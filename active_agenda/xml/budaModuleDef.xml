@@ -1,0 +1,669 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Budget Accounts" moduleID="buda" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Budget Account" pluralRecordName="Budget Accounts" addNewName="Account" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="AccountID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track accounts used to budance the risk management process" sample="1"/>
+		<TableField name="BudgetID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to track budgets throughout the enterprise" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="bud" foreignKey="BudgetID" foreignField="OrganizationID" key="BudgetID" joinType="left" phrase="Budget Organization|The organization responsible for funding and managing the overall budget" sample="Active Agenda, Sweden"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Budget Organization|The organization responsible for funding and managing the overall budget" sample="Active Agenda, Sweden"/>
+		<ForeignField name="BudgetStartDate" type="date" foreignTable="bud" foreignKey="BudgetID" foreignField="BudgetStartDate" key="BudgetID" joinType="left" phrase="Start Date|The date the budget was established" sample="01/01/2004"/>
+		<ForeignField name="BudgetEndDate" type="date" foreignTable="bud" foreignKey="BudgetID" foreignField="BudgetEndDate" key="BudgetID" joinType="left" phrase="End Date|The date the budget expires" sample="12/31/2004"/>
+		<ForeignField name="DaysRemaining" type="int" foreignTable="bud" foreignKey="BudgetID" foreignField="DaysRemaining" key="BudgetID" joinType="left" phrase="Days Remaining|The total number of days remaining before the budget expires" sample="30"/>
+		<ForeignField name="BudgetCategoryID" foreignTable="bud" foreignKey="BudgetID" foreignField="BudgetCategoryID" key="BudgetID" joinType="left" phrase="Category|A broad categoy used to group budgets of similar types" sample="1"/>
+		<CodeField name="BudgetCategory" key="BudgetCategoryID" phrase="Category|A broad categoy used to group budgets of similar types" sample="Safety and Health (Local)" codeTypeID="213"/>
+		<ForeignField name="BudgetNumber" foreignTable="bud" foreignKey="BudgetID" foreignField="BudgetNumber" key="BudgetID" joinType="left" phrase="Number|A number used by internal accounting to track budgets and related expenditures" sample="AAC-2006-928"/>
+		<ForeignField name="BudgetDesc" foreignTable="bud" foreignKey="BudgetID" foreignField="BudgetDesc" key="BudgetID" joinType="left" phrase="Description|A brief but thorough description of the budget and its purpose" sample="An annual budget used to pay for safety program needs"/>
+		<ForeignField name="Budget" foreignTable="bud" foreignKey="BudgetID" foreignField="Budget" key="BudgetID" joinType="left" phrase="Budget|A combined field used to describe the budget when associating it with other records" sample="2006 Clovis Safety Budget"/>
+		<TableField name="AccountOrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants externalParticipants" validate="RequireSelection" phrase="Account Organization|The organization responsible for managing the budget account" sample="1"/>
+		<ForeignField name="AccountOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AccountOrganizationID" joinType="left" phrase="Account Organization|The organization responsible for managing the budget account" sample="Active Agenda, Sweden"/>
+		<TableField name="DepartmentID" type="int" validate="noValidation" phrase="Department|The name of the department associated with the budget account" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|The name of the department associated with the budget account" sample="Human Resources, Local, 77282"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="176" phrase="Person Accountable|The individual assigned primary accountability for the budget account" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the budget account" sample="Mattias Thorslund"/>
+		<TableField name="AccountTypeID" type="int" validate="RequireSelection" dbFlags="unsigned not null" phrase="Account Type|A combined field used to describe the account type when associating it with other records" sample="1"/>
+		<ForeignField name="AccountCategoryID" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountCategoryID" key="AccountTypeID" joinType="left" phrase="Account Category|A broad categoy used to group accounts of similar types" sample="1"/>
+		<CodeField name="AccountCategory" key="AccountCategoryID" phrase="Account Category|A broad categoy used to group accounts of similar types" sample="Employee" codeTypeID="31"/>
+		<TableField name="AccountNumber" type="varchar(50)" validate="notEmpty" phrase="Account Number|A number used by internal accounting to track budget accounts and related expenditures" sample="AAC-2006-928"/>
+		<ForeignField name="AccountTypeTitle" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountTypeTitle" key="AccountTypeID" joinType="left" phrase="Account Type|A title or phrase used to describe a specific type of account" sample="Trust Account"/>
+		<ForeignField name="AccountTypeDesc" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountDesc" key="AccountTypeID" joinType="left" phrase="Description|A brief but thorough description of the specific type of account" sample="A fixed amount of cash available to an employee for purpose of forwarding the company's mission and/or business"/>
+		<ForeignField name="AccountType" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountType" key="AccountTypeID" joinType="left" phrase="Account Type|A combined field used to describe the account type when associating it with other records" sample="Employee | Trust Account"/>
+		<TableField name="AccountName" type="varchar(128)" validate="notEmpty" phrase="Account Name|A unique name or title used to identify the budget account" sample="Mattias Thorslund Risk Control Account"/>
+		<TableField name="AccountNumber" type="varchar(50)" validate="noValidation" phrase="Account Number|A unique number used to identify the budget account" sample="MTT-2004-01"/>
+		<TableField name="AccountDesc" type="text" validate="noValidation" phrase="Account Description|A detailed description of the budget account" sample="This account is utilized by the employee as a discretionary fund to improve business methods, processes or conditions"/>
+		<TableField name="AccountAmount" type="money" validate="Money notEmpty notNegative" phrase="Amount|The total amount of money deposited to the budget account" sample="1,000.00"/>
+		<SummaryField name="Expenditures" type="money" summaryFunction="sum" summaryField="ExpenseAmount" summaryKey="AccountID" summaryModuleID="cose" localKey="AccountID" phrase="Expenditures|A calculated field representing the total value of all expenditures associated with the budget account" sample="USD $3,600,000.00"/>
+		<CalculatedField name="AccountBalance" type="money" calcFunction="subtract" params="AccountAmount Expenditures" validate="" phrase="Account Balance|The balance available after subtracting all expenditures associated with the budget account" sample="$2,500.00"/>
+		<TableField name="AccountStatusID" type="int" validate="RequireSelection" phrase="Status|Present status of the budget account" sample="1"/>
+		<CodeField name="AccountStatus" key="AccountStatusID" phrase="Status|Present status of the budget account" sample="Active" codeTypeID="83"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'buda'" localKey="AccountID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="AccountName"/>;_<CombinedFieldRef name="AccountNumber"/></CombinedField>
+		<CombinedField name="Account" phrase="Account|A combined field used to describe this risk budance account when associating it with other records" sample="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"><CombinedFieldRef name="AccountName"/>;_<CombinedFieldRef name="AccountNumber"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AccountID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Account"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="cose" name="Cost Expenditures" parentKey="AccountID" localKey="AccountID"/>
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Conitinuity" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Permit Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Permit Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibility Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="rskcl" name="Risk Classifications" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="traca" name="Training Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="AccountTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="budat"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="AccountID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="buda"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List budget accounts">
+			<ListField name="AccountID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Budget" phrase="Budget"/>
+			<ListField name="AccountType" phrase="Account Type"/>
+			<ListField name="AccountBalance" phrase="Balance"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search budget accounts">
+			<DateField name="BudgetStartDate"/>
+			<DateField name="BudgetEndDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="BudgetCategoryID" findMode="text">
+				<UpdateFieldRef name="BudgetID"/>
+				<SampleItem ID="1" name="Safety and Health (Local)"/>
+				<SampleItem ID="2" name="Safety and Health (Enterprise)"/>
+				<SampleItem ID="3" name="Quality Assurance (Enterprise)"/>
+				<SampleItem ID="4" name="Quality Assurance (Local)"/>
+			</CodeComboField>
+			<ComboField name="BudgetID" findMode="text" parentField="BudgetCategoryID">
+				<SampleItem ID="1" name="2006 Clovis Safety Budget"/>
+				<SampleItem ID="2" name="2005 Clovis Safety Budget"/>
+				<SampleItem ID="3" name="2004 Clovis Safety Budget"/>
+			</ComboField>
+			<EditField name="BudgetNumber" size="50" maxLength="50"/>
+			<OrgComboField name="AccountOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<ComboField name="DepartmentID" findMode="text">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="2" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="3" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="4" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="AccountCategoryID" findMode="text">
+				<UpdateFieldRef name="AccountTypeID"/>
+				<SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="2" name="Department"/>
+				<SampleItem ID="3" name="Safety"/>
+			</CodeComboField>
+			<ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+				<SampleItem ID="1" name="Employee Trust Account"/>
+				<SampleItem ID="2" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="3" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="4" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<EditField name="AccountName" size="75" maxLength="128"/>
+			<EditField name="AccountNumber" size="50" maxLength="50"/>
+			<MoneyField name="AccountAmount"/>
+			<MoneyField name="Expenditures"/>
+			<MoneyField name="AccountBalance"/>
+			<CodeComboField name="AccountStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="2" name="Inactive"/>
+				<SampleItem ID="3" name="Cancelled"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a budget account">
+			<ViewField name="AccountID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="BudgetCategory"/>
+			<ViewField name="Budget"/>
+			<ViewField name="BudgetNumber"/>
+			<ViewField name="BudgetDesc"/>
+			<ViewField name="DaysRemaining"/>
+			<ViewField name="AccountOrganization"/>
+			<ViewField name="Department"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="AccountCategory"/>
+			<ViewField name="AccountType"/>
+			<ViewField name="AccountTypeDesc"/>
+			<ViewField name="AccountName"/>
+			<ViewField name="AccountNumber"/>
+			<ViewField name="AccountDesc"/>
+			<ViewField name="AccountAmount"/>
+			<ViewField name="Expenditures"/>
+			<ViewField name="AccountBalance"/>
+			<ViewField name="AccountStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="cose"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="pub"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="rskcl"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="traca"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a budget account">
+			<ViewField name="AccountID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="BudgetCategory"/>
+			<ViewField name="Budget"/>
+			<ViewField name="BudgetNumber"/>
+			<ViewField name="BudgetDesc"/>
+			<ViewField name="DaysRemaining"/>
+			<OrgComboField name="AccountOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="AccountCategoryID" findMode="text">
+				<UpdateFieldRef name="AccountTypeID"/>
+				<SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="2" name="Department"/>
+				<SampleItem ID="3" name="Safety"/>
+			</CodeComboField>
+			<ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+				<UpdateFieldRef name="AccountTypeDesc"/>
+				<SampleItem ID="1" name="Employee Trust Account"/>
+				<SampleItem ID="2" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="3" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="4" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<ViewField name="AccountTypeDesc" parentField="AccountTypeID"/>
+			<EditField name="AccountName" size="75" maxLength="128"/>
+			<EditField name="AccountNumber" size="50" maxLength="50"/>
+			<MemoField name="AccountDesc" rows="5" cols="75"/>
+			<MoneyField name="AccountAmount"/>
+			<CodeComboField name="AccountStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="2" name="Inactive"/>
+				<SampleItem ID="3" name="Cancelled"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuity" phrase="Continuity|Associate business continuity requirements with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance consequences with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="pubc"/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibilities with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Classifications" phrase="Classifications|Associate risk classifications with the budget account">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rskcl"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate training with the budget account">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="tracn"/>
+			<EditGrid moduleID="traca"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the budget account">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the budget account">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the budget account">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the budget account" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="AccountID"/>
+		<InvisibleField name="AccountTypeID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="BudgetCategory"/>
+		<ViewField name="Budget"/>
+		<ViewField name="BudgetNumber"/>
+		<ViewField name="BudgetDesc"/>
+		<ViewField name="DaysRemaining"/>
+		<ViewField name="AccountOrganization"/>
+		<ViewField name="Department"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="AccountCategory"/>
+		<ViewField name="AccountType"/>
+		<ViewField name="AccountTypeDesc"/>
+		<ViewField name="AccountName"/>
+		<ViewField name="AccountNumber"/>
+		<ViewField name="AccountDesc"/>
+		<ViewField name="AccountAmount"/>
+		<ViewField name="Expenditures"/>
+		<ViewField name="AccountBalance"/>
+		<ViewField name="AccountStatus"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="buda" phrase="Budget Accounts">
+			<InvisibleField name="AccountID"/>
+			<ViewField name="AccountOrganization" sample="Active Agenda, Inc."/>
+			<ViewField name="AccountType" sample="Personal Protective Equipment"/>
+			<ViewField name="AccountName" sample="2006 PPE Account"/>
+			<ViewField name="AccountNumber" sample="88277"/>
+			<ViewField name="AccountAmount" sample="$USD 80,000"/>
+		</ViewGrid>
+		<EditGrid moduleID="buda" phrase="Budget Accounts">
+			<GridForm>
+				<InvisibleField name="AccountID"/>
+				<OrgComboField name="AccountOrganizationID" findMode="text">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+					<SampleItem ID="3" name="Active Agenda, Latvia"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="AccountCategoryID" findMode="text">
+					<UpdateFieldRef name="AccountTypeID"/>
+					<SampleItem ID="1" name="Employee"/>
+					<SampleItem ID="2" name="Department"/>
+					<SampleItem ID="3" name="Safety"/>
+				</CodeComboField>
+				<ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+					<UpdateFieldRef name="AccountTypeDesc"/>
+					<SampleItem ID="1" name="Employee Trust Account"/>
+					<SampleItem ID="2" name="Legal, Corporate, Compliance, 732552"/>
+					<SampleItem ID="3" name="Compliance, Regional, Safety, 12382"/>
+					<SampleItem ID="4" name="Compliance, Local, Environmental, 32582"/>
+				</ComboField>
+				<ViewField name="AccountTypeDesc" parentField="AccountTypeID"/>
+				<EditField name="AccountName" size="75" maxLength="128"/>
+				<EditField name="AccountNumber" size="50" maxLength="50"/>
+				<MemoField name="AccountDesc" rows="5" cols="75"/>
+				<MoneyField name="AccountAmount"/>
+				<CodeComboField name="AccountStatusID">
+					<SampleItem ID="1" name="Active"/>
+					<SampleItem ID="2" name="Inactive"/>
+					<SampleItem ID="3" name="Cancelled"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="AccountID"/>
+			<ViewField name="AccountOrganization" sample="Active Agenda, Inc."/>
+			<ViewField name="AccountType" sample="Personal Protective Equipment"/>
+			<ViewField name="AccountName" sample="2006 PPE Account"/>
+			<ViewField name="AccountNumber" sample="88277"/>
+			<ViewField name="AccountAmount" sample="$USD 80,000"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Budget Accounts By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Budget Accounts By Budget Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Budget Accounts By Budget Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Budget Accounts By Budget Category">
+			<GroupByField name="BudgetCategory"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Budget Accounts By Budget Category">
+			<GroupByField name="BudgetCategory"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Budget Accounts By Budget">
+			<GroupByField name="Budget"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Budget Accounts By Budget">
+			<GroupByField name="Budget"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Budget Accounts By Account Organization">
+			<GroupByField name="AccountOrganization"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Budget Accounts By Account Organization">
+			<GroupByField name="AccountOrganization"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Budget Accounts By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Budget Accounts By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Budget Accounts By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Budget Accounts By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Budget Accounts By Category">
+			<GroupByField name="AccountCategory"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Budget Accounts By Category">
+			<GroupByField name="AccountCategory"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Budget Accounts By Type">
+			<GroupByField name="AccountType"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Budget Accounts By Type">
+			<GroupByField name="AccountType"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Budget Accounts By Status">
+			<GroupByField name="AccountStatus"/>
+			<SummaryField name="AccountID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Budget Accounts By Status">
+			<GroupByField name="AccountStatus"/>
+			<SummaryField name="AccountID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

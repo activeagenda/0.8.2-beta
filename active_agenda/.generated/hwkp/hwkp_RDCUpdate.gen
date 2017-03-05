@@ -1,0 +1,61 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:479:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'hwkp\' AS ModuleID,
+   hwkp.HotWorkPermitID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`hwk1`.HotWorkTitle,\'\')),\'\') AS Value,
+`hwk1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `hwkp`
+LEFT OUTER JOIN `rdc` ON (hwkp.HotWorkPermitID = rdc.RecordID AND rdc.ModuleID = \'hwkp\')
+   
+   LEFT OUTER JOIN `hwk` AS hwk1 
+   ON (`hwkp`.HotWorkID = `hwk1`.HotWorkID )
+WHERE hwkp.HotWorkPermitID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:386:"UPDATE rdc
+INNER JOIN hwkp ON (rdc.RecordID = hwkp.HotWorkPermitID AND rdc.ModuleID = \'hwkp\')
+   
+   LEFT OUTER JOIN `hwk` AS hwk1 
+   ON (`hwkp`.HotWorkID = `hwk1`.HotWorkID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`hwk1`.HotWorkTitle,\'\')),\'\'),
+rdc.OrganizationID = `hwk1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'hwkp\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

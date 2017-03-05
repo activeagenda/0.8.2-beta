@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Checklist History" parentModule="aprc" moduleID="aprch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Checklist History" pluralRecordName="Checklist Histories" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ChecklistHistoryID" type="int" dbFlags="unsigned auto_increment not null" phrase="Report ID|An automatically assigned number used to track checklist review histories" sample="1"/>
+		<TableField name="ChecklistID" type="int" phrase="Checklist|A combined field used to describe this record when associating it with other records" sample="1"/>
+		<ForeignField name="ChecklistOrganizationID" defaultValue="defaultorgID" foreignTable="aprc" foreignKey="ChecklistID" foreignField="OrganizationID" key="ChecklistID" joinType="left" phrase="Checklist Organization|The name of the organization associated with the checklist" sample="1"/>
+		<ForeignField name="ChecklistOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ChecklistID" joinType="left" phrase="Checklist Organization|The name of the organization associated with the checklist" sample="Active Agenda, HQ"/>
+		<ForeignField name="Checklist" foreignTable="aprc" foreignKey="ChecklistID" foreignField="Checklist" key="ChecklistID" joinType="left" phrase="Checklist|A combined field used to describe this record when associating it with other records" sample="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID 1"/>
+		<ForeignField name="ChecklistDesc" foreignTable="aprc" foreignKey="ChecklistID" foreignField="ChecklistDesc" key="ChecklistID" joinType="left" phrase="Description|A detailed description of the checklist's scope, purpose, and objective" sample="This checklist is designed for the Malaga Maintenance Shop. The checklist is designed to ensure all Maintenance equipment is in working order and good condition."/>
+		<RemoteField name="ReviewLeaderID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="10" phrase="Review Leader|The name of the person leading the checklist review" sample="1"/>
+		<ForeignField name="ReviewLeader" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ReviewLeaderID" joinType="left" phrase="Review Leader|The name of the person leading the checklist review" sample="Mattias Thorslund"/>
+		<RemoteField name="ReviewDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="9" phrase="Review Date|Date the checklist review was performed" sample="01/01/2004"/>
+		<TableField name="Deficiencies" type="int" phrase="Number of Deficiencies|An automatically calulated value associated with the number of deficiencies identified during the checklist review" sample="6"/>
+		<!--the deficiencies field is calculated based on the number of 'same' ChecklistHistoryID's added to the ChecklistDeficiencies sub-module. DFZ 2-27-2004-->
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Checklist"/>;_<CombinedFieldRef name="ReviewDate"/>;_<CombinedFieldRef name="Deficiencies"/></CombinedField>
+		<CombinedField name="ChecklistHistory" phrase="Checklist History|A combined field used to describe this checklist history when associating it with other records" sample="Maintenance Shop Paint Area Review | Active Agenda, HQ | Mattias Thorslund | 01/01/2004"><CombinedFieldRef name="Checklist"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChecklistHistoryID"/>
+		</PrimaryKey>
+		<OwnerField name="ChecklistOrganizationID"/>
+		<RecordDescriptionField name="ChecklistHistory"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="aprcd" name="Checklist Deficiencies" parentKey="ChecklistHistoryID" localKey="ChecklistHistoryID"/>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ChecklistHistoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprch"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ChecklistHistoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprch"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List checklist review history">
+			<ListField name="ChecklistHistoryID" phrase="Record ID"/>
+			<ListField name="ChecklistID" phrase="Checklist ID"/>
+			<ListField name="ChecklistOrganization" phrase="Checklist Organization"/>
+			<ListField name="Checklist" phrase="Checklist"/>
+			<ListField name="ReviewDate" phrase="Review Date"/>
+			<ListField name="Deficiencies" phrase="Deficiencies"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search checklist review history">
+			<OrgComboField name="ChecklistOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ChecklistID" findMode="text">
+				<SampleItem ID="1" name="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID: 1"/>
+				<SampleItem ID="2" name="Malaga Raisin Processing Quality Checklist; Active Agenda, HQ; ID: 2"/>
+				<SampleItem ID="3" name="Malaga Raisin Processing Safety Checklist; Active Agenda, HQ; ID: 3"/>
+				<SampleItem ID="4" name="Malaga Raisin Processing Operations Checklist; Active Agenda, HQ; ID: 4"/>
+			</ComboField>
+			<PersonComboField name="ReviewLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="ReviewDate"/>
+			<EditField name="Deficiencies" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about checklist reviews">
+			<ViewField name="ChecklistHistoryID"/>
+			<ViewField name="ChecklistID"/>
+			<ViewField name="ChecklistOrganization"/>
+			<ViewField name="Checklist"/>
+			<ViewField name="ChecklistDesc"/>
+			<ViewField name="ReviewLeader"/>
+			<ViewField name="ReviewDate"/>
+			<ViewField name="Deficiencies"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="aprcd"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about checklist reviews">
+			<ViewField name="ChecklistHistoryID"/>
+			<OrgComboField name="ChecklistOrganizationID" findMode="text">
+				<UpdateFieldRef name="ChecklistID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ChecklistID" findMode="text" parentField="ChecklistOrganizationID">
+				<UpdateFieldRef name="ResourceTypeDesc"/>
+				<SampleItem ID="1" name="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID: 1"/>
+				<SampleItem ID="2" name="Malaga Raisin Processing Quality Checklist; Active Agenda, HQ; ID: 2"/>
+				<SampleItem ID="3" name="Malaga Raisin Processing Safety Checklist; Active Agenda, HQ; ID: 3"/>
+				<SampleItem ID="4" name="Malaga Raisin Processing Operations Checklist; Active Agenda, HQ; ID: 4"/>
+			</ComboField>
+			<ViewField name="ChecklistDesc" parentField="ChecklistID"/>
+			<PersonComboField name="ReviewLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="ReviewDate"/>
+			<ViewField name="Deficiencies"/>
+		</EditScreen>
+		<EditScreen name="Deficiencies" phrase="Deficiencies|Track checklist review deficiencies">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="aprcd"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the checklist history">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the checklist history">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChecklistHistoryID"/>
+		<ViewField name="ChecklistID"/>
+		<ViewField name="ChecklistOrganization"/>
+		<ViewField name="Checklist"/>
+		<ViewField name="ChecklistDesc"/>
+		<ViewField name="ReviewLeader"/>
+		<ViewField name="ReviewDate"/>
+		<ViewField name="Deficiencies"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="aprch" phrase="Review History">
+			<InvisibleField name="ChecklistHistoryID"/>
+			<ViewField name="ReviewDate" sample="01/01/2004"/>
+			<ViewField name="ChecklistOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ReviewLeader" sample="Mattias Thorslund"/>
+			<ViewField name="Deficiencies" sample="6"/>
+		</ViewGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Checklist History By Checklist">
+			<GroupByField name="Checklist"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Checklist History By Checklist">
+			<GroupByField name="Checklist"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Checklist History By Organization">
+			<GroupByField name="ChecklistOrganization"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Checklist History By Organization">
+			<GroupByField name="ChecklistOrganization"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Checklist History By Review Leader">
+			<GroupByField name="ReviewLeader"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Checklist History By Review Leader">
+			<GroupByField name="ReviewLeader"/>
+			<SummaryField name="ChecklistHistoryID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

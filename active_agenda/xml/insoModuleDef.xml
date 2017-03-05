@@ -1,0 +1,280 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Insured Organizations" moduleID="inso" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Insured Organization" pluralRecordName="Insured Organizations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="InsuredOrganizationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|The name of the organization covered by the insurance policy" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Insured Organization|The name of the organization covered by the insurance policy" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Insured Organization|The name of the organization covered by the insurance policy" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="47" phrase="Person Accountable|The individual assigned primary accountability for policy oversight relative to this specific policy at this specific location" sample="1"/>
+		<ForeignField name="WorkEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkEmail" key="PersonAccountableID" joinType="left" phrase="Work Email|Work email address used by the local insurance policy coordinator" sample="dzahlis@activeagenda.net"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="PersonAccountableID" joinType="left" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for policy oversight relative to this specific policy at this specific location" sample="Mattias Thorslund"/>
+		<TableField name="PolicyID" type="int" validate="RequireSelection" phrase="Policy|The number assigned to the insurance policy by the insurance carrier" sample="1"/>
+		<ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Policy Number|The number assigned to the insurance policy by the insurance carrier" sample="Zurich; GL-29938-2003"/>
+		<ForeignField name="EffectiveDate" foreignTable="ins" foreignKey="PolicyID" foreignField="EffectiveDate" key="PolicyID" joinType="left" phrase="Effective Date|The date the insurance policy first becomes effective" sample="01/01/2004"/>
+		<ForeignField name="ExpirationDate" foreignTable="ins" foreignKey="PolicyID" foreignField="ExpirationDate" key="PolicyID" joinType="left" phrase="Expiration Date|The date the is no longer in force and coverage no longer exists" sample="01/01/2004"/>
+		<ForeignField name="DaysRemaining" foreignTable="ins" foreignKey="PolicyID" foreignField="DaysRemaining" key="PolicyID" joinType="left" phrase="Days Remaining|The total number of days remaining before the insurance policy expires" sample="30"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Policy"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="InsuredOrganization" phrase="Insured Organization|A combined field used to describe this insured organization when associating it with other records" sample="Zurich; GL-29938-2003; Active Agenda, HQ"><CombinedFieldRef name="Organization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="InsuredOrganizationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="InsuredOrganization"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="InsuredOrganizationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inso"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="InsuredOrganizationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inso"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="InsuredOrganizationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inso"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List insurance policy assignments">
+			<ListField name="InsuredOrganizationID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Insured Organization"/>
+			<ListField name="Policy" phrase="Policy"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search insurance policy assignments">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="4" name="Active Agenda, Malaga"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="PolicyID" findMode="text">
+				<SampleItem ID="1" name="Zurich; GL-29938-2003"/>
+				<SampleItem ID="2" name="Chubb; AL99282"/>
+				<SampleItem ID="3" name="SCIF;WC-2928-2003-09-01"/>
+				<SampleItem ID="4" name="FF;PL-827-2188=292-2"/>
+			</ComboField>
+			<DateField name="EffectiveDate"/>
+			<DateField name="ExpirationDate"/>
+			<EditField name="DaysRemaining" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an insurance policy assignment">
+			<ViewField name="InsuredOrganizationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ContactCard"/>
+			<ViewField name="Policy"/>
+			<ViewField name="EffectiveDate"/>
+			<ViewField name="ExpirationDate"/>
+			<ViewField name="DaysRemaining"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an insurance policy assignment">
+			<ViewField name="InsuredOrganizationID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="4" name="Active Agenda, Malaga"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<UpdateFieldRef name="ContactCard"/>
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ViewField name="ContactCard" parentField="PersonAccountableID"/>
+			<ViewField name="Policy"/>
+			<ViewField name="EffectiveDate"/>
+			<ViewField name="ExpirationDate"/>
+			<ViewField name="DaysRemaining"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical corrective action file">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="InsuredOrganizationID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Policy"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="inso" phrase="Covered Organizations">
+			<InvisibleField name="InsuredOrganizationID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="PersonAccountable" sample="Daniel F. Zahlis"/>
+			<ViewField name="ContactCard" sample="(559)916-6106 (m); dzahlis@activeagenda.net"/>
+		</ViewGrid>
+		<EditGrid moduleID="inso" phrase="Covered Organizations">
+			<GridForm>
+				<InvisibleField name="InsuredOrganizationID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<UpdateFieldRef name="ContactCard"/>
+					<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+				</PersonComboField>
+				<ViewField name="ContactCard" parentField="PersonAccountableID"/>
+			</GridForm>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ContactCard"/>
+		</EditGrid>
+		<SelectGrid moduleID="inso" phrase="Insureds" primaryListField="Organization"/>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Insured Organizations By Policy">
+			<GroupByField name="Policy"/>
+			<SummaryField name="InsuredOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Insured Organizations By Policy">
+			<GroupByField name="Policy"/>
+			<SummaryField name="InsuredOrganizationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Insured Organizations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="InsuredOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Insured Organizations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="InsuredOrganizationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Insurance Coverage Limits" moduleID="inscl" parentModule="ins" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Coverage Limit" pluralRecordName="Coverage Limits" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="CoverageLimitID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number used to track insurance policy coverage limits" sample="1"/>
+        <TableField name="PolicyID" type="int" validate="RequireSelection" phrase="Policy|A combined field used to describe this policy when associating it with other records" sample="1"/>
+        <ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Policy|A combined field used to describe this policy when associating it with other records" sample="Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+        <ForeignField name="OrganizationID" foreignTable="ins" foreignKey="PolicyID" foreignField="OrganizationID" key="PolicyID" joinType="left" phrase="Organization|The primary organization covered by this insurance policy" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The primary organization covered by this insurance policy" sample="Active Agenda, HQ"/>
+        <TableField name="CoverageLimitTypeID" type="int" dbFlags="unsigned" validate="RequireSelection" phrase="Limit Type|The specific type of coverage limit" sample="1"/>
+        <CodeField name="CoverageLimitType" key="CoverageLimitTypeID" phrase="Limit Type|The specific type of coverage limit" sample="Per Occurrence" codeTypeID="41"/>
+        <TableField name="LimitAmount" type="money" validate="Money notNegative" phrase="Limit|The automatically calculated amount of the limit associated with the coverage type of the related policy, stated in the currency choosen for the application" sample="702.00"/>
+        <TableField name="LimitDescription" type="text" dbFlags="" validate="noValidation" phrase="Description|A detailed explanation of the insurance policy coverage limit" sample="The coverage amount applies to each claim field on a claim-by-claim basis."/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Per Claim | $10,000">
+            <CombinedFieldRef name="CoverageLimitType"/>
+        </CombinedField>
+        <CombinedField name="CoverageLimit" phrase="Coverage Limit|A combined field used to describe the coverage limit when associating it with other records" sample="Per Claim | $10,000">
+            <CombinedFieldRef name="CoverageLimitType"/>
+        </CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="CoverageLimitID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="CoverageLimit"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List coverage limits">
+            <ListField name="CoverageLimitID" phrase="Record ID"/>
+            <ListField name="Policy" phrase="CIGNA 2006-288292"/>
+            <ListField name="CoverageLimitType" phrase="Limit Type"/>
+            <ListField name="LimitAmount" phrase="Amount"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search coverage limits">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="4" name="Active Agenda, Malaga"/>
+            </OrgComboField>
+            <ComboField name="PolicyID" findMode="text">
+                <SampleItem ID="1" name="Zurich; GL-29938-2003"/>
+                <SampleItem ID="2" name="Chubb; AL99282"/>
+                <SampleItem ID="3" name="SCIF;WC-2928-2003-09-01"/>
+                <SampleItem ID="4" name="FF;PL-827-2188=292-2"/>
+            </ComboField>
+            <CodeComboField name="CoverageLimitTypeID" findMode="text">
+                <SampleItem ID="1" name="Per Occurrence"/>
+                <SampleItem ID="2" name="Per Claim"/>
+                <SampleItem ID="3" name="Deductible"/>
+                <SampleItem ID="4" name="Retention"/>
+                <SampleItem ID="5" name="Umbrella"/>
+            </CodeComboField>
+            <MoneyField name="LimitAmount"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the coverage limit">
+            <ViewField name="CoverageLimitID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Policy"/>
+            <ViewField name="CoverageLimitType"/>
+            <ViewField name="LimitAmount"/>
+            <ViewField name="LimitDescription"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the coverage limit">
+            <ViewField name="CoverageLimitID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Policy"/>
+            <CodeComboField name="CoverageLimitTypeID" findMode="text">
+                <SampleItem ID="1" name="Per Occurrence"/>
+                <SampleItem ID="2" name="Per Claim"/>
+                <SampleItem ID="3" name="Deductible"/>
+                <SampleItem ID="4" name="Retention"/>
+                <SampleItem ID="5" name="Umbrella"/>
+            </CodeComboField>
+            <MoneyField name="LimitAmount"/>
+            <MemoField name="LimitDescription" rows="5" cols="75"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="inscl" phrase="Coverage Limits">
+            <InvisibleField name="CoverageLimitID"/>
+            <ViewField name="CoverageLimitType" sample="Per Occurrence"/>
+            <ViewField name="LimitAmount" sample="$25,000.00"/>
+            <ViewField name="LimitDescription" sample="Each workers' comepnsation claim is fully insured up to the limit stated. Once a clai's costs exceed the per claim limit, the company absorbs the costs up to the stop loss limit, at which point the reinsurance company takes over liability for paying costs in excess of that amount."/>
+        </ViewGrid>
+        <EditGrid moduleID="inscl" phrase="Coverage Limits">
+            <GridForm>
+                <InvisibleField name="CoverageLimitID"/>
+                <CodeComboField name="CoverageLimitTypeID" findMode="text">
+                    <SampleItem ID="1" name="Per Occurrence"/>
+                    <SampleItem ID="2" name="Per Claim"/>
+                    <SampleItem ID="3" name="Deductible"/>
+                    <SampleItem ID="4" name="Retention"/>
+                    <SampleItem ID="5" name="Umbrella"/>
+                </CodeComboField>
+                <MoneyField name="LimitAmount"/>
+                <MemoField name="LimitDescription" rows="5" cols="75"/>
+            </GridForm>
+            <InvisibleField name="CoverageLimitID"/>
+            <ViewField name="CoverageLimitType" sample="Per Occurrence"/>
+            <ViewField name="LimitAmount" sample="$25,000.00"/>
+            <ViewField name="LimitDescription" sample="Each workers' comepnsation claim is fully insured up to the limit stated. Once a clai's costs exceed the per claim limit, the company absorbs the costs up to the stop loss limit, at which point the reinsurance company takes over liability for paying costs in excess of that amount."/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Coverage Limits By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Coverage Limits By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Coverage Limits By Type">
+            <GroupByField name="CoverageLimitType"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Coverage Limits By Type">
+            <GroupByField name="CoverageLimitType"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Coverage Limits By Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Coverage Limits By Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="CoverageLimitID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

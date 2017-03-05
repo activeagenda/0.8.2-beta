@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Exposure Routes" moduleID="chmer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Exposure Route" pluralRecordName="Exposure Routes" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ExposureRouteID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track chemical exposure routes associated with chemicals" sample="1"/>
+		<TableField name="ChemicalID" type="int" validate="noValidation" phrase="Chemical ID|The common name of the chemical stored at this location" sample="1"/>
+		<ForeignField name="ProductName" foreignTable="chm" foreignKey="ChemicalID" foreignField="ProductName" key="ChemicalID" joinType="left" phrase="Product Name|A name assigned to a chemical or chemical compound by its manufacturer for product marketing and trademarking purposes" sample="Sierra Springs Natural Spring Water"/>
+		<ForeignField name="CommonName" foreignTable="chm" foreignKey="ChemicalID" foreignField="CommonName" key="ChemicalID" joinType="left" phrase="Common Name|A common name assigned to a chemical by the organization using it. Common names are more easily recognized than chemical names and can include code names used by an organization to quickly and accurately identify a chemical" sample="Water"/>
+		<ForeignField name="ChemicalName" foreignTable="chm" foreignKey="ChemicalID" foreignField="ChemicalName" key="ChemicalID" joinType="left" phrase="Chemical Name|The technical name for a chemical" sample="Hydrogen Dioxide"/>
+		<ForeignField name="CASNumber" foreignTable="chm" foreignKey="ChemicalID" foreignField="CASNumber" key="ChemicalID" joinType="left" phrase="CAS Number|Chemical Abstracts Service Registry Number. CAS Registry Numbers (often referred to as CAS RNs or CAS Numbers) are unique identifiers for chemical substances" sample="1336-21-6"/>
+		<ForeignField name="MSDSURL" foreignTable="chm" foreignKey="ChemicalID" foreignField="MSDSURL" key="ChemicalID" joinType="left" phrase="MSDS Address|Material Safety Data Sheet - Uniform Resource Locater. This is the Internt address where the manufacturer's material safety data sheet or other general information about the chemical is posted and updated" sample="www.dupont.com/water"/>
+		<ForeignField name="RTECSNumber" foreignTable="chm" foreignKey="ChemicalID" foreignField="RTECSNumber" key="ChemicalID" joinType="left" phrase="RTECS Number|Registry of Toxic Effects of Chemical Substances Number" sample="AB2800000"/>
+		<ForeignField name="RTECSURL" foreignTable="chm" foreignKey="ChemicalID" foreignField="RTECSURL" key="ChemicalID" joinType="left" phrase="RTECS Address|Registry of Toxic Effects of Chemical Substances Internet address" sample="http://www.cdc.gov/niosh/rtecs/ai3d6aa8.html"/>
+		<ForeignField name="ICSCNumber" foreignTable="chm" foreignKey="ChemicalID" foreignField="ICSCNumber" key="ChemicalID" joinType="left" phrase="ICSC Number|International Chemical Safety Card number" sample="0414"/>
+		<ForeignField name="ICSCURL" foreignTable="chm" foreignKey="ChemicalID" foreignField="ICSCURL" key="ChemicalID" joinType="left" phrase="ICSC Address|International Chemical Safety Card address" sample="http://www.ilo.org/public/english/protection/safework/cis/products/icsc/dtasht/_icsc04/icsc0414.htm"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="Chemical" key="ChemicalID" joinType="left" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="Water | Hydrogen Dioxide | CAS: 1336-21-6 | Discontinued"/>
+		<TableField name="ChemicalExposureRouteID" type="int" validate="RequireSelection" phrase="Exposure Route|The specific route of the chemical exposure" sample="1"/>
+		<CodeField name="ChemicalExposureRoute" key="ChemicalExposureRouteID" phrase="Exposure Route|The specific route of the chemical exposure" sample="Inhalation" codeTypeID="35"/>
+		<TableField name="ExposureDetail" type="text" validate="noValidation" phrase="Exposure Detail|A Detailed description of the chemical exposure route and methods of exposure" sample="Water can cause immediate death by inhaling it directly into the lungs"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ChemicalExposureRoute"/>;_<CombinedFieldRef name="CommonName"/>;_<CombinedFieldRef name="ChemicalName"/></CombinedField>
+		<CombinedField name="ExposureRoute" phrase="Exposure Route|A combined field used to describe this exposure route when associating it with other records" sample="Inhalation">
+			<CombinedFieldRef name="ChemicalExposureRoute"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ExposureRouteID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="ExposureRoute"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List exposure routes associated with chemicals">
+			<ListField name="ExposureRouteID" phrase="Record ID"/>
+			<ListField name="ChemicalID" phrase="Chemical ID"/>
+			<ListField name="ProductName" phrase="Product Name"/>
+			<ListField name="CommonName" phrase="Common Name"/>
+			<ListField name="ChemicalName" phrase="Chemical Name"/>
+			<ListField name="ChemicalExposureRoute" phrase="Exposure Route"/>
+			<ListField name="ExposureDetail" phrase="Exposure Detail"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search exposure routes associated with chemicals">
+			<ComboField name="ChemicalID" findMode="text">
+				<SampleItem ID="1" name="Ammonia"/>
+				<SampleItem ID="1" name="Benzene"/>
+				<SampleItem ID="2" name="Carbon Black"/>
+				<SampleItem ID="2" name="Ditrol"/>
+			</ComboField>
+			<CodeComboField name="ChemicalExposureRouteID">
+				<SampleItem ID="1" name="Inhalation"/>
+				<SampleItem ID="2" name="Absorption"/>
+				<SampleItem ID="3" name="Ingestion"/>
+				<SampleItem ID="4" name="Eye"/>
+				<SampleItem ID="5" name="Systemic"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a chemical exposure route">
+			<ViewField name="ExposureRouteID"/>
+			<ViewField name="ProductName"/>
+			<ViewField name="CommonName"/>
+			<ViewField name="ChemicalName"/>
+			<ViewField name="CASNumber"/>
+			<ViewField name="MSDSURL" link="MSDSURL"/>
+			<ViewField name="RTECSNumber"/>
+			<ViewField name="RTECSURL" link="RTECSURL"/>
+			<ViewField name="ICSCNumber"/>
+			<ViewField name="ICSCURL" link="ICSCURL"/>
+			<ViewField name="ChemicalExposureRoute"/>
+			<ViewField name="ExposureDetail"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a chemical exposure route">
+			<ViewField name="ExposureRouteID"/>
+			<ViewField name="ProductName"/>
+			<ViewField name="CommonName"/>
+			<ViewField name="ChemicalName"/>
+			<ViewField name="CASNumber"/>
+			<ViewField name="MSDSURL" link="MSDSURL"/>
+			<ViewField name="RTECSNumber"/>
+			<ViewField name="RTECSURL" link="RTECSURL"/>
+			<ViewField name="ICSCNumber"/>
+			<ViewField name="ICSCURL" link="ICSCURL"/>
+			<ViewField name="ChemicalExposureRoute"/>
+			<MemoField name="ExposureDetail" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<!--<CodeCheckGrid moduleID="chmer" phrase="Associate Exposure Routes" primaryListField="ChemicalExposureRoute">
+			<InvisibleField name="ExposureRouteID"/>
+			<ViewField name="ChemicalExposureRoute" phrase="Chemical Exposure Routes" sample="Inhalation"/>
+			<CheckBoxField name="Checked" phrase="Assigned" sample="Yes"/>
+		</CodeCheckGrid>-->
+		<SelectGrid moduleID="chmer" primaryListField="ChemicalExposureRoute" phrase="Exposure Routes"/>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Exposure Routes By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ExposureRouteID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Exposure Routes By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ExposureRouteID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

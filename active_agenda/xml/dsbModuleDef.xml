@@ -1,0 +1,174 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Dashboard Items" moduleID="dsb" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Dashboard Item" pluralRecordName="Dashboard Items" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="DashboardItemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track dashboard items" sample="11"/>
+		<TableField name="PersonID" type="int" validate="notEmpty" phrase="Person ID|The Person ID of the user on whose dashboard this item appears." sample="1"/>
+		<ForeignField name="Person" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonID" joinType="left" phrase="User|The user on whose dashboard this item appears." sample="Mattias Thorslund"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="PersonID" joinType="left" phrase="User Organization ID|The Organization ID of the user." sample="Active Agenda, Inc."/>
+		<TableField name="ModuleID" type="varchar(5)" validate="noValidation" phrase="Module ID|The Module ID of the module from which the data for the dashboard item is drawn." sample="opp"/>
+		<ForeignField name="Module" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="ModuleID" joinType="left" phrase="Module|The name of the module from which the data for the dashboard item is drawn." sample="Operating Permits"/>
+		<TableField name="Title" type="varchar(128)" validate="notEmpty" phrase="Title|A descriptive title used to identify the dashboard item" sample="Number of Reported Hazards by Organization and Status"/>
+		<TableField name="DashboardTypeID" type="int" validate="RequireSelection" phrase="Dashboard Type ID|The record ID corresponding with the selected dashboard type" sample="1"/>
+		<ForeignField name="DashboardType" foreignTable="dsbt" foreignKey="DashboardTypeID" foreignField="Title" key="DashboardTypeID" joinType="left" phrase="Dashboard Type|Type of dashboard item, such as summary or row-level" sample="Summary"/>
+		<ForeignField name="IncludeFile" foreignTable="dsbt" foreignKey="DashboardTypeID" foreignField="IncludeFile" key="DashboardTypeID" joinType="left" phrase="Include File|The include file that handles a particular dashboard type" sample="dsbSummaryItem.php"/>
+		<TableField name="CachedSQL" type="text" validate="noValidation" phrase="Cached SQL Statement|The SQL expression that retrieves the data for the desktop item. This is automatically generated every time the item definitions (in submodules) are modified." sample="SELECT Field FROM tbl WHERE PersonID = 1"/>
+		<TableField name="DisplayRows" type="int" validate="" phrase="Rows Displayed|The number of rows to be displayed by default in this dashboard item." sample="1"/>
+		<TableField name="PageColumn" type="int" validate="" phrase="Page Column|The column on the home page where the item should be displayed." sample="1"/>
+		<TableField name="SortOrder" type="int" validate="" phrase="Sort Order|The relative order in which the item should be displayed." sample="1"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Person"/>;_<CombinedFieldRef name="ModuleID"/>;_<CombinedFieldRef name="DashboardType"/></CombinedField>
+		<CombinedField name="DashboardItem" phrase="Dashboard Item|A combined field used to describe this dashboard item" sample="Number of Reported Hazards by Organization and Status | Mattias Thorslund | hza | Summary"><CombinedFieldRef name="Title"/>;_|_
+            <CombinedFieldRef name="Person"/>;_|_
+            <CombinedFieldRef name="ModuleID"/>;_|_
+            <CombinedFieldRef name="DashboardType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="DashboardItemID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="DashboardItem"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="dsbd" name="Fields Displayed" parentKey="DashboardItemID" localKey="DashboardItemID"/>
+		<SubModule moduleID="dsbo" name="Sort Order Fields" parentKey="DashboardItemID" localKey="DashboardItemID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List assigned dates">
+			<ListField name="DashboardItemID" phrase="Record ID"/>
+			<ListField name="Person" phrase="User"/>
+			<ListField name="Module" phrase="Module"/>
+			<ListField name="Title" phrase="Title"/>
+			<ListField name="DashboardType" phrase="Type"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search dashboard items">
+			<ComboField name="ModuleID" findMode="text">
+				<SampleItem ID="opp" name="Operating Permits"/>
+				<SampleItem ID="chm" name="Chemicals"/>
+				<SampleItem ID="cor" name="Corrective Actions"/>
+				<SampleItem ID="pos" name="Postings"/>
+			</ComboField>
+			<EditField name="Title" size="75" maxLength="128"/>
+			<PersonComboField name="PersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DashboardTypeID" findMode="text">
+				<SampleItem ID="1" name="Row Listing"/>
+				<SampleItem ID="2" name="Summary Listing"/>
+				<SampleItem ID="3" name="Pie Chart (Summary)"/>
+				<SampleItem ID="4" name="Histogram (Summary)"/>
+				<SampleItem ID="5" name="Line Chart (time series)"/>
+			</ComboField>
+			<EditField name="DisplayRows" size="5" maxLength="3"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a dashboard item">
+			<ViewField name="DashboardItemID"/>
+			<ViewField name="Person"/>
+			<ViewField name="Module"/>
+			<ViewField name="Title"/>
+			<ViewField name="DashboardType"/>
+			<ViewField name="DisplayRows"/>
+			<ViewField name="PageColumn"/>
+			<ViewField name="SortOrder"/>
+			<ViewGrid moduleID="dsbd"/>
+			<!--
+                <ViewGrid moduleID="dsbf" phrase="Filter Conditions">
+
+                    <ViewField name="HazCategory" phrase="Hazard Category" sample="Chemical"/>
+                    <ViewField name="HazardType" phrase="Hazard Type" sample="Dermititis"/>
+                    <ViewField name="HazardDesc" phrase="Hazard Description" sample="Contact with this chemical will cause dermititis immediately upon contact if proper gloves are not worn"/>
+                    <ViewField name="HazardStatus" phrase="Status|Current status of the identified hazard" sample="Ongoing"/>
+
+                </ViewGrid>
+-->
+			<ViewGrid moduleID="dsbo"/>
+			<!--             
+                <ViewGrid moduleID="dsbs" phrase="Summary Conditions">
+
+                    <ViewField name="HazCategory" phrase="Hazard Category" sample="Chemical"/>
+                    <ViewField name="HazardType" phrase="Hazard Type" sample="Dermititis"/>
+                    <ViewField name="HazardDesc" phrase="Hazard Description" sample="Contact with this chemical will cause dermititis immediately upon contact if proper gloves are not worn"/>
+                    <ViewField name="HazardStatus" phrase="Status|Current status of the identified hazard" sample="Ongoing"/>
+
+                </ViewGrid>
+-->
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a dashboard item">
+			<ViewField name="DashboardItemID"/>
+			<ComboField name="ModuleID" findMode="text">
+				<SampleItem ID="opp" name="Operating Permits"/>
+				<SampleItem ID="chm" name="Chemicals"/>
+				<SampleItem ID="cor" name="Corrective Actions"/>
+				<SampleItem ID="pos" name="Postings"/>
+			</ComboField>
+			<EditField name="Title" size="75" maxLength="128"/>
+			<PersonComboField name="PersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DashboardTypeID" findMode="text">
+				<SampleItem ID="1" name="Row Listing"/>
+				<SampleItem ID="2" name="Summary Listing"/>
+				<SampleItem ID="3" name="Pie Chart (Summary)"/>
+				<SampleItem ID="4" name="Histogram (Summary)"/>
+				<SampleItem ID="5" name="Line Chart (time series)"/>
+			</ComboField>
+			<EditField name="DisplayRows" size="5" maxLength="3"/>
+			<EditField name="PageColumn" size="5" maxLength="3"/>
+			<EditField name="SortOrder" size="5" maxLength="3"/>
+			<MemoField name="CachedSQL" rows="30" cols="80"/>
+		</EditScreen>
+		<EditScreen name="DisplayFields" phrase="Display|Assign the fields to be displayed in the dashboard item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="dsbd"/>
+		</EditScreen>
+		<EditScreen name="FilterConditions" phrase="Filter|Assign the filter conditions that data is selected by">
+			<RecordSummaryFieldsRef/>
+		</EditScreen>
+		<EditScreen name="SortOrder" phrase="Order|Assign the filter conditions that data is sorted by">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="dsbo"/>
+		</EditScreen>
+		<EditScreen name="SummaryConditions" phrase="Summarize|Assign the filter conditions that data is summarized by (does not apply to ">
+			<RecordSummaryFieldsRef/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="DashboardItemID"/>
+		<ViewField name="Person"/>
+		<ViewField name="Module"/>
+		<ViewField name="Title"/>
+		<ViewField name="DashboardType"/>
+	</RecordSummaryFields>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

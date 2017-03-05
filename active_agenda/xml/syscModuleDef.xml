@@ -1,0 +1,328 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="System Components" moduleID="sysc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="System Component" pluralRecordName="System Components" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ComponentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A combined field used to describe this component part when associating it with other records" sample="1"/>
+		<TableField name="SubSystemID" type="int" validate="RequireSelection" phrase="Sub System Name|Name used to identify the sub-system or sub-process of the parent system or process" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="sys" foreignKey="SystemID" foreignField="OrganizationID" key="SystemID" joinType="left" phrase="Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="SystemID" foreignTable="syss" foreignKey="SubSystemID" foreignField="SystemID" key="SubSystemID" joinType="left" phrase="System|A combined field used to describe this system when associating it with other records" sample="1"/>
+		<ForeignField name="System" foreignTable="sys" foreignKey="SystemID" foreignField="System" key="SystemID" joinType="left" phrase="System|A combined field used to describe this system when associating it with other records" sample="Ammonia Refrigeration System; Active Agenda, HQ; 10-28-2003; 1"/>
+		<ForeignField name="SubSystem" foreignTable="syss" foreignKey="SubSystemID" foreignField="SubSystem" key="SubSystemID" joinType="left" phrase="Sub System|A combined field used to describe this sub system when associating it with other records" sample="Ammonia Storage; Active Agenda, HQ"/>
+		<TableField name="SysComponentTypeID" type="int" validate="RequireSelection" phrase="Component Type|A combined field used to describe this system component type when associating it with other records" sample="1"/>
+		<ForeignField name="ComponentCategoryID" foreignTable="sysct" foreignKey="SysComponentTypeID" foreignField="ComponentCategoryID" key="SysComponentTypeID" joinType="left" phrase="Component Category|A broadly defined title or phrase used to group similar system component categories" sample="1"/>
+		<CodeField name="ComponentCategory" key="ComponentCategoryID" phrase="Component Category|A broadly defined title or phrase used to group similar system component categories" sample="Information Technology" codeTypeID="117"/>
+		<ForeignField name="SysComponentType" foreignTable="sysct" foreignKey="SysComponentTypeID" foreignField="SysComponentType" key="SysComponentTypeID" joinType="left" phrase="Component Type|A combined field used to describe this system component type when associating it with other records" sample="Information Technology: Server"/>
+		<TableField name="ComponentName" type="varchar(128)" validate="notEmpty" phrase="Component Name|A brief description of the system or proces component " sample="Frick PRV2319 Pressure Relief Valve"/>
+		<TableField name="ComponentNumber" type="varchar(50)" validate="noValidation" phrase="Component Number|A unique number assigned to the component part for purposes of tracking the specific component " sample="ARF-425"/>
+		<TableField name="ComponentDescription" type="text" validate="noValidation" phrase="Description|A detailed description of the component part" sample="The relief valve is manufactured by XYZ Corporation and is used exclusively throughout Active Agenda ammonia refrigeration systems"/>
+		<RemoteField name="ComponentLocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="System Component Location|Specific location within the facility where the system component is located" sample="1"/>
+		<ForeignField name="ComponentLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="ComponentLocationID" joinType="left" phrase="System Component Location|Specific location within the facility where the ystem component is located" sample="Engine Room"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ComponentName"/>:_<CombinedFieldRef name="ComponentNumber"/></CombinedField>
+		<CombinedField name="Component" phrase="Component|A combined field used to describe this component part when associating it with other records" sample="Frick PRV2319 Pressure Relief Valve: ARF-425"><CombinedFieldRef name="ComponentName"/>_Number:_<CombinedFieldRef name="ComponentNumber"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ComponentID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Component"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List system components">
+			<ListField name="ComponentID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="ComponentLocation" phrase="Location"/>
+			<ListField name="SysComponentType" phrase="Component Type"/>
+			<ListField name="ComponentName" phrase="Component Name"/>
+			<ListField name="ComponentNumber" phrase="Number"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search system components">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="ComponentLocationID"/>
+				<UpdateFieldRef name="SystemID"/>
+				<UpdateFieldRef name="SubSystemID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Ammonia Refrigeration"/>
+				<SampleItem ID="2" name="Stabilization Unit Exhaust"/>
+			</ComboField>
+			<ComboField name="SubSystemID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Ammonia Storage; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Ammonia Condensor; Active Agenda; HQ"/>
+			</ComboField>
+			<ComboField name="ComponentCategoryID" findMode="text">
+				<UpdateFieldRef name="SysComponentTypeID"/>
+				<SampleItem ID="1" name="Information Technology"/>
+				<SampleItem ID="2" name="Bag House"/>
+				<SampleItem ID="3" name="Liquid Petroleum Gas"/>
+				<SampleItem ID="4" name="Methyl Bromide Fumigation"/>
+				<SampleItem ID="5" name="Nitrogen Sterilization"/>
+				<SampleItem ID="6" name="Refrigeration"/>
+			</ComboField>
+			<ComboField name="SysComponentTypeID" findMode="text" parentField="ComponentCategoryID">
+				<SampleItem ID="1" name="Information Technology: Server"/>
+				<SampleItem ID="2" name="Information Technology: Battery Backup"/>
+				<SampleItem ID="3" name="Information Technology: Printer"/>
+				<SampleItem ID="4" name="Information Technology: Router"/>
+				<SampleItem ID="5" name="Information Technology: Switch"/>
+			</ComboField>
+			<EditField name="ComponentName" size="75" maxLength="128"/>
+			<EditField name="ComponentNumber" size="25" maxLength="50"/>
+			<ComboField name="ComponentLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a system component">
+			<ViewField name="ComponentID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SubSystem"/>
+			<ViewField name="SysComponentType"/>
+			<ViewField name="ComponentName"/>
+			<ViewField name="ComponentNumber"/>
+			<ViewField name="ComponentDescription"/>
+			<ViewField name="ComponentLocation"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a system component">
+			<ViewField name="ComponentID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SubSystemID"/>
+				<UpdateFieldRef name="ComponentLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SubSystemID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Ammonia Storage; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Ammonia Condensor; Active Agenda; HQ"/>
+			</ComboField>
+			<ComboField name="ComponentCategoryID" findMode="text">
+				<UpdateFieldRef name="SysComponentTypeID"/>
+				<SampleItem ID="1" name="Information Technology"/>
+				<SampleItem ID="2" name="Bag House"/>
+				<SampleItem ID="3" name="Liquid Petroleum Gas"/>
+				<SampleItem ID="4" name="Methyl Bromide Fumigation"/>
+				<SampleItem ID="5" name="Nitrogen Sterilization"/>
+				<SampleItem ID="6" name="Refrigeration"/>
+			</ComboField>
+			<ComboField name="SysComponentTypeID" findMode="text" parentField="ComponentCategoryID">
+				<SampleItem ID="1" name="Information Technology: Server"/>
+				<SampleItem ID="2" name="Information Technology: Battery Backup"/>
+				<SampleItem ID="3" name="Information Technology: Printer"/>
+				<SampleItem ID="4" name="Information Technology: Router"/>
+				<SampleItem ID="5" name="Information Technology: Switch"/>
+			</ComboField>
+			<EditField name="ComponentName" size="75" maxLength="128"/>
+			<EditField name="ComponentNumber" size="25" maxLength="50"/>
+			<MemoField name="ComponentDescription" rows="5" cols="75"/>
+			<ComboField name="ComponentLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="sysc" phrase="Component Parts">
+			<InvisibleField name="ComponentID"/>
+			<ViewField name="SysComponentType" sample="Information Technology: Server"/>
+			<ViewField name="ComponentName" sample="Frick PRV2319 Pressure Relief Valve"/>
+			<ViewField name="ComponentNumber" sample="ARF-425"/>
+			<ViewField name="ComponentLocation" sample="Active Agenda, Inc. | Kitchen"/>
+		</ViewGrid>
+		<EditGrid moduleID="sysc" phrase="Component Parts">
+			<GridForm>
+				<InvisibleField name="ComponentID"/>
+				<ComboField name="ComponentCategoryID" findMode="text" sample="Information Technology">
+					<UpdateFieldRef name="SysComponentTypeID"/>
+					<SampleItem ID="1" name="Information Technology"/>
+					<SampleItem ID="2" name="Bag House"/>
+					<SampleItem ID="3" name="Liquid Petroleum Gas"/>
+					<SampleItem ID="4" name="Methyl Bromide Fumigation"/>
+					<SampleItem ID="5" name="Nitrogen Sterilization"/>
+					<SampleItem ID="6" name="Refrigeration"/>
+				</ComboField>
+				<ComboField name="SysComponentTypeID" findMode="text" parentField="ComponentCategoryID" sample="Information Technology: Server">
+					<SampleItem ID="1" name="Information Technology: Server"/>
+					<SampleItem ID="2" name="Information Technology: Battery Backup"/>
+					<SampleItem ID="3" name="Information Technology: Printer"/>
+					<SampleItem ID="4" name="Information Technology: Router"/>
+					<SampleItem ID="5" name="Information Technology: Switch"/>
+				</ComboField>
+				<EditField name="ComponentName" size="75" maxLength="128" sample="Frick PRV2319 Pressure Relief Valve"/>
+				<MemoField name="ComponentDescription" rows="5" cols="75" sample="The relief valve is manufactured by XYZ Corporation and is used exclusively throughout Active Agenda ammonia refrigeration systems"/>
+				<EditField name="ComponentNumber" size="25" maxLength="50" sample="ARF-425"/>
+			</GridForm>
+			<ViewField name="SysComponentType" sample="Information Technology: Server"/>
+			<ViewField name="ComponentName" sample="Frick PRV2319 Pressure Relief Valve"/>
+			<ViewField name="ComponentNumber" sample="ARF-425"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Components By System">
+			<GroupByField name="System"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Components By System">
+			<GroupByField name="System"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Components By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Components By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Components By Sub System">
+			<GroupByField name="SubSystem"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Components By Sub System">
+			<GroupByField name="SubSystem"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Components By Category">
+			<GroupByField name="ComponentCategory"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Components By Category">
+			<GroupByField name="ComponentCategory"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Components By Type">
+			<GroupByField name="SysComponentType"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Components By Type">
+			<GroupByField name="SysComponentType"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Components By Location">
+			<GroupByField name="ComponentLocation"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Components By Location">
+			<GroupByField name="ComponentLocation"/>
+			<SummaryField name="ComponentID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

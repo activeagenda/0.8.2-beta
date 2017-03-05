@@ -1,0 +1,439 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Actions" moduleID="act" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Action" pluralRecordName="Actions" allowAddRecord="no" isGlobal="yes">
+	<ModuleFields>
+		<TableField name="ActionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Action ID|Numerical ID to identify and track actions assigned within this application" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module ID|A character ID assigned to each module of the application" sample="par"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the record" sample="Partnerships"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Hearing Conservation, Active Agenda, HQ, Complete"/>
+		<TableField name="Title" type="varchar(128)" validate="notEmpty" phrase="Title|A concise title that describes the action" sample="Hearing tests for the Production Department"/>
+		<TableField name="ActionRequired" type="text" validate="noValidation" phrase="Action Required|A comprehensive description of the action required" sample="Schedule annual hearing tests for the Production Department"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for the assigned action" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for the assigned action" sample="Active Agenda, HQ"/>
+		<TableField name="PersonAccountableID" type="int" defaultValue="defaultorgID" validate="RequireSelection" phrase="Person Accountable|The individual assigned primary accountability for the assigned action" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the assigned action" sample="Larry Hansen"/>
+		<RecordMetaField name="EntryDate" returnType="date" lookupType="created" validate="noValidation" phrase="Entry Date|An automatic entry of the date and time the action was entered into the system" sample="01/01/2004"/>
+		<RemoteField name="AssignedDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="2" phrase="Assigned Date|Date the action was originally assigned" sample="01/01/2004"/>
+		<RemoteField name="DueDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="1" phrase="Due Date|Date the action is projected to be completed" sample="01/01/2004"/>
+		<CalculatedField name="DaysRemaining" type="int" calcFunction="daysremaining" params="DueDate" phrase="Days Remaining|The number of days remaining until the due date" sample="overdue"/>
+		<CalculatedField name="DueDateFormat" type="varchar(5)" calcFunction="duedateformat" params="DaysRemaining" phrase="Due Date Format|CSS class to format the DueDate field" sample="overdue"/>
+		<TableField name="BeginDate" type="date" validate="noValidation" phrase="Begin Date|The date that activity to satisfy the action began" sample="01/01/2004"/>
+		<RemoteField name="CompletionDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="3" phrase="Completion Date|The date and time the action was completed" sample="01/01/2004"/>
+		<CalculatedField name="StartDelay" type="int" calcFunction="datediff" params="BeginDate AssignedDate" validate="" phrase="Start Delay|A calculated field based on the amount of time between the date the action was assigned and the date activity started to resolve the assigned action" sample="30"/>
+		<CalculatedField name="CompletionDelay" type="int" calcFunction="datediff_day_hour" params="CompletionDate AssignedDate" validate="" phrase="Completion Delay|A calculated field based on the amount of time between the date the action was assigned and the date action was completed" sample="30"/>
+		<RemoteField name="AssignedByID" defaultValue="userID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="4" phrase="Assigned By|The name of the person assigning the action" sample="1"/>
+		<ForeignField name="AssignedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AssignedByID" joinType="left" phrase="Assigned By|The name of the person assigning the action" sample="Mattias Thorslund"/>
+		<TableField name="ActionStatusID" type="int" defaultValue="#1" validate="RequireSelection" phrase="Status|Status of the assigned action" sample="2"/>
+		<CodeField name="ActionStatus" key="ActionStatusID" phrase="Status|Status of the assigned action" sample="To Do" codeTypeID="261"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'act'" localKey="ActionID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<ForeignField name="SMCParentModuleID" foreignTable="smc" foreignKey="SubRecordID SubModuleID" key="RelatedRecordID RelatedModuleID" foreignField="ModuleID" joinType="left" phrase="SubModuleID|SubModuleID" sample="abc"/>
+		<ForeignField name="SMCParentRecordID" foreignTable="smc" foreignKey="SubRecordID SubModuleID" key="RelatedRecordID RelatedModuleID" foreignField="RecordID" joinType="left" phrase="SubRecordID|SubRecordID" sample="abc"/>
+		<ForeignField name="SubModuleID" foreignTable="smc" foreignKey="SubRecordID SubModuleID" key="RelatedRecordID RelatedModuleID" foreignField="SubModuleID" joinType="left" phrase="SubModuleID|SubModuleID" sample="abc"/>
+		<ForeignField name="SubRecordID" foreignTable="smc" foreignKey="SubRecordID SubModuleID" key="RelatedRecordID RelatedModuleID" foreignField="SubRecordID" joinType="left" phrase="SubRecordID|SubRecordID" sample="abc"/>
+		<ForeignField name="SubModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="SubModuleID" joinType="left" phrase="SubModule|The name or title of the submodule" sample="Partnerships"/>
+		<DynamicForeignField name="SubRecord" key="SubRecordID" moduleIDField="SubModuleID" foreignField="RecordDescription" joinType="left" phrase="SubRecord|A description of the related record based on a combination of field values assigned from within the related module" sample="Hearing Conservation, Active Agenda, HQ, Complete"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="SubRecordDescription" phrase="SubRecord" sample=""><CombinedFieldRef name="SubModule"/>_;_<CombinedFieldRef name="SubRecord"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | Hearing tests for the Production Department | 01-01-2006">
+			<CombinedFieldRef name="Organization"/>;_
+			<CombinedFieldRef name="Title"/>;_
+			<CombinedFieldRef name="RelatedModule"/>;_
+			<CombinedFieldRef name="RelatedRecordDescription"/>
+		</CombinedField>
+		<CombinedField name="StartDelayCalc" phrase="Start Delay|A calculated field based on the amount of time between the date the action was assigned and the date activity started to resolve the assigned action" sample="30 Hours"><CombinedFieldRef name="StartDelay"/>_Days</CombinedField>
+		<CombinedField name="Action" phrase="Action|A combined field used to describe this action when associating it with other records" sample="Schedule annual hearing tests for the Production Department | Status: To Do "><CombinedFieldRef name="Title"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ActionID"/>
+		</PrimaryKey>
+		<Index name="RelatedModuleIDRecordID">
+			<FieldRef name="RelatedModuleID"/>
+			<FieldRef name="RelatedRecordID"/>
+		</Index>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Action"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ActionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="act"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List actions">
+			<ListField name="ActionID" phrase="Action ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="Title" phrase="Title"/>
+			<ListField name="PersonAccountable" phrase="Accountable"/>
+			<ListField name="DueDate" phrase="Due"/>
+			<ListField name="ActionStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search actions associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="Title" size="75" maxLength="128"/>
+			<DateField name="EntryDate"/>
+			<DateField name="AssignedDate"/>
+			<DateField name="DueDate"/>
+			<DateField name="BeginDate"/>
+			<DateField name="CompletionDate"/>
+			<PersonComboField name="AssignedByID">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ActionStatusID">
+				<SampleItem ID="1" name="To Do"/>
+				<SampleItem ID="2" name="In Progress"/>
+				<SampleItem ID="3" name="Complete"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an action associated with a related record">
+			<ViewField name="ActionID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="Title"/>
+			<ViewField name="ActionRequired"/>
+			<ViewField name="EntryDate"/>
+			<ViewField name="AssignedDate"/>
+			<ViewField name="DueDate"/>
+			<ViewField name="BeginDate"/>
+			<ViewField name="CompletionDate"/>
+			<ViewField name="AssignedBy"/>
+			<ViewField name="ActionStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+				<ViewField name="AssignedDate"/>
+				<ViewField name="BeginDate"/>
+				<ViewField name="StartDelayCalc"/>
+				<ViewField name="CompletionDate"/>
+				<ViewField name="CompletionDelay"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an action associated with a related record">
+			<ViewField name="ActionID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="Title" size="75" maxLength="128"/>
+			<MemoField name="ActionRequired" rows="5" cols="75"/>
+			<DateField name="AssignedDate"/>
+			<DateField name="DueDate"/>
+			<DateField name="BeginDate"/>
+			<DateField name="CompletionDate"/>
+			<PersonComboField name="AssignedByID">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ActionStatusID">
+				<SampleItem ID="1" name="To Do"/>
+				<SampleItem ID="2" name="In Progress"/>
+				<SampleItem ID="3" name="Complete"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with an action associated with a related record">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<!--<RecordReportScreen name="RecordReports" phrase="Reports|View reports on the action item"/>-->
+		<ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ActionID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="Title"/>
+		<ViewField name="ActionRequired"/>
+		<ViewField name="EntryDate"/>
+		<ViewField name="AssignedDate"/>
+		<ViewField name="DueDate"/>
+		<ViewField name="BeginDate"/>
+		<ViewField name="CompletionDate"/>
+		<ViewField name="AssignedBy"/>
+		<ViewField name="ActionStatus"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="act" phrase="Actions" SMCRecordIDField="SMCParentRecordID" SMCModuleIDField="SMCParentModuleID">
+			<InvisibleField name="ActionID" phrase="Action ID|Numerical ID to identify and track actions assigned within this application"/>
+			<ViewField name="Organization" phrase="Organization|The organization with primary responsibility for the assigned action"/>
+			<ViewField name="PersonAccountable" phrase="Person Accountable|The individual assigned primary accountability for the assigned action"/>
+			<ViewField name="Title" phrase="Title|A concise title that describes the action" sample="Hearing tests for the Production Department"/>
+			<ViewField name="DueDate" phrase="Due Date|Date the action is projected to be completed"/>
+			<ViewField name="ActionStatus" phrase="Status|Status of the assigned action"/>
+			<!--<ViewField name="CompletionDate" phrase="Completion Date|Date the action was completed"/>
+            <ViewField name="SubModule" phrase="Sub Module|The name of the submodule that this action is associated with (if any)"/>
+            <ViewField name="SubRecordID" phrase="ID|The record ID of the submodule record this action is associated with (if any)"/>-->
+		</ViewGrid>
+		<!-- edit grid to be included in all modules... -->
+		<EditGrid moduleID="act" phrase="Actions" SMCRecordIDField="SMCParentRecordID" SMCModuleIDField="SMCParentModuleID">
+			<GridForm>
+				<ViewField name="ActionID" phrase="Action ID|Numerical ID to identify and track actions assigned within this application"/>
+				<OrgComboField name="OrganizationID" findMode="text" phrase="Organization|The organization with primary responsibility for the assigned action">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="text" phrase="Person Accountable|The individual assigned primary accountability for the assigned action">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<EditField name="Title" size="75" maxLength="128"/>
+				<MemoField name="ActionRequired" rows="5" cols="75" phrase="Action Required|A comprehensive description of the action required"/>
+				<DateField name="AssignedDate" phrase="Assigned Date|An automatic entry of the date the action was created in the database"/>
+				<DateField name="DueDate" phrase="Due Date|Date the action is projected to be completed"/>
+				<DateField name="BeginDate" phrase="Begin Date|The date that activity to satisfy the action began"/>
+				<DateField name="CompletionDate" phrase="Completion Date|Date the action was completed"/>
+				<PersonComboField name="AssignedByID" findMode="text" phrase="Assigned By|The name of the person assigning the action">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="ActionStatusID" findMode="text" phrase="Status|Status of the assigned action">
+					<SampleItem ID="1" name="To Do"/>
+					<SampleItem ID="2" name="In Progress"/>
+					<SampleItem ID="3" name="Complete"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="ActionID" phrase="Action ID|Numerical ID to identify and track actions assigned within this application"/>
+			<ViewField name="Organization" phrase="Organization|The organization with primary responsibility for the assigned action"/>
+			<ViewField name="PersonAccountable" phrase="Person Accountable|The individual assigned primary accountability for the assigned action"/>
+			<ViewField name="Title"/>
+			<ViewField name="DueDate" phrase="Due Date|Date the action is projected to be completed"/>
+			<ViewField name="ActionStatus" phrase="Status|Status of the assigned action"/>
+			<!--<ViewField name="SubModule" phrase="SubModule|The name of the submodule that this action is associated with (if any)"/>-->
+			<!--<ViewField name="SubRecordDescription" phrase="Source|A description of the submodule record this action is associated with (if any)"/>-->
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Actions By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Actions By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Actions By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Actions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Actions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Actions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Actions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Actions By Status">
+			<GroupByField name="ActionStatus"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Actions By Status">
+			<GroupByField name="ActionStatus"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Actions By Person Assigning">
+			<GroupByField name="AssignedBy"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Actions By Person Assigning">
+			<GroupByField name="AssignedBy"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>The Actions module associates actions assigned to people with records throughout the application and as stand-alone action assignments within the Actions module. Each module of Active Agenda has an Actions screen that allows implementers to associate required actions, persons accountable, details of the required action, the person assigning the action, and the present status of the action assignment. Actions can be assigned to internal and external resources and can be viewed on a record-by-record basis or globally from within the Actions module. Active Agenda's search utility allows implementers to dynamically search actions based and a variety of parameters and our unique method of associating people with accountabilities allows implementers to quickly reassign actions on an action-by-action basis or perform a global reassignment to prevent actions from "falling through the cracks."</p>
+			<h3>Target Objectives:</h3>
+			<ul>
+				<li>Assign and track business tasks utilizing a single action tracking system capable of monitoring follow through activities and action status.</li>
+				<li>Streamline action tracking so that prioritization of assigned accountabilities can benefit from a cross functional perspective - provide the "big picture."</li>
+			</ul>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation"/>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>Assigning actions results in tracked accountabilities. In fact, Active Agenda centralizes every action assigned into a central Accountabilities module where an organization can quickly filter and review accountabilities by person, status, module, etc. Most organizations will be amazed by the number of accountabilities that accumulate within a short period of Active Agenda use. This powerful feature will undoubtedly help an organization to gain a better grasp over the many tasks and accountabilities required to conduct business but it may also result in employee discomfort as the accontabilities exceed time and resources available. </p>
+			<p>
+				<strong>
+It is important to acknolwedge that the actions and accountabilities modules are being implemented to better track follow-through AND gain a better understanding of the resource requirements and prioritization of the organization.</strong>
+			</p>
+			<h3>Barriers To Success:</h3>
+			<p>Larger companies are comprised of multiple departments, managed by different people, and each person tracks his/her activities independently with different tools (i.e. schedules, day planners, etc.). The inroduction of a centralized action planning system will need to be approached with care and sensitivity for functional concerns over prioritization. One method of overcoming these concerns is to communicate the objective to streamline redundant tasks as a means of gaining organizational efficiencies and effectiveness. The Accountabilties list can be used effectively to share the vast number of organizational expectations in contrast to available resources. The organization's competitive business environment  does not allow the addition of resources and must find ways to better distribute and central redundant work. The use of a centralized action tracking system is not being used to reduce labor. Rather, it is being used to increase the effectiveness of the existing labor force.   </p>
+			<p>Smaller businesses are often too overwhelmed by their compliance obligations to even document their tasks. The Actions module is often seen as a welcome tool to enable a company's limited number of human resources to better distribute work expectations and make otherwise impossible work loads possible.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+Data for inclusion within the Actions module can come from many sources. The key to collecting source data is to include any action oriented data which is current and consists of an immediate or established need to take action. Sources of action data might include:
+            
+            
+            
+            
+            
+			<ul>
+				<li>Existing "To Do' lists - hand written or typed.</li>
+				<li>Task management programs, e.g. Schedule, Lotus Notes, Microsoft Outlook, Mozilla Thunderbird, etc.</li>
+				<li>Follow-up requirements from internal company, outside consulting, or insurance carrier audit reports.</li>
+				<li>Open solicitation of undocumented objectives from department managers. For example, request a list of the ten highest priority objectives from each department manager to be accomplished in the next twelve months.</li>
+				<li>Action plans generated through company wide strategic planning sessions.</li>
+			</ul>
+			<p>It should be made clear that the target is those actions or activities that are of mutual interest across the organization. The continued use of a personal "To Do' list is certainly of value if it aids a person in accomplishing individual objectives but the inclusion of incidental actions, which do not impact the overall business, is not necessary. However, if an individual is comofrtable utilizing Active Agenda's Action module to track personal tasks in an open environment, great!</p>
+			<p>Another useful feature of the actions module is its ability to track activities mandated by regulatory agencies that may apply to the organization. Some examples are: OSHA 200 log posted by February 1st each year, SARA Title III reports (312 and 313) filed annually, city sewer water analysis report submitted every six months, bi-annual hazardous waste generator report submission, annual air emissions inventory report submission, etc.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>The Actions module is designed to allow any registered user to enter actions directly into the system as action requirements surface. Intial data input can consist of a mass entry exercise where one or more individuals enter all outstanding organizational action requirements in one instance. However, we caution the use of untrained persons to enter and assign actions due to the nuances of action requirements and the necessity to gain approval of workload requirements from action assignee supervisors. We have had great succes in utilizing subject matter experts (e.g. loss control staff entering insurance carrier recommendations) to enter and assign actions. Once actions are entered and assigned, a list can be forwarded to assignee supervisors for approval of the assigned actions. This process can often result in the discovery that required actions outstrip resources.</p>
+			<p>Whatever the approach taken, be it a mass entry of existing actions or a "from this date forward" approach, the entry of actions into a centrally maintained database is the best way to guarantee results and prevent important organizational issues from "falling through the cracks."</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<ul>
+				<li>Is your business saddled with multiple, competing expectations from regulators, external partners or internal departments?</li>
+				<li>Are you required to document and demonstrate past, present and future activities undertaken to manage risk?</li>
+				<li>Are you having difficulties managing task accountabilities?</li>
+				<li>Can you provide a list of tasks associated with employee safety, product safety, or operational activities?</li>
+				<li>What percent of those activities have been completed, are ongoing or have been postponed?</li>
+				<li>What deadlines are approaching for you to have your business tasks completed?</li>
+				<li>Which business partners, employees, resources have outstanding task assignments?</li>
+				<li>How many tasks are assigned, on average, by your industry?</li>
+				<li>What's your industry's completion rate? How do you compare?</li>
+				<li>Can you view your company's risk assignments, in real time, from anywhere on Earth?</li>
+			</ul>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>The Actions module can help an organization to learn about itself in many ways. The most obvious learning opportunity is the vast number of actions which accumulate within the system over a short period of use and the rate at which these actions are completed. However, Active Agenda's Actions module can be filtered and/or charts can be analyzed to learn from the following information:</p>
+			<ul>
+				<li>Completion rates of assignees.</li>
+				<li>The relative distribution of actions assigned to assignees. Is one person expected to do all of the work?</li>
+				<li>Distribution or balance of actions based on risk imperatives.</li>
+				<li>Use or non-use of the action tracking capabilities of the system amongst locations</li>
+				<li>Performance indicators (e.g. incident rates, production rates) contrasted with action completion rates</li>
+			</ul>
+			<h3>Common Practices and Active Agenda Alternatives:</h3>
+			<p>Organizations have traditionally captured action planning tasks and elements in a variety of ways. These include the task who, what, and when information commonly documented in a word processing file or spreadsheet. Often simply a hand written "To Do" list. Active Agenda provides a better approach that can help an organization learn about itself and its human resource requirements.</p>
+			<h3>Information Automation:</h3>
+			<blockquote>
+				<h4>Common Practice:</h4>
+				<p>While there are software programs available to capture and track this type of information in a database format, they are seldom integrated (multiple users, multiple locations), and few, if any, are designed to specifically capture unique organizational activities. Within traditional systems, the end user must define the field information, codes, and organizational objective alignment.</p>
+				<h4>Active Agenda Alternative:</h4>
+				<p>The Action module is directly tied to other modules in Active Agenda as appropriate to document and track activities needed to be accomplish key organizational objectives supported by the other modules. Information is automatically compiled from multiple users. These users may include both internal personnel and external organization personnel as determined by the host organization.</p>
+			</blockquote>
+			<h3>Information Timeliness and Quality:</h3>
+			<blockquote>
+				<h4>Common Practice:</h4>
+				<p>The ability to collect real time information regarding task status often requires direct contact with the person assigned the task. This promotes information inconsistencies and delays, especially working in multiple locations and time zones.</p>
+				<h4>Active Agenda Alternative:</h4>
+				<p>Tasks/Activities are input to the Actions module by the person that has discovered or defined the need of the task/activity. Status updates are input by the person, or persons, assigned responsibility for the task. The information contained in the Actions module is available in real-time - globally, twenty-four hours a day, seven days a week.</p>
+			</blockquote>
+			<h3>Objective Communications:</h3>
+			<blockquote>
+				<h4>Common Practice:</h4>
+				<p>Clearly defined objectives, priorities, and resource requirements necessary to accomplish a task are weak points in what are often very mechanical action planning systems.</p>
+				<h4>Active Agenda Alternative:</h4>
+				<p>The structure of the Actions module promotes clearly defined objectives and priorities. The module also promotes dialog between the author of the task/activity and the person assigned the task as needed to define necessary resources.</p>
+			</blockquote>
+			<h3>Task Assignments and Expectations:</h3>
+			<blockquote>
+				<h4>Common Practice:</h4>
+				<p>Organizations often assign work to those personnel that can be relied upon consistently for completion. This often results in overwhelming the best performers with overly demanding expectations.</p>
+				<h4>Active Agenda Alternative:</h4>
+				<p>The tasking assigned to an individual can be readily sorted to allow review by management. This will promote communication and help avoid setting unrealistic expectations.</p>
+			</blockquote>
+			<h3>Communication Filters:</h3>
+			<blockquote>
+				<h4>Common Practice:</h4>
+				<p>Summary reports presented to top management are often filtered at lower levels in the organization confusing "what you want to know" with "what you need to know."</p>
+				<h4>Active Agenda Alternative:</h4>
+				<p>The summary reports presented in the Action module can be defined by the organization as needed to promote consistent information sharing. These reports are updated as information changes are made from multiple users. Again this information will be available real-time globally.</p>
+			</blockquote>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>Organizational training of the Action module should address two components. </p>
+			<p>The first area to address is the organization's action taking culture and existing systems (or lack thereof) used to capture, track, and resolve needs for action. The organization should make an effort to explain the strengths and weaknesses of existing practices and present a reasonable justification for doing things differently. </p>
+			<p>The second area to address is the specific functionality of the Actions module and the features of the system. Discussion about the functionality and features of the Actions module should incorporate organizational culture and analogize and distinguish between existing culture and the cultural  changes being sought by introduction of a new action tracking system. The review of the module's features should demonstrate the organizational learning orpportunities created by effective and enterprise wide use of the module and should include a demonstration of related charts and data search filters.</p>
+			<blockquote>
+				<h3>Leadership and Management:</h3>
+				<p>Leadership training of the Actions modules should be focused on the organizational learning aspects of the system and the importance of supporting and reinforcing the module's use across the enterprise.</p>
+				<h3>Staff:</h3>
+				<p>Staff training should focus on the Actions module as a means of communicating specialized requirements and tracking follow-through (e.g. compliance). Emphasis should be placed on the importance of tracking staff contributions to organizational performance as a means of illustrating staff value and importance.</p>
+				<h3>Line Level:</h3>
+				<p>Line level employees will not likely interface directly with the Actions module but they should be made aware of the system's existence and use. Key elements to communicate with line level employees are the module's ability to integrate with the many aspects of Active Agenda and the systems ability to generate filtered reports in associations with specialized areas (i.e. Hazard Reports, Suggestions, Incentives, etc.). Line employees should be made aware of the systems ability to keep communication alive and accessible to everyone.</p>
+			</blockquote>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge"/>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions"/>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,117 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'TrustTransferID' => gettext("Transfer ID|An automatically assigned number used to track financial account transfers"),
+   'FromOrganization' => gettext("From Organization|The organization responsible for funding and managing the trust distribution account to be debited"),
+   'FromDistribution' => gettext("From Distribution Account|The trust distribution account to be debited"),
+   'ToOrganization' => gettext("To Organization|The organization responsible for funding and managing the trust distribution account to be credited"),
+   'ToDistribution' => gettext("To Account|The trust distribution account to be credited"),
+   'TransferDate' => gettext("Transfer Date|The specific date the transfer occurred"),
+   'TransferredBy' => gettext("Transferred By|The person responsible for transferring the funds"),
+   'TrustAccountTransferType' => gettext("Transfer Type|The type of transfer between accounts"),
+   'TransferAmount' => gettext("Transfer Amount|The total amount involved in the transfer, stated in the currency assigned to this installation of the software"),
+   'TransferDesc' => gettext("Transfer Description|A detailed description of the financial account transfer"),
+   'TransferDocNumber' => gettext("Transfer Document Number|The number associated with the transfer document (e.g. Transfer Slip Number)")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:3:{s:6:"phrase";s:22:"Trust Account Transfer";s:3:"sql";s:3160:"SELECT 
+   `trut`.TrustTransferID,
+   `org1`.Name AS FromOrganization,
+   NULLIF(CONCAT(IFNULL(`ppl2`.DisplayName,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`tru2`.AccountName,\'\')),\'\'),\'\'),\' | \',IFNULL(ROUND(`tru2`.TrustAmount, 2),\'\')),\' |  | \') AS FromDistribution,
+   `org2`.Name AS ToOrganization,
+   NULLIF(CONCAT(IFNULL(`ppl4`.DisplayName,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`tru4`.AccountName,\'\')),\'\'),\'\'),\' | \',IFNULL(ROUND(`tru4`.TrustAmount, 2),\'\')),\' |  | \') AS ToDistribution,
+   `dat1`.RelatedDate AS TransferDate,
+   `ppl5`.DisplayName AS TransferredBy,
+   `cod1`.Description AS TrustAccountTransferType,
+   `trut`.TransferAmount,
+   `trut`.TransferDesc,
+   `trut`.TransferDocNumber,
+   NULLIF(CONCAT(IFNULL(ROUND(`trut`.TransferAmount, 2),\'\'),\' from \',IFNULL(`ppl1`.DisplayName,\'\'),\' to \',IFNULL(`ppl3`.DisplayName,\'\'),\' on \',IFNULL(`dat1`.RelatedDate,\'\')),\' from  to  on \') AS RecordLabel,
+   `tru1`.OrganizationID AS FromOrganizationID
+FROM `trut`
+   
+     LEFT OUTER JOIN `trud` AS trud1 
+   ON (`trut`.FromDistributionID = `trud1`.TrustDistributionID )
+     LEFT OUTER JOIN `trud` AS trud2 
+   ON (`trut`.ToDistributionID = `trud2`.TrustDistributionID )
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`trut`.TrustTransferID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'trut\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'30\')
+     LEFT OUTER JOIN `inv` AS inv3 
+    ON (`trut`.TrustTransferID = `inv3`.SourceRecordID 
+     AND `inv3`.SourceModuleID = \'trut\'
+     AND `inv3`._Deleted = 0
+     AND `inv3`.InvolvementDescriptorID = \'2\')
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`trut`.TrustAccountTransferTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'153\')
+     LEFT OUTER JOIN `tru` AS tru1 
+   ON (`trud1`.TrustAccountID = `tru1`.TrustAccountID )
+     LEFT OUTER JOIN `tru` AS tru2 
+   ON (`trud1`.TrustAccountID = `tru2`.TrustAccountID )
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`trud1`.TrustDistributionID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'trud\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'1\')
+     LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `tru` AS tru3 
+   ON (`trud2`.TrustAccountID = `tru3`.TrustAccountID )
+     LEFT OUTER JOIN `tru` AS tru4 
+   ON (`trud2`.TrustAccountID = `tru4`.TrustAccountID )
+     LEFT OUTER JOIN `inv` AS inv2 
+    ON (`trud2`.TrustDistributionID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'trud\'
+     AND `inv2`._Deleted = 0
+     AND `inv2`.InvolvementDescriptorID = \'1\')
+     LEFT OUTER JOIN `ppl` AS ppl3 
+ON (`inv2`.PersonInvolvedID = `ppl3`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl5 
+   ON (`inv3`.PersonInvolvedID = `ppl5`.PersonID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`tru1`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`inv1`.PersonInvolvedID = `ppl2`.PersonID )
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`tru3`.OrganizationID = `org2`.OrganizationID )
+     LEFT OUTER JOIN `ppl` AS ppl4 
+   ON (`inv2`.PersonInvolvedID = `ppl4`.PersonID )
+WHERE
+   trut.TrustTransferID=\'/**RecordID**/\'";s:6:"fields";a:11:{s:15:"TrustTransferID";O:9:"viewfield":16:{s:4:"name";s:15:"TrustTransferID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:86:"Transfer ID|An automatically assigned number used to track financial account transfers";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"FromOrganization";O:9:"viewfield":16:{s:4:"name";s:16:"FromOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:116:"From Organization|The organization responsible for funding and managing the trust distribution account to be debited";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"FromDistribution";O:9:"viewfield":16:{s:4:"name";s:16:"FromDistribution";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"From Distribution Account|The trust distribution account to be debited";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ToOrganization";O:9:"viewfield":16:{s:4:"name";s:14:"ToOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"To Organization|The organization responsible for funding and managing the trust distribution account to be credited";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ToDistribution";O:9:"viewfield":16:{s:4:"name";s:14:"ToDistribution";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"To Account|The trust distribution account to be credited";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"TransferDate";O:9:"viewfield":16:{s:4:"name";s:12:"TransferDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Transfer Date|The specific date the transfer occurred";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"TransferredBy";O:9:"viewfield":16:{s:4:"name";s:13:"TransferredBy";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:64:"Transferred By|The person responsible for transferring the funds";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"TrustAccountTransferType";O:9:"viewfield":16:{s:4:"name";s:24:"TrustAccountTransferType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:51:"Transfer Type|The type of transfer between accounts";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"TransferAmount";O:9:"viewfield":16:{s:4:"name";s:14:"TransferAmount";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:127:"Transfer Amount|The total amount involved in the transfer, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"TransferDesc";O:9:"viewfield":16:{s:4:"name";s:12:"TransferDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:77:"Transfer Description|A detailed description of the financial account transfer";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"TransferDocNumber";O:9:"viewfield":16:{s:4:"name";s:17:"TransferDocNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Transfer Document Number|The number associated with the transfer document (e.g. Transfer Slip Number)";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}}');
+
+?>

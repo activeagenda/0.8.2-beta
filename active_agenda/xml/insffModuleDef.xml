@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Factors" moduleID="insff" parentModule="insld" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Loss Factor" pluralRecordName="Loss Factors" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="FinalFactorID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate loss increases with the development of loss development factors" sample="1"/>
+		<TableField name="LossDevelopmentFactorID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to associate loss development factors with insurance policy types and related claims" sample="1"/>
+		<ForeignField name="DevelopmentTypeID" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="DevelopmentTypeID" key="LossDevelopmentFactorID" joinType="left" phrase="Development Type|The type of cost development associated with the factors" sample="1"/>
+		<CodeField name="DevelopmentType" key="DevelopmentTypeID" phrase="Development Type|The type of cost development associated with the factors" sample="Incurred" codeTypeID="275"/>
+		<ForeignField name="PolicyTypeID" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="PolicyTypeID" key="LossDevelopmentFactorID" joinType="left" phrase="Policy Type|The type of insurance policy, and/or claim, to which this loss development factor should be applied" sample="1"/>
+		<CodeField name="PolicyType" key="PolicyTypeID" phrase="Policy Type|The type of insurance policy, and/or claim, to which this loss development factor should be applied" sample="General Liability" codeTypeID="3"/>
+		<ForeignField name="LossDevelopmentFactor" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="LossDevelopmentFactor" key="LossDevelopmentFactorID" joinType="left" phrase="Loss Development Factor|A combined field used to describe the loss development factors when associating them with other records" sample="Active Agenda, HQ | 2005 Global Incurred LDF's | General Liability | Incurred"/>
+		<TableField name="LossFactorID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to associate loss increases with the development of loss development factors" sample="1"/>
+		<ForeignField name="Months1ID" foreignTable="inslf" foreignKey="LossFactorID" foreignField="Months1ID" key="LossFactorID" joinType="left" phrase="Months (1st)|The number of development months to be used as the starting value of the development period" sample="1"/>
+		<CodeField name="Months1" key="Months1ID" phrase="Months (1st)|The number of development months to be used as the starting value of the development period" sample="12" codeTypeID="276"/>
+		<ForeignField name="Months2ID" foreignTable="inslf" foreignKey="LossFactorID" foreignField="Months2ID" key="LossFactorID" joinType="left" phrase="Months (2nd)|The number of development months to be used as the starting value of the development period" sample="2"/>
+		<CodeField name="Months2" key="Months2ID" phrase="Months (2nd)|The number of development months to be used as the starting value of the development period" sample="24" codeTypeID="276"/>
+		<TableField name="FinalDevelopmentFactor" type="float" validate="noValidation" phrase="Final Development Factor|The cumulative or final loss development factor selecetd to be applied to loss costs matching the same number of months of development" sample="1.75"/>
+		<!--The DevelopmentFactor field is a calculated field based on the following formula: (Multiply all SelectedRate fields from within <inslf> where the Months1 are greater than the Months1 field within this module)-->
+		<CombinedField name="FinalFactor" phrase="Final Factor|A combined field used to describe this final loss development factor when associating it with other records" sample="Incurred | General Liability | 12 to 24 months | Loss Development Factor  = 1.91"><CombinedFieldRef name="DevelopmentType"/>;_<CombinedFieldRef name="PolicyType"/>;_<CombinedFieldRef name="Months1"/>_to_<CombinedFieldRef name="Months2"/>_months;_Loss Development Factor_=_(<CombinedFieldRef name="FinalDevelopmentFactor"/>)</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="FinalFactorID"/>
+		</PrimaryKey>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List loss development factors">
+			<ListField name="FinalFactorID" phrase="Record ID"/>
+			<ListField name="LossDevelopmentFactor" phrase="Development Factors Title"/>
+			<ListField name="Months1" phrase="Months (1st)"/>
+			<ListField name="Months2" phrase="Months (2nd)"/>
+			<ListField name="FinalDevelopmentFactor" phrase="Loss Development Factor"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search loss development factors">
+			<ComboField name="LossDevelopmentFactorID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ | 2005 Global Incurred LDF's | General Liability | Incurred"/>
+				<SampleItem ID="2" name="Active Agenda, HQ | 2005 Global Incurred LDF's | Auto Liability | Incurred"/>
+				<SampleItem ID="3" name="Active Agenda, HQ | 2005 Global Incurred LDF's | Products Liability | Incurred"/>
+				<SampleItem ID="4" name="Active Agenda, HQ | 2005 Global Incurred LDF's | Workers' Compensation | Incurred"/>
+			</ComboField>
+			<ComboField name="DevelopmentTypeID" findMode="text">
+				<SampleItem ID="1" name="Incurred"/>
+				<SampleItem ID="2" name="Paid"/>
+			</ComboField>
+			<ComboField name="PolicyTypeID" findMode="text">
+				<SampleItem ID="1" name="General Liability"/>
+				<SampleItem ID="2" name="Auto Liability"/>
+				<SampleItem ID="3" name="Products Liability"/>
+				<SampleItem ID="4" name="Employment Practices Liability"/>
+				<SampleItem ID="5" name="Workers' Compensation'"/>
+				<SampleItem ID="6" name="Pollution Liability"/>
+			</ComboField>
+			<ComboField name="Months1ID" findMode="text">
+				<SampleItem ID="1" name="12"/>
+				<SampleItem ID="2" name="24"/>
+				<SampleItem ID="3" name="36"/>
+				<SampleItem ID="4" name="48"/>
+				<SampleItem ID="5" name="60"/>
+				<SampleItem ID="6" name="72"/>
+			</ComboField>
+			<ComboField name="Months2ID" findMode="text">
+				<SampleItem ID="1" name="12"/>
+				<SampleItem ID="2" name="24"/>
+				<SampleItem ID="3" name="36"/>
+				<SampleItem ID="4" name="48"/>
+				<SampleItem ID="5" name="60"/>
+				<SampleItem ID="6" name="72"/>
+			</ComboField>
+			<EditField name="FinalDevelopmentFactor" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View loss development factors used to develop loss costs to ultimate">
+			<ViewField name="FinalFactorID"/>
+			<ViewField name="LossDevelopmentFactor"/>
+			<ViewField name="DevelopmentType"/>
+			<ViewField name="PolicyType"/>
+			<ViewField name="Months1"/>
+			<ViewField name="Months2"/>
+			<ViewField name="FinalDevelopmentFactor" size="5" maxLength="5"/>
+		</ViewScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="insff" phrase="Final Loss Development">
+			<InvisibleField name="LossFactorID"/>
+			<ViewField name="Months1" sample="12"/>
+			<ViewField name="Months2" sample="24"/>
+			<ViewField name="FinalDevelopmentFactor" sample="2.19"/>
+		</ViewGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,135 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    /**CUSTOM_CODE|init**/
+
+    //list of objects containing the field information
+    $fields = unserialize('a:3:{s:11:"RiskIndexID";O:9:"viewfield":16:{s:4:"name";s:11:"RiskIndexID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:73:"Risk Index ID|An automatically assigned number used to track risk indices";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"IndexValue";O:9:"viewfield":16:{s:4:"name";s:10:"IndexValue";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:127:"Lower Value|The lowest product of the risk likelihood and risk severity which will result in the associated risk recommendation";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"RiskRecommendation";O:9:"viewfield":16:{s:4:"name";s:18:"RiskRecommendation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Risk Recommendation|A detailed phrase used to communicate a risk abatement or mitigation recommendation";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}');
+
+
+    //list of grids
+    /**grids**/
+
+    //phrases for field names, in field order
+    $phrases = array(
+   'RiskIndexID' => gettext("Risk Index ID|An automatically assigned number used to track risk indices"),
+   'IndexValue' => gettext("Lower Value|The lowest product of the risk likelihood and risk severity which will result in the associated risk recommendation"),
+   'RiskRecommendation' => gettext("Risk Recommendation|A detailed phrase used to communicate a risk abatement or mitigation recommendation")
+   );
+
+
+    $ownerField = '';
+
+    
+    /**disbleGlobalModules**/
+    /**useBestPractices**/
+
+    //retrieve record
+    $data = array();
+    
+    /**SQL|GET_BEGIN**/
+    $SQL = "SELECT 
+   `rskx`.RiskIndexID,
+   `rskx`.IndexValue,
+   `rskx`.RiskRecommendation,
+   NULLIF(CONCAT(IFNULL(`rskx`.IndexValue,''),': ',IFNULL(`rskx`.RiskRecommendation,'')),': ') AS RecordLabel
+FROM `rskx`
+   
+WHERE
+   rskx.RiskIndexID='/**RecordID**/'";
+
+    /**CUSTOM_CODE|before_get**/
+
+    //get data
+    $r = $dbh->getAll(str_replace('/**RecordID**/', $recordID, $SQL), DB_FETCHMODE_ASSOC);
+    dbErrorCheck($r);
+
+    
+    /**SQL|GET_END**/
+    //need to repeat for each getSQL........
+    $data = array_merge($data, $r[0]); //assign first (only) row
+    
+    /**CUSTOM_CODE|get**/
+    
+    //check if user has permission to view or edit record - will redirect if no permission at all
+    $allowEdit = $User->CheckViewScreenPermission();
+    //$allowEdit = true;
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //List tab
+    $tabs['List'] = Array("list.php?$qs", gettext("List|View the list of Risk Indices"));
+
+    if ($allowEdit){
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Risk Index") );
+      $tempTabs['Form'] = array( "edit.php?scr=Form&$tabsQS", gettext("Form|Edit summary information about a risk index") );
+$tabs = array_merge($tabs, $tempTabs);
+    } else {
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Risk Index") );
+      $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Risk Index") );
+$tabs = array_merge($tabs, $tempTabs);
+    }
+    
+    $recordLabelField = $data['RecordLabel'];
+
+    $content = '';
+    foreach($fields as $key => $field){
+        if (!$field->isSubField()){
+            $content .= $field->render($data, $phrases);
+        }
+    }
+
+    $pageTitle = gettext("Risk Index");
+    $screenPhrase = gettext("View|View summary information about risk indices");
+
+    $backlink = "list.php?$qs";
+
+    $nextScreen = "Form";
+    $editlink = "edit.php?$tabsQS&scr=$nextScreen";
+    $content = renderViewTable($content, $allowEdit, $backlink, $editlink);
+
+    //add byline info on record modification info
+    $content .= "<div class=\"recinfo\">{$phrases['_ModDate']} {$data['_ModDate']}";
+    if ($User->IsAdmin) {
+        $content .= '&nbsp; &nbsp; <a href="audit.php?mdl='.$ModuleID.'&rid='.$recordID.'">'.gettext("Audit Trail").'</a> ';
+    }
+    $content .= "</div>";
+
+    //display view grids here
+
+
+//View Screen Sections here
+/**VIEWSCREENSECTIONS**/
+?>

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Risk Index Associations" moduleID="rskxa" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Risk Index Association" pluralRecordName="Risk Index Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="IndexAssociationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track risk index associations with related records" sample="1"/>
+		<TableField name="SourceModuleID" type="varchar(5)" validate="noValidation" phrase="Source Module|The name of the module which is the source of the assigned risk index" sample="haz"/>
+		<ForeignField name="SourceModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="SourceModuleID" joinType="left" phrase="Source Module|The name of the module which is the source of the assigned risk index" sample="Hazard Abatement"/>
+		<TableField name="SourceRecordID" type="int" validate="noValidation" phrase="Source Record ID|The unique ID of the source record within the source module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="SourceRecordID" moduleIDField="SourceModuleID" foreignField="RecordDescription" joinType="left" phrase="Source Record Description|A description of the source record based on a combination of field values assigned from within the source module" sample="Step Ladder Between Roof Tops, Active Agenda, HQ, Packaging Area, Awaiting Assignment"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="SourceRecordID" moduleIDField="SourceModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization related to the risk index association" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization related to the risk index association" sample="Active Agenda, Inc."/>
+		<DynamicForeignField name="CostSeverityValue" cacheTable="csc" key="SourceRecordID" moduleIDField="SourceModuleID" foreignField="SeverityValue" joinType="left" phrase="Cost Severity Value|A severity value that is calculated based on the summarized costs of the related record" sample="1"/>
+		<TableField name="LikelihoodID" type="int" validate="RequireSelection" phrase="Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="1"/>
+		<ForeignField name="RiskLikelihoodTerm" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="RiskLikelihoodTerm" key="LikelihoodID" joinType="left" phrase="Risk Likelihood Term|A one word description of the risk likelihood level" sample="Remote"/>
+		<ForeignField name="LikelihoodValue" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="LikelihoodValue" key="LikelihoodID" joinType="left" phrase="Likelihood Value|A numerical value assigned to the likelihood of risk occurrence. The likelihood value is used in combination with the severity value to calculate a risk index score and an associated recommendation to mitigate the risk" sample="3"/>
+		<ForeignField name="Likelihood" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="Likelihood" key="LikelihoodID" joinType="left" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="REMOTE: Extremely unlikely to occur"/>
+		<TableField name="LikelihoodFactors" type="text" validate="RequireSelection" phrase="Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat" sample="SCBAs were purchased for all First Responders and all responders have been trained by the Fire Department"/>
+		<TableField name="LikelihoodStatusID" type="int" validate="RequireSelection" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="1"/>
+		<CodeField name="LikelihoodStatus" key="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="Resolved" codeTypeID="112"/>
+		<TableField name="SeverityID" type="int" validate="RequireSelection" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="1"/>
+		<ForeignField name="SeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="SeverityID" joinType="left" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="6"/>
+		<CalculatedField name="CalculatedSeverityValue" type="int" calcFunction="max" params="CostSeverityValue SeverityValue" phrase="Calculated Severity Value|The greater of the User-assigned severity value and the acutomaticlly assigned Cost Severity value" sample="3"/>
+		<ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+		<ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+		<CalculatedField name="IndexValue" type="int" calcFunction="multiply" params="LikelihoodValue CalculatedSeverityValue" validate="" phrase="Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed" sample="15"/>
+		<RangeField name="RiskRecommendation" foreignTable="rskx" foreignKey="IndexValue" foreignField="RiskRecommendation" key="IndexValue" phrase="Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity" sample="Take action if and when appropriate"/>
+		<LinkField name="SourceRecordLink" moduleIDField="SourceModuleID" recordIDField="SourceRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="SourceModuleRecord" phrase="Related Record|A combined field used to display the source module name and record ID" sample="Corrective Actions Module Record ID: 3"><CombinedFieldRef name="SourceModule"/>_Module_(Record_ID:_<CombinedFieldRef name="SourceRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="IndexValue"/>;_<CombinedFieldRef name="SourceModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="IndexAssociation" phrase="IndexAssociation|A combined field used to describe this risk index association when associating it with other records" sample="Hazard Abatement | ID: 1 | REMOTE: Extremely unlikely to occur and SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"><CombinedFieldRef name="IndexValue"/>;_<CombinedFieldRef name="SourceModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="IndexAssociationID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="IndexAssociation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List risk index associations">
+			<ListField name="IndexAssociationID" phrase="Record ID"/>
+			<ListField name="SourceModule" phrase="Source Module"/>
+			<ListField name="RelatedRecordDescription" phrase="Related Record Description"/>
+			<ListField name="RiskLikelihoodTerm" phrase="Risk Likelihood" align="center"/>
+			<ListField name="IndexValue" phrase="Risk Index" align="center"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search risk index associations">
+			<OrgComboField name="OwnerOrganizationID">
+				<SampleItem ID="1" name="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+			</OrgComboField>
+			<ComboField name="SourceModuleID" findMode="text">
+				<SampleItem ID="1" name="Hazard Abatement"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Chemicals"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<EditField name="RiskRecommendation" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a risk index association">
+			<ViewField name="IndexAssociationID"/>
+			<ViewField name="SourceModuleRecord" link="SourceRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="Likelihood"/>
+			<ViewField name="LikelihoodStatus"/>
+			<ViewField name="LikelihoodFactors"/>
+			<ViewField name="CostSeverityValue"/>
+			<ViewField name="Severity"/>
+			<ViewField name="IndexValue"/>
+			<ViewField name="RiskRecommendation"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a risk index association">
+			<ViewField name="IndexAssociationID"/>
+			<ViewField name="SourceModuleRecord" link="SourceRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<MemoField name="LikelihoodFactors" cols="75" rows="10"/>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<ViewField name="IndexValue"/>
+			<ViewField name="RiskRecommendation"/>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Risk Index Associations By Module">
+			<GroupByField name="SourceModule"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Risk Index Associations By Module">
+			<GroupByField name="SourceModule"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Risk Index Associations By Likelihood">
+			<GroupByField name="RiskLikelihoodTerm"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Risk Index Associations By Likelihood">
+			<GroupByField name="RiskLikelihoodTerm"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Risk Index Associations By Severity">
+			<GroupByField name="RiskSeverityTerm"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Risk Index Associations By Severity">
+			<GroupByField name="RiskSeverityTerm"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Risk Index Associations By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Risk Index Associations By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Risk Index Associations By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Risk Index Associations By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Risk likelihood Status">
+			<GroupByField name="LikelihoodStatus"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Risk likelihood Status">
+			<GroupByField name="LikelihoodStatus"/>
+			<SummaryField name="IndexAssociationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation useSupportDoc="rskx"/>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

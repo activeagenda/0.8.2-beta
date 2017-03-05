@@ -1,0 +1,700 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Product and/or Service Associations" moduleID="lpdps" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Product and Service Loss Association" pluralRecordName="Product and Service Losses Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LossProdServAssnID" type="int" dbFlags="unsigned auto_increment not null" phrase="Loss Association ID|An automatically assigned number used to track losses associated with products and/or services" sample="11"/>
+		<TableField name="LossProdServID" type="int" dbFlags="unsigned not null" phrase="Loss ID|An automatically assigned number used to track losses associated with products and/or services" sample="11"/>
+		<ForeignField name="LossProdServ" foreignTable="lpd" foreignKey="LossProdServID" foreignField="LossProdServ" key="LossProdServID" joinType="left" phrase="Loss Product or Service|A combined field used to describe this product or service loss when associating it with other records" sample="Mattias Thorslund; Active Agenda, HQ; Packaging Area; 01-01-2004"/>
+		<TableField name="ProdServID" type="int" dbFlags="unsigned not null" phrase="Product or Service|A combined field used to describe this product or service when associating it with other records" sample="1"/>
+		<ForeignField name="ProductOrganizationID" foreignTable="opdps" foreignKey="ProdServID" foreignField="OrganizationID" key="ProdServID" joinType="left" phrase="Organization|The name of the organization producing the product and/or service" sample="1"/>
+		<ForeignField name="ProductOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ProductOrganizationID" joinType="left" phrase="Organization|The name of the organization producing the product and/or service" sample="Active Agenda, HQ"/>
+		<ForeignField name="ProductServiceTypeID" foreignTable="opdps" foreignKey="ProdServID" foreignField="ProductServiceTypeID" key="ProdServID" joinType="left" phrase="Product or Service Type|A combined field used to describe this product or service type when associating it with other records" sample="1"/>
+		<ForeignField name="ProductorServiceID" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductorServiceID" key="ProductServiceTypeID" joinType="left" phrase="Product or Service|Whether this is a product or service" sample="1"/>
+		<CodeField name="ProductorService" key="ProductorServiceID" phrase="Product or Service|Whether this is a product or service" sample="Product" codeTypeID="5"/>
+		<ForeignField name="ProductServiceCategoryID" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceCategoryID" key="ProdServID" joinType="left" phrase="Category|A broad categoy used to group products or services of similar types" sample="1"/>
+		<CodeField name="ProductServiceCategory" key="ProductServiceCategoryID" phrase="Category|A broad categoy used to group products or services of similar types" sample="Bulk Retail" codeTypeID="6"/>
+		<ForeignField name="ProductServiceTypeDesc" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceTypeDesc" key="ProdServID" joinType="left" phrase="Description|A brief but thorough description of the specific type of product or service" sample="Bulk skinless almonds are shipped in a pallet box weighing 1200 pounds."/>
+		<ForeignField name="ProductServiceType" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceType" key="ProdServID" joinType="left" phrase="Product or Service Type|A combined field used to describe this product or service type when associating it with other records" sample="Bulk Skinless Almonds"/>
+		<ForeignField name="ProductLifeCycleID" foreignTable="opdps" foreignKey="ProdServID" foreignField="ProductLifeCycleID" key="ProdServID" joinType="left" phrase="Product Life Cycle|The stage of the product life cycle the product had attained at the time of the reported loss" sample="2"/>
+		<CodeField name="ProductLifeCycle" key="ProductLifeCycleID" phrase="Product Life Cycle|The stage of the product life cycle the product had attained at the time of the reported loss" sample="Introduction" codeTypeID="285"/>
+		<ForeignField name="ProdServStatusID" foreignTable="opdps" foreignKey="ProdServID" foreignField="ProdServStatusID" key="ProdServID" joinType="left" phrase="Status|The present status of the product or service" sample="2"/>
+		<CodeField name="ProdServStatus" key="ProdServStatusID" phrase="Status|The present status of the product or service" sample="Discontinued" codeTypeID="215"/>
+		<ForeignField name="ProdServDesc" foreignTable="opdps" foreignKey="ProdServID" foreignField="ProdServDesc" key="ProdServID" joinType="left" phrase="Description|A detailed description of the product and/or service" sample="The Monterey Frozen Burrito comes in four variaties: Bean, Beef, Beef and Bean; and, Cheese."/>
+		<ForeignField name="ProdServ" foreignTable="opdps" foreignKey="ProdServID" foreignField="ProdServ" key="ProdServDesc" joinType="left" phrase="Product or Service|A combined field used to describe this product or service when associating it with other records" sample="Monterey Frozen Burrito - Bean; MB-B-2003-P14"/>
+		<TableField name="MethodofHarm" type="text" validate="noValidation" phrase="Method of Harm|Description of the method of contamination or adulteration likely to result in harm" sample="The ice cream absorbed ammonia while in storage. The ammonia concentration in the product is capable of making consumers ill."/>
+		<TableField name="DefectOriginID" type="int" validate="noValidation" phrase="Origin of Defect|The origin of the identified or alledged defect in the product" sample="1"/>
+		<CodeField name="DefectOrigin" key="DefectOriginID" phrase="Origin of Defect|The origin of the identified or alledged defect in the product" sample="Distribution" codeTypeID="238"/>
+		<TableField name="DefectDescription" type="text" validate="noValidation" phrase="Defect Description|Description of the defect associated with the product or service loss" sample="Leaking evaporators within the cold storage building."/>
+		<TableField name="HazardDescription" type="text" validate="noValidation" phrase="Hazard Description|Description of the hazard presented to the user or consumer" sample="A consumer risk becoming ill if the product, contaminated with the ammonia, is consumed."/>
+		<TableField name="SupplierRelated" type="bool" validate="noValidation" dbFlags="default 0" phrase="Supplier Related|Whether the potential product harm is the result of a supplier of raw ingredients, component parts, or packaging materials" sample="No"/>
+		<TableField name="TraceNumber" type="varchar(128)" validate="noValidation" phrase="Trace Number|The trace number associated with the product and/or service involved in the loss" sample="1287-12-tulca-2005"/>
+		<TableField name="BatchNumber" type="varchar(128)" validate="noValidation" phrase="Batch Number|The batch number associated with the product and/or service involved in the loss" sample="1287"/>
+		<TableField name="LotNumber" type="varchar(128)" validate="noValidation" phrase="Lot Number|The lot number associated with the product and/or service involved in the loss" sample="12"/>
+		<TableField name="ModelNumber" type="varchar(128)" validate="noValidation" phrase="Model Number|The model number associated with the product and/or service involved in the loss" sample="N/A"/>
+		<TableField name="ProductionDate" type="datetime" validate="noValidation" phrase="Production Date|Date and time the subject product was produced" sample="01/01/2004"/>
+		<TableField name="ShippingDate" type="datetime" validate="noValidation" phrase="Shipping Date|Date and time the subject product was shipped" sample="01/01/2004"/>
+		<TableField name="ProductionReviewDate" type="datetime" validate="noValidation" phrase="Production Review Date|Date and time the production records were reviewed and quantities recorded" sample="01/01/2004"/>
+		<TableField name="AmountProduced" type="float" validate="Number notEmpty notNegative" phrase="Amount Produced|The amount of product produced that may also be affected" sample="50"/>
+		<TableField name="AmountProducedUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmountProducedCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmountProducedUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmountProducedCategory" key="AmountProducedCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmountProducedUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmountProducedUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ProductionConclusion" type="text" validate="noValidation" phrase="Production Conclusion|Conclusion drawn from review of the production records and likelihood for additional product involvement" sample="Production amounts are irrelevant to this claim of loss"/>
+		<TableField name="ProcessReviewDate" type="datetime" validate="noValidation" phrase="Process Review Date|Date and time the in-process records were reviewed and quantities recorded" sample="01/01/2004"/>
+		<TableField name="AmountInProcess" type="float" validate="Number notEmpty notNegative" phrase="Amount In Process|The amount of product that is in process that may also be affected" sample="50"/>
+		<TableField name="AmountInProcessUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmountInProcessCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmountInProcessUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmountInProcessCategory" key="AmountInProcessCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmountInProcessUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmountInProcessUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ProcessConclusion" type="text" validate="noValidation" phrase="Process Conclusion|Conclusion drawn from review of the process records and likelihood for additional product involvement" sample="Process amounts are irrelevant to this claim of loss"/>
+		<TableField name="ShippingReviewDate" type="datetime" validate="noValidation" phrase="Shipping Review Date|Date and time the shipping records were reviewed and quantities recorded" sample="01/01/2004"/>
+		<TableField name="AmountShipped" type="float" validate="Number notEmpty notNegative" phrase="Amount Shipped|The amount of product shipped that may also be affected" sample="50"/>
+		<TableField name="AmountShippedUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmountShippedCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmountShippedUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmountShippedCategory" key="AmountShippedCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmountShippedUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmountShippedUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ShippingConclusion" type="text" validate="noValidation" phrase="Shipping Conclusion|Conclusion drawn from review of the shipping records and likelihood for additional product involvement" sample="It was determined that 2,000,000 units were shipped from warehouse and are likely contaminated"/>
+		<TableField name="InventoryReviewDate" type="datetime" validate="noValidation" phrase="Inventory Review Date|Date and time the inventory records were reviewed and quantities recorded" sample="01/01/2004"/>
+		<TableField name="AmountinInventory" type="float" validate="Number notEmpty notNegative" phrase="Amount In Inventory|The amount of product in inventory that may also be affected" sample="50"/>
+		<TableField name="AmountinInventoryUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmountinInventoryCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmountinInventoryUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmountinInventoryCategory" key="AmountinInventoryCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmountinInventoryUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmountinInventoryUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="InventoryConclusion" type="text" validate="noValidation" phrase="Inventory Conclusion|Conclusion drawn from review of the inventory records and likelihood for additional product involvement" sample="It was determined that 21,321,004 potentaill contaminated units remain in the warehouse"/>
+		<TableField name="ProductAvailable" type="bool" validate="noValidation" dbFlags="default 0" phrase="Product Available|Whether the product resulting in loss is available for viewing" sample="Yes"/>
+		<!--The ProductAvailable field should only appear if the Product or Product and Service radio button is selected. DFZ 1-13-2003-->
+		<TableField name="PresentDesc" type="text" validate="noValidation" phrase="Present Location|A detailed description of the location where the product causing the loss can be seen." sample="The customer has transported the damaged product to US Cold Storage for hold until the matter can be resolved."/>
+		<TableField name="PresentAddress1" type="varchar(50)" validate="noValidation" phrase="Present Address|First physical street address of the location where the product resulting in loss can be seen" sample="836 Cherry Lane"/>
+		<TableField name="PresentAddress2" type="varchar(50)" validate="noValidation" phrase="Present Address|Second physical street address of the location where the product resulting in loss can be seen; such as, suite number or p.o. box" sample="Suite 101"/>
+		<TableField name="PresentCountyID" type="int" validate="noValidation" dbFlags="unsigned" phrase="Incurred County|A combined field used to track and associate counties" sample="1"/>
+		<ForeignField name="PresentCountryID" foreignTable="sta" foreignTableAlias="sta2a" foreignKey="StateID" foreignField="CountryID" key="PresentStateID" joinType="left" phrase="Present Country|The name of the country where the product or service associated with the incurred loss can be viewed"/>
+		<ForeignField name="PresentCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="CountryName" key="PresentCountryID" joinType="left" phrase="Present Country|The name of the country where the product or service associated with the incurred loss can be viewed" sample="United States of America (USA)"/>
+		<ForeignField name="PresentStateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="PresentCountyID" joinType="left" phrase="Present State|The name of the state where the product or service associated with the incurred loss can be viewed" sample="1"/>
+		<ForeignField name="PresentState" foreignTable="sta" foreignTableAlias="sta2a" foreignKey="StateID" foreignField="StateName" key="PresentStateID" joinType="left" phrase="Present State|The name of the state where the product or service associated with the incurred loss can be viewed" sample="California (CA)"/>
+		<ForeignField name="PresentCounty" foreignTable="cti" foreignKey="CountyID" foreignField="CountyName" key="PresentCountyID" joinType="left" phrase="Present Country|The name of the country where the product or service associated with the incurred loss can be viewed" sample="Fresno"/>
+		<TableField name="PresentCity" type="varchar(50)" validate="noValidation" phrase="Present City|City where the product resulting in loss can be seen" sample="Clovis"/>
+		<TableField name="PresentPostalCode" type="varchar(50)" validate="noValidation" phrase="Present Postal Code|Postal code used to direct mail to the physical street address where the product resulting in loss can be seen" sample="93612"/>
+		<!--The Present fields are only available if the ProductAvailable checkbox is checked. DFZ 01-13-2003-->
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="LossProdServ"/>;_<CombinedFieldRef name="ProdServ"/></CombinedField>
+		<CombinedField name="LossProdServAssn" phrase="Product or Service Association|A combined field used to describe this product or service association when associating it with other records" sample="Mattias Thorslund; Active Agenda, HQ; Packaging Area; 01-01-2004 | Monterey Frozen Burrito - Bean; MB-B-2003-P14"><CombinedFieldRef name="LossProdServ"/>;_<CombinedFieldRef name="ProdServ"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LossProdServAssnID"/>
+		</PrimaryKey>
+		<OwnerField name="ProductOrganizationID"/>
+		<RecordDescriptionField name="LossProdServAssn"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List products and/or services associated with losses">
+			<ListField name="LossProdServAssnID" phrase="Loss Association ID"/>
+			<ListField name="LossProdServID" phrase="Loss ID"/>
+			<ListField name="LossProdServ" phrase="Loss Description"/>
+			<ListField name="ProductOrganization" phrase="Organization"/>
+			<ListField name="ProdServ" phrase="Product"/>
+			<ListField name="ProdServStatus" phrase="Status"/>
+			<ListField name="TraceNumber" phrase="Trace"/>
+			<ListField name="BatchNumber" phrase="Batch"/>
+			<ListField name="LotNumber" phrase="Lot"/>
+			<ListField name="ModelNumber" phrase="Model"/>
+			<ListField name="ProductionDate" phrase="Produced"/>
+			<ListField name="ShippingDate" phrase="Shipped"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search products and/or services associated with losses">
+			<OrgComboField name="ProductOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceCategoryID" findMode="text" listParentField="ProductorServiceID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+				<UpdateFieldRef name="ProdServID"/>
+				<SampleItem ID="1" name="Product: Retail Food"/>
+				<SampleItem ID="2" name="Service: Internet"/>
+				<SampleItem ID="3" name="Product: Industrial Supply"/>
+			</ComboField>
+			<ComboField name="ProdServID" findMode="text" parentField="ProductServiceTypeID">
+				<SampleItem ID="1" name="Product - Retail Food - Monterey Frozen Burrito - Bean; MF-B-2003-P14"/>
+				<SampleItem ID="2" name="Product - Retail Food - Xtapa Frozen Burrito - Bean; XF-B-2003-P17"/>
+				<SampleItem ID="3" name="Product - Retail Food - Tijuana Frozen Burrito - Bean; TF-B-2003-P19"/>
+			</ComboField>
+			<CodeComboField name="ProdServStatusID" findMode="text">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="2" name="On Hold"/>
+				<SampleItem ID="3" name="Recalled"/>
+			</CodeComboField>
+			<CodeComboField name="DefectOriginID" findMode="text">
+				<SampleItem ID="1" name="Formualtion"/>
+				<SampleItem ID="2" name="Production"/>
+				<SampleItem ID="3" name="Distribution"/>
+			</CodeComboField>
+			<CodeRadioField name="ProductLifeCycleID" findMode="text">
+				<SampleItem ID="1" name="Introduction"/>
+				<SampleItem ID="2" name="Growth"/>
+				<SampleItem ID="3" name="Maturity"/>
+				<SampleItem ID="4" name="Decline"/>
+			</CodeRadioField>
+			<CheckBoxField name="SupplierRelated"/>
+			<EditField name="TraceNumber" size="50" maxLength="128"/>
+			<EditField name="BatchNumber" size="50" maxLength="128"/>
+			<EditField name="LotNumber" size="50" maxLength="128"/>
+			<EditField name="ModelNumber" size="50" maxLength="128"/>
+			<DateField name="ProductionDate"/>
+			<DateField name="ShippingDate"/>
+			<CheckBoxField name="ProductAvailable"/>
+			<EditField name="PresentAddress1" size="30" maxLength="50"/>
+			<EditField name="PresentAddress2" size="30" maxLength="50"/>
+			<ComboField name="PresentCountryID" findMode="text">
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="PresentStateID" findMode="text">
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="PresentCountyID" findMode="text">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="PresentCity" size="30" maxLength="50"/>
+			<EditField name="PresentPostalCode" size="30" maxLength="50"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about products and/or services associated with losses">
+			<ViewField name="LossProdServAssnID"/>
+			<ViewField name="LossProdServID"/>
+			<ViewField name="LossProdServ"/>
+			<ViewField name="ProductOrganization"/>
+			<ViewField name="ProductServiceCategory"/>
+			<ViewField name="ProductServiceType"/>
+			<ViewField name="ProductLifeCycle"/>
+			<ViewField name="ProdServStatus"/>
+			<ViewField name="ProdServDesc"/>
+			<ViewField name="MethodofHarm"/>
+			<ViewField name="DefectOrigin"/>
+			<ViewField name="DefectDescription"/>
+			<ViewField name="HazardDescription"/>
+			<ViewField name="SupplierRelated"/>
+			<ViewField name="ProductionReviewDate"/>
+			<ViewField name="AmountProduced">
+				<ViewField name="AmountProducedUnit"/>
+			</ViewField>
+			<ViewField name="ProductionConclusion"/>
+			<ViewField name="ProcessReviewDate"/>
+			<ViewField name="AmountInProcess">
+				<ViewField name="AmountInProcessUnit"/>
+			</ViewField>
+			<ViewField name="ProcessConclusion"/>
+			<ViewField name="ShippingReviewDate"/>
+			<ViewField name="AmountShipped">
+				<ViewField name="AmountShippedUnit"/>
+			</ViewField>
+			<ViewField name="ShippingConclusion"/>
+			<ViewField name="InventoryReviewDate"/>
+			<ViewField name="AmountinInventory">
+				<ViewField name="AmountinInventoryUnit"/>
+			</ViewField>
+			<ViewField name="InventoryConclusion"/>
+			<ViewField name="ProductAvailable"/>
+			<ViewField name="PresentDesc"/>
+			<ViewField name="PresentAddress1"/>
+			<ViewField name="PresentAddress2"/>
+			<ViewField name="PresentCity"/>
+			<ViewField name="PresentState"/>
+			<ViewField name="PresentPostalCode"/>
+			<ViewField name="PresentCountry"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about products and/or services associated with losses">
+			<ViewField name="LossProdServAssnID"/>
+			<CodeComboField name="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceCategoryID" findMode="text" listParentField="ProductorServiceID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+				<UpdateFieldRef name="ProdServID"/>
+				<SampleItem ID="1" name="Product: Retail Food"/>
+				<SampleItem ID="2" name="Service: Internet"/>
+				<SampleItem ID="3" name="Product: Industrial Supply"/>
+			</ComboField>
+			<ComboField name="ProdServID" findMode="text" parentField="ProductServiceTypeID">
+				<UpdateFieldRef name="ProductOrganization"/>
+				<UpdateFieldRef name="ProdServDesc"/>
+				<SampleItem ID="1" name="Product - Retail Food - Monterey Frozen Burrito - Bean; MF-B-2003-P14"/>
+				<SampleItem ID="2" name="Product - Retail Food - Xtapa Frozen Burrito - Bean; XF-B-2003-P17"/>
+				<SampleItem ID="3" name="Product - Retail Food - Tijuana Frozen Burrito - Bean; TF-B-2003-P19"/>
+			</ComboField>
+			<ViewField name="ProductOrganization" parentField="ProdServID"/>
+			<ViewField name="ProdServDesc" parentField="ProdServID"/>
+			<MemoField name="MethodofHarm" rows="5" cols="75"/>
+			<CodeComboField name="DefectOriginID" findMode="text">
+				<SampleItem ID="1" name="Formualtion"/>
+				<SampleItem ID="2" name="Production"/>
+				<SampleItem ID="3" name="Distribution"/>
+			</CodeComboField>
+			<MemoField name="DefectDescription" rows="5" cols="75"/>
+			<MemoField name="HazardDescription" rows="5" cols="75"/>
+			<CheckBoxField name="SupplierRelated"/>
+			<EditField name="TraceNumber" size="50" maxLength="128"/>
+			<EditField name="BatchNumber" size="50" maxLength="128"/>
+			<EditField name="LotNumber" size="50" maxLength="128"/>
+			<EditField name="ModelNumber" size="50" maxLength="128"/>
+			<DateField name="ProductionDate"/>
+			<DateField name="ShippingDate"/>
+			<DateField name="ProductionReviewDate"/>
+			<EditField name="AmountProduced" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmountProducedCategoryID">
+					<UpdateFieldRef name="AmountProducedUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmountProducedUnitID" parentField="AmountProducedCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="ProductionConclusion" rows="5" cols="75"/>
+			<DateField name="ProcessReviewDate"/>
+			<EditField name="AmountInProcess" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmountInProcessCategoryID">
+					<UpdateFieldRef name="AmountInProcessUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmountInProcessUnitID" parentField="AmountInProcessCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="ProcessConclusion" rows="5" cols="75"/>
+			<DateField name="ShippingReviewDate"/>
+			<EditField name="AmountShipped" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmountShippedCategoryID">
+					<UpdateFieldRef name="AmountShippedUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmountShippedUnitID" parentField="AmountShippedCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="ShippingConclusion" rows="5" cols="75"/>
+			<DateField name="InventoryReviewDate"/>
+			<EditField name="AmountinInventory" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmountinInventoryCategoryID">
+					<UpdateFieldRef name="AmountinInventoryUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmountinInventoryUnitID" parentField="AmountinInventoryCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="InventoryConclusion" rows="5" cols="75"/>
+			<CheckBoxField name="ProductAvailable"/>
+			<MemoField name="PresentDesc" cols="75" rows="5"/>
+			<EditField name="PresentAddress1" size="30" maxLength="50"/>
+			<EditField name="PresentAddress2" size="30" maxLength="50"/>
+			<ComboField name="PresentCountryID" findMode="text">
+				<UpdateFieldRef name="PresentStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="PresentStateID" findMode="text" parentField="PresentCountryID">
+				<UpdateFieldRef name="PresentCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="PresentCountyID" findMode="text" parentField="PresentStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="PresentCity" size="30" maxLength="50"/>
+			<EditField name="PresentPostalCode" size="30" maxLength="50"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="LossProdServAssnID"/>
+		<ViewField name="LossProdServID"/>
+		<ViewField name="LossProdServ"/>
+		<ViewField name="ProductOrganization"/>
+		<ViewField name="ProdServCategory"/>
+		<ViewField name="ProdServType"/>
+		<ViewField name="ProdServStatus"/>
+		<ViewField name="ProdServDesc"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="lpdps" phrase="Product and/or Service Losses">
+			<InvisibleField name="LossProdServAssnID"/>
+			<ViewField name="ProductOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ProdServ" sample="Monterey Frozen Burrito - Bean; MB-B-2003-P14"/>
+			<ViewField name="ProductLifeCycle" sample="Growth"/>
+			<ViewField name="ProdServStatus" sample="Discontinued"/>
+			<ViewField name="TraceNumber" size="50" maxLength="128"/>
+			<ViewField name="BatchNumber" size="50" maxLength="128"/>
+			<ViewField name="LotNumber" size="50" maxLength="128"/>
+			<ViewField name="ModelNumber" size="50" maxLength="128"/>
+			<ViewField name="ProductionDate"/>
+			<ViewField name="ShippingDate"/>
+		</ViewGrid>
+		<EditGrid moduleID="lpdps" phrase="Product and/or Service Losses">
+			<GridForm>
+				<InvisibleField name="LossProdServAssnID"/>
+				<CodeComboField name="ProductorServiceID">
+					<UpdateFieldRef name="ProductServiceCategoryID" findMode="text" listParentField="ProductorServiceID"/>
+					<SampleItem ID="1" name="Product"/>
+					<SampleItem ID="2" name="Service"/>
+					<SampleItem ID="3" name="Product and Service"/>
+				</CodeComboField>
+				<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+					<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+					<SampleItem ID="1" name="Product"/>
+					<SampleItem ID="2" name="Service"/>
+					<SampleItem ID="3" name="Product and Service"/>
+				</CodeComboField>
+				<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+					<UpdateFieldRef name="ProdServID"/>
+					<SampleItem ID="1" name="Product: Retail Food"/>
+					<SampleItem ID="2" name="Service: Internet"/>
+					<SampleItem ID="3" name="Product: Industrial Supply"/>
+				</ComboField>
+				<ComboField name="ProdServID" findMode="text" parentField="ProductServiceTypeID">
+					<UpdateFieldRef name="ProductOrganization"/>
+					<UpdateFieldRef name="ProdServDesc"/>
+					<SampleItem ID="1" name="Product - Retail Food - Monterey Frozen Burrito - Bean; MF-B-2003-P14"/>
+					<SampleItem ID="2" name="Product - Retail Food - Xtapa Frozen Burrito - Bean; XF-B-2003-P17"/>
+					<SampleItem ID="3" name="Product - Retail Food - Tijuana Frozen Burrito - Bean; TF-B-2003-P19"/>
+				</ComboField>
+				<ViewField name="ProductOrganization" parentField="ProdServID"/>
+				<ViewField name="ProdServDesc" parentField="ProdServID"/>
+				<MemoField name="MethodofHarm" rows="5" cols="75"/>
+				<CodeComboField name="DefectOriginID" findMode="text">
+					<SampleItem ID="1" name="Formualtion"/>
+					<SampleItem ID="2" name="Production"/>
+					<SampleItem ID="3" name="Distribution"/>
+				</CodeComboField>
+				<MemoField name="DefectDescription" rows="5" cols="75"/>
+				<MemoField name="HazardDescription" rows="5" cols="75"/>
+				<CheckBoxField name="SupplierRelated"/>
+				<CodeRadioField name="ProductLifeCycleID" findMode="text">
+					<SampleItem ID="1" name="Introduction"/>
+					<SampleItem ID="2" name="Growth"/>
+					<SampleItem ID="3" name="Maturity"/>
+					<SampleItem ID="4" name="Decline"/>
+				</CodeRadioField>
+				<EditField name="TraceNumber" size="50" maxLength="128"/>
+				<EditField name="BatchNumber" size="50" maxLength="128"/>
+				<EditField name="LotNumber" size="50" maxLength="128"/>
+				<EditField name="ModelNumber" size="50" maxLength="128"/>
+				<DateField name="ProductionDate"/>
+				<DateField name="ShippingDate"/>
+				<DateField name="ProductionReviewDate"/>
+				<EditField name="AmountProduced" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="AmountProducedCategoryID">
+						<UpdateFieldRef name="AmountProducedUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="AmountProducedUnitID" parentField="AmountProducedCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<MemoField name="ProductionConclusion" rows="5" cols="75"/>
+				<DateField name="ProcessReviewDate"/>
+				<EditField name="AmountInProcess" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="AmountInProcessCategoryID">
+						<UpdateFieldRef name="AmountInProcessUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="AmountInProcessUnitID" parentField="AmountInProcessCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<MemoField name="ProcessConclusion" rows="5" cols="75"/>
+				<DateField name="ShippingReviewDate"/>
+				<EditField name="AmountShipped" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="AmountShippedCategoryID">
+						<UpdateFieldRef name="AmountShippedUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="AmountShippedUnitID" parentField="AmountShippedCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<MemoField name="ShippingConclusion" rows="5" cols="75"/>
+				<DateField name="InventoryReviewDate"/>
+				<EditField name="AmountinInventory" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="AmountinInventoryCategoryID">
+						<UpdateFieldRef name="AmountinInventoryUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="AmountinInventoryUnitID" parentField="AmountinInventoryCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<MemoField name="InventoryConclusion" rows="5" cols="75"/>
+				<CheckBoxField name="ProductAvailable"/>
+				<MemoField name="PresentDesc" cols="75" rows="5"/>
+				<EditField name="PresentAddress1" size="30" maxLength="50"/>
+				<EditField name="PresentAddress2" size="30" maxLength="50"/>
+				<ComboField name="PresentCountryID" findMode="text">
+					<UpdateFieldRef name="PresentStateID"/>
+					<SampleItem ID="1" name="United States of America (USA)"/>
+					<SampleItem ID="2" name="Sweden (SWE)"/>
+					<SampleItem ID="3" name="Latvia (LAT)"/>
+					<SampleItem ID="4" name="Chile (CHI)"/>
+					<SampleItem ID="5" name="Denmark (DEN)"/>
+					<SampleItem ID="6" name="Equador (EQU)"/>
+				</ComboField>
+				<ComboField name="PresentStateID" findMode="text" parentField="PresentCountryID">
+					<UpdateFieldRef name="PresentCountyID"/>
+					<SampleItem ID="1" name="California (CA)"/>
+					<SampleItem ID="2" name="Arizona (AZ)"/>
+					<SampleItem ID="3" name="Oregon (OR)"/>
+					<SampleItem ID="4" name="Nevada (NV)"/>
+					<SampleItem ID="5" name="New Mexico (NM)"/>
+					<SampleItem ID="6" name="Washington (WA)"/>
+				</ComboField>
+				<ComboField name="PresentCountyID" findMode="text" parentField="PresentStateID">
+					<SampleItem ID="1" name="Fresno"/>
+					<SampleItem ID="2" name="Bakersfield"/>
+					<SampleItem ID="3" name="Los Angeles"/>
+					<SampleItem ID="4" name="Orange"/>
+					<SampleItem ID="5" name="Riverside"/>
+					<SampleItem ID="6" name="San Diego"/>
+				</ComboField>
+				<EditField name="PresentCity" size="30" maxLength="50"/>
+				<EditField name="PresentPostalCode" size="30" maxLength="50"/>
+			</GridForm>
+			<InvisibleField name="LossProdServAssnID"/>
+			<ViewField name="ProductOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ProdServ" sample="Monterey Frozen Burrito - Bean; MB-B-2003-P14"/>
+			<ViewField name="ProductLifeCycle" sample="Introduction"/>
+			<ViewField name="ProdServStatus" sample="Discontinued"/>
+			<ViewField name="TraceNumber" size="50" maxLength="128"/>
+			<ViewField name="BatchNumber" size="50" maxLength="128"/>
+			<ViewField name="LotNumber" size="50" maxLength="128"/>
+			<ViewField name="ModelNumber" size="50" maxLength="128"/>
+			<ViewField name="ProductionDate"/>
+			<ViewField name="ShippingDate"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

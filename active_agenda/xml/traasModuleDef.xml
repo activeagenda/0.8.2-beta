@@ -1,0 +1,382 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Attendees Scheduled" moduleID="traas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Attendee Scheduled" pluralRecordName="Attendee Scheduled" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="AttendeeSchedID" type="int" dbFlags="unsigned auto_increment not null" phrase="Attendee ID|An automatically assigned number used to associate people with meetings" sample="1"/>
+		<TableField name="TrainingClassID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to track meetings held by the organization" sample="11"/>
+		<ForeignField name="CourseID" foreignTable="tracl" foreignKey="TrainingClassID" foreignField="CourseID" key="TrainingClassID" joinType="left" phrase="Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods" sample="QA-HACCP-101.1"/>
+		<ForeignField name="CourseCode" foreignTable="tra" foreignKey="CourseID" foreignField="CourseCode" key="CourseID" joinType="left" phrase="Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods" sample="QA-HACCP-101.1"/>
+		<ForeignField name="CourseTitle" foreignTable="tra" foreignKey="CourseID" foreignField="CourseTitle" key="CourseID" joinType="left" phrase="Title|A brief name used to identify the course offering" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+		<ForeignField name="TrainingTypeID" foreignTable="tra" foreignKey="CourseID" foreignField="TrainingTypeID" key="CourseID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingCategoryID" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingCategoryID" key="TrainingTypeID" joinType="left" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+		<CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+		<ForeignField name="TrainingTypeDesc" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingTypeDesc" key="TrainingTypeID" joinType="left" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+		<ForeignField name="TrainingType" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingType" key="TrainingTypeID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"/>
+		<ForeignField name="CourseDesc" foreignTable="tra" foreignKey="CourseID" foreignField="CourseDesc" key="CourseID" joinType="left" phrase="Description|A detailed description of the course" sample="The Introduction to Hazard Analysis of Critical Control Points (HACCP) course provides attendees with a working knowledge of company and regulatory product quality requirements. The course also provides attendees with a working knowledge of the company's internal policies and controls deployed to protect consumers from product quality deficiencies."/>
+		<ForeignField name="CourseObj" foreignTable="tra" foreignKey="CourseID" foreignField="CourseObj" key="CourseID" joinType="left" phrase="Objective|A detailed description of the course objective. The course objective should reflect the knowledge expected of attendees as they complete the course" sample="The objective of the Introduction to HACCP course is to provide attendees with the level of understanding required to perform operational duties within a HACCP environment. This course is designed to provide visitors to a HACCP environment with the requisite level of understanding to avoid product contamination behaviors during visitations."/>
+		<ForeignField name="MinClassSize" foreignTable="tra" foreignKey="CourseID" foreignField="MinClassSize" key="CourseID" joinType="left" phrase="Minimum Class Size|The minimum number of attendees required for a class to be conducted" sample="5"/>
+		<ForeignField name="MaxClassSize" foreignTable="tra" foreignKey="CourseID" foreignField="MaxClassSize" key="CourseID" joinType="left" phrase="Maximum Class Size|The maximum number of attendees allowed for this course" sample="25"/>
+		<ForeignField name="Validity" foreignTable="tra" foreignKey="CourseID" foreignField="Validity" key="CourseID" joinType="left" phrase="Validity Period|The amount of time that may pass before the training course satisfaction is no longer valid" sample="1"/>
+		<ForeignField name="ValidityUnitID" foreignTable="tra" foreignKey="CourseID" foreignField="ValidityUnitID" key="CourseID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="ValidityUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ValidityUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="ValidityUnitCategory" key="ValidityUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="ValidityUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ValidityUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<ForeignField name="ValidityPeriod" foreignTable="tra" foreignKey="CourseID" foreignField="ValidityPeriod" key="CourseID" joinType="left" phrase="Validity Period|The amount of time that may pass before the training course satisfaction is no longer valid" sample="8 Hour(s)"/>
+		<ForeignField name="Course" foreignTable="tra" foreignKey="CourseID" foreignField="Course" key="CourseID" joinType="left" phrase="Course|A combined field used to describe this course when associating it with other records" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-101.1"/>
+		<ForeignField name="ClassStartTime" type="date" foreignTable="tracl" foreignKey="TrainingClassID" foreignField="ClassStartTime" key="TrainingClassID" joinType="left" phrase="Start Time|The date and time the training class is scheduled to begin" sample="01:37 pm"/>
+		<ForeignField name="TrainingClass" foreignTable="tracl" foreignKey="TrainingClassID" foreignField="TrainingClass" key="TrainingClassID" joinType="left" phrase="Training Class|A combined field used to describe this training class when associating it with other records" sample="Active Agenda, HQ; Packaging Department Safety Meeting;  Employee Safety; 01/01/2004"/>
+		<RemoteField name="AttendeeID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="57" phrase="Attendee|The person attending the training class" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="AttendeeID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Active Agenda, HQ"/>
+		<ForeignField name="DepartmentID" foreignTable="pple" foreignKey="PersonID" foreignField="DepartmentID" key="AttendeeID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignKey="PersonID" foreignField="LastName" key="AttendeeID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignKey="PersonID" foreignField="FirstName" key="AttendeeID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="DisplayName" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AttendeeID" joinType="left" phrase="Display Name|Commonly used name of an individual used to display throughout this application" sample="Daniel"/>
+		<ForeignField name="HourlyWage" foreignTable="pple" foreignKey="PersonID" foreignField="HourlyWage" key="AttendeeID" joinType="left" phrase="Hourly Wage|The amount the attendee is paid per hour of work" sample="$18.50"/>
+		<ForeignField name="Attendee" foreignTable="ppl" foreignKey="PersonID" foreignField="SearchSelect" key="AttendeeID" joinType="left" phrase="Attendee|The person attending the training class" sample="Mattias Thorslund"/>
+		<TableField name="Completed" type="bool" validate="RequireSelection" dbFlags="default 1" phrase="Completed|Whether the attendee completed the course" sample="Yes"/>
+		<TableField name="PunctualnessID" type="int" defaultValue="#2" dbFlags="default 2" validate="noValidation" phrase="Punctualness|The punctualness of the scheduled attendee" sample="1"/>
+		<CodeField name="Punctualness" key="PunctualnessID" phrase="Punctualness|The punctualness of the scheduled attendee" sample="Late" codeTypeID="216"/>
+		<TableField name="AttentivenessID" type="int" defaultValue="#1" dbFlags="default 1" validate="noValidation" phrase="Attentiveness|The attentiveness of the scheduled attendee" sample="1"/>
+		<CodeField name="Attentiveness" key="AttentivenessID" phrase="Attentiveness|The attentiveness of the scheduled attendee" sample="Attentive" codeTypeID="105"/>
+		<TableField name="AttendeeDetails" type="text" validate="noValidation" phrase="Details|A description of any details associated with this person's attendance or failure to attend" sample="Mattias was required to operate the Bananna Line by his immediate supervisor. The Supervisor's waiver of the meeting requirement is attached"/>
+		<CalculatedField name="QualificationExpirationDate" type="date" calcFunction="dateadd" params="ClassStartTime ValidityUnitID Validity" phrase="Expiration Date|The date the qualifications resulting from this class will expire and no longer be valid" sample="01/01/2004"/>
+		<CalculatedField name="DaysRemaining" type="int" calcFunction="daysremaining_not_negative" params="QualificationExpirationDate" phrase="Days Remaining|The total number of days remaining before the class will need to be refreshed by the attendee" sample="30"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | Project Management 101 | 01-01-2006"><CombinedFieldRef name="Attendee"/>;_<CombinedFieldRef name="CourseTitle"/>;_<CombinedFieldRef name="ClassStartTime"/></CombinedField>
+		<CombinedField name="AttendeeSched" phrase="Attendee|A combined field used to describe this attendee when associating him or her with other records" sample="Mattias Thorslund | Project Management 101 | 01-01-2006"><CombinedFieldRef name="Attendee"/>;_<CombinedFieldRef name="CourseTitle"/>;_<CombinedFieldRef name="ClassStartTime"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AttendeeSchedID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/>-->
+		<RecordDescriptionField name="AttendeeSched"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training class attendees">
+			<ListField name="AttendeeSchedID" phrase="Record ID"/>
+			<ListField name="Attendee" phrase="Attendee"/>
+			<ListField name="TrainingType" phrase="Type"/>
+			<ListField name="CourseTitle" phrase="Course Title"/>
+			<ListField name="ClassStartTime" phrase="Scheduled Date"/>
+			<ListField name="Completed" phrase="Completed"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training class attendees">
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<DateField name="ClassStartTime"/>
+			<PersonComboField name="AttendeeID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="PunctualnessID">
+				<SampleItem ID="1" name="Late"/>
+				<SampleItem ID="2" name="On Time"/>
+			</CodeRadioField>
+			<CodeRadioField name="AttentivenessID">
+				<SampleItem ID="1" name="Attentive"/>
+				<SampleItem ID="2" name="Participative"/>
+				<SampleItem ID="2" name="Inattentive"/>
+				<SampleItem ID="2" name="Inconsiderate"/>
+				<SampleItem ID="2" name="Disruptive"/>
+			</CodeRadioField>
+			<CheckBoxField name="Completed"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the training class attendee">
+			<ViewField name="AttendeeSchedID"/>
+			<ViewField name="CourseTitle"/>
+			<ViewField name="CourseCode"/>
+			<ViewField name="CourseDesc"/>
+			<ViewField name="ClassStartTime"/>
+			<ViewField name="Attendee"/>
+			<ViewField name="Punctualness"/>
+			<ViewField name="Attentiveness"/>
+			<ViewField name="Attentiveness"/>
+			<ViewField name="AttendeeDetails"/>
+			<ViewField name="Completed"/>
+			<ViewField name="ValidityPeriod"/>
+			<ViewField name="DaysRemaining"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the training class attendee">
+			<ViewField name="AttendeeSchedID"/>
+			<ViewField name="CourseTitle"/>
+			<ViewField name="CourseCode"/>
+			<ViewField name="CourseDesc"/>
+			<ViewField name="MinClassSize"/>
+			<ViewField name="MaxClassSize"/>
+			<ViewField name="ClassStartTime"/>
+			<PersonComboField name="AttendeeID" findMode="alpha" parentField="DepartmentID">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="PunctualnessID">
+				<SampleItem ID="1" name="Late"/>
+				<SampleItem ID="2" name="On Time"/>
+			</CodeRadioField>
+			<CodeRadioField name="AttentivenessID">
+				<SampleItem ID="1" name="Attentive"/>
+				<SampleItem ID="2" name="Participative"/>
+				<SampleItem ID="2" name="Inattentive"/>
+				<SampleItem ID="2" name="Inconsiderate"/>
+				<SampleItem ID="2" name="Disruptive"/>
+			</CodeRadioField>
+			<MemoField name="AttendeeDetails" cols="75" rows="5"/>
+			<CheckBoxField name="Completed"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="traas" phrase="Attendees Scheduled">
+			<InvisibleField name="AttendeeSchedID"/>
+			<ViewField name="Attendee" sample="Mattias Thorslund"/>
+			<ViewField name="Punctualness" sample="Punctualness"/>
+			<ViewField name="Completed" sample="Completed" align="center"/>
+		</ViewGrid>
+		<EditGrid moduleID="traas" phrase="Attendees Scheduled">
+			<GridForm>
+				<InvisibleField name="AttendeeSchedID"/>
+				<PersonComboField name="AttendeeID" findMode="alpha">
+					<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+				</PersonComboField>
+				<CodeRadioField name="PunctualnessID">
+					<SampleItem ID="1" name="Late"/>
+					<SampleItem ID="2" name="On Time"/>
+				</CodeRadioField>
+				<CodeRadioField name="AttentivenessID">
+					<SampleItem ID="1" name="Attentive"/>
+					<SampleItem ID="2" name="Participative"/>
+					<SampleItem ID="3" name="Inattentive"/>
+					<SampleItem ID="4" name="Inconsiderate"/>
+					<SampleItem ID="5" name="Disruptive"/>
+				</CodeRadioField>
+				<MemoField name="AttendeeDetails" cols="75" rows="5"/>
+				<CheckBoxField name="Completed"/>
+			</GridForm>
+			<InvisibleField name="AttendeeSchedID"/>
+			<ViewField name="Attendee" sample="Mattias Thorslund"/>
+			<ViewField name="Punctualness" sample="Punctualness"/>
+			<ViewField name="Completed" sample="Completed" align="center"/>
+		</EditGrid>
+		<SearchSelectGrid moduleID="traas" phrase="Attendees" primaryListField="Attendee">
+			<SearchForm>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="DepartmentID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda Sweden"/>
+					<SampleItem ID="3" name="Active Agenda Latvia"/>
+				</OrgComboField>
+				<ComboField name="DepartmentID" parentField="OrganizationID">
+					<SampleItem ID="1" name="Packaging"/>
+					<SampleItem ID="2" name="Processing"/>
+					<SampleItem ID="3" name="Administration"/>
+				</ComboField>
+			</SearchForm>
+		</SearchSelectGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Scheduled Attendees By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Scheduled Attendees By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Scheduled Attendees By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Scheduled Attendees By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Scheduled Attendees By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Scheduled Attendees By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Scheduled Attendees By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Scheduled Attendees By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Scheduled Attendees By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Scheduled Attendees By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Scheduled Attendees By Punctualness">
+			<GroupByField name="Punctualness"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Scheduled Attendees By Punctualness">
+			<GroupByField name="Punctualness"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Scheduled Attendees By Attentiveness">
+			<GroupByField name="Attentiveness"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Scheduled Attendees By Attentiveness">
+			<GroupByField name="Attentiveness"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Scheduled Attendees By Completion Status">
+			<GroupByField name="Completed"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Scheduled Attendees By Completion Status">
+			<GroupByField name="Completed"/>
+			<SummaryField name="AttendeeSchedID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

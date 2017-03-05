@@ -1,0 +1,271 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Asset Protection - Other Items" moduleID="aproi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Other Item" pluralRecordName="Other Items" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="OtherItemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Item ID|An automatically assigned number used to track items requiring asset protection measures, other than those assigned from within other modules; such as: chemicals, vehicles, buildings, postings, systems, waste or equipment" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization with primary accountability for managing the item" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary accountability for managing the item" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="68" phrase="Other Item Manager|The individual assigned primary accountability for managing the item" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Other Item Manager|The individual assigned primary accountability for managing the item" sample="Mattias Thorslund"/>
+		<TableField name="OtherItemTypeID" type="int" validate="RequireSelection" phrase="Item Type|A method of classifying and tracking items that are not otherwise classified" sample="1"/>
+		<CodeField name="OtherItemType" foreignTableAlias="cod_197" key="OtherItemTypeID" phrase="Item Type|A method of classifying and tracking items that are not otherwise classified" sample="Behavior" codeTypeID="197"/>
+		<TableField name="OtherItemTitle" type="varchar(128)" validate="notEmpty" phrase="Item Title|The name of the item to be reviewed" sample="Maintenance Mechanic Activities"/>
+		<TableField name="OtherItemDesc" type="text" validate="noValidation" phrase="Description|A detailed description of the item to be reviewed" sample="Mechancis should be performing their activities safely. Safety behaviors include the proper use of personal and product protective equipment as stipulated within the Maintenance Mechanic Job Analisys. The Mechanics should also be performing their activities consistent with their Job Analyses"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OtherItemType"/>;_<CombinedFieldRef name="OtherItemTitle"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="OtherItem" phrase="Other Item|A combined field used to describe this item when associating it with other records" sample="Behavior, Maintenance Mechanic Activities"><CombinedFieldRef name="OtherItemType"/>,_<CombinedFieldRef name="OtherItemTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="OtherItemID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="OtherItem"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="april" name="Other Asset Locations" parentKey="OtherItemID" localKey="OtherItemID"/>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List other checklist items">
+			<ListField name="OtherItemID" phrase="Item ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+			<ListField name="OtherItemType" phrase="Type"/>
+			<ListField name="OtherItemTitle" phrase="Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search other checklist items">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="OtherItemTypeID" findMode="alpha">
+				<SampleItem ID="1" name="Behavior"/>
+				<SampleItem ID="2" name="Area"/>
+				<SampleItem ID="3" name="Weather"/>
+			</CodeComboField>
+			<EditField name="OtherItemTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about other checklist items">
+			<ViewField name="OtherItemID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="OtherItemType"/>
+			<ViewField name="OtherItemTitle"/>
+			<ViewField name="OtherItemDesc"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="april"/>
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit basic information about other checklist items">
+			<ViewField name="OtherItemID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="OtherItemTypeID" findMode="alpha">
+				<SampleItem ID="1" name="Behavior"/>
+				<SampleItem ID="2" name="Area"/>
+				<SampleItem ID="3" name="Weather"/>
+			</CodeComboField>
+			<EditField name="OtherItemTitle" size="75" maxLength="128"/>
+			<MemoField name="OtherItemDesc" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Locations" phrase="Locations|Associate locations with the item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="april"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the item">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="OtherItemID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="OtherItemType"/>
+		<ViewField name="OtherItemTitle"/>
+		<ViewField name="OtherItemDesc"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Other Items By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Other Items By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Other Items By Type">
+			<GroupByField name="OtherItemType"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Other Items By Type">
+			<GroupByField name="OtherItemType"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Other Items By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Other Items By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OtherItemID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

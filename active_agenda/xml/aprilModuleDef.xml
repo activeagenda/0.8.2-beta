@@ -1,0 +1,436 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Other Item Locations" moduleID="april" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Other Item Location" pluralRecordName="Other Item Locations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="OtherItemLocationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Asset Location ID|An automatically assigned number used to track the location of items requiring asset protection measures, other than those assigned from within other modules" sample="1"/>
+		<TableField name="OtherItemID" type="int" validate="noValidation" phrase="Item ID|An automatically assigned number used to track items requiring asset protection measures, other than those assigned from within other modules; such as: chemicals, vehicles, buildings, postings, systems, waste or equipment" sample="1"/>
+		<ForeignField name="OtherItemTypeID" foreignTable="aproi" foreignTableAlias="aproi_a" foreignKey="OtherItemID" foreignField="OtherItemTypeID" key="OtherItemID" joinType="left" phrase="Item Type|A method of classifying and tracking items that are not otherwise classified" sample="1"/>
+		<CodeField name="OtherItemType" foreignTableAlias="cod_197" key="OtherItemTypeID" phrase="Item Type|A method of classifying and tracking items that are not otherwise classified" sample="Behavior" codeTypeID="197"/>
+		<ForeignField name="OtherItemTitle" foreignTable="aproi" foreignTableAlias="aproi_a" foreignKey="OtherItemID" foreignField="OtherItemTitle" key="OtherItemID" joinType="left" phrase="Item Title|The name of the item to be reviewed on a regular or reoccurring basis" sample="Maintenance Mechanic Activities"/>
+		<ForeignField name="OtherItemDesc" foreignTable="aproi" foreignTableAlias="aproi_a" foreignKey="OtherItemID" foreignField="OtherItemDesc" key="OtherItemID" joinType="left" phrase="Description|A detailed description of the item to be tracked and/or reviewed" sample="Mechancis should be performing their activities safely. Safety behaviors include the proper use of personal and product protective equipment as stipulated within the Maintenance Mechanic Job Analisys. The Mechanics should also be performing their activities consistent with their Job Analyses"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants allNonParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for managing this item at this specific location" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for managing this item at this specific location" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="68" phrase="Person Accountable|The individual assigned primary accountability for managing the item at this specific location" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the item at this specific location" sample="Mattias Thorslund"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the item can be reviewed" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the item can be reviewed" sample="Packaging Area"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Behavior | Active Agenda, Inc. | Packaging Area"><CombinedFieldRef name="OtherItemTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Location"/></CombinedField>
+		<CombinedField name="OtherItemLocation" phrase="Other Item - This Location|A combined field used to describe this item location when associating it with other records" sample="Behavior; Maintenance Mechanic Activities; Active Agenda, HQ; Mattias Thorslund"><CombinedFieldRef name="OtherItemType"/>;_<CombinedFieldRef name="OtherItemTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Location"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="OtherItemLocationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="OtherItemLocation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Consequence Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibilities" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Operating Permit Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Continuity Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Continuity Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Suppliers" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Policy Associations" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Imperative Considerations" parentKey="OtherItemID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aproi"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="OtherItemLocationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="april"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List other checklists items">
+			<ListField name="OtherItemLocationID" phrase="Location ID"/>
+			<ListField name="OtherItemType" phrase="Type"/>
+			<ListField name="OtherItemTitle" phrase="Title"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search other checklists items">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" reload="auto" parentField="OrganizationID">
+				<SampleItem ID="1" name="Maintenance Area, Maintenance Building"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the other checklist item storage locations">
+			<ViewField name="OtherItemLocationID"/>
+			<ViewField name="OtherItemID"/>
+			<ViewField name="OtherItemType"/>
+			<ViewField name="OtherItemTitle"/>
+			<ViewField name="OtherItemDesc"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="rskc"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit basic information about other checklist items">
+			<ViewField name="OtherItemLocationID"/>
+			<ViewField name="OtherItemID"/>
+			<ViewField name="OtherItemType"/>
+			<ViewField name="OtherItemTitle"/>
+			<ViewField name="OtherItemDesc"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" reload="auto" parentField="OrganizationID">
+				<SampleItem ID="1" name="Maintenance Area, Maintenance Building"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Assign organizational level responsibilities to the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuation" phrase="Continuity|Associate business continuation requirements with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the item location">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the item location">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the item location">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the item location">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the item location" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="OtherItemLocationID"/>
+		<InvisibleField name="OtherItemTypeID"/>
+		<ViewField name="OtherItemID"/>
+		<ViewField name="OtherItemType"/>
+		<ViewField name="OtherItemTitle"/>
+		<ViewField name="OtherItemDesc"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Location"/>
+		<ViewField name="PersonAccountable"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="april" phrase="Locations">
+			<InvisibleField name="OtherItemLocationID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Maintenance Area, Maintenance Building"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+		</ViewGrid>
+		<EditGrid moduleID="april" phrase="Locations">
+			<GridForm>
+				<InvisibleField name="OtherItemLocationID"/>
+				<OrgComboField name="OrganizationID" findMode="text" reload="auto">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" reload="auto" parentField="OrganizationID">
+					<SampleItem ID="1" name="Maintenance Area, Maintenance Building"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Office"/>
+					<SampleItem ID="7" name="Production Line #1"/>
+				</ComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Maintenance Area, Maintenance Building"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

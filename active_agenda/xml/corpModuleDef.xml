@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Corrective Action Practices" moduleID="corp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Corrective Action Practice" pluralRecordName="Corrective Action Practice" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="PracticeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to assign and track standard corrective action practices" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The policy organization with primary responsibility for continuity of the corrective action practice" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The policy organization with primary responsibility for continuity of the corrective action practice" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="22" phrase="Person Accountable|The person assigned primary accountability for continuity of the corrective action practice" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person assigned primary accountability for continuity of the corrective action practice" sample="Mattias Thorslund"/>
+		<TableField name="SituationID" type="int" dbFlags="unsigned not null" phrase="Situation|A combined field used to describe this situation when associating it with other records" sample="1"/>
+		<ForeignField name="SituationCategoryID" foreignTable="cors" foreignKey="SituationID" foreignField="SituationCategoryID" key="SituationID" joinType="left" phrase="Situation Category|A broadly defined title or phrase used to group similar situations requiring corrective action" sample="1"/>
+		<CodeField name="SituationCategory" key="SituationCategoryID" phrase="Situation Category|A broadly defined title or phrase used to group similar situations requiring corrective action" sample="Crime" codeTypeID="58"/>
+		<ForeignField name="Situation" foreignTable="cors" foreignKey="SituationID" foreignField="Situation" key="SituationID" joinType="left" phrase="Situation|A combined field used to describe this situation when associating it with other records" sample="Theft"/>
+		<ForeignField name="GeneralDesc" foreignTable="cors" foreignKey="SituationID" foreignField="GeneralDesc" key="SituationID" joinType="left" phrase="General Description|A general description of a situation requiring corrective action" sample="Theft includes the taking of property of a rightful owner with intent to convert the property to the person own use"/>
+		<TableField name="OrganizationDesc" type="text" validate="notEmpty" phrase="Organization Description|A detailed description of the organization specific situation requiring corrective action" sample="Intentionally taking company property or the property of others with the intent to convert the property to one's own use without the intention of returning the property"/>
+		<TableField name="WorkRuleNo" type="varchar(50)" validate="notEmpty" phrase="Work Rule Number|Work rule or policy number associated with the situation to be addressed" sample="2347"/>
+		<TableField name="OccurNoID" type="int" validate="RequireSelection" phrase="Occurrence|The number of times the situation must occur to result in the assigned consistent practice" sample="3"/>
+		<CodeField name="OccurNo" key="OccurNoID" phrase="Occurrence|The number of times the situation must occur to result in the assigned consistent practice" sample="1st" codeTypeID="75"/>
+		<TableField name="CorrActTypeID" dbFlags="not null" type="int" phrase="Consistent Practice|A combined field used to describe this corrective action type when associating it with other records" sample="1"/>
+		<ForeignField name="ActionOrganizationID" defaultValue="defaultorgID" foreignTable="cort" foreignKey="CorrActTypeID" foreignField="ActionOrganizationID" key="CorrActTypeID" joinType="left" phrase="Action Organization|The organization directly associated with this corrective action type" sample="1"/>
+		<ForeignField name="ActionOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ActionOrganizationID" joinType="left" phrase="Action Organization|The organization directly associated with this corrective action type" sample="Active Agenda, Inc"/>
+		<ForeignField name="CorrectiveActionTitle" foreignTable="cort" foreignKey="CorrActTypeID" foreignField="CorrectiveActionTitle" key="CorrActTypeID" joinType="left" phrase="Corrective Action Title|A word or short phrase used to describe the specific type of corrective action" sample="Termination for Disciplinary Reasons"/>
+		<ForeignField name="CorrActType" foreignTable="cort" foreignKey="CorrActTypeID" foreignField="CorrActType" key="CorrActTypeID" joinType="left" phrase="Consistent Practice|A combined field used to describe this corrective action type when associating it with other records" sample="Termination | Termination for Disciplinary Reasons"/>
+		<ForeignField name="CorrectiveActionDesc" foreignTable="cort" foreignKey="CorrActTypeID" foreignField="CorrectiveActionDesc" key="CorrActTypeID" joinType="left" phrase="Corrective Action Requirements|A detailed description of the corrective action type and any additional information required to adequately describe the action and associated requirements" sample="A recommendation to terminate an employee for disciplinary reasons shall be initiated by the immediate supervisor and concurred with by all successive supervisors up to and including the divisional vice president before being sent to the President.  Only the President has authority to actually terminate an employee, and such notice must be in writing with a copy of the notice provided to the employee.  A termination of employment for disciplinary reasons may take effect on the date of notification when in the  judgment of the President the seriousness of the offense is such that keeping the employee on the job would be detrimental to the University or to the employee. However, if the President does not believe that immediate termination is necessary to protect the interests of the University or the employee, he/she will give a minimum of two weeks advance notice of termination rather than immediate notice of termination."/>
+		<!--only one record should be allowed with the same organization, situation, and occurrence number. DFZ 3-29-2004-->
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="CorrActType"/>_occurs_after_the_<CombinedFieldRef name="OccurNo"/>_occurrence_of_<CombinedFieldRef name="Situation"/>_at_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="OrgPractice" phrase="Practice|A combined field used to describe this corrective action practice when associating it with other records" sample="Termination | Termination for Disciplinary Reasons"><CombinedFieldRef name="Organization"/>_;_<CombinedFieldRef name="OccurNo"/>_Occurrence_=_<CombinedFieldRef name="CorrActType"/></CombinedField>
+		<CombinedField name="Practice" phrase="Practice|A combined field used to describe this corrective action practice when associating it with other records" sample="Termination | Termination for Disciplinary Reasons"><CombinedFieldRef name="OccurNo"/>_Occurrence_=_<CombinedFieldRef name="CorrActType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PracticeID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Practice"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List situations requiring corrective action">
+			<ListField name="PracticeID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SituationCategory" phrase="Category"/>
+			<ListField name="Situation" phrase="Situation"/>
+			<ListField name="OccurNo" phrase="Occurrence"/>
+			<ListField name="CorrActType" phrase="Action Type"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search situations requiring corrective action">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationID"/>
+				<SampleItem ID="1" name="Crime"/>
+				<SampleItem ID="2" name="Attendance"/>
+				<SampleItem ID="3" name="Work Performance"/>
+				<SampleItem ID="4" name="Insubordination"/>
+				<SampleItem ID="5" name="Harassment"/>
+			</CodeComboField>
+			<ComboField name="SituationID" findMode="text" parentField="SituationCategoryID">
+				<SampleItem ID="1" name="Crime | Theft"/>
+				<SampleItem ID="2" name="Crime | Burglary"/>
+				<SampleItem ID="3" name="Crime | Vandalism"/>
+				<SampleItem ID="4" name="Crime | Arson"/>
+				<SampleItem ID="5" name="Crime | Bribery"/>
+			</ComboField>
+			<EditField name="WorkRuleNo" size="25" maxLength="25"/>
+			<CodeComboField name="OccurNoID">
+				<SampleItem ID="1" name="1st"/>
+				<SampleItem ID="2" name="2nd"/>
+				<SampleItem ID="3" name="3rd"/>
+				<SampleItem ID="4" name="4th"/>
+				<SampleItem ID="5" name="5th"/>
+			</CodeComboField>
+			<ComboField name="ActionOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="CorrActTypeID" findMode="text">
+				<SampleItem ID="1" name="Termination | Termination for Disciplinary Reasons"/>
+				<SampleItem ID="2" name="Termination | Termination for Cause"/>
+				<SampleItem ID="3" name="Termination | Termination Without Cause"/>
+				<SampleItem ID="4" name="Termination | At Will"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a situation requiring corrective action">
+			<ViewField name="PracticeID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="Situation"/>
+			<ViewField name="GeneralDesc"/>
+			<ViewField name="OrganizationDesc"/>
+			<ViewField name="WorkRuleNo"/>
+			<ViewField name="OccurNo"/>
+			<ViewField name="ActionOrganization"/>
+			<ViewField name="CorrActType"/>
+			<ViewField name="CorrectiveActionDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a situation requiring corrective action">
+			<ViewField name="PracticeID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationID"/>
+				<SampleItem ID="1" name="Crime"/>
+				<SampleItem ID="2" name="Attendance"/>
+				<SampleItem ID="3" name="Work Performance"/>
+				<SampleItem ID="4" name="Insubordination"/>
+				<SampleItem ID="5" name="Harassment"/>
+			</CodeComboField>
+			<ComboField name="SituationID" findMode="text" parentField="SituationCategoryID">
+				<UpdateFieldRef name="GeneralDesc"/>
+				<SampleItem ID="1" name="Crime | Theft"/>
+				<SampleItem ID="2" name="Crime | Burglary"/>
+				<SampleItem ID="3" name="Crime | Vandalism"/>
+				<SampleItem ID="4" name="Crime | Arson"/>
+				<SampleItem ID="5" name="Crime | Bribery"/>
+			</ComboField>
+			<ViewField name="GeneralDesc" parentField="SituationID"/>
+			<MemoField name="OrganizationDesc" rows="10" cols="75"/>
+			<EditField name="WorkRuleNo" size="25" maxLength="25"/>
+			<CodeComboField name="OccurNoID">
+				<SampleItem ID="1" name="1st"/>
+				<SampleItem ID="2" name="2nd"/>
+				<SampleItem ID="3" name="3rd"/>
+				<SampleItem ID="4" name="4th"/>
+				<SampleItem ID="5" name="5th"/>
+			</CodeComboField>
+			<ComboField name="ActionOrganizationID" findMode="text">
+				<UpdateFieldRef name="CorrActTypeID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="CorrActTypeID" findMode="text" parentField="ActionOrganizationID">
+				<UpdateFieldRef name="CorrectiveActionDesc"/>
+				<SampleItem ID="1" name="Termination | Termination for Disciplinary Reasons"/>
+				<SampleItem ID="2" name="Termination | Termination for Cause"/>
+				<SampleItem ID="3" name="Termination | Termination Without Cause"/>
+				<SampleItem ID="4" name="Termination | At Will"/>
+			</ComboField>
+			<ViewField name="CorrectiveActionDesc" parentField="CorrActTypeID"/>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Established Practices By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Established Practices By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Established Practices By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Established Practices By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Established Practices By Situation">
+			<GroupByField name="Situation"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Established Practices By Situation">
+			<GroupByField name="Situation"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Established Practices By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Established Practices By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Established Practices By Corrective Action Type">
+			<GroupByField name="CorrActType"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Established Practices By Corrective Action Type">
+			<GroupByField name="CorrActType"/>
+			<SummaryField name="PracticeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

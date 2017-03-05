@@ -1,0 +1,514 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="General Tasks" moduleID="tas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="General Task" pluralRecordName="General Tasks" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="TaskID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number assigned to each task so that tasks can be associated with job analyses" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization associated with the general task" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization associated with the general task" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="85" phrase="Person Accountable|The individual assigned primary accountability for ensuring that the general  task has been reviewed and all associated controls, equipment are assigned and a functional analysis has been performed" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for ensuring that the general task has been reviewed and all associated controls, equipment are assigned and a functional analysis has been performed" sample="Mattias Thorslund"/>
+		<TableField name="FunctionID" type="int" validate="RequireSelection" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="1"/>
+		<CodeField name="Function" key="FunctionID" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="Operations (Raisin)" codeTypeID="4"/>
+		<TableField name="TaskTypeID" type="int" dbFlags="unsigned not null" phrase="Task Type|The type of general task performed by the organization" sample="1"/>
+		<ForeignField name="TaskCategoryID" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskCategoryID" key="TaskTypeID" joinType="left" phrase="Category|A broad categoy used to group tasks of similar types" sample="1"/>
+		<CodeField name="TaskCategory" key="TaskCategoryID" phrase="Category|A broad categoy used to group tasks of similar types" sample="Operating Machinery" codeTypeID="45"/>
+		<ForeignField name="TaskTitleGuide" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskTypeTitle" key="TaskTypeID" joinType="left" phrase="Guidance Type|A title or phrase used to describe a task type" sample="Operating bin dump"/>
+		<ForeignField name="TaskDescGuide" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskTypeDesc" key="TaskTypeID" joinType="left" phrase="Guidance Description|A brief but thorough description of the task type" sample="Operating a bin dump to introduce raisins into the production process"/>
+		<ForeignField name="TaskType" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskType" key="TaskTypeID" joinType="left" phrase="Task Type|The type of general task performed by the organization" sample="Operating | Operating Bin Dump"/>
+		<TableField name="TaskName" type="varchar(128)" validate="notEmpty" phrase="Task|A descriptive name of the general task performed by the organization" sample="Sugar coating raisins on the sugar shaker"/>
+		<TableField name="TaskDesc" type="varchar(255)" validate="notEmpty" phrase="Task Description|A detailed description of the general task performed by the organization. The detailed description will be very important to others interested in assigning this task to different job analyses" sample="Sugar is retrieved from a sugar bag using a red plastic shovel. The sugar is then shake over the Sugar Shaker machine so that the sugar is applied evenly across the surface of the raisins"/>
+		<TableField name="CriticalControlTaskID" type="int" validate="RequireSelection" phrase="Critical Control Task|Whether this general task is considered a critical control as it relates to a business process or product specification" sample="1"/>
+		<CodeField name="CriticalControlTask" key="CriticalControlTaskID" phrase="Critical Control Task|Whether this general task is considered a critical control as it relates to a business process or product specification" sample="Critical Product Task" codeTypeID="129"/>
+		<TableField name="TaskStatusID" type="int" validate="RequireSelection" phrase="Status|Status of the task review process" sample="2"/>
+		<CodeField name="TaskStatus" key="TaskStatusID" phrase="Status|Status of the task review process" sample="Under Review" codeTypeID="244"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="TaskName"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Task" phrase="Task|A combined field used to describe this task when associating it with other records" sample="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area, Under Review"><CombinedFieldRef name="TaskName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TaskID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Task"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="tasga" name="Tasks - General Activities" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="tashu" name="Tasks - Hand Use" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="tasl" name="Tasks - Lifting" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="tasc" name="Tasks - Carrying" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="jant" name="Job Analyses" parentKey="TaskID" localKey="TaskID"/>
+		<SubModule moduleID="doca" name="Document Associations" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="TaskTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tast"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Abatement" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="TaskID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="tas"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List general tasks performed by the organization">
+			<ListField name="TaskID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="TaskCategory" phrase="Category"/>
+			<ListField name="TaskType" phrase="Type"/>
+			<ListField name="TaskName" phrase="Task"/>
+			<ListField name="TaskStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search general tasks performed by the organization">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="FunctionID" findMode="text">
+				<SampleItem ID="1" name="Operations (Raisin)"/>
+				<SampleItem ID="2" name="Sales and Marketing"/>
+				<SampleItem ID="3" name="Human Resources"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" suppressItemAdd="yes">
+				<UpdateFieldRef name="TaskTypeID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Operating Machinery"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="4" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskTypeID" findMode="text" parentField="TaskCategoryID">
+				<SampleItem ID="1" name="Operating bin dump"/>
+				<SampleItem ID="2" name="Operating incline conveyor"/>
+				<SampleItem ID="3" name="Operating sugar shakers"/>
+				<SampleItem ID="4" name="Operating mix tanks"/>
+				<SampleItem ID="5" name="Operating ammonia compressors"/>
+				<SampleItem ID="6" name="Operating pallet jack"/>
+			</ComboField>
+			<EditField name="TaskName" size="75" maxLength="128"/>
+			<CodeRadioField name="CriticalControlTaskID" orientation="vertical">
+				<SampleItem ID="1" name="Critical Product Task"/>
+				<SampleItem ID="2" name="Critical Service Task"/>
+				<SampleItem ID="3" name="Non-Critical Task"/>
+			</CodeRadioField>
+			<CodeComboField name="TaskStatusID">
+				<SampleItem ID="1" name="Under Review"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="No Review Required"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the general task">
+			<ViewField name="TaskID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Function"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TaskCategory"/>
+			<ViewField name="TaskType"/>
+			<ViewField name="TaskName"/>
+			<ViewField name="TaskDesc"/>
+			<ViewField name="CriticalControlTask"/>
+			<ViewField name="TaskStatus"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="jant" phrase="Job Analyses">
+					<InvisibleField name="JobTaskID"/>
+					<ViewField name="JAOrganization" phrase="Organization"/>
+					<ViewField name="JobAnalysis" phrase="Job Analysis" link="JobAnalysisLink"/>
+					<ViewField name="JobAnalysisDesc" phrase="Description"/>
+					<ViewField name="JobAnalysisStatus" phrase="Status"/>
+				</ViewGrid>
+				<ViewGrid moduleID="tasga"/>
+				<ViewGrid moduleID="tashu"/>
+				<ViewGrid moduleID="tasl"/>
+				<ViewGrid moduleID="tasc"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="doca"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the general task">
+			<ViewField name="TaskID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<CodeComboField name="FunctionID" findMode="text">
+				<SampleItem ID="1" name="Operations (Raisin)"/>
+				<SampleItem ID="2" name="Sales and Marketing"/>
+				<SampleItem ID="3" name="Human Resources"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" suppressItemAdd="yes">
+				<UpdateFieldRef name="TaskTypeID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Operating Machinery"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="4" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskTypeID" findMode="text" parentField="TaskCategoryID">
+				<UpdateFieldRef name="TaskDescGuide"/>
+				<SampleItem ID="1" name="Operating bin dump"/>
+				<SampleItem ID="2" name="Operating incline conveyor"/>
+				<SampleItem ID="3" name="Operating sugar shakers"/>
+				<SampleItem ID="4" name="Operating mix tanks"/>
+				<SampleItem ID="5" name="Operating ammonia compressors"/>
+				<SampleItem ID="6" name="Operating pallet jack"/>
+			</ComboField>
+			<EditField name="TaskName" size="75" maxLength="128"/>
+			<ViewField name="TaskDescGuide" parentField="TaskTypeID"/>
+			<MemoField name="TaskDesc" rows="5" cols="75"/>
+			<CodeRadioField name="CriticalControlTaskID" orientation="vertical">
+				<SampleItem ID="1" name="Critical Product Task"/>
+				<SampleItem ID="2" name="Critical Service Task"/>
+				<SampleItem ID="3" name="Non-Critical Task"/>
+			</CodeRadioField>
+			<CodeComboField name="TaskStatusID">
+				<SampleItem ID="1" name="Under Review"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="No Review Required"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Analyses" phrase="Analyses|Associate job analyses with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="jant" phrase="Job Analyses">
+				<GridForm>
+					<InvisibleField name="JobTaskID"/>
+					<OrgComboField name="JAOrganizationID" findMode="text">
+						<UpdateFieldRef name="JobAnalysisID"/>
+						<SampleItem ID="1" name="Active Agenda, HQ"/>
+						<SampleItem ID="2" name="Active Agenda, Inc."/>
+						<SampleItem ID="3" name="Good Ideas Consulting"/>
+					</OrgComboField>
+					<ComboField name="JobAnalysisID" findMode="text" parentField="JAOrganizationID">
+						<UpdateFieldRef name="JobAnalysisDesc"/>
+						<UpdateFieldRef name="JobAnalysisStatus"/>
+						<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+						<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+						<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+						<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+					</ComboField>
+					<ViewField name="JobAnalysisDesc" parentField="JobAnalysisID"/>
+					<ViewField name="JobAnalysisStatus" parentField="JobAnalysisID"/>
+				</GridForm>
+				<InvisibleField name="JobTaskID"/>
+				<ViewField name="JAOrganization" phrase="Organization"/>
+				<ViewField name="JobAnalysis" phrase="Job Analysis" link="JobAnalysisLink"/>
+			</EditGrid>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the general task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="General" phrase="Activities|Associate general activities with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tasga"/>
+		</EditScreen>
+		<EditScreen name="HandUse" phrase="Hands|Associate hand use requirements with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tashu"/>
+		</EditScreen>
+		<EditScreen name="Lifting" phrase="Lifting|Associate lifting requirements with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tasl"/>
+		</EditScreen>
+		<EditScreen name="Carrying" phrase="Carrying|Associate carrying requirements with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tasc"/>
+		</EditScreen>
+		<EditScreen name="Documents" phrase="Documents|Associate documents with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="doca"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the general task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the general task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the general task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the general task">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the general task">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the general task" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="TaskID"/>
+		<InvisibleField name="TaskTypeID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Function"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="TaskCategory"/>
+		<ViewField name="TaskType"/>
+		<ViewField name="TaskName"/>
+		<ViewField name="TaskDesc"/>
+		<ViewField name="CriticalControlTask"/>
+		<ViewField name="TaskStatus"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Tasks By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Tasks By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Tasks By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Tasks By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Tasks By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Tasks By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Tasks By Category">
+			<GroupByField name="TaskCategory"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Tasks By Category">
+			<GroupByField name="TaskCategory"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Tasks By Critical Control Association">
+			<GroupByField name="CriticalControlTask"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Tasks By Critical Control Association">
+			<GroupByField name="CriticalControlTask"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Tasks By Type">
+			<GroupByField name="TaskType"/>
+			<SummaryField name="TaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Tasks By Type">
+			<GroupByField name="TaskType"/>
+			<SummaryField name="TaskID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

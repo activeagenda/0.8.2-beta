@@ -1,0 +1,275 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Notifications" moduleID="ntf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Notification" pluralRecordName="Notifications" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="NotificationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track notifications" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" dbFlags="not null" phrase="Module|The name of the module associated with the notification" sample="cor"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Module|The name of the module associated with the notification" sample="Corrective Actions"/>
+        <TableField name="RelatedRecordID" type="int" dbFlags="not null" phrase="Record|The record that is being sent as a notification" sample="12111"/>
+        <DynamicForeignField name="RelatedRecord" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the record that is being sent as a notification" sample="Hearing Conservation, Active Agenda, HQ, Complete"/>
+        <TableField name="Subject" type="varchar(50)" dbFlags="not null" phrase="Subject|The subject line for the  notification email" sample="Corrective Action for Dan Zahlis"/>
+        <TableField name="Message" type="text" dbFlags="" phrase="Message|An additional message in the notification email" sample="Long comments"/>
+        <DynamicForeignField name="OrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the related record" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the related record" sample="Active Agenda, Inc."/>
+        <TableField name="XMLAttached" type="bool" dbFlags="" phrase="Attach XML Data?|Whether to attach a machine-readable data file with the message" sample="Yes"/>
+        <TableField name="StatusID" type="int" dbFlags="" phrase="Status|The current status of the notification" sample="1"/>
+        <CodeField name="Status" key="StatusID" phrase="Status|The current status of the notification" sample="In Preparation" codeTypeID="32"/>
+        <TableField name="SenderID" type="int" phrase="Sender|The person who sent the notification" sample="Mattias Thorslund"/>
+        <ForeignField name="Sender" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SenderID" joinType="left" phrase="Sender|The person who sent the notification" sample="Mattias Thorslund"/>
+        <TableField name="SentDate" type="datetime" phrase="Sent Date|The time and date when the notification was sent" sample="3/13/2006 12:54"/>
+        <TableField name="TextContent" type="text" dbFlags="" phrase="Text Content|The (plain) text included in emails sent" sample="Long comments"/>
+        <TableField name="HTMLContent" type="text" dbFlags="" phrase="HTML Content|The HTML text included in emails sent" sample="Long comments"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, HQ: Warehouse"><CombinedFieldRef name="RelatedModule"/>;_
+            <CombinedFieldRef name="RelatedRecordID"/></CombinedField>
+        <CombinedField name="Notification" phrase="Notification Recipient|A combined field used to describe this notification recipient when associating it with other records" sample="Corrective Actions | The AffectedPerson phrase needs to have a space inserted between the words Affected and Person | Resolved"><CombinedFieldRef name="RelatedModule"/>_-_
+            <CombinedFieldRef name="RelatedRecord"/>_-_
+            <CombinedFieldRef name="NotificationID"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="NotificationID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Notification"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="ntfr" name="Recipients" parentKey="NotificationID" localKey="NotificationID"/>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List issue reports">
+            <ListField name="NotificationID" phrase="Record ID"/>
+            <ListField name="RelatedModule" phrase="Module Name"/>
+            <ListField name="RelatedRecord" phrase="Record"/>
+            <ListField name="Subject" phrase="Subject"/>
+            <ListField name="Status" phrase="Status"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search issue reports">
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Postings"/>
+                <SampleItem ID="2" name="Corrective Actions"/>
+                <SampleItem ID="3" name="Chemicals"/>
+            </ComboField>
+            <ComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+                <SampleItem ID="2" name="Active Agenda, Inc."/>
+                <SampleItem ID="3" name="Good Ideas Consulting"/>
+            </ComboField>
+            <CodeComboField name="StatusID" findMode="text">
+                <SampleItem ID="1" name="In Preparation (not sent)"/>
+                <SampleItem ID="2" name="Sent - Pending mail server pickup"/>
+                <SampleItem ID="3" name="Sent - Delivered"/>
+                <SampleItem ID="11" name="Awaiting Approval"/>
+                <SampleItem ID="21" name="Bounced/Undeliverable"/>
+            </CodeComboField>
+            <ComboField name="SenderID" findMode="text"/>
+            <EditField name="Subject" size="40" maxLength="50"/>
+            <DateField name="SentDate"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a notification requirement">
+            <ViewField name="NotificationID"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecord"/>
+            <ViewField name="Sender"/>
+            <ViewField name="Subject"/>
+            <ViewField name="Message"/>
+            <ViewField name="XMLAttached"/>
+            <ViewField name="Status"/>
+            <ViewField name="SentDate"/>
+            <InvisibleField name="StatusID"/>
+            <ViewGrid moduleID="ntfr"/>
+            <CustomCode location="get">
+                <![CDATA[ $disableGlobalModules = true; ]]>
+            </CustomCode>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a notification requirement">
+            <CustomCode location="init">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfInitialize.php'; ]]>
+                <![CDATA[ $disableGlobalModules = true; ]]>
+            </CustomCode>
+            <CustomCode location="get">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfCheckStatus.php'; ]]>
+            </CustomCode>
+            <CustomCode location="save">
+                <![CDATA[ 
+                if($ntf_sent){
+                    die("Can't update a record that has been sent.");
+                }
+                ]]>
+            </CustomCode>
+            <CustomCode location="save_end">
+                <![CDATA[
+                if(intval($_GET['rid']) != $recordID){ //detect that a record was just inserted
+                    include_once APP_INCLUDE_PATH . '/ntfSQLInsert.php';
+                }
+                ]]>
+            </CustomCode>
+            <CustomCode location="form">
+                <![CDATA[ if($ntf_sent):
+                          $info = gettext("This notification has already been sent. It can't be changed anymore.");
+                          $content .= "<p>$info</p>";
+                          else: ]]>
+            </CustomCode>
+            <CustomCode location="after_form">
+                <![CDATA[ endif; ]]>
+            </CustomCode>
+            <ViewField name="NotificationID"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecord"/>
+            <ViewField name="Sender"/>
+            <EditField name="Subject" size="40" maxLength="50"/>
+            <MemoField name="Message" rows="5" cols="75"/>
+            <CheckBoxField name="XMLAttached"/>
+            <ViewField name="SentDate"/>
+            <InvisibleField name="StatusID"/>
+        </EditScreen>
+        <EditScreen name="Recipients" phrase="Recipients|Modify the selected recipients for this notification">
+            <CustomCode location="get">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfCheckStatus.php'; ]]>
+                <![CDATA[ $disableGlobalModules = true; ]]>
+            </CustomCode>
+            <RecordSummaryFieldsRef/>
+            <InvisibleField name="OrganizationID"/>
+            <CustomCode location="after_form">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfReciptentGridTweak.php'; ]]>
+                <![CDATA[ //if (!$ntf_sent): ]]>
+            </CustomCode>
+            <SearchSelectGrid moduleID="ntfr"/>
+            <ViewGrid moduleID="ntfr"/>
+            <CustomCode location="after_grids">
+                <![CDATA[ //else: ]]>
+                <![CDATA[ //$content .= gettext("This message has been sent. Recipients can't be added or removed anymore."); ]]>
+                <![CDATA[ //endif; ]]>
+            </CustomCode>
+        </EditScreen>
+        <EditScreen name="Send" phrase="Send|Confim the sending of this notification">
+            <CustomCode location="init">
+                <![CDATA[ $disableGlobalModules = true; ]]>
+            </CustomCode>
+            <CustomCode location="get">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfCheckStatus.php'; ]]>
+            </CustomCode>
+            <CustomCode location="after_save">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfHandleSend.php'; ]]>
+            </CustomCode>
+            <CustomCode location="after_form">
+                <![CDATA[ include_once APP_INCLUDE_PATH . '/ntfSendForm.php'; ]]>
+            </CustomCode>
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="ntfr"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="NotificationID"/>
+        <ViewField name="RelatedModule"/>
+        <ViewField name="RelatedRecord"/>
+        <ViewField name="Sender"/>
+        <ViewField name="Subject"/>
+        <ViewField name="Message"/>
+        <ViewField name="XMLAttached"/>
+        <ViewField name="Status"/>
+        <ViewField name="SentDate"/>
+        <InvisibleField name="StatusID"/>
+        <InvisibleField name="RelatedModuleID"/>
+        <InvisibleField name="RelatedRecordID"/>
+    </RecordSummaryFields>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

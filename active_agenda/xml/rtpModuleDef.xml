@@ -1,0 +1,394 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Recommendations" moduleID="rtp" parentModule="rtc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Recommendation" pluralRecordName="Recommendations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="RecommendationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate prevention recommendations with unplanned events" sample="1"/>
+		<TableField name="CauseID" type="int" phrase="Root Cause Addressed|The root cause that this recommendation addresses" sample=""/>
+		<ForeignField name="RelatedModuleID" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="RelatedModuleID" phrase="Related Module|The name or title of the module which is associated with the root cause determination" sample="cor" joinType="inner"/>
+		<ForeignField name="RelatedModule" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="RelatedModule" phrase="Related Module|The name or title of the module which is associated with the root cause determination" sample="Corrective Actions" joinType="inner"/>
+		<ForeignField name="RelatedRecordID" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="RelatedRecordID" phrase="Related Record ID|The unique ID of the record within the related module which has been associated with a root cause" sample="1" joinType="inner"/>
+		<ForeignField name="RelatedRecordDescription" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="RelatedRecordDescription" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the module where the root cause was identified and associated" sample="Tardiness, Mattias Thorslund, 2-24-2004" joinType="inner"/>
+		<ForeignField name="OwnerOrganizationID" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="OwnerOrganizationID" phrase="Organization|The name of the organization associated with the event requiring a root cause analysis" sample="1" joinType="inner"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the event requiring a root cause analysis" sample="Active Agenda, Inc."/>
+		<ForeignField name="CausationTypeID" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="CausationTypeID" phrase="Causation Type|A title or phrase used to describe a specific causation type" sample="1" joinType="inner"/>
+		<ForeignField name="CauseCategoryID" foreignTable="rtct" foreignKey="CausationTypeID" foreignField="CauseCategoryID" key="CausationTypeID" joinType="left" phrase="Causation Category|A broadly defined title or phrase used to group similar causation categories" sample="1"/>
+		<CodeField name="CauseCategory" key="CauseCategoryID" phrase="Causation Category|A broadly defined title or phrase used to group similar causation categories" sample="Design" codeTypeID="167"/>
+		<ForeignField name="CausationType" foreignTable="rtct" foreignKey="CausationTypeID" foreignField="CausationType" key="CausationTypeID" joinType="left" phrase="Causation Type|A title or phrase used to describe a specific causation type" sample="Insufficient Training"/>
+		<ForeignField name="RootCauseDesc" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="RootCauseDesc" phrase="Root Cause Description|A detailed description of the associated root cause" sample="The employee had never received training or signed acknowledgement regarding the company's policy regarding investments in vendor businesses" joinType="inner"/>
+		<ForeignField name="Cause" key="CauseID" foreignTable="rtc" foreignKey="CauseID" foreignField="Cause" phrase="Cause|A combined field used to describe the root cause" sample="Operating Permits | ID: 1 | Insufficient Training" joinType="inner"/>
+		<TableField name="RecToPreventID" type="int" validate="RequireSelection" phrase="Recommendation To Prevent|A recommendation, which if followed, can reduce or eliminate the likelihood of the reoccurrence of an incident or event" sample="19"/>
+		<CodeField name="RecToPrevent" key="RecToPreventID" phrase="Recommendation To Prevent|A recommendation, which if followed, can reduce or eliminate the likelihood of the reoccurrence of an incident or event" sample="Training (organizational)" codeTypeID="225"/>
+		<TableField name="RecToPreventTitle" type="varchar(128)" validate="notEmpty" phrase="Recommendation Title|A short phrase used to describe the recommendation to prevent a reoccurrence" sample="Conduct corporate ethics training"/>
+		<TableField name="RecToPreventDesc" type="text" validate="noValidation" phrase="Recommendation Description|A detailed description of the associated recommendation to prevent the reoccurrence of an incident or event" sample="All local employees with a hire date subsequent to 10-31-2003 shall received training in corporate ethics and sign conflict of interest statements"/>
+		<RemoteField name="PersonAccountableID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="116" phrase="Person Accountable|The person with primary accountability for preventing a reoccurence of the root cause of the incident" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person with primary accountability for preventing a reoccurence of the root cause of the incident" sample="Mattias Thorslund"/>
+		<TableField name="RecommendationStatusID" type="int" validate="noValidation" phrase="Status|Current status of the recommendation" sample="2"/>
+		<CodeField name="RecommendationStatus" key="RecommendationStatusID" phrase="Status|Current status of the recommendation" sample="Implemented (resolved)" codeTypeID="93"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RecToPrevent"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Recommendation" phrase="Cause|A combined field used to describe this recommendation to prevent (re)occurrence when associating it with other records" sample="Operating Permits | ID: 1 | Training (organizational)"><CombinedFieldRef name="RecToPreventTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="RecommendationID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="Recommendation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="RecommendationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rtp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List recommendations to prevent the reoccurence of loss associated with related records">
+			<ListField name="RecommendationID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+			<ListField name="RelatedRecordDescription" phrase="Related Record Description"/>
+			<ListField name="RecToPrevent" phrase="Recommendation"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search recommendations to prevent the reoccurence of loss associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Operating Permits"/>
+				<SampleItem ID="3" name="Chemicals"/>
+				<SampleItem ID="4" name="Postings"/>
+			</ComboField>
+			<CodeComboField name="CauseCategoryID" findMode="text">
+				<UpdateFieldRef name="CausationTypeID"/>
+				<SampleItem ID="1" name="Design"/>
+				<SampleItem ID="2" name="Environment"/>
+				<SampleItem ID="3" name="Behaviour"/>
+			</CodeComboField>
+			<ComboField name="CausationTypeID" findMode="text" parentField="CauseCategoryID">
+				<SampleItem ID="1" name="Insufficient Training"/>
+				<SampleItem ID="3" name="Failed Policy"/>
+				<SampleItem ID="5" name="Insufficient Supervision"/>
+				<SampleItem ID="7" name="Insufficient Security"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="RecToPreventID" findMode="text">
+				<SampleItem ID="1" name="Corrective action (affected person(s))"/>
+				<SampleItem ID="2" name="Corrective action (direct supervision)"/>
+				<SampleItem ID="3" name="Equipment or work area (modify)"/>
+				<SampleItem ID="4" name="Expectations of individuals (modify)"/>
+				<SampleItem ID="5" name="Housekeeping (improve)"/>
+				<SampleItem ID="6" name="Human or physical resources (modify)"/>
+				<SampleItem ID="7" name="Inspection checklist (create)"/>
+				<SampleItem ID="8" name="Inspection checklist (modify)"/>
+				<SampleItem ID="9" name="Job Analysis (modify)"/>
+				<SampleItem ID="10" name="Personal empowerment (increase)"/>
+				<SampleItem ID="11" name="Policies or procedures (create)"/>
+				<SampleItem ID="12" name="Policies or procedures (modify)"/>
+				<SampleItem ID="13" name="Policies or procedures (reinforce)"/>
+				<SampleItem ID="14" name="Protective equipment (assign)"/>
+				<SampleItem ID="15" name="Protective equipment (modify)"/>
+				<SampleItem ID="16" name="Protective equipment (provide)"/>
+				<SampleItem ID="17" name="Training (affected individuals)"/>
+				<SampleItem ID="18" name="Training (group, area or location)"/>
+				<SampleItem ID="19" name="Training (organizational)"/>
+				<SampleItem ID="20" name="Work flow or process (modify)"/>
+			</CodeComboField>
+			<EditField name="RecToPreventTitle" size="75" maxLength="128"/>
+			<CodeComboField name="RecommendationStatusID" findMode="text">
+				<SampleItem ID="1" name="Implemented (resolved)"/>
+				<SampleItem ID="2" name="Implemented (unresolved)"/>
+				<SampleItem ID="3" name="Deemed Impractical"/>
+				<SampleItem ID="4" name="Deemed Ineffective"/>
+				<SampleItem ID="5" name="Under Consideration"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a recommendation to prevent the reoccurence of loss associated with a related record">
+			<ViewField name="RecommendationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="CauseCategory"/>
+			<ViewField name="CausationType"/>
+			<ViewField name="RootCauseDesc"/>
+			<!--<ViewField name="OwnerOrganization"/>-->
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="RecToPrevent"/>
+			<ViewField name="RecToPreventTitle"/>
+			<ViewField name="RecToPreventDesc"/>
+			<ViewField name="RecommendationStatus"/>
+			<ViewGrid moduleID="bpc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a recommendation to prevent the reoccurence of loss associated with a related record">
+			<ViewField name="RecommendationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="CauseCategory"/>
+			<ViewField name="CausationType"/>
+			<ViewField name="RootCauseDesc"/>
+			<!--<ViewField name="OwnerOrganization"/>-->
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="RecToPreventID" findMode="text">
+				<SampleItem ID="1" name="Corrective action (affected person(s))"/>
+				<SampleItem ID="2" name="Corrective action (direct supervision)"/>
+				<SampleItem ID="3" name="Equipment or work area (modify)"/>
+				<SampleItem ID="4" name="Expectations of individuals (modify)"/>
+				<SampleItem ID="5" name="Housekeeping (improve)"/>
+				<SampleItem ID="6" name="Human or physical resources (modify)"/>
+				<SampleItem ID="7" name="Inspection checklist (create)"/>
+				<SampleItem ID="8" name="Inspection checklist (modify)"/>
+				<SampleItem ID="9" name="Job Hazard Evaluation (modify)"/>
+				<SampleItem ID="10" name="Personal empowerment (increase)"/>
+				<SampleItem ID="11" name="Policies or procedures (create)"/>
+				<SampleItem ID="12" name="Policies or procedures (modify)"/>
+				<SampleItem ID="13" name="Policies or procedures (reinforce)"/>
+				<SampleItem ID="14" name="Protective equipment (assign)"/>
+				<SampleItem ID="15" name="Protective equipment (modify)"/>
+				<SampleItem ID="16" name="Protective equipment (provide)"/>
+				<SampleItem ID="17" name="Training (affected individuals)"/>
+				<SampleItem ID="18" name="Training (group, area or location)"/>
+				<SampleItem ID="19" name="Training (organizational)"/>
+				<SampleItem ID="20" name="Work flow or process (modify)"/>
+			</CodeComboField>
+			<EditField name="RecToPreventTitle" size="75" maxLength="128"/>
+			<MemoField name="RecToPreventDesc" rows="5" cols="75"/>
+			<CodeComboField name="RecommendationStatusID" findMode="text">
+				<SampleItem ID="1" name="Implemented (resolved)"/>
+				<SampleItem ID="2" name="Implemented (unresolved)"/>
+				<SampleItem ID="3" name="Deemed Impractical"/>
+				<SampleItem ID="4" name="Deemed Ineffective"/>
+				<SampleItem ID="5" name="Under Consideration"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the recommendation" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+    <RecordSummaryFields>
+        <ViewField name="RecommendationID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="RelatedRecordDescription"/>
+        <ViewField name="CauseCategory"/>
+        <ViewField name="CausationType"/>
+        <ViewField name="RootCauseDesc"/>
+        <!--<ViewField name="OwnerOrganization"/>-->
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="RecToPrevent"/>
+		<ViewField name="RecToPreventTitle"/>
+        <ViewField name="RecToPreventDesc"/>
+        <ViewField name="RecommendationStatus"/>
+    </RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="rtp" phrase="Recommendations">
+			<InvisibleField name="RecommendationID"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="RecToPrevent" sample="Training (organizational)"/>
+			<ViewField name="RecToPreventTitle" sample="Conduct corporate ethics training"/>
+			<ViewField name="RecommendationStatus" sample="Implemented (resolved)"/>
+		</ViewGrid>
+		<EditGrid moduleID="rtp" phrase="Recommendations">
+			<GridForm>
+				<InvisibleField name="RecommendationID"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="RecToPreventID" findMode="text" sample="Training (organizational)">
+					<SampleItem ID="1" name="Corrective action (affected person(s))"/>
+					<SampleItem ID="2" name="Corrective action (direct supervision)"/>
+					<SampleItem ID="3" name="Equipment or work area (modify)"/>
+					<SampleItem ID="4" name="Expectations of individuals (modify)"/>
+					<SampleItem ID="5" name="Housekeeping (improve)"/>
+					<SampleItem ID="6" name="Human or physical resources (modify)"/>
+					<SampleItem ID="7" name="Inspection checklist (create)"/>
+					<SampleItem ID="8" name="Inspection checklist (modify)"/>
+					<SampleItem ID="9" name="Job Hazard Evaluation (modify)"/>
+					<SampleItem ID="10" name="Personal empowerment (increase)"/>
+					<SampleItem ID="11" name="Policies or procedures (create)"/>
+					<SampleItem ID="12" name="Policies or procedures (modify)"/>
+					<SampleItem ID="13" name="Policies or procedures (reinforce)"/>
+					<SampleItem ID="14" name="Protective equipment (assign)"/>
+					<SampleItem ID="15" name="Protective equipment (modify)"/>
+					<SampleItem ID="16" name="Protective equipment (provide)"/>
+					<SampleItem ID="17" name="Training (affected individuals)"/>
+					<SampleItem ID="18" name="Training (group, area or location)"/>
+					<SampleItem ID="19" name="Training (organizational)"/>
+					<SampleItem ID="20" name="Work flow or process (modify)"/>
+				</CodeComboField>
+                <EditField name="RecToPreventTitle" size="75" maxLength="128"/>
+				<MemoField name="RecToPreventDesc" rows="5" cols="75" sample="All local employees with a hire date subsequent to 10-31-2003 shall received training in corporate ethics and sign conflict of interest statements"/>
+				<CodeComboField name="RecommendationStatusID" findMode="text" sample="Implemented (resolved)">
+					<SampleItem ID="1" name="Implemented (resolved)"/>
+					<SampleItem ID="2" name="Implemented (unresolved)"/>
+					<SampleItem ID="3" name="Deemed Impractical"/>
+					<SampleItem ID="4" name="Deemed Ineffective"/>
+					<SampleItem ID="5" name="Under Consideration"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="RecommendationID"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="RecToPrevent" sample="Training (organizational)"/>
+			<ViewField name="RecToPreventTitle" sample="Conduct corporate ethics training"/>
+			<ViewField name="RecommendationStatus" sample="Implemented (resolved)"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Recommendations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Recommendations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Recommendations By Root Cause Type">
+			<GroupByField name="RootCauseType"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Recommendations By Root Cause Type">
+			<GroupByField name="RootCauseType"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Recommendations By Cause">
+			<GroupByField name="Cause"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Recommendations By Cause">
+			<GroupByField name="Cause"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Recommendations By Type">
+			<GroupByField name="RecToPrevent"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Recommendations By Type">
+			<GroupByField name="RecToPrevent"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Recommendations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Recommendations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Recommendations By Status">
+			<GroupByField name="RecommendationStatus"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Recommendations By Status">
+			<GroupByField name="RecommendationStatus"/>
+			<SummaryField name="RecommendationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

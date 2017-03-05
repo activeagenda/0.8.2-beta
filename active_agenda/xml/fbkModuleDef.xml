@@ -1,0 +1,413 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Feedback" moduleID="fbk" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Feedback" pluralRecordName="Feedback" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="FeedbackID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track feedback provided throughout the organization" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants allNonParticipants" validate="RequireSelection" phrase="Affected Organization|The organization which is most affected by the feedback" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Affected Organization|The organization which is most affected by the feedback" sample="Active Agenda, HQ"/>
+		<RemoteField name="FeedbackDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="26" phrase="Feedback Date|The date the feedback was submitted by the person offering the feedback for consideration" sample="01/01/2004"/>
+		<TableField name="Anonymous" type="bool" validate="noValidation" dbFlags="default 0" phrase="Anonymous|Whether the feedback is being provided anonymously" sample="No"/>
+		<RemoteField name="FeedbackProviderID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="28" phrase="Feedback Provider|The name of the person providing the feedback for consideration" sample="1"/>
+		<ForeignField name="FeedbackProvider" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FeedbackProviderID" joinType="left" phrase="Feedback Provider|The name of the person providing the feedback for consideration" sample="Mattias Thorslund"/>
+		<!--the PersonProviding field is only displayed if the Anonymous field is negative. DFZ 6-28-2004-->
+		<TableField name="FeedbackTypeID" type="int" validate="RequireSelection" phrase="Feedback Type|A method of grouping feedback of similar types so that cultural inferences may be drawn based on a predominance of feedback types" sample="1"/>
+		<CodeField name="FeedbackType" key="FeedbackTypeID" phrase="Feedback Type|A method of grouping feedback of similar types so that cultural inferences may be drawn based on a predominance of feedback types" sample="Constructive" codeTypeID="151"/>
+		<RemoteField name="FeedbackRecipientID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="29" phrase="Feedback Recipient|The name of the intended recipient of the feedback" sample="1"/>
+		<ForeignField name="FeedbackRecipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FeedbackRecipientID" joinType="left" phrase="Feedback Recipient|The name of the intended recipient of the feedback" sample="Larry Hansen"/>
+		<RemoteField name="DepartmentID" validate="noValidation" remoteModuleID="orgda" remoteModuleIDField="RelatedModuleID" remoteRecordIDField="RelatedRecordID" remoteField="DepartmentID" phrase="Department Recipient|Department recipient of the feedback when applicable" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department Recipient|Department recipient of the feedback when applicable" sample="Human Resources, Local, Human Resources, 77282"/>
+		<TableField name="FeedbackTitle" type="text" validate="notEmpty" phrase="Feedback Title|A short feedback statement that acts as a title for the feedback provided" sample="Use darker backgrounds for your slides"/>
+		<TableField name="FeedbackProvided" type="text" validate="noValidation" phrase="Feedback Provided|A clear, comprehensive, and direct feedback statement which is provided for improvement" sample="Some of Larry's slides used a light background and I found them hard to read. I suggest that Larry use dark backgrounds for his PowerPoint slides."/>
+		<TableField name="FeedbackStatusID" type="int" validate="RequireSelection" phrase="Feedback Status|Status of the feedback provided for improvement" sample="1"/>
+		<CodeField name="FeedbackStatus" key="FeedbackStatusID" phrase="Feedback Status|Status of the feedback provided for improvement" sample="Accepted and Implemented" codeTypeID="152"/>
+		<!--modified only by the PersonAsking. DFZ 6-20-2004-->
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="FeedbackID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'fbk'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the feedback item" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="FeedbackID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'fbk'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the feedback item" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="FeedbackType"/>_feedback_provided_on_<CombinedFieldRef name="FeedbackDate"/>_to_<CombinedFieldRef name="FeedbackRecipient"/>:_<CombinedFieldRef name="FeedbackTitle"/></CombinedField>
+		<CombinedField name="Feedback" phrase="Feedback|A combined field used to describe this feedback when associating it with other records" sample="09-21-2003; Constructive; To: Larry Hansen; From: Mattias Thorslund; Active Agenda, HQ"><CombinedFieldRef name="FeedbackTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="FeedbackID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Feedback"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="fbkr" name="Feedback Responses" parentKey="FeedbackID" localKey="FeedbackID"/>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="FeedbackID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbk"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List feedback">
+			<ListField name="FeedbackID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="FeedbackDate" phrase="Date"/>
+			<ListField name="FeedbackProvider" phrase="Provider"/>
+			<ListField name="FeedbackType" phrase="Type"/>
+			<ListField name="FeedbackRecipient" phrase="Recipient"/>
+			<ListField name="FeedbackStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search feedback">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<DateField name="FeedbackDate"/>
+			<CheckBoxField name="Anonymous"/>
+			<PersonComboField name="FeedbackProviderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="FeedbackTypeID">
+				<SampleItem ID="1" name="Constructive"/>
+				<SampleItem ID="2" name="Reinforcing"/>
+			</CodeRadioField>
+			<PersonComboField name="FeedbackRecipientID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DepartmentID" findMode="text">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<MemoField name="FeedbackProvided" rows="5" cols="75"/>
+			<CodeComboField name="FeedbackStatusID" findMode="text">
+				<SampleItem ID="1" name="Accepted and Implemented"/>
+				<SampleItem ID="2" name="Accepted and Not Implemented"/>
+				<SampleItem ID="3" name="Not Accepted and Implemented"/>
+				<SampleItem ID="4" name="Not Accepted and Not Implemented"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="ConsequenceCategoryID" subModuleID="bcq" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="ConsequenceCategoryID" codeTypeID="190" phrase="Business Consequences|Filter search results by one or more related business consequences"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an occurrence of feedback">
+			<ViewField name="FeedbackID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="FeedbackDate"/>
+			<ViewField name="Anonymous"/>
+			<ViewField name="FeedbackProvider"/>
+			<ViewField name="FeedbackType"/>
+			<ViewField name="FeedbackRecipient"/>
+			<ViewField name="Department"/>
+			<ViewField name="FeedbackTitle"/>
+			<ViewField name="FeedbackProvided"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="FeedbackStatus"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="fbkr"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an occurrence of feedback">
+			<ViewField name="FeedbackID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="DepartmentID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<DateField name="FeedbackDate"/>
+			<CheckBoxField name="Anonymous"/>
+			<PersonComboField name="FeedbackProviderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="FeedbackTypeID">
+				<SampleItem ID="1" name="Constructive"/>
+				<SampleItem ID="2" name="Reinforcing"/>
+			</CodeRadioField>
+			<PersonComboField name="FeedbackRecipientID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<EditField name="FeedbackTitle" size="75" maxLength="128"/>
+			<MemoField name="FeedbackProvided" rows="5" cols="75"/>
+			<CodeComboField name="FeedbackStatusID" findMode="text">
+				<SampleItem ID="1" name="Accepted and Implemented"/>
+				<SampleItem ID="2" name="Accepted and Not Implemented"/>
+				<SampleItem ID="3" name="Not Accepted and Implemented"/>
+				<SampleItem ID="4" name="Not Accepted and Not Implemented"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Responses" phrase="Responses|Associate feedback responses with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="fbkr" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate organizational values with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="vala" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="cosex" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opt" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bcq" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the feedback provided">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk" dataCollectionForm="no"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the feedback provided" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc" dataCollectionForm="no"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="FeedbackID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="FeedbackDate"/>
+		<ViewField name="FeedbackProvider"/>
+		<ViewField name="FeedbackType"/>
+		<ViewField name="FeedbackRecipient"/>
+		<ViewField name="FeedbackTitle"/>
+		<ViewField name="FeedbackProvided"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+		<ViewField name="FeedbackStatus"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Feedback By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Feedback By Type">
+			<GroupByField name="FeedbackType"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Feedback By Type">
+			<GroupByField name="FeedbackType"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Feedback By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Feedback By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Feedback By Provider">
+			<GroupByField name="FeedbackProvider"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Feedback By Provider">
+			<GroupByField name="FeedbackProvider"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Feedback By Recipient">
+			<GroupByField name="FeedbackRecipient"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Feedback By Recipient">
+			<GroupByField name="FeedbackRecipient"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Feedback By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Feedback By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Feedback By Status">
+			<GroupByField name="FeedbackStatus"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Feedback By Status">
+			<GroupByField name="FeedbackStatus"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Ratio of Anonymous Feedback">
+			<GroupByField name="Anonymous"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Ratio of Anonymous Feedback">
+			<GroupByField name="Anonymous"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</ParetoChart>
+		<BarChart name="Bar01" title="Feedback by Year">
+			<GroupByField name="FeedbackDate" dateInterval="year"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar02" title="Feedback by Quarter">
+			<GroupByField name="FeedbackDate" dateInterval="yearquarter"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar03" title="Feedback by Month">
+			<GroupByField name="FeedbackDate" dateInterval="yearmonth"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar04" title="Feedback by Week">
+			<GroupByField name="FeedbackDate" dateInterval="yearweek"/>
+			<SummaryField name="FeedbackID" type="count"/>
+		</BarChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

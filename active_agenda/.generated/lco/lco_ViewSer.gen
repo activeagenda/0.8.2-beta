@@ -1,0 +1,102 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'LossCostID' => gettext("Claim Cost ID|Numerical ID assigned by the system to associated claims management costs with claims of loss"),
+   'RelatedModuleRecord' => gettext("Related Record|A combined field used to display the related module name and record ID"),
+   'ClaimID' => gettext("Claim ID|The record ID value of the corresponding claim"),
+   'Policy' => gettext("Insurance Policy|A description of the insurance policy associated with the loss cost based on a combination of field values assigned from within the Insurance Policies module"),
+   'IntegrationKey' => gettext("Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization"),
+   'TotalIncurred' => gettext("Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software"),
+   'TotalPayments' => gettext("Paid to Date|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software"),
+   'TotalOutstanding' => gettext("Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts"),
+   'ValuationDate' => gettext("Valuation Date|The specific date this valuation occurred")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:4:{s:6:"phrase";s:9:"Loss Cost";s:3:"sql";s:1401:"SELECT 
+   `lco`.LossCostID,
+   CONCAT(\'internal:view.php?mdl=\',`lco`.RelatedModuleID,\'&rid=\',`lco`.RelatedRecordID) AS RelatedRecordLink,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`lco`.RelatedRecordID,\'\'),\')\'),\' Module (Record ID: )\') AS RelatedModuleRecord,
+   `lco`.ClaimID,
+   NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(`ins1`.PolicyNumber,\'\')),\' | \') AS Policy,
+   `ins1`.IntegrationKey AS IntegrationKey,
+   `lcod1`.TotalIncurred AS TotalIncurred,
+   `lcod1`.TotalPayments AS TotalPayments,
+   IFNULL(ROUND(`lcod1`.TotalIncurred, 2),0) - IFNULL(ROUND(`lcod1`.TotalPayments, 2),0) AS TotalOutstanding,
+   `lco`.ValuationDate,
+   NULLIF(CONCAT(IFNULL(ROUND(`lcod1`.TotalIncurred, 2),\'\')),\'\') AS RecordLabel
+FROM `lco`
+   
+     LEFT OUTER JOIN `mod` AS mod1 
+   ON (`lco`.RelatedModuleID = `mod1`.ModuleID )
+     LEFT OUTER JOIN `clm` AS clm1 
+   ON (`lco`.ClaimID = `clm1`.ClaimID )
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`lcod`.Incurred, 2)) AS TotalIncurred,
+SUM(ROUND(`lcod`.Payments, 2)) AS TotalPayments,
+`lcod`.LossCostID FROM `lcod` 
+ WHERE `lcod`._Deleted = 0 
+GROUP BY `lcod`.LossCostID 
+) AS lcod1 
+ON (`lco`.LossCostID = lcod1.LossCostID) 
+     LEFT OUTER JOIN `ins` AS ins1 
+   ON (`clm1`.PolicyID = `ins1`.PolicyID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`ins1`.CarrierNameID = `org1`.OrganizationID )
+WHERE
+   lco.LossCostID=\'/**RecordID**/\'";s:6:"fields";a:9:{s:10:"LossCostID";O:9:"viewfield":16:{s:4:"name";s:10:"LossCostID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Claim Cost ID|Numerical ID assigned by the system to associated claims management costs with claims of loss";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"RelatedModuleRecord";O:9:"viewfield":16:{s:4:"name";s:19:"RelatedModuleRecord";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:85:"Related Record|A combined field used to display the related module name and record ID";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";s:17:"RelatedRecordLink";s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"ClaimID";O:9:"viewfield":16:{s:4:"name";s:7:"ClaimID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Claim ID|The record ID value of the corresponding claim";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Policy";O:9:"viewfield":16:{s:4:"name";s:6:"Policy";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:174:"Insurance Policy|A description of the insurance policy associated with the loss cost based on a combination of field values assigned from within the Insurance Policies module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"IntegrationKey";O:9:"viewfield":16:{s:4:"name";s:14:"IntegrationKey";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:179:"Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"TotalIncurred";O:9:"viewfield":16:{s:4:"name";s:13:"TotalIncurred";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:159:"Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:13:"TotalPayments";O:9:"viewfield":16:{s:4:"name";s:13:"TotalPayments";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:157:"Paid to Date|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:16:"TotalOutstanding";O:9:"viewfield":16:{s:4:"name";s:16:"TotalOutstanding";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:252:"Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:13:"ValuationDate";O:9:"viewfield":16:{s:4:"name";s:13:"ValuationDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"Valuation Date|The specific date this valuation occurred";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:5:"grids";a:1:{s:13:"viewgrid_lcod";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"lcod";s:6:"phrase";s:17:"Loss Cost Details";s:6:"number";N;s:6:"Fields";a:5:{s:16:"LossCostDetailID";O:14:"invisiblefield":11:{s:4:"name";s:16:"LossCostDetailID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:114:"Claim Cost Detail ID|Numerical ID assigned by the system to associated claims management costs with claims of loss";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"lcod";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"LossCostType";O:9:"viewfield":16:{s:4:"name";s:12:"LossCostType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Loss Cost Type|A combined field used to describe this loss cost type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"lcod";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Incurred";O:9:"viewfield":16:{s:4:"name";s:8:"Incurred";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:159:"Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"lcod";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Payments";O:9:"viewfield":16:{s:4:"name";s:8:"Payments";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:157:"Paid to Date|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"lcod";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Outstanding";O:9:"viewfield":16:{s:4:"name";s:11:"Outstanding";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:252:"Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"lcod";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}s:8:"countSQL";s:106:"SELECT 
+    count(*) 
+FROM `lcod`
+   
+WHERE lcod._Deleted = 0
+   AND `lcod`.LossCostID = \'/**RecordID**/\'
+";s:7:"listSQL";s:552:"SELECT 
+   `lcod`.LossCostDetailID,
+NULLIF(CONCAT(IFNULL(`cod1`.Description,\'\'),\' (\',IFNULL(`lcot1`.CostType,\'\'),\')\'),\' ()\') AS LossCostType,
+`lcod`.Incurred,
+`lcod`.Payments,
+IFNULL(ROUND(`lcod`.Incurred, 2),0) - IFNULL(ROUND(`lcod`.Payments, 2),0) AS Outstanding
+FROM `lcod`
+
+   LEFT OUTER JOIN `lcot` AS lcot1 
+   ON (`lcod`.LossCostTypeID = `lcot1`.LossCostTypeID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`lcot1`.CostCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'96\')
+WHERE lcod._Deleted = 0
+AND `lcod`.LossCostID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:10:"LossCostID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:16:"LossCostDetailID";s:3:"int";s:12:"LossCostType";N;s:8:"Incurred";s:5:"money";s:8:"Payments";s:5:"money";s:11:"Outstanding";s:5:"money";}s:4:"name";N;s:10:"fieldAlign";a:5:{s:16:"LossCostDetailID";s:5:"right";s:12:"LossCostType";s:7:"justify";s:8:"Incurred";s:5:"right";s:8:"Payments";s:5:"right";s:11:"Outstanding";s:5:"right";}}}}}');
+
+?>

@@ -1,0 +1,403 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Costs" moduleID="cos" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Cost of Risk" pluralRecordName="Costs of Risk" addNewName="Cost" allowAddRecord="no" isGlobal="yes">
+	<ModuleFields>
+		<TableField name="CostID" type="int" dbFlags="unsigned auto_increment not null" phrase="Cost ID|An automatically assigned number used to track costs throughout the enterprise" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the record" sample="ire"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the record" sample="Incident Reporting"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Thorslund Discrimination Complaint; Active Agenda, HQ; 04-29-2004"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization responsible for the cost or expense" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for the cost or expense" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="137" phrase="Person Accountable|The individual assigned primary accountability for the cost" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the cost" sample="Larry Hansen"/>
+		<TableField name="CostTypeID" type="int" phrase="Cost Type|A combined field used to describe this cost type when associating it with other records" sample="1"/>
+		<ForeignField name="CostCategoryID" foreignTable="cost" foreignKey="CostTypeID" foreignField="CostCategoryID" key="CostTypeID" joinType="left" phrase="Cost of Risk Category|A cost of risk categorization which enables a Total Cost of Risk analysis" sample="1"/>
+		<CodeField name="CostCategory" key="CostCategoryID" phrase="Cost of Risk Category|A cost of risk categorization which enables a Total Cost of Risk analysis" sample="Administration" codeTypeID="124"/>
+		<ForeignField name="CostType" foreignTable="cost" foreignKey="CostTypeID" foreignField="CostType" key="CostTypeID" joinType="left" phrase="Cost Type|A combined field used to describe this cost type when associating it with other records" sample="External Consultant"/>
+		<TableField name="Incurred" type="money" validate="Money notEmpty notNegative" phrase="Incurred|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software" sample="10,000.00"/>
+		<SummaryField name="Payments" type="money" summaryFunction="sum" summaryField="ExpenseAmount" summaryKey="CostID" summaryModuleID="cose" localKey="CostID" phrase="Payments|A calculated field representing the total value of all expenditures associated with the incurred cost" sample="USD $3,600,000.00"/>
+		<CalculatedField name="Outstanding" type="money" calcFunction="subtract" params="Incurred Payments" validate="" phrase="Outstanding|The outstanding amount to be paid to satisfy the unpaid portion of the incurred cost" sample="$2,500.00"/>
+		<TableField name="Title" type="varchar(128)" validate="notEmpty" phrase="Title|A concise title that describes the cost" sample="Labor law consulting fees"/>
+		<TableField name="CostDesc" type="text" validate="notEmpty" phrase="Cost Description|A detailed description of the cost being tracked" sample="Labor law consultanting fees. This consulting firm was utilized to assist with the agency response."/>
+		<RemoteField name="CostDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="18" phrase="Cost Date|The date this cost amount was incurred by the organization" sample="01/01/2004"/>
+		<TableField name="PONumber" type="varchar(50)" validate="noValidation" phrase="P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose" sample="9948848"/>
+		<RecordMetaField name="ModifiedByID" returnType="userID" lookupType="modified" phrase="Modified By|The name of the person that last modified the cost record" sample="1"/>
+		<ForeignField name="ModifiedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ModifiedByID" joinType="left" phrase="Modified By|The name of the person that last modified the cost record" sample="Mattias Thorslund"/>
+		<RecordMetaField name="LastModifiedDate" returnType="date" lookupType="modified" phrase="Last Modified|The date the cost record was last modified" sample="1"/>
+		<TableField name="BudgetConsideration" type="bool" validate="noValidation" dbFlags="default 0" phrase="Budget Consideration?|Whether the cost incurred should be considered for future budget planning" sample="No"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'cos'" localKey="CostID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Costs | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>_incurred_a_<CombinedFieldRef name="CostType"/>_cost_of_<CombinedFieldRef name="Incurred"/>_on_<CombinedFieldRef name="CostDate"/></CombinedField>
+		<CombinedField name="Cost" phrase="Cost|A combined field used to describe this cost when associating it with other records" sample="Incident Reporting | Active Agenda, HQ | 04-29-2004 | External Consultant | 10,000.00"><CombinedFieldRef name="Title"/>;_<CombinedFieldRef name="Incurred"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="CostID"/>
+		</PrimaryKey>
+		<Index name="RelatedModuleIDRecordID">
+			<FieldRef name="RelatedModuleID"/>
+			<FieldRef name="RelatedRecordID"/>
+		</Index>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Cost"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="cose" name="Expenditures" parentKey="CostID" localKey="CostID"/>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="CostID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cos"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List costs of risk associated with related records">
+			<ListField name="CostID" phrase="Cost ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="Title" phrase="Title"/>
+			<ListField name="Incurred" phrase="Incurred"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search costs of risk associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Incident Reporting"/>
+				<SampleItem ID="2" name="Vehicles"/>
+				<SampleItem ID="3" name="Equipment"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CostCategoryID" findMode="text">
+				<UpdateFieldRef name="CostTypeID"/>
+				<SampleItem ID="1" name="Administration"/>
+				<SampleItem ID="2" name="Brokerage Commission"/>
+				<SampleItem ID="2" name="Fees and Taxes"/>
+				<SampleItem ID="3" name="Retained Loss"/>
+				<SampleItem ID="4" name="Premium"/>
+			</CodeComboField>
+			<ComboField name="CostTypeID" findMode="text" parentField="CostCategoryID">
+				<SampleItem ID="1" name="External Consultant"/>
+				<SampleItem ID="2" name="Internal Consultant"/>
+				<SampleItem ID="3" name="Internal Staff"/>
+				<SampleItem ID="4" name="External Value Added (Carrier))"/>
+			</ComboField>
+			<EditField name="Title" size="50" maxLength="128"/>
+			<MoneyField name="Incurred"/>
+			<MoneyField name="Payments"/>
+			<MoneyField name="Outstanding"/>
+			<DateField name="CostDate"/>
+			<CheckBoxField name="BudgetConsideration"/>
+			<EditField name="PONumber" size="50" maxLength="128"/>
+			<PersonComboField name="ModifiedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="LastModifiedDate"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a cost of risk associated with a related record">
+			<ViewField name="CostID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="CostDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="CostCategory"/>
+			<ViewField name="CostType"/>
+			<ViewField name="Title"/>
+			<ViewField name="CostDesc"/>
+			<ViewField name="Incurred"/>
+			<ViewField name="Payments"/>
+			<ViewField name="Outstanding"/>
+			<ViewField name="BudgetConsideration"/>
+			<ViewField name="PONumber"/>
+			<ViewField name="ModifiedBy"/>
+			<ViewField name="LastModifiedDate"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewGrid moduleID="cose" phrase="Expenditures"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a cost of risk associated with a related record">
+			<ViewField name="CostID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<DateField name="CostDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CostCategoryID" findMode="text">
+				<UpdateFieldRef name="CostTypeID"/>
+				<SampleItem ID="1" name="Administration"/>
+				<SampleItem ID="2" name="Brokerage Commission"/>
+				<SampleItem ID="2" name="Fees and Taxes"/>
+				<SampleItem ID="3" name="Retained Loss"/>
+				<SampleItem ID="4" name="Premium"/>
+			</CodeComboField>
+			<ComboField name="CostTypeID" findMode="text" parentField="CostCategoryID">
+				<SampleItem ID="1" name="External Consultant"/>
+				<SampleItem ID="2" name="Internal Consultant"/>
+				<SampleItem ID="3" name="Internal Staff"/>
+				<SampleItem ID="4" name="External Value Added (Carrier))"/>
+			</ComboField>
+			<EditField name="Title" size="50" maxLength="128"/>
+			<MemoField name="CostDesc" rows="5" cols="75"/>
+			<MoneyField name="Incurred"/>
+			<ViewField name="Payments"/>
+			<ViewField name="Outstanding"/>
+			<CheckBoxField name="BudgetConsideration"/>
+			<EditField name="PONumber" size="50" maxLength="128"/>
+			<ViewField name="ModifiedBy"/>
+			<ViewField name="LastModifiedDate"/>
+		</EditScreen>
+		<EditScreen name="Expenditures" phrase="Expenditures|Associate expenditures with the incurred cost">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="cose"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a cost of risk associated with a related record">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="CostID"/>
+		<ViewField name="RelatedModule"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="CostCategory"/>
+		<ViewField name="CostType"/>
+		<ViewField name="Incurred"/>
+		<ViewField name="Payments"/>
+		<ViewField name="Outstanding"/>
+		<ViewField name="Title"/>
+		<ViewField name="CostDesc"/>
+		<ViewField name="CostDate"/>
+		<ViewField name="BudgetConsideration"/>
+		<ViewField name="PONumber"/>
+		<ViewField name="ModifiedBy"/>
+		<ViewField name="LastModifiedDate"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Costs By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Costs By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Costs By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Costs By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Costs By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Costs By Category">
+			<GroupByField name="CostCategory"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Costs By Category">
+			<GroupByField name="CostCategory"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Costs By Type">
+			<GroupByField name="CostType"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Costs By Type">
+			<GroupByField name="CostType"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Costs By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Costs By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Costs By Person Modifying">
+			<GroupByField name="ModifiedBy"/>
+			<SummaryField name="CostID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Costs By Person Modifying">
+			<GroupByField name="ModifiedBy"/>
+			<SummaryField name="CostID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Exports>
+		<ViewGrid moduleID="cos" phrase="Costs">
+			<InvisibleField name="CostID" sample="1"/>
+			<ViewField name="CostDate" sample="01/01/2004"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="CostType" sample="External Consultant"/>
+			<ViewField name="Title" sample="Labor law consulting fees"/>
+			<ViewField name="Incurred" sample="10,000.00"/>
+			<ViewField name="Payments" sample="1,000.00"/>
+			<ViewField name="Outstanding" sample="9,000.00"/>
+		</ViewGrid>
+		<EditGrid moduleID="cos" phrase="Costs">
+			<GridForm>
+				<InvisibleField name="CostID" phrase="Record ID|Numerical ID to identify and track costs associated with records throughout this application" sample="1"/>
+				<DateField name="CostDate" phrase="Cost Date|The date this cost amount was incurred by the organization" sample="01/01/2004"/>
+				<CheckBoxField name="BudgetConsideration" phrase="Budget Consideration?|Whether the cost incurred should be considered for future budget planning" sample="No"/>
+				<OrgComboField name="OrganizationID" phrase="Organization|The organization responsible for the cost or expense" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<CodeComboField name="CostCategoryID" findMode="text" phrase="Cost of Risk Category|A cost of risk categorization which enables a Total Cost of Risk analysis" sample="Administration">
+					<UpdateFieldRef name="CostTypeID"/>
+					<SampleItem ID="1" name="Administration"/>
+					<SampleItem ID="2" name="Brokerage Commission"/>
+					<SampleItem ID="2" name="Fees and Taxes"/>
+					<SampleItem ID="3" name="Retained Loss"/>
+					<SampleItem ID="4" name="Premium"/>
+				</CodeComboField>
+				<ComboField name="CostTypeID" findMode="text" parentField="CostCategoryID" phrase="Cost Type|A combined field used to describe this cost type when associating it with other records" sample="External Consultant">
+					<SampleItem ID="1" name="External Consultant"/>
+					<SampleItem ID="2" name="Internal Consultant"/>
+					<SampleItem ID="3" name="Internal Staff"/>
+					<SampleItem ID="4" name="External Value Added (Carrier))"/>
+				</ComboField>
+				<EditField name="Title" size="50" maxLength="128" phrase="Title|A concise title that describes the cost" sample="Labor law consulting fees"/>
+				<MemoField name="CostDesc" rows="5" cols="75" phrase="Cost Description|A detailed description of the cost being tracked" sample="Labor law consultanting fees. This consulting firm was utilized to assist with the agency response."/>
+				<MoneyField name="Incurred"/>
+			</GridForm>
+			<InvisibleField name="CostID" sample="1"/>
+			<ViewField name="CostDate" sample="01/01/2004"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="CostType" sample="External Consultant"/>
+			<ViewField name="Title" sample="Labor law consulting fees"/>
+			<ViewField name="Incurred" sample="10,000.00"/>
+			<ViewField name="Payments" sample="1,000.00"/>
+			<ViewField name="Outstanding" sample="9,000.00"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

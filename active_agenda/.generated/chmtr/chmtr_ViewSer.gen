@@ -1,0 +1,121 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'ChemicalTransactionID' => gettext("Transaction ID|An automatically assigned number used to track inventory transactions"),
+   'ChemicalInventoryID' => gettext("Inventory ID|An automatically assigned number used to track chemical inventory"),
+   'Organization' => gettext("Organization|The name of the organization where the Chemical is located"),
+   'Location' => gettext("Location|Specific location within the facility where the chemical is located"),
+   'ChemicalID' => gettext("Chemical|The specific chemical which is involved in the transaction"),
+   'Chemical' => gettext("Chemical|A combined field used to describe this record when associating it with other records"),
+   'TransactionType' => gettext("Transaction Type|The type of inventory transaction which occurred on this date at this location"),
+   'TransactionAmount' => gettext("Amount|The amount of chemical involved in this transaction"),
+   'PersonAccountable' => gettext("Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory"),
+   'TransactionSubject' => gettext("Transaction Subject|The name of the individual the chemical was issued to, OR the name of the individual returning the inventory item, OR the name of the person entering a new item into inventory"),
+   'TransactionDate' => gettext("Transaction Date|The date this chemical transaction occurred"),
+   'TransactionTime' => gettext("Transaction Time|The time this chemical transaction occurred"),
+   'EstimatedReturnDate' => gettext("Estimated Return Date|The date the excess or unused chemical is estimated to be returned"),
+   'EstimatedReturnTime' => gettext("Estimated Return Time|The time the excess or unused chemical is estimated to be returned"),
+   'ActualReturnDate' => gettext("Actual Return Date|The date the excess or unused chemical is actually returned to inventory at this specific location"),
+   'ActualReturnTime' => gettext("Actual Return Time|The time the excess or unused chemical is actually returned to inventory at this specific location"),
+   'IssueDesc' => gettext("Issue Description|A brief description of any issues identified by the person returning the chemical into inventory")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:3:{s:6:"phrase";s:20:"Chemical Transaction";s:3:"sql";s:2880:"SELECT 
+   `chmtr`.ChemicalTransactionID,
+   `chmtr`.ChemicalInventoryID,
+   `org1`.Name AS Organization,
+   NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+   `chmin1`.ChemicalID AS ChemicalID,
+   NULLIF(CONCAT(IFNULL(`chm1`.CommonName,\'\'),\' | CAS: \',IFNULL(`chm1`.CASNumber,\'\')),\' | CAS: \') AS Chemical,
+   `cod2`.Description AS TransactionType,
+   NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\') AS TransAmountUoM,
+   `chmtr`.TransactionAmount,
+   `ppl1`.DisplayName AS PersonAccountable,
+   `ppl2`.DisplayName AS TransactionSubject,
+   `dat1`.RelatedDate AS TransactionDate,
+   `chmtr`.TransactionTime,
+   `chmtr`.EstimatedReturnDate,
+   `chmtr`.EstimatedReturnTime,
+   `chmtr`.ActualReturnDate,
+   `chmtr`.ActualReturnTime,
+   `chmtr`.IssueDesc,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`chm1`.CommonName,\'\'),\' | CAS: \',IFNULL(`chm1`.CASNumber,\'\')),\' | CAS: \'),\'\'),\' | \',IFNULL(`cod2`.Description,\'\'),\' | \',IFNULL(`dat1`.RelatedDate,\'\')),\' |  | \') AS RecordLabel,
+   `chmin1`.OrganizationID AS OrganizationID
+FROM `chmtr`
+   
+     LEFT OUTER JOIN `chmin` AS chmin1 
+   ON (`chmtr`.ChemicalInventoryID = `chmin1`.ChemicalInventoryID )
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`chmtr`.TransactionTypeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'46\')
+     LEFT OUTER JOIN `uts` AS uts1 
+   ON (`chmtr`.TransAmountUoMID = `uts1`.UnitID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`chmtr`.ChemicalTransactionID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'chmtr\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'18\')
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`chmtr`.ChemicalTransactionID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'chmtr\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'12\')
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`chmtr`.ChemicalTransactionID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'chmtr\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'14\')
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`chmin1`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`chmin1`.ChemicalInventoryID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'chmin\'
+     AND `orgla1`._Deleted = 0)
+     LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+     LEFT OUTER JOIN `chm` AS chm1 
+   ON (`chmin1`.ChemicalID = `chm1`.ChemicalID )
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`inv1`.PersonInvolvedID = `ppl2`.PersonID )
+     LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+     LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE
+   chmtr.ChemicalTransactionID=\'/**RecordID**/\'";s:6:"fields";a:17:{s:21:"ChemicalTransactionID";O:9:"viewfield":16:{s:4:"name";s:21:"ChemicalTransactionID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:84:"Transaction ID|An automatically assigned number used to track inventory transactions";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"ChemicalInventoryID";O:9:"viewfield":16:{s:4:"name";s:19:"ChemicalInventoryID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:78:"Inventory ID|An automatically assigned number used to track chemical inventory";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Organization|The name of the organization where the Chemical is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:76:"Location|Specific location within the facility where the chemical is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"ChemicalID";O:9:"viewfield":16:{s:4:"name";s:10:"ChemicalID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:67:"Chemical|The specific chemical which is involved in the transaction";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Chemical";O:9:"viewfield":16:{s:4:"name";s:8:"Chemical";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:93:"Chemical|A combined field used to describe this record when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"TransactionType";O:9:"viewfield":16:{s:4:"name";s:15:"TransactionType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Transaction Type|The type of inventory transaction which occurred on this date at this location";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"TransactionAmount";O:9:"viewfield":16:{s:4:"name";s:17:"TransactionAmount";s:10:"parentName";N;s:6:"Fields";a:1:{s:14:"TransAmountUoM";O:9:"viewfield":16:{s:4:"name";s:14:"TransAmountUoM";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:87:"Unit|A combined field used to describe this unit when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:6:"phrase";s:58:"Amount|The amount of chemical involved in this transaction";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:140:"Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"TransactionSubject";O:9:"viewfield":16:{s:4:"name";s:18:"TransactionSubject";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:195:"Transaction Subject|The name of the individual the chemical was issued to, OR the name of the individual returning the inventory item, OR the name of the person entering a new item into inventory";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"TransactionDate";O:9:"viewfield":16:{s:4:"name";s:15:"TransactionDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:60:"Transaction Date|The date this chemical transaction occurred";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"TransactionTime";O:9:"viewfield":16:{s:4:"name";s:15:"TransactionTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:60:"Transaction Time|The time this chemical transaction occurred";s:8:"dataType";s:4:"time";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"EstimatedReturnDate";O:9:"viewfield":16:{s:4:"name";s:19:"EstimatedReturnDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Estimated Return Date|The date the excess or unused chemical is estimated to be returned";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"EstimatedReturnTime";O:9:"viewfield":16:{s:4:"name";s:19:"EstimatedReturnTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Estimated Return Time|The time the excess or unused chemical is estimated to be returned";s:8:"dataType";s:4:"time";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ActualReturnDate";O:9:"viewfield":16:{s:4:"name";s:16:"ActualReturnDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Actual Return Date|The date the excess or unused chemical is actually returned to inventory at this specific location";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ActualReturnTime";O:9:"viewfield":16:{s:4:"name";s:16:"ActualReturnTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Actual Return Time|The time the excess or unused chemical is actually returned to inventory at this specific location";s:8:"dataType";s:4:"time";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"IssueDesc";O:9:"viewfield":16:{s:4:"name";s:9:"IssueDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:114:"Issue Description|A brief description of any issues identified by the person returning the chemical into inventory";s:8:"dataType";s:12:"varchar(255)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}}');
+
+?>

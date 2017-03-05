@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Course Materials" moduleID="tram" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Course Material" pluralRecordName="Training Course Materials" addNewName="Material" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="MaterialID" type="int" dbFlags="unsigned auto_increment not null" phrase="Material ID|An automatically assigned number used to materials required to conduct a course with courses offered by the organization" sample="1"/>
+		<TableField name="CourseMaterialTypeID" type="int" validate="RequireSelection" phrase="Material Type|The specific type of material required to conduct this course" sample="1"/>
+		<CodeField name="CourseMaterialType" key="CourseMaterialTypeID" phrase="Material Type|The specific type of material required to conduct this course" sample="Handout" codeTypeID="126"/>
+		<TableField name="MaterialName" type="varchar(128)" validate="notEmpty" phrase="Material Name|A brief title used to identify the training material" sample="PowerPoint handout of the presentation"/>
+		<TableField name="MaterialDesc" type="text" validate="noValidation" phrase="Material Description|A brief description of the material required" sample="A master powerpoint presentation has been developed and is stored in digital and paper form within the training filing cabinet within the human resources filing area"/>
+		<TableField name="MaterialNo" type="varchar(50)" validate="noValidation" phrase="Material Number|The number asigned to this material for filing or inventory purposes" sample="HO-PPT-HS-CPRFA-101"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for creating and updating this training material item" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for creating and updating this training material item" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="99" phrase="Person Accountable|The person with primary accountability for managing the master training material or item" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person with primary accountability for managing the master training material or item" sample="Mattias Thorslund"/>
+		<RemoteField name="MasterLocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Master Location|Specific location within the facility where the master material or item can be found" sample="1"/>
+		<ForeignField name="MasterLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="MasterLocationID" joinType="left" phrase="Master Location|Specific location within the facility where the master material or item can be found" sample="Human Resources File Room"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="MaterialName"/>;_<CombinedFieldRef name="MaterialNo"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Material" phrase="Material|A combined field used to describe this training material or item when associating it with other records" sample="Handout; PowerPoint handout of the presentation; HO-PPT-HS-CPRFA-101"><CombinedFieldRef name="MaterialName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="MaterialID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Material"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training materials">
+			<ListField name="MaterialID" phrase="Material ID"/>
+			<ListField name="CourseMaterialType" phrase="Material Type"/>
+			<ListField name="MaterialName" phrase="Material"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training materials">
+			<CodeComboField name="CourseMaterialTypeID" findMode="text">
+				<SampleItem ID="1" name="Handout"/>
+				<SampleItem ID="2" name="Overhead"/>
+				<SampleItem ID="3" name="Presentation File"/>
+				<SampleItem ID="4" name="Power Equipment"/>
+				<SampleItem ID="5" name="Audio Visual Equipment"/>
+			</CodeComboField>
+			<EditField name="MaterialName" size="75" maxLength="128"/>
+			<EditField name="MaterialNo" size="50" maxLength="50"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="MasterLocationID" findMode="text">
+				<SampleItem ID="1" name="Human Resources File Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a training material item required to conduct a training course">
+			<ViewField name="MaterialID"/>
+			<ViewField name="CourseMaterialType"/>
+			<ViewField name="MaterialName"/>
+			<ViewField name="MaterialDesc"/>
+			<ViewField name="MaterialNo"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="MasterLocation"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a training material item required to conduct a training course">
+			<ViewField name="MaterialID"/>
+			<CodeComboField name="CourseMaterialTypeID" findMode="text">
+				<SampleItem ID="1" name="Handout"/>
+				<SampleItem ID="2" name="Overhead"/>
+				<SampleItem ID="3" name="Presentation File"/>
+				<SampleItem ID="4" name="Power Equipment"/>
+				<SampleItem ID="5" name="Audio Visual Equipment"/>
+			</CodeComboField>
+			<EditField name="MaterialName" size="75" maxLength="128"/>
+			<MemoField name="MaterialDesc" rows="5" cols="75"/>
+			<EditField name="MaterialNo" size="50" maxLength="50"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="MasterLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="MasterLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Human Resources File Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Course Materials By Type">
+			<GroupByField name="CourseMaterialType"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Course Materials By Type">
+			<GroupByField name="CourseMaterialType"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Course Materials By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Course Materials By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Course Materials By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Course Materials By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Course Materials By Location">
+			<GroupByField name="MasterLocation"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Course Materials By Location">
+			<GroupByField name="MasterLocation"/>
+			<SummaryField name="MaterialID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Training Types" moduleID="trat" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Training Type" pluralRecordName="Training Types" addNewName="Type" allowAddRecord="yes" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="TrainingTypeID" dbFlags="auto_increment not null" type="int" phrase="Record ID|An automatically assigned number used to track training types" sample="1"/>
+		<TableField name="TrainingCategoryID" type="int" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+		<CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+		<TableField name="TrainingTypeTitle" type="varchar(128)" phrase="Training Type Title|A word or short phrase used to describe the type of training" sample="Healh and Safety"/>
+		<RemoteField name="PersonAccountableID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="40" phrase="Person Accountable|The name of the person accountable for developing, directing, and/or managing this type of training across the organization" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person accountable for developing, directing, and/or managing this type of training across the organization" sample="Mattias Thorslund"/>
+		<TableField name="TrainingTypeDesc" type="text" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="On the Job | Health and Safety"><CombinedFieldRef name="TrainingCategory"/>_-_<CombinedFieldRef name="TrainingTypeTitle"/></CombinedField>
+		<CombinedField name="TrainingType" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"><CombinedFieldRef name="TrainingCategory"/>_-_<CombinedFieldRef name="TrainingTypeTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TrainingTypeID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="TrainingType"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="TrainingTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trat"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="TrainingTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trat"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="TrainingTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trat"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="TrainingTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trat"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List participation types">
+			<ListField name="TrainingTypeID" phrase="Record ID"/>
+			<ListField name="TrainingCategory" phrase="Category"/>
+			<ListField name="TrainingTypeTitle" phrase="Title"/>
+			<ListField name="TrainingTypeDesc" phrase="Description"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search participation types">
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<SampleItem ID="1" name="On the Job"/>
+				<SampleItem ID="2" name="Classroom"/>
+				<SampleItem ID="3" name="Classroom and On the Job"/>
+				<SampleItem ID="4" name="Outside Institution"/>
+			</CodeComboField>
+			<EditField name="TrainingTypeTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view summary information about risk control participation types">
+			<ViewField name="TrainingTypeID"/>
+			<ViewField name="TrainingCategory"/>
+			<ViewField name="TrainingTypeTitle"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TrainingTypeDesc"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit summary information about risk control participation type">
+			<ViewField name="TrainingTypeID"/>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<SampleItem ID="1" name="On the Job"/>
+				<SampleItem ID="2" name="Classroom"/>
+				<SampleItem ID="3" name="Classroom and On the Job"/>
+				<SampleItem ID="4" name="Outside Institution"/>
+			</CodeComboField>
+			<EditField name="TrainingTypeTitle" size="75" maxLength="128"/>
+			<MemoField name="TrainingTypeDesc" rows="10" cols="75"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the participation type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the participation type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the participation type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the participation type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Training Types By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Training Types By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Training Types By Title">
+			<GroupByField name="TrainingTypeTitle"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Training Types By Title">
+			<GroupByField name="TrainingTypeTitle"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Training Types By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Training Types By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TrainingTypeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

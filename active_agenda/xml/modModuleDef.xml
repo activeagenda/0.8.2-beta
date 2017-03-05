@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Modules" moduleID="mod" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Module" pluralRecordName="Modules" allowAddRecord="No" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="ModuleID" type="varchar(5)" dbFlags="not null" phrase="Module ID|A unique character ID assigned to each module of the application. Character ID's are usually between three and five characters. Main module ID's typically contain three characters and sub-modules contain four to five characters" sample="cor"/>
+		<TableField name="Name" type="varchar(128)" dbFlags="" phrase="Module Name|The name of the module" sample="Corrective Actions"/>
+		<TableField name="ModuleDesc" type="text" dbFlags="" phrase="Module Description|A detailed description of the purpose of the module" sample="The Corrective Actions module is used to track disciplinary actions and follow-up activities associated with disciplianry actions"/>
+		<TableField name="StandAlone" type="bool" validate="noValidation" dbFlags="default 0" phrase="Stand Alone|Whether this module is a stand alone module" sample="Yes"/>
+		<TableField name="SubModule" type="bool" validate="noValidation" dbFlags="default 0" phrase="Sub Module|Whether this module is a sub module of another module" sample="No"/>
+		<TableField name="Association" type="bool" validate="noValidation" dbFlags="default 0" phrase="Association|Whether this module is an association module which is used to associate many modules of different types" sample="No"/>
+		<TableField name="Global" type="bool" validate="noValidation" dbFlags="default 0" phrase="Global|Whether this module is a global module which is available from within all other modules" sample="No"/>
+		<TableField name="Remote" type="bool" validate="noValidation" dbFlags="default 0" phrase="Remote|Whether this module is a remote module, i.e. pointed to by RemoteFields from other modules" sample="No"/>
+		<TableField name="ModuleStatusID" type="int" dbFlags="unsigned" validate="RequireSelection" phrase="Module Status|A short description of the technical implementation status of the module" sample="1"/>
+		<CodeField name="ModuleStatus" key="ModuleStatusID" phrase="Module Status|A short description of the technical implementation status of the module" sample="Not Parsed" codeTypeID="272"/>
+		<TableField name="GlobalDiscussionAddress" type="varchar(50)" dbFlags="" phrase="Global Discussion ID|The ID assigned to the global discussion forum most relevant to this module" sample="31"/>
+		<TableField name="LocalDiscussionAddress" type="varchar(50)" dbFlags="" phrase="Local Discussion ID|The ID assigned to the local discussion forum most relevant to this module" sample="35"/>
+		<TableField name="LastParsed" type="datetime" validate="noValidation" dbFlags="" phrase="Last Parsed|Most recent date and time when the module was parsed" sample="2004-11-15 13:45:00"/>
+		<TableField name="ParentModuleID" type="varchar(5)" dbFlags="" phrase="Parent Module ID|The Module ID of the parent module. This module will inherit the permissions of the parent module" sample="hwk"/>
+		<ForeignField name="ParentModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="ParentModuleID" joinType="left" phrase="Parent Module|The name of the parent module. This module will inherit the permissions of the parent module" sample="Hot Work"/>
+		<TableField name="OwnerField" type="varchar(50)" dbFlags="" phrase="Owner Organization Field|The field in this module to which Organization permissions are matched" sample="OrganizationID"/>
+		<TableField name="RecordDescriptionField" type="varchar(50)" dbFlags="" phrase="Record Description Field|The field in this module that is used as a RecordDescription" sample="Chemical"/>
+		<TableField name="RevisionAuthor" type="varchar(30)" dbFlags="" phrase="Revision Author|The author of the XML specification file used to generate the module" sample="OrganizationID"/>
+		<TableField name="RevisionNumber" type="int" dbFlags="unsigned" validate="" phrase="Revision Number|A number that was automatically assigned by the software versioning system when the revision was made" sample="1"/>
+		<TableField name="RevisionDate" type="varchar(50)" validate="" dbFlags="" phrase="Revision Date|The revision date of the XML specification file used to generate the module" sample="2004-11-15 13:45:00"/>
+		<TableField name="RecordLabelField" type="varchar(50)" dbFlags="" phrase="Record Label Field|The field in this module that is used as a Record Label" sample="Chemical"/>
+		<SummaryField name="ModuleDependencies" type="int" summaryFunction="count" summaryField="DependencyID" summaryKey="ModuleID" summaryModuleID="modd" localKey="ModuleID" phrase="Module Dependencies|A calculated field representing the total number of modules dependent upon this module" sample="6"/>
+		<SummaryField name="CodeDependencies" type="int" summaryFunction="count" summaryField="CodeTypeID" summaryKey="DependencyID" summaryModuleID="codtd" localKey="ModuleID" phrase="Code Dependencies|A calculated field representing the total number of codes the module is dependent upon" sample="2"/>
+		<CombinedField name="InternalLink" phrase="Internal Link|A link to the List screen of that module">internal:list.php?mdl=
+			<CombinedFieldRef name="ModuleID"/>
+		</CombinedField>
+		<CombinedField name="Revision" phrase="Revision|A combined field used to display information about the last revision to a modules's XML specification file" sample="Mattias Thorslund | 01-01-2006 | Ongoing">Revision:_<CombinedFieldRef name="RevisionNumber"/>,_Made:_<CombinedFieldRef name="RevisionDate"/>_By_<CombinedFieldRef name="RevisionAuthor"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Name"/>;_<CombinedFieldRef name="ModuleStatus"/>_Last_parsed:_<CombinedFieldRef name="LastParsed"/></CombinedField>
+		<CombinedField name="Module" phrase="Module|A combined field used to describe this module when associating it with other records" sample="Corrective Actions | Not Parsed | Last Parsed: 2004-11-15 13:45:00">
+			<CombinedFieldRef name="Name"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ModuleID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<!--<RecordDescriptionField name="Module"/> Not possible: RDC recordID is integer-->
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="modd" name="Module Dependencies" parentKey="ModuleID" localKey="ModuleID"/>
+		<SubModule moduleID="gap" name="Gap Analysis" parentKey="ModuleID" localKey="ModuleID"/>
+        <SubModule moduleID="codtd" name="Code Dependencies" parentKey="ModuleID" localKey="DependencyID"/>
+		<SubModule moduleID="moddr" name="Module Direction" parentKey="ModuleID" localKey="RelatedModuleID"/>
+		<SubModule moduleID="modir" name="Issue Reports" parentKey="ModuleID" localKey="ModuleID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List modules">
+			<ListField name="ModuleID" phrase="Record ID"/>
+            <InvisibleField name="InternalLink"/>
+            <ListField name="Name" link="InternalLink" phrase="Module Name"/>
+			<ListField name="GlobalDiscussionAddress" phrase="Forum" align="center"/>
+			<ListField name="ModuleDependencies" phrase="Modules" align="center"/>
+			<ListField name="CodeDependencies" phrase="Codes" align="center"/>
+			<ListField name="StandAlone" phrase="Stand Alone" align="center"/>
+			<ListField name="SubModule" phrase="Sub Module" align="center"/>
+			<ListField name="Association" phrase="Association" align="center"/>
+			<ListField name="Global" phrase="Global" align="center"/>
+			<ListField name="Remote" phrase="Remote" align="center"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|The screen used to search summary information about modules">
+			<EditField name="ModuleID" size="5" maxLength="10"/>
+			<EditField name="Name" size="75" maxLength="128"/>
+			<CheckBoxField name="StandAlone"/>
+			<CheckBoxField name="SubModule"/>
+			<CheckBoxField name="Association"/>
+			<CheckBoxField name="Global"/>
+			<CheckBoxField name="Remote"/>
+			<CodeComboField name="ModuleStatusID" findMode="text">
+				<SampleItem ID="1" name="Not Parsed"/>
+				<SampleItem ID="2" name="Completed"/>
+				<SampleItem ID="3" name="Tables and Files"/>
+				<SampleItem ID="4" name="Tables Only"/>
+				<SampleItem ID="5" name="Under Development"/>
+			</CodeComboField>
+			<EditField name="RevisionAuthor" size="30" maxLength="30"/>
+			<EditField name="RevisionNumber" size="10" maxLength="10"/>
+			<DateField name="RevisionDate"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view summary information about modules">
+			<ViewField name="ModuleID"/>
+			<ViewField name="Name" link="InternalLink"/>
+			<InvisibleField name="InternalLink"/>
+			<ViewField name="ModuleDesc"/>
+			<ViewField name="GlobalDiscussionAddress"/>
+			<ViewField name="LocalDiscussionAddress"/>
+			<ViewField name="StandAlone"/>
+			<ViewField name="SubModule"/>
+			<ViewField name="Association"/>
+			<ViewField name="Global"/>
+			<ViewField name="Remote"/>
+			<ViewField name="ModuleStatus"/>
+			<ViewField name="LastParsed"/>
+			<ViewField name="RevisionAuthor"/>
+			<ViewField name="RevisionNumber"/>
+			<ViewField name="RevisionDate"/>
+			<ViewField name="ModuleDependencies"/>
+			<ViewField name="CodeDependencies"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="modd"/>
+				<ViewGrid moduleID="codtd" phrase="Code Dependencies">
+					<InvisibleField name="CodeTypeDependencyID"/>
+					<ViewField name="CodeTypeID"/>
+					<ViewField name="CodeType"/>
+				</ViewGrid>
+				<ViewGrid moduleID="modir"/>
+				<ViewGrid moduleID="moddr"/>
+				<ViewGrid moduleID="gap"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit summary information about modules">
+			<ViewField name="ModuleID"/>
+			<EditField name="Name" size="75" maxLength="128"/>
+			<MemoField name="ModuleDesc" cols="75" rows="5"/>
+			<EditField name="GlobalDiscussionAddress" size="5" maxLength="50"/>
+			<EditField name="LocalDiscussionAddress" size="5" maxLength="50"/>
+			<CheckBoxField name="StandAlone"/>
+			<ViewField name="SubModule"/>
+			<ViewField name="Association"/>
+			<ViewField name="Global"/>
+			<ViewField name="Remote"/>
+			<CodeComboField name="ModuleStatusID" findMode="text">
+				<SampleItem ID="1" name="Not Parsed"/>
+				<SampleItem ID="2" name="Completed"/>
+				<SampleItem ID="3" name="Tables and Files"/>
+				<SampleItem ID="4" name="Tables Only"/>
+				<SampleItem ID="5" name="Under Development"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Issues" phrase="Issues|Associate issue reports with a module">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="modir"/>
+		</EditScreen>
+		<EditScreen name="Direction" phrase="Direction|Associate organizational direction with a module">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="moddr"/>
+		</EditScreen>
+		<EditScreen name="GapAnalysis" phrase="Gap Analysis|Associate gap analysis criteria with a module">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gap"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ModuleID"/>
+		<ViewField name="Name"/>
+		<ViewField name="ModuleDesc"/>
+		<ViewField name="GlobalDiscussionAddress"/>
+		<ViewField name="LocalDiscussionAddress"/>
+		<ViewField name="StandAlone"/>
+		<ViewField name="SubModule"/>
+		<ViewField name="Association"/>
+		<ViewField name="Global"/>
+		<ViewField name="Remote"/>
+		<ViewField name="ModuleStatus"/>
+		<ViewField name="ModuleDependencies"/>
+		<ViewField name="CodeDependencies"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Stand Alone Modules">
+			<GroupByField name="StandAlone"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Stand Alone Modules">
+			<GroupByField name="StandAlone"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Sub-Modules">
+			<GroupByField name="SubModule"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Sub-Modules">
+			<GroupByField name="SubModule"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Association Modules">
+			<GroupByField name="Association"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Association Modules">
+			<GroupByField name="Association"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Global Modules">
+			<GroupByField name="Global"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Global Modules">
+			<GroupByField name="Global"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Remote Modules">
+			<GroupByField name="Remote"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Remote Modules">
+			<GroupByField name="Remote"/>
+			<SummaryField name="ModuleID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

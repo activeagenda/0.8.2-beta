@@ -1,0 +1,314 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Job Title Requirements" moduleID="orgjr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Job Title Requirement" pluralRecordName="Job Title Requirements">
+	<ModuleFields>
+		<TableField name="JobReqID" type="int" dbFlags="unsigned auto_increment not null" phrase="Requirement ID|A unique number assigned to each job requirement assigned to each job title" sample="1"/>
+		<TableField name="OrgJobTitleID" type="int" dbFlags="unsigned" phrase="Job Title|A combined field used to describe this job title when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrganizationID" key="OrgJobTitleID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrgJobTitleID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="Emprise, HQ"/>
+		<ForeignField name="LocalLevelID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="LocalLevelID" key="OrgJobTitleID" joinType="left" phrase="Organization Level|A hierarchical level of an organization to which individuals of an organization are assigned" sample="1"/>
+		<CodeField name="LocalLevel" key="LocalLevelID" phrase="Organization Level|A hierarchical level of an organization to which individuals of an organization are assigned" sample="Plant Management" codeTypeID="22"/>
+		<ForeignField name="JobTitleTypeID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="JobTitleTypeID" key="OrgJobTitleID" joinType="left" phrase="Job Title Type|A phrase used to describe the type of job title utilized by the organization" sample="1"/>
+		<CodeField name="JobTitleType" key="JobTitleTypeID" phrase="Job Title Type|A phrase used to describe the type of job title utilized by the organization" sample="Risk Manager" codeTypeID="20"/>
+		<ForeignField name="OrgJobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrgJobTitle" key="OrgJobTitleID" joinType="left" phrase="Job Title|A combined field used to describe this job title when associating it with other records" sample="Risk Manager"/>
+		<TableField name="JobRequirementID" type="int" dbFlags="unsigned" phrase="Job Requirement|A word or short phrase describing the specific job requirement" sample="1"/>
+		<CodeField name="JobRequirement" key="JobRequirementID" phrase="Job Requirement|A word or short phrase describing the specific job requirement" sample="Driving cars, trucks, forklifts and other equipment" codeTypeID="176"/>
+		<TableField name="JobReqDesc" type="varchar(255)" phrase="Description|A brief description of the specific job requirement associated with this job title" sample="Risk Managers are required to drive fleet passenger vehicles during trips to the various locations."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="JobRequirement"/>;_<CombinedFieldRef name="OrgJobTitle"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="JobReq" phrase="Job Requirement|A combined field used to describe this job requirement when associating it with other records" sample="Risk Manager | Driving cars, trucks, forklifts and other equipment"><CombinedFieldRef name="OrgJobTitle"/>;_<CombinedFieldRef name="JobRequirement"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="JobReqID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="JobReq"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List job title requirements">
+			<ListField name="JobReqID" phrase="Job Requirement ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="LocalLevel" phrase="Level"/>
+			<ListField name="JobTitleType" phrase="Job Title Type"/>
+			<ListField name="OrgJobTitle" phrase="Job Title"/>
+			<ListField name="JobRequirement" phrase="Job Requirement"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search job title requirements">
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise, HQ"/>
+				<SampleItem ID="2" name="Emprise, Sweden"/>
+				<SampleItem ID="3" name="Emprise, Latvia"/>
+			</ComboField>
+			<CodeComboField name="LocalLevelID" findMode="text">
+				<UpdateFieldRef name="JobTitleTypeID"/>
+				<SampleItem ID="1" name="Plant Management"/>
+				<SampleItem ID="2" name="Plant Leadership"/>
+				<SampleItem ID="3" name="Plant Supervision"/>
+				<SampleItem ID="4" name="Plant Team Leadership"/>
+				<SampleItem ID="5" name="Plant Line"/>
+				<SampleItem ID="6" name="Plant Staff"/>
+			</CodeComboField>
+			<CodeComboField name="JobTitleTypeID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="2" name="Operator"/>
+				<SampleItem ID="3" name="Customer Service Representative"/>
+				<SampleItem ID="4" name="Sales Person"/>
+				<SampleItem ID="6" name="Executive Leadership"/>
+				<SampleItem ID="7" name="General Administration"/>
+				<SampleItem ID="8" name="Financial Control"/>
+			</CodeComboField>
+			<ComboField name="OrgJobTitleID" findMode="text" parentField="JobTitleTypeID">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="2" name="Line Operator (Sugar Line)"/>
+				<SampleItem ID="3" name="Line Operator (Prune Line)"/>
+			</ComboField>
+			<CodeComboField name="JobRequirementID" findMode="text">
+				<SampleItem ID="1" name="Driving cars, trucks, forklifts and other equipment"/>
+				<SampleItem ID="2" name="Working around equipment and machinery"/>
+				<SampleItem ID="3" name="Walking on uneven ground"/>
+				<SampleItem ID="4" name="Exposure to excessive noise"/>
+				<SampleItem ID="5" name="Exposure to extremes in temperature, humidity or wetness"/>
+				<SampleItem ID="6" name="Exposure to dust, gas, fumes, or chemicals"/>
+				<SampleItem ID="7" name="Working at heights"/>
+				<SampleItem ID="8" name="Operation of foot controls or repetive foot movement"/>
+				<SampleItem ID="5" name="Use of special visual or auditory protective equipment"/>
+				<SampleItem ID="6" name="Working with bio-hazards (i.e. bloodborne pathogens)"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a job title requirement">
+			<ViewField name="JobReqID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LocalLevel"/>
+			<ViewField name="JobTitleType"/>
+			<ViewField name="OrgJobTitle"/>
+			<ViewField name="JobRequirement"/>
+			<ViewField name="JobReqDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a job title requirement">
+			<ViewField name="JobReqID"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise, HQ"/>
+				<SampleItem ID="2" name="Emprise, Sweden"/>
+				<SampleItem ID="3" name="Emprise, Latvia"/>
+			</ComboField>
+			<CodeComboField name="LocalLevelID" findMode="text">
+				<SampleItem ID="1" name="Plant Management"/>
+				<SampleItem ID="2" name="Plant Leadership"/>
+				<SampleItem ID="3" name="Plant Supervision"/>
+				<SampleItem ID="4" name="Plant Team Leadership"/>
+				<SampleItem ID="5" name="Plant Line"/>
+				<SampleItem ID="6" name="Plant Staff"/>
+			</CodeComboField>
+			<CodeComboField name="JobTitleTypeID" findMode="text">
+				<UpdateFieldRef name="OrgJobTitleID"/>
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="2" name="Operator"/>
+				<SampleItem ID="3" name="Customer Service Representative"/>
+				<SampleItem ID="4" name="Sales Person"/>
+				<SampleItem ID="6" name="Executive Leadership"/>
+				<SampleItem ID="7" name="General Administration"/>
+				<SampleItem ID="8" name="Financial Control"/>
+			</CodeComboField>
+			<ComboField name="OrgJobTitleID" findMode="text" parentField="JobTitleTypeID">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="2" name="Line Operator (Sugar Line)"/>
+				<SampleItem ID="3" name="Line Operator (Prune Line)"/>
+			</ComboField>
+			<CodeComboField name="JobRequirementID" findMode="text">
+				<SampleItem ID="1" name="Driving cars, trucks, forklifts and other equipment"/>
+				<SampleItem ID="2" name="Working around equipment and machinery"/>
+				<SampleItem ID="3" name="Walking on uneven ground"/>
+				<SampleItem ID="4" name="Exposure to excessive noise"/>
+				<SampleItem ID="5" name="Exposure to extremes in temperature, humidity or wetness"/>
+				<SampleItem ID="6" name="Exposure to dust, gas, fumes, or chemicals"/>
+				<SampleItem ID="7" name="Working at heights"/>
+				<SampleItem ID="8" name="Operation of foot controls or repetive foot movement"/>
+				<SampleItem ID="5" name="Use of special visual or auditory protective equipment"/>
+				<SampleItem ID="6" name="Working with bio-hazards (i.e. bloodborne pathogens)"/>
+			</CodeComboField>
+			<MemoField name="JobReqDesc" rows="10" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="orgjr" phrase="Job Requirements">
+			<InvisibleField name="JobReqID"/>
+			<ViewField name="Organization" sample="Emprise HQ"/>
+			<ViewField name="JobRequirement" sample="Driving cars, trucks, forklifts and other equipment"/>
+			<ViewField name="JobReqDesc" sample="Risk Managers are required to drive fleet passenger vehicles during trips to the various locations."/>
+		</ViewGrid>
+		<EditGrid moduleID="orgjr" phrase="Job Requirements">
+			<GridForm>
+				<InvisibleField name="JobReqID"/>
+				<CodeComboField name="JobRequirementID" findMode="text" sample="Driving cars, trucks, forklifts and other equipment">
+					<SampleItem ID="1" name="Driving cars, trucks, forklifts and other equipment"/>
+					<SampleItem ID="2" name="Working around equipment and machinery"/>
+					<SampleItem ID="3" name="Walking on uneven ground"/>
+					<SampleItem ID="4" name="Exposure to excessive noise"/>
+					<SampleItem ID="5" name="Exposure to extremes in temperature, humidity or wetness"/>
+					<SampleItem ID="6" name="Exposure to dust, gas, fumes, or chemicals"/>
+					<SampleItem ID="7" name="Working at heights"/>
+					<SampleItem ID="8" name="Operation of foot controls or repetive foot movement"/>
+					<SampleItem ID="5" name="Use of special visual or auditory protective equipment"/>
+					<SampleItem ID="6" name="Working with bio-hazards (i.e. bloodborne pathogens)"/>
+				</CodeComboField>
+				<MemoField name="JobReqDesc" rows="10" cols="75" sample="Risk Managers are required to drive fleet passenger vehicles during trips to the various locations."/>
+			</GridForm>
+			<ViewField name="JobRequirement" sample="Driving cars, trucks, forklifts and other equipment"/>
+			<ViewField name="JobReqDesc" sample="Risk Managers are required to drive fleet passenger vehicles during trips to the various locations."/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Job Requirements By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Job Requirements By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Job Requirements By Level">
+			<GroupByField name="LocalLevel"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Job Requirements By Level">
+			<GroupByField name="LocalLevel"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Job Requirements By Job Title Type">
+			<GroupByField name="JobTitleType"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Job Requirements By Job Title Type">
+			<GroupByField name="JobTitleType"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Job Requirements By Job Title">
+			<GroupByField name="OrgJobTitle"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Job Requirements By Job Title">
+			<GroupByField name="OrgJobTitle"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Job Requirements">
+			<GroupByField name="JobRequirement"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Job Requirements">
+			<GroupByField name="JobRequirement"/>
+			<SummaryField name="JobReqID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,283 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Waste Disposal Facilities" moduleID="wasdf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Waste Disposal Facility" pluralRecordName="Waste Disposal Facilities" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="WasteDisposalFacilityID" type="int" dbFlags="unsigned auto_increment not null" phrase="Facility ID|An automatically assigned number used to track approved waste disposal facilities" sample="1"/>
+		<TableField name="WasteID" type="int" validate="noValidation" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="1"/>
+		<ForeignField name="WasteOrganizationID" listType="allParticipants" foreignTable="was" foreignKey="WasteID" foreignField="OrganizationID" key="WasteID" joinType="left" phrase="Organization|The name of the organization responsible for generating the waste" sample="1"/>
+		<ForeignField name="WasteOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WasteOrganizationID" joinType="left" phrase="Organization|The name of the organization responsible for generating the waste" sample="Active Agenda, HQ"/>
+		<ForeignField name="Waste" foreignTable="was" foreignKey="WasteID" foreignField="Waste" key="WasteID" joinType="left" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="Ammonium Hydroxide"/>
+		<TableField name="DisposalFacilityID" type="int" listType="special=10" validate="RequireSelection" phrase="Disposal Facility|The name of the organization approved to dispose of waste generated" sample="1"/>
+		<ForeignField name="DisposalFacility" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="DisposalFacilityID" joinType="left" phrase="Disposal Facility|The name of the organization approved to dispose of waste generated" sample="CWM, Inc. - Kettleman Hills TSDF"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="90" phrase="Person Accountable|The individual assigned primary accountability for managing the relationship with, and comliance status of, this waste dispposal facility" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the relationship with, and comliance status of, this waste dispposal facility" sample="Mattias Thorslund"/>
+		<TableField name="DisposalContractAgmt" type="bool" validate="noValidation" dbFlags="default 0" phrase="Agreement On File?|Whether the organization has a signed waste contract with the disposal facility on file" sample="Yes"/>
+		<TableField name="DisposalFacilityApproval" type="bool" validate="noValidation" dbFlags="default 0" phrase="Approval On File?|Whether the organization has received approval from the central organization regarding the waste disposal practices and facilties used" sample="Yes"/>
+		<TableField name="DisposalPractice" type="text" validate="notEmpty" phrase="Disposal Practices|A brief description of the disposal practices associated with disposal of this waste" sample="CWM, Inc. Kettleman Hills is the second largest treatment storage and disposal facility in the U.S. Kettleman utilizes a solidification process to convert the liquid waste toa solid and then disposes of the solid result in a lined landfill."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Waste"/>;_Generator:_<CombinedFieldRef name="WasteOrganization"/>_Disposal_Facility:_<CombinedFieldRef name="DisposalFacility"/></CombinedField>
+		<CombinedField name="WasteDisposalFacility" phrase="Waste Disposal Facility|A combined field used to describe this waste disposal facility when associating it with other records" sample="Chemical Waste Management, Inc.">
+			<CombinedFieldRef name="DisposalFacility"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="WasteDisposalFacilityID"/>
+		</PrimaryKey>
+		<OwnerField name="WasteOrganizationID"/>
+		<RecordDescriptionField name="WasteDisposalFacility"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List waste disposal facilities">
+			<ListField name="WasteDisposalFacilityID" phrase="Record ID"/>
+			<ListField name="WasteOrganization" phrase="Waste Organization"/>
+			<ListField name="Waste" phrase="Waste"/>
+			<ListField name="DisposalFacility" phrase="DisposalFacility"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+			<ListField name="DisposalContractAgmt" phrase="Contract Agreement"/>
+			<ListField name="DisposalFacilityApproval" phrase="Facility Approval"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search waste disposal facilities">
+			<OrgComboField name="WasteOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="WasteID" findMode="text">
+				<SampleItem ID="1" name="Ammonium Hydroxide"/>
+				<SampleItem ID="2" name="Cardboard"/>
+				<SampleItem ID="3" name="Process Waste Water"/>
+			</ComboField>
+			<OrgComboField name="DisposalFacilityID" findMode="text">
+				<SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+				<SampleItem ID="2" name="TOSCO Refineries"/>
+				<SampleItem ID="3" name="Greenfield Environmental"/>
+				<SampleItem ID="4" name="SafetyKleen"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="DisposalContractAgmt"/>
+			<CheckBoxField name="DisposalFacilityApproval"/>
+			<MemoField name="DisposalPractice" rows="10" cols="75"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a waste disposal facility">
+			<ViewField name="WasteDisposalFacilityID"/>
+			<ViewField name="Waste"/>
+			<ViewField name="DisposalFacility"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="DisposalContractAgmt"/>
+			<ViewField name="DisposalFacilityApproval"/>
+			<ViewField name="DisposalPractice"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a waste disposal facility">
+			<ViewField name="WasteDisposalFacilityID"/>
+			<ViewField name="Waste"/>
+			<OrgComboField name="DisposalFacilityID" findMode="text">
+				<SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+				<SampleItem ID="2" name="TOSCO Refineries"/>
+				<SampleItem ID="3" name="Greenfield Environmental"/>
+				<SampleItem ID="4" name="SafetyKleen"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="DisposalContractAgmt"/>
+			<CheckBoxField name="DisposalFacilityApproval"/>
+			<MemoField name="DisposalPractice" rows="10" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="wasdf" phrase="Disposal Facilities">
+			<InvisibleField name="WasteDisposalFacilityID"/>
+			<ViewField name="DisposalFacility" sample="CWM, Inc. - Kettleman Hills TSDF"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="DisposalContractAgmt" sample="Yes"/>
+			<ViewField name="DisposalFacilityApproval" sample="Yes"/>
+		</ViewGrid>
+		<EditGrid moduleID="wasdf" phrase="Disposal Facilities">
+			<GridForm>
+				<InvisibleField name="WasteDisposalFacilityID"/>
+				<OrgComboField name="DisposalFacilityID" findMode="text" sample="CWM, Inc. - Kettleman Hills TSDF">
+					<SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+					<SampleItem ID="2" name="TOSCO Refineries"/>
+					<SampleItem ID="3" name="Greenfield Environmental"/>
+					<SampleItem ID="4" name="SafetyKleen"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CheckBoxField name="DisposalContractAgmt" sample="Yes"/>
+				<CheckBoxField name="DisposalFacilityApproval" sample="Yes"/>
+				<MemoField name="DisposalPractice" rows="10" cols="75" sample="CWM, Inc. Kettleman Hills is the second largest treatment storage and disposal facility in the U.S. Kettleman utilizes a solidification process to convert the liquid waste toa solid and then disposes of the solid result in a lined landfill."/>
+			</GridForm>
+			<ViewField name="DisposalFacility" sample="CWM, Inc. - Kettleman Hills TSDF"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="DisposalContractAgmt" sample="Yes"/>
+			<ViewField name="DisposalFacilityApproval" sample="Yes"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie02" title="Waste Disposal Facilities By Waste Generating Organization">
+			<GroupByField name="WasteOrganization"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Waste Disposal Facilities By Waste Generating Organization">
+			<GroupByField name="WasteOrganization"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Waste Disposal Facilities By Disposal Facility">
+			<GroupByField name="DisposalFacility"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Waste Disposal Facilities By Disposal Facility">
+			<GroupByField name="DisposalFacility"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Waste Disposal Facilities By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Waste Disposal Facilities By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Waste Disposal Facilities With Contract Agreements On File">
+			<GroupByField name="DisposalContractAgmt"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Waste Disposal Facilities With Contract Agreements On File">
+			<GroupByField name="DisposalContractAgmt"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Waste Disposal Facilities With Facility Approval On File">
+			<GroupByField name="DisposalFacilityApproval"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Waste Disposal Facilities With Facility Approval On File">
+			<GroupByField name="DisposalFacilityApproval"/>
+			<SummaryField name="WasteDisposalFacilityID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

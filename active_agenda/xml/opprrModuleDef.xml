@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permit Reporting Requirements" moduleID="opprr" parentModule="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Permit Reporting Requirement" pluralRecordName="Permit Reporting Requirements" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="PermitRptReqID" type="int" dbFlags="unsigned auto_increment not null" phrase="Permit Reporting Requirement ID|A unique number assigned to reporting requirements so that multiple reporting requirements can be associated with a single operating permit" sample="1"/>
+        <TableField name="OppPermitID" type="int" validate="noValidation" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="11"/>
+        <ForeignField name="OrganizationID" foreignTable="opp" foreignKey="OppPermitID" foreignField="OrganizationID" key="OppPermitID" joinType="left" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="Active Agenda, HQ"/>
+        <ForeignField name="OppPermit" foreignTable="opp" foreignKey="OppPermitID" foreignField="OppPermit" key="OppPermitID" joinType="left" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+        <TableField name="ReportReqID" type="int" validate="RequireSelection" phrase="Reporting Requirement|Reporting requirements assigned by the issuing agency and associated with this operating permit" sample="3"/>
+        <CodeField name="ReportReq" key="ReportReqID" phrase="Reporting Requirement|Reporting requirements assigned by the issuing agency and associated with this operating permit" sample="Exceeding Permit Requirements" codeTypeID="229"/>
+        <TableField name="Requirement" type="varchar(255)" validate="notEmpty" phrase="Requirement|A brief description of the reporting requirement associated with this operating permit" sample="The organization is required to report ANY non-approved discharge into storm water drains. The facility must report immediately upon learning of a possible non-conforming discharge. All report must be by telephone to the following number (800)772-2982"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="ReportReq"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+        <CombinedField name="PermitRptReq" phrase="Permit Reporting Requirement|A combined field used to describe this permit reporting requirement when associating it with other records" sample="Discharge, Storm Water Discharge - 002 | U.S. Environmental Protection Agency | Active Agenda, HQ | Exceeding Permit Requirements"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="ReportReq"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="PermitRptReqID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="PermitRptReq"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List reporting requirements associated with operating permits">
+            <ListField name="PermitRptReqID" phrase="Record ID"/>
+            <ListField name="OppPermitID" phrase="Permit ID"/>
+            <ListField name="OppPermit" phrase="Permit"/>
+            <ListField name="ReportReq" phrase="ReportReq"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search reporting requirements associated with operating permits">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="OppPermitID" findMode="text">
+                <SampleItem ID="1" name="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Discharge, Storm Water Discharge - 003; U.S. Environmental Protection Agency; Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Discharge, Storm Water Discharge - 004; U.S. Environmental Protection Agency; Active Agenda, Latvia"/>
+                <SampleItem ID="4" name="Discharge, Storm Water Discharge - 005; U.S. Environmental Protection Agency; Active Agenda, Norway"/>
+            </ComboField>
+            <CodeComboField name="ReportReqID" findMode="text">
+                <SampleItem ID="1" name="Exceeding Permit Requirements"/>
+                <SampleItem ID="2" name="Reportable Quantity Release"/>
+                <SampleItem ID="3" name="Process Modification"/>
+                <SampleItem ID="4" name="Process Discontinued"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a reporting requirement associated with an operating permit">
+            <ViewField name="PermitRptReqID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OppPermitID"/>
+            <ViewField name="OppPermit"/>
+            <ViewField name="ReportReq"/>
+            <ViewField name="Requirement"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a reporting requirement associated with an operating permit">
+            <ViewField name="PermitRptReqID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OppPermit"/>
+            <CodeComboField name="ReportReqID" findMode="text">
+                <SampleItem ID="1" name="Exceeding Permit Requirements"/>
+                <SampleItem ID="2" name="Reportable Quantity Release"/>
+                <SampleItem ID="3" name="Process Modification"/>
+                <SampleItem ID="4" name="Process Discontinued"/>
+            </CodeComboField>
+            <MemoField name="Requirement" rows="5" cols="75"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="opprr" phrase="Reporting Requirements">
+            <ViewField name="ReportReq" sample="Exceeding Permit Requirements"/>
+            <ViewField name="Requirement" sample="The organization is required to report ANY non-approved discharge into storm water drains. The facility must report immediately upon learning of a possible non-conforming discharge. All report must be by telephone to the following number (800)772-2982"/>
+        </ViewGrid>
+        <EditGrid moduleID="opprr" phrase="Reporting Requirements">
+            <GridForm>
+                <InvisibleField name="PermitRptReqID" sample="Exceeding Permit Requirements"/>
+                <CodeComboField name="ReportReqID" findMode="text" sample="Exceeding Permit Requirements">
+                    <SampleItem ID="1" name="Exceeding Permit Requirements"/>
+                    <SampleItem ID="2" name="Reportable Quantity Release"/>
+                    <SampleItem ID="3" name="Process Modification"/>
+                    <SampleItem ID="4" name="Process Discontinued"/>
+                </CodeComboField>
+                <MemoField name="Requirement" rows="5" cols="75" sample="The organization is required to report ANY non-approved discharge into storm water drains. The facility must report immediately upon learning of a possible non-conforming discharge. All report must be by telephone to the following number (800)772-2982"/>
+            </GridForm>
+            <ViewField name="ReportReq" sample="Exceeding Permit Requirements"/>
+            <ViewField name="Requirement" sample="The organization is required to report ANY non-approved discharge into storm water drains. The facility must report immediately upon learning of a possible non-conforming discharge. All report must be by telephone to the following number (800)772-2982"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Permit Requirements By Operating Permit">
+            <GroupByField name="OppPermit"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Permit Requirements By Operating Permit">
+            <GroupByField name="OppPermit"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Permit Requirements By Reporting Requirement">
+            <GroupByField name="ReportReq"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Permit Requirements By Reporting Requirement">
+            <GroupByField name="ReportReq"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Permit Requirements By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Permit Requirements By Reporting Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="PermitRptReqID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

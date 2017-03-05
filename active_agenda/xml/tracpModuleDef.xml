@@ -1,0 +1,328 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Certification Prerequisites" moduleID="tracp" parentModule="tra" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Certification Prerequisite" pluralRecordName="Certification Prerequisites" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="CertPrereqID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate prior course requirements to training courses" sample="1"/>
+		<TableField name="CertificationID" type="int" validate="noValidation" phrase="Certification ID|An automatically assigned number used to associate certifications with training courses" sample="11"/>
+		<ForeignField name="CertificationTypeID" foreignTable="trac" foreignKey="CertificationID" foreignField="CertificationTypeID" key="CourseID" joinType="left" phrase="Certification Type|The type of certification offered by the organization" sample="1"/>
+		<CodeField name="CertificationType" key="CertificationTypeID" phrase="Certification Type|The type of certification offered by the organization" sample="Health and Safety" codeTypeID="33"/>
+		<ForeignField name="Certification" foreignTable="trac" foreignKey="CertificationID" foreignField="Certification" key="CourseID" joinType="left" phrase="Certification|A combined field used to describe this certification when associating it with other records" sample="CPR and First Aid"/>
+		<TableField name="CourseID" type="int" validate="RequireSelection" phrase="Course|A combined field used to describe this course when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingTypeID" foreignTable="tra" foreignKey="CourseID" foreignField="TrainingTypeID" key="CourseID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingCategoryID" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingCategoryID" key="TrainingTypeID" joinType="left" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+		<CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+		<ForeignField name="TrainingTypeDesc" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingTypeDesc" key="TrainingTypeID" joinType="left" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+		<ForeignField name="TrainingType" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingType" key="TrainingTypeID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"/>
+		<ForeignField name="OrgLevelID" foreignTable="tra" foreignKey="CourseID" foreignField="OrgLevelID" key="CourseID" joinType="left" phrase="Course Level|The hierarchical level of the organization" sample="1"/>
+		<CodeField name="OrgLevel" key="OrgLevelID" phrase="Course Level|The hierarchical level of the organization" sample="Local" codeTypeID="22"/>
+		<ForeignField name="Course" foreignTable="tra" foreignKey="CourseID" foreignField="Course" key="CourseID" joinType="left" phrase="Course|A combined field used to describe this course when associating it with other records" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Local; QA-HACCP-101.1"/>
+		<TableField name="CourseSatisfactionLevelID" type="int" validate="noValidation" phrase="Satisfaction Level|The level to which the course identified satisfies the associated certification" sample="1"/>
+		<CodeField name="CourseSatisfactionLevel" key="CourseSatisfactionLevelID" phrase="Satisfaction Level|The level to which the course identified satisfies the associated certification" sample="Partial" codeTypeID="127"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="CertificationType"/>;_<CombinedFieldRef name="TrainingType"/>;_<CombinedFieldRef name="Course"/></CombinedField>
+		<CombinedField name="CertPrereq" phrase="Certification Prerequisite|A combined field used to describe this certification prerequisite when associating it with other records" sample="Health and Safety | Quality | Introduction to Hazard Analysis of Critical Control Points (HACCP); Local; QA-HACCP-101.1"><CombinedFieldRef name="CertificationType"/>;_<CombinedFieldRef name="TrainingType"/>;_<CombinedFieldRef name="Course"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="CertPrereqID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="CertPrereq"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training certification prerequisites">
+			<ListField name="CertPrereqID" phrase="Record ID"/>
+			<ListField name="Certification" phrase="Certification"/>
+			<ListField name="TrainingCategory" phrase="Certification"/>
+			<ListField name="TrainingType" phrase="Certification"/>
+			<ListField name="Course" phrase="Course"/>
+			<ListField name="CourseSatisfactionLevel" phrase="Satisfaction"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training certification prerequisites">
+			<CodeComboField name="OrgLevelID" findMode="text">
+				<SampleItem ID="1" name="Local"/>
+				<SampleItem ID="2" name="Regional"/>
+				<SampleItem ID="3" name="Corporate"/>
+			</CodeComboField>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<CodeRadioField name="CourseSatisfactionLevelID">
+				<SampleItem ID="1" name="Partial"/>
+				<SampleItem ID="2" name="Complete"/>
+			</CodeRadioField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a training certification prerequisite">
+			<ViewField name="CertPrereqID"/>
+			<ViewField name="CertificationType"/>
+			<ViewField name="Certification"/>
+			<ViewField name="TrainingCategory"/>
+			<ViewField name="TrainingType"/>
+			<ViewField name="OrgLevel"/>
+			<ViewField name="Course"/>
+			<ViewField name="CourseSatisfactionLevel"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a training certification prerequisite">
+			<ViewField name="CertPrereqID"/>
+			<ViewField name="CertificationType"/>
+			<ViewField name="Certification"/>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<CodeRadioField name="CourseSatisfactionLevelID">
+				<SampleItem ID="1" name="Partial"/>
+				<SampleItem ID="2" name="Complete"/>
+			</CodeRadioField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="tracp" phrase="Prerequisite Courses">
+			<InvisibleField name="CertPrereqID"/>
+			<ViewField name="Course" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Local; QA-HACCP-101.1"/>
+			<ViewField name="CourseSatisfactionLevel" sample="Partial"/>
+		</ViewGrid>
+		<EditGrid moduleID="tracp" phrase="Prerequisite Courses">
+			<GridForm>
+				<InvisibleField name="CertPrereqID"/>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+				<CodeComboField name="CourseSatisfactionLevelID" sample="Partial">
+					<SampleItem ID="1" name="Partial"/>
+					<SampleItem ID="2" name="Complete"/>
+				</CodeComboField>
+			</GridForm>
+			<ViewField name="Course" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Local; QA-HACCP-101.1"/>
+			<ViewField name="CourseSatisfactionLevel" sample="Partial"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Certification Prequisites By Type">
+			<GroupByField name="CertificationType"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Certification Prequisites By Type">
+			<GroupByField name="CertificationType"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Certification Prequisites By Certification">
+			<GroupByField name="Certification"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Certification Prequisites By Certification">
+			<GroupByField name="Certification"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Certification Prequisites By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Certification Prequisites By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Certification Prequisites By Organization Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Certification Prequisites By Organization Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Certification Prequisites By Course Satisfaction Level">
+			<GroupByField name="CourseSatisfactionLevel"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Certification Prequisites By Course Satisfaction Level">
+			<GroupByField name="CourseSatisfactionLevel"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Certification Prequisites By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Certification Prequisites By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Certification Prequisites By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Certification Prequisites By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="CertPrereqID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

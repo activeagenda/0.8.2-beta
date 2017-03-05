@@ -1,0 +1,314 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Meetings Attendees" moduleID="mtga" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Meeting Attendee" pluralRecordName="Meeting Attendees" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="AttendeeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Attendee ID|An automatically assigned number used to associate people with meetings" sample="1"/>
+		<TableField name="MeetingID" type="int" validate="noValidation" phrase="Meeting ID|An automatically assigned number used to track meetings held by the organization" sample="11"/>
+		<ForeignField name="OrganizationID" listType="allParticipants internalNonParticipants externalNonParticipants" foreignTable="mtg" foreignKey="MeetingID" foreignField="OrganizationID" key="MeetingID" joinType="left" phrase="Organization|The name of the organization responsible for generating the meeting requirement" sample="3"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization responsible for generating the meeting requirement" sample="Active Agenda, HQ"/>
+		<ForeignField name="DepartmentID" foreignTable="orgda" foreignKey="RelatedRecordID" foreignField="DepartmentID" key="PersonID" listCondition="RelatedModuleID = 'pple'" joinType="left" phrase="Department ID|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="MeetingTypeID" foreignTable="mtg" foreignKey="MeetingID" foreignField="MeetingTypeID" key="MeetingID" joinType="left" phrase="Meeting Type|The type of meeting conducted" sample="Safety Meeting"/>
+		<ForeignField name="MeetingType" foreignTable="mtg" foreignKey="MeetingID" foreignField="MeetingType" key="MeetingID" joinType="left" phrase="Meeting Type|The type of meeting conducted" sample="Safety Meeting"/>
+		<ForeignField name="MeetingStartTime" foreignTable="mtg" foreignKey="MeetingID" foreignField="MeetingStartTime" key="MeetingID" joinType="left" phrase="Meeting Date|Date the meeting occurred" sample="01/01/2004"/>
+		<ForeignField name="MeetingDuration" foreignTable="mtg" foreignKey="MeetingID" foreignField="MeetingDuration" key="MeetingID" joinType="left" phrase="Duration|The total duration of the meeting. The duration is automatically calculated based on the meeting's begin time and end time" sample="0:30:01"/>
+		<ForeignField name="Meeting" foreignTable="mtg" foreignKey="MeetingID" foreignField="Meeting" key="MeetingID" joinType="left" phrase="Meeting|A combined field used to describe this meeting when associating it with other records" sample="Active Agenda, HQ; Packaging Department Safety Meeting;  Employee Safety; 01/01/2004"/>
+		<RemoteField name="MtgAttendeeID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="57" phrase="Meeting Attendee|The person attending the meeting" sample="1"/>
+		<ForeignField name="DepartmentID" foreignTable="ppl" foreignKey="PersonID" foreignField="DepartmentID" key="MtgAttendeeID" joinType="left" phrase="Department|Department of the local organization the employee reports to" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignKey="PersonID" foreignField="LastName" key="MtgAttendeeID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignKey="PersonID" foreignField="FirstName" key="MtgAttendeeID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="DisplayName" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="MtgAttendeeID" joinType="left" phrase="Display Name|Commonly used name of an individual used to display throughout this application" sample="Daniel"/>
+		<ForeignField name="HourlyWage" foreignTable="pple" foreignKey="PersonID" foreignField="HourlyWage" key="MtgAttendeeID" joinType="left" phrase="Hourly Wage|The amount the employee is paid per hour of work" sample="$18.50"/>
+		<ForeignField name="MtgAttendee" foreignTable="ppl" foreignKey="PersonID" foreignField="SearchSelect" key="MtgAttendeeID" joinType="left" phrase="Meeting Attendee|The person attending the meeting" sample="Mattias Thorslund"/>
+		<CalculatedField name="PersonCost" type="int" calcFunction="multiply" params="HourlyWage MeetingDuration" validate="" phrase="Labor Cost|The labor cost associated with this person's attendance at the meeting." sample="$9.25"/>
+		<TableField name="PunctualnessID" type="int" defaultValue="#1" validate="noValidation" phrase="Punctualness|The punctualness of this scheduled attendee" sample="1"/>
+		<CodeField name="Punctualness" key="PunctualnessID" phrase="Punctualness|The punctualness of this scheduled attendee" sample="Late" codeTypeID="216"/>
+		<TableField name="AttentivenessID" type="int" defaultValue="#1" validate="noValidation" phrase="Attentiveness|The attentiveness of this scheduled attendee" sample="1"/>
+		<CodeField name="Attentiveness" key="AttentivenessID" phrase="Attentiveness|The attentiveness of this scheduled attendee" sample="Attentive" codeTypeID="105"/>
+		<TableField name="AttendanceID" type="int" defaultValue="#1" dbFlags="default 1" validate="noValidation" phrase="Attendance|The Attendance type of this scheduled attendee" sample="1"/>
+		<CodeField name="Attendance" key="AttendanceID" phrase="Attendance|The Attendance type of this scheduled attendee" sample="Attended" codeTypeID="104"/>
+		<!--the ParticipationType should default to Attended. DFZ 1-22-2004-->
+		<TableField name="AttendeeDetails" type="text" validate="noValidation" phrase="Details|A description of any details associated with this person's attendance or failure to attend" sample="Mattias was required to operate the Bananna Line by his immediate supervisor. The Supervisor's waiver of the meeting requirement is attached"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="MtgAttendee"/>;_<CombinedFieldRef name="MeetingType"/>;_<CombinedFieldRef name="MeetingStartTime"/>;_<CombinedFieldRef name="Attendance"/></CombinedField>
+		<CombinedField name="Attendee" phrase="Attendee|A combined field used to describe this attendee when associating him or her with other records" sample="Employee Safety; 01/01/2004; Mattias Thorslund"><CombinedFieldRef name="MeetingType"/>;_<CombinedFieldRef name="MeetingStartTime"/>;_<CombinedFieldRef name="MtgAttendee"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AttendeeID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Attendee"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List meeting attendees">
+			<ListField name="AttendeeID" phrase="Record ID"/>
+			<ListField name="MeetingType" phrase="Meeting Type"/>
+			<ListField name="MeetingStartTime" phrase="Date"/>
+			<ListField name="LastName" phrase="Last Name"/>
+			<ListField name="FirstName" phrase="First Name"/>
+			<ListField name="Department" phrase="Department"/>
+			<ListField name="Attendance" phrase="Attendance"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search meeting attendees">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<ComboField name="MeetingTypeID" findMode="text">
+				<SampleItem ID="1" name="Monthly Safety"/>
+				<SampleItem ID="2" name="Product Quality"/>
+				<SampleItem ID="3" name="Product Cutting"/>
+			</ComboField>
+			<ComboField name="MeetingID" findMode="alpha">
+				<SampleItem ID="1" name="Active Agenda, HQ; Shipping Department Safety Meeting;  Employee Safety; 01/01/2004"/>
+				<SampleItem ID="2" name="Active Agenda, HQ; Laboratory Safety Meeting;  Employee Safety; 01/01/2004"/>
+				<SampleItem ID="3" name="Active Agenda, HQ; Packaging Department Safety Meeting;  Employee Safety; 01/01/2004"/>
+				<SampleItem ID="4" name="Active Agenda, HQ; Production (1st Shift) Safety Meeting;  Employee Safety; 01/01/2004"/>
+			</ComboField>
+			<PersonComboField name="MtgAttendeeID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="AttendanceID">
+				<SampleItem ID="1" name="Attended"/>
+				<SampleItem ID="2" name="Absent"/>
+				<SampleItem ID="3" name="Partial Attendance"/>
+			</CodeRadioField>
+			<CodeRadioField name="PunctualnessID">
+				<SampleItem ID="1" name="Late"/>
+				<SampleItem ID="2" name="On Time"/>
+			</CodeRadioField>
+			<CodeRadioField name="AttentivenessID">
+				<SampleItem ID="1" name="Attentive"/>
+				<SampleItem ID="2" name="Participative"/>
+				<SampleItem ID="2" name="Inattentive"/>
+				<SampleItem ID="2" name="Inconsiderate"/>
+				<SampleItem ID="2" name="Disruptive"/>
+			</CodeRadioField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a meeting attendee">
+			<ViewField name="AttendeeID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="MeetingType"/>
+			<ViewField name="MeetingStartTime"/>
+			<ViewField name="Meeting"/>
+			<ViewField name="MtgAttendee"/>
+			<ViewField name="Attendance"/>
+			<ViewField name="Punctualness"/>
+			<ViewField name="Attentiveness"/>
+			<ViewField name="AttendeeDetails"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a meeting attendee">
+			<ViewField name="AttendeeID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="MeetingType"/>
+			<ViewField name="MeetingStartTime"/>
+			<ViewField name="Meeting"/>
+			<PersonComboField name="MtgAttendeeID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="AttendanceID" orientation="horizontal">
+				<SampleItem ID="1" name="Attended"/>
+				<SampleItem ID="2" name="Absent"/>
+				<SampleItem ID="3" name="Partial Attendance"/>
+			</CodeRadioField>
+			<CodeRadioField name="PunctualnessID" orientation="horizontal">
+				<SampleItem ID="1" name="Late"/>
+				<SampleItem ID="2" name="On Time"/>
+			</CodeRadioField>
+			<CodeRadioField name="AttentivenessID" orientation="horizontal">
+				<SampleItem ID="1" name="Attentive"/>
+				<SampleItem ID="2" name="Participative"/>
+			</CodeRadioField>
+			<MemoField name="AttendeeDetails" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="mtga" phrase="Meeting Attendees">
+			<InvisibleField name="AttendeeID"/>
+			<ViewField name="LastName" phrase="Last Name"/>
+			<ViewField name="FirstName" phrase="First Name"/>
+			<ViewField name="Department" phrase="Department"/>
+			<ViewField name="Attendance" phrase="Attendance"/>
+		</ViewGrid>
+		<EditGrid moduleID="mtga" phrase="Meeting Attendees">
+			<GridForm>
+				<InvisibleField name="AttendeeID"/>
+				<ViewField name="DisplayName" phrase="Name"/>
+				<ViewField name="Department" phrase="Department"/>
+				<CodeRadioField name="AttendanceID" orientation="vertical" sample="Attended"/>
+				<CodeRadioField name="PunctualnessID" orientation="vertical" sample="Late"/>
+				<CodeRadioField name="AttentivenessID" orientation="vertical" sample="Participative"/>
+			</GridForm>
+			<InvisibleField name="AttendeeID"/>
+			<ViewField name="LastName" phrase="Last Name"/>
+			<ViewField name="FirstName" phrase="First Name"/>
+			<ViewField name="Department" phrase="Department"/>
+			<ViewField name="Attendance" phrase="Attendance"/>
+		</EditGrid>
+		<SearchSelectGrid moduleID="mtga" phrase="Meeting Attendees" primaryListField="MtgAttendee">
+			<SearchForm>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="DepartmentID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda Sweden"/>
+					<SampleItem ID="3" name="Active Agenda Latvia"/>
+				</OrgComboField>
+				<ComboField name="DepartmentID" parentField="OrganizationID">
+					<SampleItem ID="1" name="Packaging"/>
+					<SampleItem ID="2" name="Processing"/>
+					<SampleItem ID="3" name="Administration"/>
+				</ComboField>
+			</SearchForm>
+		</SearchSelectGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Meeting Attendees By Punctualness">
+			<GroupByField name="Punctualness"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Meeting Attendees By Punctualness">
+			<GroupByField name="Punctualness"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Meeting Attendees By Attentiveness">
+			<GroupByField name="Attentiveness"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Meeting Attendees By Attentiveness">
+			<GroupByField name="Attentiveness"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Meeting Attendees By Attendance">
+			<GroupByField name="Attendance"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Meeting Attendees By Attendance">
+			<GroupByField name="Attendance"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Meeting Attendees By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Meeting Attendees By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Meeting Attendees By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Meeting Attendees By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AttendeeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

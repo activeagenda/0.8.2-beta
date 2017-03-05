@@ -1,0 +1,888 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Incident Reporting" moduleID="ire" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Incident Report" pluralRecordName="Incident Reports" addNewName="Report" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="IncidentReportID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track situations and incidents" sample="11"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The primary organization involved in the incident" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The primary organization involved in the incident" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="44" phrase="Person Accountable|The individual assigned primary accountability for managing the report process" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the report process" sample="Mattias Thorslund"/>
+		<TableField name="MannerReceivedID" type="int" validate="RequireSelection" phrase="Manner Received|The manner in which the initial report was received" sample="1"/>
+		<CodeField name="MannerReceived" key="MannerReceivedID" phrase="Manner Received|The manner in which the initial report was received" sample="In Person" codeTypeID="187"/>
+		<RemoteField name="EventDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="16" phrase="Event Date|Date the situation or incident occurred" sample="01/01/2004"/>
+		<RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="System Entry Date|Date the situation or incident was entered into the system" sample="01/01/2004 12:02:34"/>
+		<CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate EventDate" validate="" phrase="System Entry Delay|A calculated field based on the number of days between the incident data entry date and the event date" sample="30"/>
+		<!--the entry date and time should be automatically entered based on the server calendar and clock and record upon the first screen save. DFZ 10-28-2003-->
+		<RemoteField name="SubmittedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="43" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="1"/>
+		<ForeignField name="SubmittedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SubmittedByID" joinType="left" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="Jane Doe"/>
+		<ForeignField name="SubmittedByEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkEmail" key="SubmittedByID" joinType="left" phrase="Submitted By Email|The email address of the individual that submitted this report into the system" sample="Jane@Doe.com"/>
+		<RemoteField name="ReportDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="32" phrase="Report Date|Date the situation or incident was first reported" sample="01/01/2004"/>
+		<CalculatedField name="ReportDelay" type="int" calcFunction="timediff" params="ReportDate EventDate" validate="" phrase="Report Delay|A calculated field based on the number of days between the incident date and the incident report date" sample="30"/>
+		<TableField name="ReportSourceID" type="int" validate="RequireSelection" phrase="Report Source|The source of the report. Whether the report was generated anonymously, by a known person, or by an unknown source" sample="1"/>
+		<CodeField name="ReportSource" key="ReportSourceID" phrase="Report Source|The source of the report. Whether the report was generated anonymously, by a known person, or by an unknown source" sample="Known Person" codeTypeID="230"/>
+		<RemoteField name="PersonReportingID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="42" phrase="Person Reporting|The name of the individual that reported the situation or incident" sample="1"/>
+		<ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the situation or incident" sample="Jane Doe"/>
+		<TableField name="RepPersonTypeID" type="int" validate="RequireSelection" phrase="Reporting Person Type|The organizational affiliation of the person reporting" sample="1"/>
+		<CodeField name="RepPersonType" key="RepPersonTypeID" phrase="Reporting Person Type|The organizational affiliation of the person reporting" sample="Employee" codeTypeID="228"/>
+		<TableField name="OnCoPropID" type="int" validate="RequireSelection" phrase="On Company Property|Whether this situation or incident occurred on company property" sample="1"/>
+		<CodeField name="OnCoProp" key="OnCoPropID" phrase="On Company Property|Whether this situation or incident occurred on company property" sample="Yes" codeTypeID="8"/>
+		<TableField name="RepEvent" type="text" validate="notEmpty" phrase="Reported Event|A detailed description of the situation or incident, as received from the reporter. Every effort should be made to enter the reporter's comments on a word-for-word basis. Who, What, When, Where and Why" sample="Mattias Thorslund, an employee, was witnessed eating lunch on the process line during lunch on Friday, October 31, 2003."/>
+		<TableField name="SubObserv" type="text" validate="notEmpty" phrase="Submission Observations|A detailed description of any observations or impressions about the reporter or other information about the event that might be helpful in assessing the situation or incident" sample="The reporting person seemed to be bitter towards Mr. Thorslund. The reporting person stated that Mr. Thorslund had bothered him on prior occassions"/>
+		<TableField name="IncidentName" type="varchar(128)" validate="notEmpty" phrase="Incident Name|A unique name used to identify the situation or incident" sample="Thorslund Discrimination Claim"/>
+		<TableField name="CodeName" type="varchar(50)" validate="noValidation" phrase="Code Name|A unique code name used to reference situation or incident information without disclosing the particular situation or incident" sample="Red Herring"/>
+		<TableField name="PotVioLaw" type="bool" validate="noValidation" dbFlags="default 0" phrase="Potential Violation of Law|Check this box if this situation or incident is a potential violation of law" sample="No"/>
+		<TableField name="GovtRept" type="bool" validate="noValidation" dbFlags="default 0" phrase="Governmental Reporting Requirements|Check this box if this situation or incident requires governmental reporting" sample="No"/>
+		<!-- Costs and Severity section (Begin)-->
+		<!-- These fields should ideally NOT be used on screens in the module itself. They are part of the calculation of TotalCost and CostSeverity, and add (quite) a bit of overhead to the SQL that retrieves a record. Rather, use the "cached" counterparts below, which are updated whenever the cost changes.-->
+		<SummaryField name="ClaimCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="TotalIncurred" localKey="IncidentReportID" summaryKey="IncidentReportID" summaryModuleID="clm" phrase="Claim Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+		<SummaryField name="RollupCosts" type="money" validate="noValidation" summaryFunction="cos_rollup_sum" summaryField="Incurred" localKey="IncidentReportID" summaryKey="RecordID" summaryModuleID="cos" summaryCondition="ModuleID = 'ire'" isGlobal="yes" phrase="Rollup Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+		<SummaryField name="LocalCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="Incurred" localKey="IncidentReportID" summaryKey="RelatedRecordID" summaryModuleID="cos" summaryCondition="RelatedModuleID = 'ire'" isGlobal="yes" phrase="Local Costs|The estimated amount of costs attached directly to this record" sample="702.00"/>
+		<CalculatedField name="TotalCost" type="money" calcFunction="sum" params="ClaimCosts RollupCosts LocalCosts" phrase="Total Cost|The automatically calculated cost associated with this incident. Costs are derived by compiling all claim costs and those costs associated with managing this incident and tracked within the Costs module" sample="702.00"/>
+		<RangeField name="CostSeverityID" foreignTable="rsks" foreignKey="SeverityLowCost" foreignField="SeverityID" key="TotalCost" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<ForeignField name="CostSeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<ForeignField name="CostSeverity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<!-- The CachedTotalCost and CachedSeverityValue fields should replace their counterparts in ViewFields on the screens below. Their "non-cached" counterparts  -->
+		<RemoteField name="CachedTotalCost" type="money" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="TotalCost" phrase="Total Cost|The total cost of this incident" sample="1.00"/>
+		<RemoteField name="CachedSeverityValue" type="int" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="SeverityValue" phrase="Cost Severity|The severity this incident" sample="1.00"/>
+		<!-- now uses the cached cost severity value -->
+		<CalculatedField name="CalculatedSeverityValue" type="int" calcFunction="max" params="CachedSeverityValue SeverityValue" phrase="Calculated Severity Value|The greater of the User-assigned severity value and the acutomaticlly assigned Cost Severity value" sample="3"/>
+		<RemoteField name="LikelihoodID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodID" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="1"/>
+		<ForeignField name="LikelihoodValue" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="LikelihoodValue" key="LikelihoodID" joinType="left" phrase="Likelihood Value|A numerical value assigned to the likelihood of risk occurrence. The likelihood value is used in combination with the severity value to calculate a risk index score and an associated recommendation to mitigate the risk" sample="3"/>
+		<ForeignField name="RiskLikelihoodTerm" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="RiskLikelihoodTerm" key="LikelihoodID" joinType="left" phrase="Risk Likelihood Term|A one word description of the risk likelihood level" sample="Remote"/>
+		<ForeignField name="Likelihood" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="Likelihood" key="LikelihoodID" joinType="left" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="REMOTE: Extremely unlikely to occur"/>
+		<RemoteField name="LikelihoodStatusID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="1"/>
+		<CodeField name="LikelihoodStatus" key="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="Resolved" codeTypeID="112"/>
+		<RemoteField name="LikelihoodFactors" validate="notEmpty" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodFactors" phrase="Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat" sample="SCBAs were purchased for all First Responders and all responders have been trained by the Fire Department"/>
+		<RemoteField name="SeverityID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="SeverityID" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="1"/>
+		<ForeignField name="SeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="SeverityID" joinType="left" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="6"/>
+		<ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+		<ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+		<CalculatedField name="IndexValue" type="int" calcFunction="multiply" params="LikelihoodValue CalculatedSeverityValue" validate="" phrase="Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed" sample="15"/>
+		<RangeField name="RiskRecommendation" foreignTable="rskx" foreignKey="IndexValue" foreignField="RiskRecommendation" key="IndexValue" phrase="Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity" sample="Take action if and when appropriate"/>
+		<!-- Costs and Severity section (End)-->
+		<TableField name="InvRptDftComp" type="bool" validate="noValidation" dbFlags="default 0" phrase="Investigative Draft Report Completed|Check this box if an investigative draft report has been completed" sample="Yes"/>
+		<TableField name="InvRptDftCompDate" type="date" validate="noValidation" phrase="Completion Date|Date the investigative draft report was completed" sample="01/01/2004"/>
+		<RemoteField name="InvRptDftCompByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="38" phrase="Draft Report Author|The name of the individual that authored the investigative draft report" sample="1"/>
+		<ForeignField name="InvRptDftCompBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InvRptDftCompByID" joinType="left" phrase="Draft Report Author|The name of the individual that authored the investigative draft report" sample="Jane Doe"/>
+		<TableField name="InvRptDftSent" type="bool" validate="noValidation" dbFlags="default 0" phrase="Investigative Draft Report Sent|Check this box if an investigative draft report has been sent" sample="Yes"/>
+		<TableField name="InvRptDftSentDate" type="datetime" validate="noValidation" phrase="Draft Report Sent Date|Date the investigative draft report was sent" sample="01/01/2004"/>
+		<CalculatedField name="InvRptDftSentDelay" type="int" calcFunction="timediff" params="InvRptDftSentDate EventDate" validate="" phrase="Draft Report Delay|A calculated field based on the number of days between the event date and the draft investigation report sent date" sample="30"/>
+		<RemoteField name="InvRptDftSentByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="40" phrase="Draft Report Sender|The name of the individual that sent the investigative draft report" sample="1"/>
+		<ForeignField name="InvRptDftSentBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InvRptDftSentByID" joinType="left" phrase="Sender|The name of the individual that sent the investigative draft report" sample="Jane Doe"/>
+		<TableField name="InvRptDftReceived" type="bool" validate="noValidation" dbFlags="default 0" phrase="Investigative Draft Report Received|Check this box if an investigative draft report has been received" sample="Yes"/>
+		<TableField name="InvRptDftRecDate" type="date" validate="noValidation" phrase="Received Date|Date the investigative draft report was received" sample="01/01/2004"/>
+		<RemoteField name="InvRptDftRecByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="39" phrase="Draft Report Recipient|The name of the individual that received the investigative draft report" sample="1"/>
+		<ForeignField name="InvRptDftRecBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InvRptDftRecByID" joinType="left" phrase="Recipient|The name of the individual that received the investigative draft report" sample="Jane Doe"/>
+		<TableField name="InvRptFinalized" type="bool" validate="noValidation" dbFlags="default 0" phrase="Investigative Report Finalized|Check this box if an investigative report has been finalized" sample="Yes"/>
+		<TableField name="InvRptFinalDate" type="datetime" validate="noValidation" phrase="Final Report Date|Date the investigative report was finalized" sample="01/01/2004"/>
+		<CalculatedField name="InvRptFinalDelay" type="int" calcFunction="timediff" params="InvRptFinalDate EventDate" validate="" phrase="Final Report Delay|A calculated field based on the number of days between the event date and the final investigation report completion date" sample="30"/>
+		<RemoteField name="InvRptFinalByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="41" phrase="Final Report Author|The name of the individual that authored the final investigative report" sample="1"/>
+		<ForeignField name="InvRptFinalBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InvRptFinalByID" joinType="left" phrase="Final Report Author|The name of the individual that authored the final investigative report" sample="Jane Doe"/>
+		<TableField name="IncidentStatusID" type="int" validate="RequireSelection" phrase="Incident Status|Status of the situation or incident report and associated investigation" sample="2"/>
+		<CodeField name="IncidentStatus" key="IncidentStatusID" phrase="Incident Status|Status of the situation or incident report and associated investigation" sample="Closed" codeTypeID="99"/>
+		<TableField name="KeyLearning" type="text" validate="noValidation" phrase="Key Learning|A detailed description of the key learnings from the reported situation or incident. All suggested changes to Policies, Guidelines, Training Materials and other business processes should be included" sample="All employees should receive training regarding the definition of workers' compensation fraud and the penalties associated with conviction"/>
+		<RemoteField name="ClosureDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="33" phrase="Incident Closure Date|The date the situation or incident report was closed" sample="01/01/2004"/>
+		<CalculatedField name="ClosureDelay" type="int" calcFunction="datediff" params="ClosureDate EventDate" validate="" phrase="Incident Closure Delay|A calculated field based on the number of days between the event date and the incident report closure date" sample="30"/>
+		<SummaryField name="Situations" summaryFunction="list" summaryField="SituationType" summaryKey="IncidentReportID" summaryModuleID="ires" localKey="IncidentReportID" phrase="Situation type|A list of situation types resulting in an incident report" sample="Information Technology |  Malicious Code Attack: Script (logging)"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'ire'" localKey="IncidentReportID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="ReportDelayCalc" phrase="Report Delay|A calculated field based on the number of hours between the incident date and the incident report date" sample="30 Hours"><CombinedFieldRef name="ReportDelay"/>_Hours</CombinedField>
+		<CombinedField name="EntryDelayCalc" phrase="System Entry Delay|A calculated field based on the number of hours between the incident data entry date and the event date" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours</CombinedField>
+		<CombinedField name="InvRptDftSentDelayCalc" phrase="Draft Report Delay|A calculated field based on the number of hours between the event date and the draft investigation report sent date" sample="30 Hours"><CombinedFieldRef name="InvRptDftSentDelay"/>_Hours</CombinedField>
+		<CombinedField name="InvRptFinalDelayCalc" phrase="Final Report Delay|A calculated field based on the number of hours between the event date and the final investigation report completion date" sample="30 Hours"><CombinedFieldRef name="InvRptFinalDelay"/>_Hours</CombinedField>
+		<CombinedField name="ClosureDelayCalc" phrase="Incident Closure Delay|A calculated field based on the number of hours between the event date and the incident report closure date" sample="425 Hours"><CombinedFieldRef name="ClosureDelay"/>_Days</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="IncidentName"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="EventDate"/>_Incident_ID:_<CombinedFieldRef name="IncidentReportID"/></CombinedField>
+		<CombinedField name="IncidentReport" phrase="Incident Report|A combined field used to describe this incident report when associating it with other records" sample="Thorslund Discrimination Claim | Active Agenda, HQ | 10-28-2003; Incident ID: 1"><CombinedFieldRef name="IncidentName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="IncidentReportID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="IncidentReport"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="ires" name="Incident Report Situations" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="irel" name="Letter Contact" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="ireoc" name="Incident Report Outside Counsel" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="irepo" name="Incident Report Policy Violations" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="iren" name="Incident Report Numbers" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="ireps" name="Products and/or Services" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="iret" name="Telephone Contact" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="irev" name="Visitation" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="clm" name="Claims" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lpa" name="Loss Employment Practice" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="len" name="Loss Environment" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lin" name="Loss Injury" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lit" name="Loss Information Technology" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lpd" name="Loss Product and/ or Service" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lppb" name="Loss Property - Building" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lppe" name="Loss Property - Equipment" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lppo" name="Loss Property - Other Asset" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="lppv" name="Loss Property - Vehicle" parentKey="IncidentReportID" localKey="IncidentReportID"/>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="wrk" name="Work Orders" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="rtc" name="Root Causes" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Exposures" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="docs" name="Document Status" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="IncidentReportID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ire"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List reported incidents and/or situations">
+			<ListField name="IncidentReportID" phrase="Record ID"/>
+			<ListField name="EventDate" phrase="Event Date"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="IncidentName" phrase="Incident Name"/>
+			<ListField name="IndexValue" phrase="Risk Index" align="center"/>
+			<ListField name="CachedTotalCost" phrase="Total Costs"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search reported incidents and/or situations">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="MannerReceivedID" findMode="text">
+				<SampleItem ID="1" name="Electronic Mail"/>
+				<SampleItem ID="2" name="Facsimile [fax]"/>
+				<SampleItem ID="3" name="Help Telephone Line"/>
+				<SampleItem ID="4" name="In Person"/>
+				<SampleItem ID="5" name="Incident Report Form"/>
+				<SampleItem ID="6" name="Internet Web Form"/>
+				<SampleItem ID="7" name="Letter Mail"/>
+				<SampleItem ID="8" name="Telephone"/>
+			</CodeComboField>
+			<CodeRadioField name="ReportSourceID">
+				<SampleItem ID="1" name="Known Person"/>
+				<SampleItem ID="2" name="Anonymous"/>
+			</CodeRadioField>
+			<DateField name="EventDate"/>
+			<DateField name="ReportDate"/>
+			<EditField name="IncidentName" size="50" maxLength="128"/>
+			<EditField name="CodeName" size="50" maxLength="50"/>
+			<CheckBoxField name="PotVioLaw"/>
+			<CheckBoxField name="GovtRept"/>
+			<DateField name="EntryDate"/>
+			<PersonComboField name="SubmittedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="RepPersonTypeID" findMode="text">
+				<SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="2" name="Anonymous"/>
+				<SampleItem ID="3" name="Contractor"/>
+				<SampleItem ID="4" name="Customer"/>
+				<SampleItem ID="5" name="Government Agency or Employee"/>
+				<SampleItem ID="6" name="Retiree"/>
+				<SampleItem ID="7" name="Shareholder"/>
+				<SampleItem ID="8" name="Vendor/Supplier"/>
+				<SampleItem ID="9" name="Unknown Status"/>
+				<SampleItem ID="10" name="Other"/>
+			</CodeComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="OnCoPropID">
+				<SampleItem ID="1" name="Yes"/>
+				<SampleItem ID="3" name="No"/>
+				<SampleItem ID="5" name="Both On and Off Company Property"/>
+			</CodeRadioField>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<EditField name="IndexValue" size="5" maxLength="5"/>
+			<EditField name="RiskRecommendation" size="75" maxLength="128"/>
+			<CheckBoxField name="InvRptDftComp"/>
+			<DateField name="InvRptDftCompDate"/>
+			<PersonComboField name="InvRptDftCompByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="InvRptDftSent"/>
+			<PersonComboField name="InvRptDftSentByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptDftSentDate"/>
+			<CheckBoxField name="InvRptDftReceived"/>
+			<PersonComboField name="InvRptDftRecByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptDftRecDate"/>
+			<CheckBoxField name="InvRptFinalized"/>
+			<PersonComboField name="InvRptFinalByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptFinalDate"/>
+			<CodeComboField name="IncidentStatusID" findMode="text">
+				<SampleItem ID="1" name="Pending new situation or incident filing"/>
+				<SampleItem ID="2" name="Non-situation or incident"/>
+				<SampleItem ID="3" name="Open - referred to function indicated for review or investigation"/>
+				<SampleItem ID="4" name="Open - reported to Section 301 Committee"/>
+				<SampleItem ID="5" name="Open - formal investigation underway"/>
+				<SampleItem ID="3" name="Open - review and/or investigation completed and resolution pending"/>
+				<SampleItem ID="4" name="Closed"/>
+			</CodeComboField>
+			<DateField name="ClosureDate"/>
+			<EditField name="ReportDelay" size="5" maxLength="5"/>
+			<EditField name="EntryDelay" size="5" maxLength="5"/>
+			<EditField name="InvRptDftSentDelay" size="5" maxLength="5"/>
+			<EditField name="InvRptFinalDelay" size="5" maxLength="5"/>
+			<EditField name="ClosureDelay" size="5" maxLength="5"/>
+			<!--<CheckSearchField name="IncidentReportSituationID" subModuleID="ires" subModuleRecordIDField="IncidentReportSituationID" subModuleListField="IncidentReportSituation" phrase="Situation|Filter search results by one or more related situations"/>-->
+			<ComboSearchField name="IncidentReportSituationID" subModuleID="ires" listModuleID="sit" subModuleKey="IncidentReportSituationID" listKey="SituationID" listField="Situation" phrase="Situation|Filter search results by an associated situation"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the reported incident or situation">
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="MannerReceived"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EventDate"/>
+			<ViewField name="ReportDate"/>
+			<ViewField name="EntryDate"/>
+			<ViewField name="SubmittedBy" link="SubmittedByEmail"/>
+			<ViewField name="ReportSource"/>
+			<ViewField name="PersonReporting"/>
+			<ViewField name="RepPersonType"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="OnCoProp"/>
+			<ViewField name="RepEvent"/>
+			<ViewField name="SubObserv"/>
+			<ViewField name="IncidentName"/>
+			<ViewField name="CachedTotalCost"/>
+			<ViewField name="Situations"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="RiskMatrix" phrase="Risk Matrix">
+				<ViewField name="CachedTotalCost"/>
+				<ViewField name="Likelihood"/>
+				<ViewField name="LikelihoodStatus"/>
+				<ViewField name="LikelihoodFactors"/>
+				<ViewField name="Severity"/>
+				<ViewField name="CachedSeverityValue"/>
+				<ViewField name="IndexValue"/>
+				<ViewField name="RiskRecommendation"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="DatesDelays" phrase="Dates and Delays">
+				<ViewField name="EventDate"/>
+				<ViewField name="ReportDate"/>
+				<ViewField name="ReportDelayCalc"/>
+				<ViewField name="EntryDate"/>
+				<ViewField name="EntryDelayCalc"/>
+				<ViewField name="InvRptDftSentDate"/>
+				<ViewField name="InvRptDftSentDelayCalc"/>
+				<ViewField name="InvRptFinalDate"/>
+				<ViewField name="InvRptFinalDelayCalc"/>
+				<ViewField name="ClosureDate"/>
+				<ViewField name="ClosureDelayCalc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="ires"/>
+				<ViewGrid moduleID="iren"/>
+				<ViewGrid moduleID="ireps"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="wrk"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Review" phrase="Review">
+				<ViewGrid moduleID="irepo"/>
+				<ViewGrid moduleID="docs"/>
+				<ViewGrid moduleID="rtc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Losses" phrase="Losses or Near Losses">
+				<ViewGrid moduleID="lpa"/>
+				<ViewGrid moduleID="len"/>
+				<ViewGrid moduleID="lin"/>
+				<ViewGrid moduleID="lit"/>
+				<ViewGrid moduleID="lpd"/>
+				<ViewGrid moduleID="lppb"/>
+				<ViewGrid moduleID="lppe"/>
+				<ViewGrid moduleID="lppo"/>
+				<ViewGrid moduleID="lppv"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Litigation" phrase="Litigation">
+				<ViewGrid moduleID="ireoc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Publicity" phrase="Publicity Exposures">
+				<ViewGrid moduleID="pub"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Contacts" phrase="Letters, Telephone Calls, and Visitations">
+				<ViewGrid moduleID="iret"/>
+				<ViewGrid moduleID="irel"/>
+				<ViewGrid moduleID="irev"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the reported incident or situation">
+			<ViewField name="IncidentReportID"/>
+			<DateField name="EventDate"/>
+			<DateField name="ReportDate"/>
+			<CodeRadioField name="ReportSourceID">
+				<SampleItem ID="1" name="Known Person"/>
+				<SampleItem ID="2" name="Anonymous"/>
+			</CodeRadioField>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="RepPersonTypeID" findMode="text">
+				<SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="1" name="Customer"/>
+				<SampleItem ID="3" name="Shareholder"/>
+				<SampleItem ID="5" name="Contractor"/>
+				<SampleItem ID="7" name="Vendor/Supplier"/>
+				<SampleItem ID="1" name="Government Agency or Employee"/>
+				<SampleItem ID="3" name="Retiree"/>
+				<SampleItem ID="5" name="Unknown Status"/>
+				<SampleItem ID="7" name="Other"/>
+			</CodeComboField>
+			<CodeComboField name="MannerReceivedID" findMode="text">
+				<SampleItem ID="1" name="Electronic Mail"/>
+				<SampleItem ID="2" name="Facsimile [fax]"/>
+				<SampleItem ID="3" name="Help Telephone Line"/>
+				<SampleItem ID="4" name="In Person"/>
+				<SampleItem ID="5" name="Incident Report Form"/>
+				<SampleItem ID="6" name="Internet Web Form"/>
+				<SampleItem ID="7" name="Letter Mail"/>
+				<SampleItem ID="8" name="Telephone"/>
+			</CodeComboField>
+			<ViewField name="EntryDate"/>
+			<PersonComboField name="SubmittedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<MemoField name="SubObserv" rows="5" cols="75"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<MemoField name="RepEvent" rows="5" cols="75"/>
+			<EditField name="IncidentName" size="50" maxLength="128"/>
+			<EditField name="CodeName" size="50" maxLength="50"/>
+			<CheckBoxField name="PotVioLaw"/>
+			<CheckBoxField name="GovtRept"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="OnCoPropID">
+				<SampleItem ID="1" name="Yes"/>
+				<SampleItem ID="3" name="No"/>
+				<SampleItem ID="5" name="Both On and Off Company Property"/>
+			</CodeRadioField>
+		</EditScreen>
+		<!--<EditScreen name="Contacts" phrase="Contacts|Track contacts made to comply with contact requirements">
+            <RecordSummaryFieldsRef/>
+            This screen will require custom programming. We need to review <sitc> and write the contact names associated with the incident organization and situation to a new module <irect>[ire contact tracking] which will have additional fields for tracking date, time, and type of contact. DFZ 9-14-2005
+        </EditScreen>-->
+		<EditScreen name="Situations" phrase="Situations|Edit summary information about the situations leading to a reported incident">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="ires"/>
+		</EditScreen>
+		<EditScreen name="Numbers" phrase="Numbers|Associate one or more incident numbers with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="iren"/>
+		</EditScreen>
+		<EditScreen name="Documentation" phrase="Documentation|Track the status of documentation delivery requirements associated with an incident report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="docs"/>
+		</EditScreen>
+		<EditScreen name="RiskMatrix" phrase="Risk Matrix|Associate risk matrix values with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<ViewField name="CachedTotalCost"/>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<MemoField name="LikelihoodFactors" cols="75" rows="5"/>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<ViewField name="CachedSeverityValue"/>
+			<ViewField name="IndexValue"/>
+			<ViewField name="RiskRecommendation"/>
+		</EditScreen>
+		<EditScreen name="Products" phrase="Products|Associate products and/or services with a situation requiring involvement and/or reporting">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="ireps"/>
+		</EditScreen>
+		<EditScreen name="EmploymentPracticeLoss" phrase="Labor|Associate one or more employment practice incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lpa"/>
+		</EditScreen>
+		<EditScreen name="EnvironmentalLoss" phrase="Environment|Associate one or more environmental incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="len"/>
+		</EditScreen>
+		<EditScreen name="InjuryLoss" phrase="Injury|Associate one or more injury incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lin"/>
+		</EditScreen>
+		<EditScreen name="ITLoss" phrase="Technology|Associate one or more information technology losses with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lit"/>
+		</EditScreen>
+		<EditScreen name="ProductServiceLoss" phrase="Product|Associate one or more product/service incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lpd"/>
+		</EditScreen>
+		<EditScreen name="BuildingLoss" phrase="Building|Associate one or more building incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lppb"/>
+		</EditScreen>
+		<EditScreen name="EquipmentLoss" phrase="Equipment|Associate one or more equipment incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lppe"/>
+		</EditScreen>
+		<EditScreen name="OtherAssetLoss" phrase="Other|Associate one or more asset incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lppo"/>
+		</EditScreen>
+		<EditScreen name="VehicleLoss" phrase="Vehicle|Associate one or more vehicle incidents with a reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lppv"/>
+		</EditScreen>
+		<EditScreen name="Contacts" phrase="Contacts|Display contacts associated with a reported incident or situation based upon contact conditions established within the situation contacts module">
+			<!-- the contact list should consist of an outlook style page with all contacts listed [name,emailaddress link, phone number/s <ppl>; immediacy, specialfactors <incc>] based on contact assignments occuring within <incc>. DFZ 04-16-2004-->
+			<!--there can be more than one situation assigned to each incident report within the <ires> sm. DFZ 4-16-2004-->
+			<RecordSummaryFieldsRef/>
+		</EditScreen>
+		<EditScreen name="Litigation" phrase="Litigation|Associate law firms and lead attorneys with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="ireoc"/>
+		</EditScreen>
+		<EditScreen name="Review" phrase="Review|Assign and track incident review activities associated with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<CheckBoxField name="InvRptDftComp"/>
+			<DateField name="InvRptDftCompDate"/>
+			<PersonComboField name="InvRptDftCompByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="InvRptDftSent"/>
+			<PersonComboField name="InvRptDftSentByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptDftSentDate"/>
+			<CheckBoxField name="InvRptDftReceived"/>
+			<PersonComboField name="InvRptDftRecByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptDftRecDate"/>
+			<CheckBoxField name="InvRptFinalized"/>
+			<PersonComboField name="InvRptFinalByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="InvRptFinalDate"/>
+		</EditScreen>
+		<EditScreen name="RootCause" phrase="Causes|Associate root causes of the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rtc"/>
+		</EditScreen>
+		<EditScreen name="PolicyViolations" phrase="Policies|Assign and track policy violations associated with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="irepo"/>
+		</EditScreen>
+		<EditScreen name="ClosureandFollowUp" phrase="Closure|Edit incident closure factors and ongoing follow-up assignments associated with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="KeyLearning" rows="10" cols="75"/>
+			<CodeComboField name="IncidentStatusID" findMode="text">
+				<SampleItem ID="1" name="Pending new situation or incident filing"/>
+				<SampleItem ID="2" name="Non-situation or incident"/>
+				<SampleItem ID="3" name="Open - referred to function indicated for review or investigation"/>
+				<SampleItem ID="4" name="Open - reported to Section 301 Committee"/>
+				<SampleItem ID="5" name="Open - formal investigation underway"/>
+				<SampleItem ID="3" name="Open - review and/or investigation completed and resolution pending"/>
+				<SampleItem ID="4" name="Closed"/>
+			</CodeComboField>
+			<DateField name="ClosureDate"/>
+		</EditScreen>
+		<EditScreen name="WorkOrders" phrase="Orders|Associate hazard abatement work orders with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="wrk"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity exposures with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Telephone" phrase="Telephone|Associate telephone calls with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="iret"/>
+		</EditScreen>
+		<EditScreen name="AgencyLetter" phrase="Letters|Associate letters with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="irel"/>
+		</EditScreen>
+		<EditScreen name="Visitations" phrase="Visitations|Associate agency visits with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="irev"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the reported incident or situation">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the reported incident or situation" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="IncidentReportID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="EventDate"/>
+		<ViewField name="PersonReporting"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="RepEvent"/>
+		<ViewField name="CachedTotalCost"/>
+		<ViewField name="Likelihood"/>
+		<ViewField name="Severity"/>
+		<ViewField name="CachedSeverityValue"/>
+		<ViewField name="RiskRecommendation"/>
+		<ViewField name="Situations"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Incident Reports By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Incident Reports By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Incident Reports By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Incident Reports By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Incident Reports By Manner Received">
+			<GroupByField name="MannerReceived"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Incident Reports By Manner Received">
+			<GroupByField name="MannerReceived"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Incident Reports By Person Submitting">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Incident Reports By Person Submitting">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Incident Reports By Report Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Incident Reports By Report Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Incident Reports By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Incident Reports By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Incident Reports By Report Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Incident Reports By Report Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Incident Reports By Reporting Person Type">
+			<GroupByField name="RepPersonType"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Incident Reports By Reporting Person Type">
+			<GroupByField name="RepPersonType"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Incidents Occurring On Company Property">
+			<GroupByField name="OnCoProp"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Incidents Occurring On Company Property">
+			<GroupByField name="OnCoProp"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Incident Reports By Risk Likelihood">
+			<GroupByField name="Likelihood"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Incident Reports By Risk Likelihood">
+			<GroupByField name="Likelihood"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Incident Reports By Risk Severity">
+			<GroupByField name="Severity"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Incident Reports By Risk Severity">
+			<GroupByField name="Severity"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie12" title="Incident Reports By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto12" title="Incident Reports By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie13" title="Incident Reports By Status">
+			<GroupByField name="IncidentStatus"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto13" title="Incident Reports By Status">
+			<GroupByField name="IncidentStatus"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie14" title="Incident Reports By Situation">
+			<GroupByField name="Situations"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto14" title="Incident Reports By Situation">
+			<GroupByField name="Situations"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie15" title="Incident Reports By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto15" title="Incident Reports By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+		<RadarChart name="Radar15" title="Incident Reports By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie16" title="Incidents Potentially Violating a Law">
+			<GroupByField name="PotVioLaw"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto16" title="Incidents Potentially Violating a Law">
+			<GroupByField name="PotVioLaw"/>
+			<SummaryField name="IncidentReportID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 540 $" date="$Date: 2007-02-27 21:28:05 -0800 (Tue, 27 Feb 2007) $"/>
+</Module>

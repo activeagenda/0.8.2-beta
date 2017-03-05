@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Support Document Sections" moduleID="spts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Document Section" pluralRecordName="Document Sections" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="SupportDocumentSectionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track support documents" sample="1"/>
+		<TableField name="SupportDocumentID" type="int" dbFlags="unsigned not null" phrase="Support Document ID|The ID of the related Support Document" sample="1"/>
+		<ForeignField name="SupportDocument" foreignTable="spt" foreignKey="SupportDocumentID" foreignField="SupportDocument" key="SupportDocumentID" joinType="left" phrase="Support Document|A combined field used to describe this support document when associating it with other records" sample="Corrective Actions"/>
+		<TableField name="Title" type="varchar(50)" validate="notEmpty" dbFlags="not null" phrase="Section Title|The title of the Support Document Section" sample="Introduction"/>
+		<TableField name="SectionText" type="text" validate="" dbFlags="" phrase="Support Document Text|The text of the Support Document Section" sample="Introduction"/>
+		<TableField name="SortOrder" type="int" phrase="Sort Order|A numeric sort order" sample="10"/>
+		<TableField name="Protected" type="bool" phrase="Protected|Protect these changes from being automatically overwritten by the parser" sample="no"/>
+		<TableField name="Display" type="bool" phrase="Display|Display this support section within the module support documentation" sample="Yes"/>
+		<TableField name="SectionID" type="varchar(25)" phrase="Section ID|The section ID of the element from where this section was imported." sample="Introduction"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="SupportDocument"/>;_<CombinedFieldRef name="Title"/></CombinedField>
+		<CombinedField name="SupportDocumentSection" phrase="Support Document|A combined field used to describe this support document section when associating it with other records" sample="Corrective Actions | Introduction"><CombinedFieldRef name="SupportDocument"/>;_<CombinedFieldRef name="Title"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SupportDocumentSectionID"/>
+		</PrimaryKey>
+		<Index name="Doc_SectionID">
+			<FieldRef name="SupportDocumentID"/>
+			<FieldRef name="SectionID"/>
+		</Index>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="SupportDocumentSection"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List module support documentation sections">
+			<ListField name="SupportDocumentSectionID" phrase="Record ID"/>
+			<ListField name="Title" phrase="Title"/>
+		</ListScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view a module support documentation section">
+			<ViewField name="SupportDocumentSectionID"/>
+			<ViewField name="SupportDocumentID"/>
+			<ViewField name="Title"/>
+			<ViewField name="SectionText"/>
+			<ViewField name="SortOrder"/>
+			<ViewField name="Protected"/>
+			<ViewField name="Display"/>
+			<!--image viewgrid section
+            <ViewGrid moduleID="spti" phrase="Images and/or Diagrams">
+                <InvisibleField name="SupportImageID"/>
+                <ViewField name="FileName" phrase="File|The file to be attached" sample="wiener_ingredients.txt"/>
+                <ViewField name="Description" phrase="Description|A short description of the file contents" sample="Ingredient list for our yummy wiener dogs"/>
+                <ViewField name="FileSize" phrase="File Size|The size of the uploaded file in megabytes" sample="2.02"/>
+            </ViewGrid>-->
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit a module support documentation section">
+			<ViewField name="SupportDocumentSectionID"/>
+			<ViewField name="SupportDocumentID"/>
+			<EditField name="Title" size="30" maxlength="50"/>
+			<MemoField name="SectionText" rows="25" cols="50"/>
+			<EditField name="SortOrder" size="5" maxlength="5"/>
+			<CheckBoxField name="Protected"/>
+			<CheckBoxField name="Display"/>
+		</EditScreen>
+		<!--Upload image section
+        <EditScreen name="Images" phrase="Images|Associate images and/or diagrams with a module support documentation section">
+            <ViewField name="SupportDocumentSectionID"/>
+            <ViewField name="SupportDocumentID"/>
+            <ViewField name="Title"/>
+            <ViewField name="SectionText"/>
+            <ViewField name="SortOrder"/>
+            <ViewField name="Protected"/>
+            <EditGrid moduleID="spti" phrase="Associate Images">
+                <GridForm>
+                    <InvisibleField name="SupportImageID"/>
+                    <CustomCode location="init">
+                        <![CDATA[ $form_enctype = 'enctype="multipart/form-data"'; ]]>
+                    </CustomCode>
+                    <CustomCode location="sql_update">
+                        <![CDATA[ 
+                            include(INCLUDE_PATH.'/uploads_include.php');
+                            CheckFileUploads('FileName'); ]]>
+                    </CustomCode>
+                    <CustomCode location="sql_insert">
+                        <![CDATA[ CheckFileUploads('FileName'); ]]>
+                    </CustomCode>
+                    <CustomCode location="sql_done">
+                        <![CDATA[ HandleFileUploads('FileName', $recordID); ]]>
+                    </CustomCode>
+                    <EditField name="Description" size="50" maxLength="128"/>
+                    <UploadField name="FileName" size="50" maxLength="128"/>
+                </GridForm>
+                <InvisibleField name="SupportImageID"/>
+                <ViewField name="FileName" phrase="File|The file to be attached" sample="wiener_ingredients.txt"/>
+                <ViewField name="Description" phrase="Description|A short description of the file contents" sample="Ingredient list for our yummy wiener dogs"/>
+                <ViewField name="FileSize" phrase="File Size|The size of the uploaded file in megabytes" sample="2.02"/>
+            </EditGrid>
+        </EditScreen>-->
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="spts" phrase="Sections">
+			<InvisibleField name="SupportDocumentSectionID"/>
+			<ViewField name="Title" sample="Claims Administration - Claims Adjuster"/>
+			<ViewField name="SectionText" sample="Mattias Thorslund"/>
+			<ViewField name="SortOrder"/>
+			<ViewField name="Protected"/>
+		</ViewGrid>
+		<EditGrid moduleID="spts" phrase="Sections">
+			<GridForm>
+				<InvisibleField name="SupportDocumentSectionID"/>
+				<EditField name="Title" size="30" maxlength="50" sample="Claims Administration - Claims Adjuster"/>
+				<MemoField name="SectionText" rows="25" cols="80" sample="Mattias Thorslund"/>
+				<EditField name="SortOrder" size="5" maxlength="5"/>
+				<CheckBoxField name="Protected"/>
+			</GridForm>
+			<InvisibleField name="SupportDocumentSectionID"/>
+			<ViewField name="Title" sample="Claims Administration - Claims Adjuster"/>
+			<ViewField name="SectionText" sample="Mattias Thorslund"/>
+			<ViewField name="SortOrder"/>
+			<ViewField name="Protected"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

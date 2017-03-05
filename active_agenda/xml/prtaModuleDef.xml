@@ -1,0 +1,288 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Participant Accountabilities" moduleID="prta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Participant Accountability" pluralRecordName="Participant Accountabilities" allowAddRecord="no" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="ParticipantAccID" type="int" dbFlags="unsigned auto_increment not null" phrase="Participant ID|An automatically assigned number used to track risk control participant accountabilities" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" phrase="Related Module|Related Module|The name of the module which is associated with this record" sample="lin"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name of the module which is associated with this record" sample="Injury Loss"/>
+		<TableField name="RelatedRecordID" type="int" phrase="Related Record|A group of fields used to describe the related record" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A group of fields used to describe the related record" sample="Larry Hansen Injury | Left Arm | 12-12-2004"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization generating the accountability" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization generating the accountability" sample="Active Agenda, Inc."/>
+		<TableField name="AccountabilityTypeID" type="int" phrase="Accountability Type|The participant's specific type of accountability" sample="1"/>
+		<ForeignField name="AccountabilityPurposeID" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationPurposeID" key="AccountabilityTypeID" joinType="left" phrase="Accountability Purpose|A word or short phrase used to describe the purpose for this accountability" sample="1"/>
+		<CodeField name="AccountabilityPurpose" key="AccountabilityPurposeID" phrase="Accountability Purpose|A word or short phrase used to describe the purpose for this accountability" sample="Claims Administration" codeTypeID="42"/>
+		<ForeignField name="AccountabilityType" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationType" key="AccountabilityTypeID" joinType="left" phrase="Accountability Type|The participant's specific type of accountability" sample="Claims Administration - Claims Adjuster"/>
+		<ForeignField name="AccountabilityTypeDesc" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationTypeDesc" key="AccountabilityTypeID" joinType="left" phrase="Accountability Type Description|A detailed description of the scope and requirements of this accountability type" sample="Claims adjusters are assigned by the company's third party administrator, and in some cases, by outside insurance companies. Claims adjusters are responsible for managing claims made against companies and they have the authority to issue checks against a reserve account towards the resolution of the respective claims they are assigned to manage"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="70" phrase="Person Accountable|The name of the person accountable" sample="1"/>
+		<ForeignField name="PersonAccountableOrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="PersonAccountableID" joinType="left" phrase="Organization|Name of organization associated with the person accountable" sample="2"/>
+		<ForeignField name="PersonAccountableOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PersonAccountableOrganizationID" joinType="left" phrase="Organization|Name of organization associated with the person accountable" sample="Active Agenda, Inc."/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person accountable" sample="Mattias Thorslund"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="PersonAccountableID" joinType="left" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-0479 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<RemoteField name="AccountabilityDesc" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="Details" phrase="Accountability Description|A detailed description of the participant's accountability associated with the related record" sample="Mr. Thorslund is the claims adjuster on Larry's claim. Mattias adjusts all claims where the clamant's last name begins with the letters A-L on all claims occurring after 2003"/>
+		<RemoteField name="AccountabilityStatusID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="AccountabilityStatusID" phrase="Accountability Status|The present status of the participant's ongoing accountability" sample="1"/>
+		<CodeField name="AccountabilityStatus" key="AccountabilityStatusID" phrase="Accountability Status|The present status of this participant's ongoing involvement" sample="Ongoing" codeTypeID="199"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Dan Zahlis | Claims Administration - Claims Adjuster | Ongoing"><CombinedFieldRef name="PersonAccountable"/>;_<CombinedFieldRef name="AccountabilityType"/>;_<CombinedFieldRef name="AccountabilityStatus"/></CombinedField>
+		<CombinedField name="ParticipantAcc" phrase="Accountability Type|A combined field used to describe this accountability when associating it with other records" sample="Injury Loss | ID: 1231 | Claims Administration - Claims Adjuster | Ongoing"><CombinedFieldRef name="PersonAccountable"/>;_<CombinedFieldRef name="AccountabilityType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ParticipantAccID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="ParticipantAcc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List participant accountabilities">
+			<ListField name="ParticipantAccID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="AccountabilityType" phrase="Accountability Type"/>
+			<ListField name="PersonAccountable" phrase="Accountable"/>
+			<ListField name="AccountabilityStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search participant accountabilities">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Loss Injury"/>
+				<SampleItem ID="2" name="Vehicles"/>
+				<SampleItem ID="3" name="Equipment"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="AccountabilityPurposeID" findMode="text">
+				<SampleItem ID="1" name="Claims Administration"/>
+				<SampleItem ID="2" name="Legal Representation"/>
+				<SampleItem ID="3" name="Translation"/>
+				<SampleItem ID="4" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="AccountabilityTypeID" findMode="text">
+				<SampleItem ID="1" name="Claims Adjuster"/>
+				<SampleItem ID="2" name="Atmosphere Tester"/>
+				<SampleItem ID="3" name="Entry Person"/>
+				<SampleItem ID="4" name="Entry Contractor"/>
+			</ComboField>
+			<CodeComboField name="AccountabilityStatusID">
+				<SampleItem ID="1" name="Ongoing"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="Reassigned"/>
+				<SampleItem ID="4" name="Replaced"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view summary information about a risk control event participant">
+			<ViewField name="ParticipantAccID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="AccountabilityPurpose"/>
+			<ViewField name="AccountabilityType"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ContactCard"/>
+			<ViewField name="AccountabilityTypeDesc"/>
+			<ViewField name="AccountabilityDesc"/>
+			<ViewField name="AccountabilityStatus"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit summary information about a risk control event participant">
+			<ViewField name="ParticipantAccID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<CodeComboField name="AccountabilityPurposeID" findMode="text">
+				<UpdateFieldRef name="AccountabilityTypeID"/>
+				<SampleItem ID="1" name="Claims Administration"/>
+				<SampleItem ID="2" name="Legal Representation"/>
+				<SampleItem ID="3" name="Translation"/>
+				<SampleItem ID="4" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="AccountabilityTypeID" findMode="text" parentField="AccountabilityPurposeID">
+				<UpdateFieldRef name="AccountabilityTypeDesc"/>
+				<SampleItem ID="1" name="Claims Adjuster"/>
+				<SampleItem ID="2" name="Atmosphere Tester"/>
+				<SampleItem ID="3" name="Entry Person"/>
+				<SampleItem ID="4" name="Entry Contractor"/>
+			</ComboField>
+			<ViewField name="AccountabilityTypeDesc" parentField="AccountabilityTypeID"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+			<MemoField name="AccountabilityDesc" rows="5" cols="75"/>
+			<CodeComboField name="AccountabilityStatusID">
+				<SampleItem ID="1" name="Ongoing"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="Reassigned"/>
+				<SampleItem ID="4" name="Replaced"/>
+			</CodeComboField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="prta" phrase="Accountabilities">
+			<InvisibleField name="ParticipantAccID"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="AccountabilityType" sample="Claims Administration - Claims Adjuster"/>
+			<ViewField name="AccountabilityStatus" sample="Ongoing"/>
+		</ViewGrid>
+		<EditGrid moduleID="prta" phrase="Accountabilities">
+			<GridForm>
+				<InvisibleField name="ParticipantAccID"/>
+				<CodeComboField name="AccountabilityPurposeID" findMode="text" sample="Claims Administration">
+					<UpdateFieldRef name="AccountabilityTypeID"/>
+					<SampleItem ID="1" name="Claims Administration"/>
+					<SampleItem ID="2" name="Legal Representation"/>
+					<SampleItem ID="3" name="Translation"/>
+					<SampleItem ID="4" name="Investigation"/>
+				</CodeComboField>
+				<ComboField name="AccountabilityTypeID" findMode="text" parentField="AccountabilityPurposeID" sample="Claims Administration - Claims Adjuster">
+					<UpdateFieldRef name="AccountabilityTypeDesc"/>
+					<SampleItem ID="1" name="Claims Adjuster"/>
+					<SampleItem ID="2" name="Atmosphere Tester"/>
+					<SampleItem ID="3" name="Entry Person"/>
+					<SampleItem ID="4" name="Entry Contractor"/>
+				</ComboField>
+				<ViewField name="AccountabilityTypeDesc" parentField="AccountabilityTypeID"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+				</PersonComboField>
+				<MemoField name="AccountabilityDesc" rows="5" cols="75" sample="Mr. Thorslund is the claims adjuster on Larry's claim. Mattias adjusts all claims where the clamant's last name begins with the letters A-L on all claims occurring after 2003"/>
+				<CodeComboField name="AccountabilityStatusID" sample="Ongoing">
+					<SampleItem ID="1" name="Ongoing"/>
+					<SampleItem ID="2" name="Complete"/>
+					<SampleItem ID="3" name="Reassigned"/>
+					<SampleItem ID="4" name="Replaced"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="ParticipantAccID"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="AccountabilityType" sample="Claims Administration - Claims Adjuster"/>
+			<ViewField name="AccountabilityStatus" sample="Ongoing"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

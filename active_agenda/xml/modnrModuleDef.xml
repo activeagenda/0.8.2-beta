@@ -1,0 +1,302 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Notification Recipients" moduleID="modnr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Notification Recipient" pluralRecordName="Notification Recipients" allowAddRecord="no" isGlobal="yes">
+	<ModuleFields>
+		<TableField name="NotificationRecipientID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track notification requirements" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" dbFlags="" phrase="Module|The name of the module associated with the notification recipient" sample="2"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Module|The name of the module associated with the notification requirement" sample="Corrective Actions"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned not null" phrase="Organization|Name of the organization associated with the notification requirements. Individuals from the same organization, or many different organizations, may be added to the notification list of this organization for this module." sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|Name of the organization associated with the notification requirements. Individuals from the same organization, or many different organizations, may be added to the notification list of this organization for this module." sample="Active Agenda, Inc."/>
+		<ForeignField name="OrganizationShortName" foreignTable="org" foreignKey="OrganizationID" foreignField="ShortName" key="OrganizationID" joinType="left" phrase="Organization Short Name|Short name of the organization associated with the notification requirement" sample="AASWE"/>
+		<TableField name="RecipientID" type="int" dbFlags="unsigned" listType="allParticipants" validate="RequireSelection" phrase="Recipient|The name of the individual that should be notified" sample="1"/>
+		<ForeignField name="Recipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="RecipientID" joinType="left" phrase="Recipient|The name of the individual that should be notified" sample="Dan Zahlis"/>
+		<ForeignField name="WorkEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkEmail" key="RecipientID" joinType="left" phrase="Work Email|Work email address used by the notification contact person" sample="dzahlis@activeagenda.net"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="RecipientID" joinType="left" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<TableField name="Details" type="text" validate="noValidation" phrase="Recipient Notification Details|Details associated with the notification requirement" sample="Dan should be contacted following all corrective actions"/>
+		<TableField name="NotificationImmediacy" type="float" validate="noValidation" phrase="Immediacy|The amount of time which can pass before the recipient shall be notified" sample="1"/>
+		<TableField name="NotificationImmediacyUnitsID" type="int" validate="RequireSelection" phrase="Immediacy Units|The units associated with the notification immediacy" sample="1"/>
+		<ForeignField name="NotificationImmediacyCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="NotificationImmediacyUnitsID" joinType="left" phrase="Immediacy Category|A broadly defined title or phrase used to group notification immediacy requirements" sample="1"/>
+		<CodeField name="NotificationImmediacyCategory" key="NotificationImmediacyCategoryID" phrase="Immediacy Category|A broadly defined title or phrase used to group notification immediacy requirements" sample="Distance" codeTypeID="37">
+			<ListCondition fieldName="CodeID" mode="in">
+				<StaticValue value="4"/>
+				<!-- Time -->
+				<StaticValue value="7"/>
+				<!-- Stipulated -->
+			</ListCondition>
+		</CodeField>
+		<ForeignField name="NotificationImmediacyUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="NotificationImmediacyUnitsID" joinType="left" phrase="Immediacy Units|The units associated with the notification immediacy" sample="Millimeter"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Recipient"/>_-_<CombinedFieldRef name="RelatedModule"/>_-_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="ContactImmediacy" phrase="Notify Within|A combined field used to describe the contact immediacy required for this notification recipient" sample="1 week"><CombinedFieldRef name="NotificationImmediacy"/>_<CombinedFieldRef name="NotificationImmediacyUnits"/></CombinedField>
+		<CombinedField name="NotificationRecipient" phrase="Notification Recipient|A combined field used to describe this notification recipient when associating it with other records" sample="Corrective Actions | The AffectedPerson phrase needs to have a space inserted between the words Affected and Person | Resolved"><CombinedFieldRef name="RelatedModule"/>_-_<CombinedFieldRef name="Organization"/>_-_<CombinedFieldRef name="Recipient"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="NotificationRecipientID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="NotificationRecipient"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List issue reports">
+			<ListField name="NotificationRecipientID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Module Name"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Recipient" phrase="Recipient"/>
+			<ListField name="WorkEmail" phrase="Email Address"/>
+			<ListField name="ContactImmediacy" phrase="Notify Within"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search issue reports">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Postings"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Chemicals"/>
+			</ComboField>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<PersonComboField name="RecipientID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="NotificationImmediacy" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="NotificationImmediacyCategoryID">
+					<UpdateFieldRef name="NotificationImmediacyUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="NotificationImmediacyUnitsID" parentField="NotificationImmediacyCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a notification requirement">
+			<ViewField name="NotificationRecipientID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Recipient"/>
+			<ViewField name="ContactCard"/>
+			<ViewField name="Details"/>
+			<ViewField name="ContactImmediacy"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a notification requirement">
+			<ViewField name="NotificationRecipientID"/>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Postings"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Chemicals"/>
+			</ComboField>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<PersonComboField name="RecipientID" findMode="alpha">
+				<UpdateFieldRef name="ContactCard"/>
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ViewField name="ContactCard" parentField="RecipientID"/>
+			<MemoField name="Details" rows="5" cols="75"/>
+			<EditField name="NotificationImmediacy" size="5" maxLength="5">
+				<Self/>
+				<CodeComboField name="NotificationImmediacyCategoryID">
+					<UpdateFieldRef name="NotificationImmediacyUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</CodeComboField>
+				<ComboField name="NotificationImmediacyUnitsID" parentField="NotificationImmediacyCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="modnr" phrase="Notification Recipients">
+			<InvisibleField name="NotificationRecipientID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Recipient"/>
+			<ViewField name="ContactCard" sample="Daniel F. Zahlis +1-(559)916-6106 (mobile) - dzahlis@activeagenda.net"/>
+			<ViewField name="ContactImmediacy"/>
+		</ViewGrid>
+		<EditGrid moduleID="modnr" phrase="Notification Recipients">
+			<GridForm>
+				<InvisibleField name="NotificationRecipientID"/>
+				<ComboField name="OrganizationID" findMode="text">
+					<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+					<SampleItem ID="2" name="Active Agenda, Inc."/>
+					<SampleItem ID="3" name="Good Ideas Consulting"/>
+				</ComboField>
+				<PersonComboField name="RecipientID" findMode="alpha">
+					<UpdateFieldRef name="ContactCard"/>
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<MemoField name="Details" rows="5" cols="75"/>
+				<EditField name="NotificationImmediacy" size="5" maxLength="5">
+					<Self/>
+					<CodeComboField name="NotificationImmediacyCategoryID">
+						<UpdateFieldRef name="NotificationImmediacyUnitsID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</CodeComboField>
+					<ComboField name="NotificationImmediacyUnitsID" parentField="NotificationImmediacyCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+			</GridForm>
+			<InvisibleField name="NotificationRecipientID"/>
+			<ViewField name="Recipient"/>
+			<ViewField name="Organization"/>
+			<ViewField name="ContactCard"/>
+			<ViewField name="Details"/>
+			<ViewField name="ContactImmediacy"/>
+		</EditGrid>
+	</Exports>
+	<RecordSummaryFields>
+		<ViewField name="NotificationRecipientID"/>
+		<ViewField name="RelatedModule"/>
+		<ViewField name="Recipient"/>
+		<ViewField name="WorkEmail"/>
+		<ViewField name="ContactImmediacy"/>
+	</RecordSummaryFields>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

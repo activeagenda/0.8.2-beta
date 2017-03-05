@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<ReportGroup name="Main" author="Active Agenda">
+	<Report name="HazardReport" title="Hazard Report: HTML" headerField="HazardTitle" singularRecordName="Hazard Report">
+		<!-- 
+             ReportLocation determines which reports screen the report will be listed in. Level can be either "Record" or "List". If the report should be visible in both the record-level and list-level screens, simply add a ReportLocation element for each.
+             
+             The group attribute can be any sensible group name, and will determine the header on the report view screen under whic a particular report will be sorted. Until I think of something better, reports will appear in alpha order on the page.
+        -->
+		<ReportLocation level="Record" group="Main"/>
+		<!-- These fields refer to the ModuleFields in the hzr module-->
+		<ReportField name="Organization"/>
+		<ReportField name="HazardTitle"/>
+		<ReportField name="Description"/>
+		<ReportField name="PersonReporting"/>
+		<ReportField name="PersonAccountable"/>
+		<ReportField name="SubmittalDate"/>
+		<ReportField name="ReceivedDate"/>
+		<ReportField name="ReceivingDelay"/>
+		<ReportField name="EntryDate"/>
+		<ReportField name="EntryDelay"/>
+		<ReportField name="ResolvedDate"/>
+		<ReportField name="ResolutionDelay"/>
+		<ReportField name="HazAbateStatus"/>
+		<!-- If the module of the SubReport is defined in the parent report module's SubModules section, no keys or conditions are required.-->
+		<SubReport moduleID="hza" name="Hazards" headerField="HazardTitle" singularRecordName="Hazard" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubReportCondition field="RelatedModuleID" value="hzr"/>
+			<!-- These fields refer to the ModuleFields in the hza module-->
+			<ReportField name="HazardType"/>
+			<ReportField name="HazardDesc"/>
+			<ReportField name="IndexValue"/>
+			<ReportField name="RiskImperatives"/>
+			<SubReport moduleID="cnt" name="Controls" headerField="ControlTitle" singularRecordName="Control">
+				<!-- These fields refer to the ModuleFields in the cnt module-->
+				<ReportField name="ControlCategory"/>
+				<ReportField name="ControlDesc"/>
+				<SubReport moduleID="eqpa" name="Equipment" headerField="EquipmentType" singularRecordName="Equipment">
+					<!-- These fields refer to the ModuleFields in the eqpa module-->
+					<ReportField name="EquipmentType"/>
+					<ReportField name="EquipmentInventory"/>
+					<ReportField name="UseConditions"/>
+				</SubReport>
+			</SubReport>
+		</SubReport>
+		<SubReport moduleID="prta" name="Accountabilities" headerField="AccountabilityType" singularRecordName="Accountability" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubReportCondition field="RelatedModuleID" value="hzr"/>
+			<!-- These fields refer to the ModuleFields in the prta module-->
+			<ReportField name="AccountabilityPurpose"/>
+			<ReportField name="PersonAccountable"/>
+			<ReportField name="ContactCard"/>
+			<ReportField name="AccountabilityDesc"/>
+		</SubReport>
+		<SubReport moduleID="prti" name="Involvement" headerField="InvolvementType" singularRecordName="Involvement" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubReportCondition field="RelatedModuleID" value="hzr"/>
+			<!-- These fields refer to the ModuleFields in the prti module-->
+			<ReportField name="InvolvementPurpose"/>
+			<ReportField name="PersonInvolved"/>
+			<ReportField name="ContactCard"/>
+			<ReportField name="InvolvementDesc"/>
+		</SubReport>
+	</Report>
+</ReportGroup>

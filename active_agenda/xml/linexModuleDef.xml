@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Injury Exposures" moduleID="linex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Injury Exposure" pluralRecordName="Injury Exposures" allowAddRecord="yes" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="InjuryExposureID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number used to track and associate specific exposures to injuries or illnesses" sample="1"/>
+		<TableField name="InjuryExposureTypeID" type="int" validate="RequireSelection" phrase="Exposure Type|A combined field used to describe this injury or illness exposure type when associating it with other records" sample="1"/>
+		<ForeignField name="InjuryExposureCategoryID" foreignTable="linet" foreignKey="InjuryExposureTypeID" foreignField="InjuryExposureCategoryID" key="InjuryExposureTypeID" joinType="left" phrase="Exposure Category|A generic term or phrase used to group exposures to injury or illness" sample="1"/>
+		<CodeField name="InjuryExposureCategory" key="InjuryExposureCategoryID" phrase="Exposure Category|A generic term or phrase used to group exposures to injury or illness" sample="Contact with Objects and Equipment" codeTypeID="195"/>
+		<ForeignField name="InjuryExposureType" foreignTable="linet" foreignKey="InjuryExposureTypeID" foreignField="InjuryExposureType" key="InjuryExposureTypeID" joinType="left" phrase="Exposure Type|A combined field used to describe this injury or illness exposure type when associating it with other records" sample="Struck Against Object | Stepped on object"/>
+		<TableField name="InjuryExposureTitle" type="varchar(128)" validate="notEmpty" phrase="Exposure Title|A short title or phrase used to specifically describe an exposure to loss" sample="Stepped on object"/>
+		<TableField name="InjuryExposureDivision" type="varchar(10)" validate="noValidation" phrase="Exposure Division|A unique value assigned to an injury and/or illness exposure code for purposes of coordinating application codes with external code systems" sample="011"/>
+		<TableField name="InjuryExposureDesc" type="text" validate="noValidation" phrase="Exposure Description|A detailed description of this exposure to injury or illness" sample="Stepping down onto an object which strikes the foot causing injury"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="InjuryExposureType"/>;_<CombinedFieldRef name="InjuryExposureTitle"/></CombinedField>
+		<CombinedField name="InjuryExposure" phrase="Injury Exposure|A combined field used to describe this Exposure of injury or illness when associating it with other records" sample="Contact with Objects and Equipment | Stepped on object | Stepping down onto an object which strikes the foot causing injury">
+			<CombinedFieldRef name="InjuryExposureTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="InjuryExposureID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="InjuryExposure"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List exposures to injuries and/or illnesses">
+			<ListField name="InjuryExposureID" phrase="Record ID"/>
+			<ListField name="InjuryExposureType" phrase="Type"/>
+			<ListField name="InjuryExposureTitle" phrase="Title"/>
+			<ListField name="InjuryExposureDivision" phrase="Division"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search exposures to injuries and/or illnesses">
+			<CodeComboField name="InjuryExposureCategoryID" findMode="text">
+				<UpdateFieldRef name="InjuryExposureTypeID"/>
+				<SampleItem ID="1" name="Contact with Objects and Equipment"/>
+				<SampleItem ID="2" name="Falls"/>
+				<SampleItem ID="3" name="Bodily Reaction and Exertion"/>
+			</CodeComboField>
+			<CodeComboField name="InjuryExposureTypeID" findMode="text" parentField="InjuryExposureCategoryID">
+				<SampleItem ID="1" name="Struck against object"/>
+				<SampleItem ID="2" name="Struck by object"/>
+				<SampleItem ID="3" name="Caught in or compressed by equipment or objects"/>
+			</CodeComboField>
+			<EditField name="InjuryExposureTitle" size="75" maxLength="128"/>
+			<EditField name="InjuryExposureDivision" size="5" maxLength="10"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an exposure to an injury or illness">
+			<ViewField name="InjuryExposureID"/>
+			<ViewField name="InjuryExposureType"/>
+			<ViewField name="InjuryExposureTitle"/>
+			<ViewField name="InjuryExposureDivision"/>
+			<ViewField name="InjuryExposureDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an exposure to an injury or illness">
+			<ViewField name="InjuryExposureID"/>
+			<CodeComboField name="InjuryExposureCategoryID" findMode="text">
+				<UpdateFieldRef name="InjuryExposureTypeID"/>
+				<SampleItem ID="1" name="Contact with Objects and Equipment"/>
+				<SampleItem ID="2" name="Falls"/>
+				<SampleItem ID="3" name="Bodily Reaction and Exertion"/>
+			</CodeComboField>
+			<CodeComboField name="InjuryExposureTypeID" findMode="text" parentField="InjuryExposureCategoryID">
+				<SampleItem ID="1" name="Struck against object"/>
+				<SampleItem ID="2" name="Struck by object"/>
+				<SampleItem ID="3" name="Caught in or compressed by equipment or objects"/>
+			</CodeComboField>
+			<EditField name="InjuryExposureTitle" size="75" maxLength="128"/>
+			<EditField name="InjuryExposureDivision" size="5" maxLength="10"/>
+			<MemoField name="InjuryExposureDesc" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

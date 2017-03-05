@@ -1,0 +1,390 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Town Hall Answers" moduleID="twna" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Town Hall Answer" pluralRecordName="Town Hall Answers" addNewName="Answer" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="TownHallAnswerID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track answers to town hall questions asked throughout the organization" sample="1"/>
+		<TableField name="TownHallQuestionID" type="int" dbFlags="unsigned not null" phrase="Question|A combined field used to describe this question when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="OrganizationID" key="TownHallQuestionID" joinType="left" phrase="Pertinent Organization|The organization associated with the subject matter of the question" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Pertinent Organization|The organization associated with the subject matter of the question" sample="Active Agenda, HQ"/>
+		<ForeignField name="SubmittalDate" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="SubmittalDate" key="TownHallQuestionID" joinType="left" phrase="Submittal Date|The date and time the question was submitted by the person asking the question" sample="01/01/2004"/>
+		<ForeignField name="QuestionTypeID" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="QuestionTypeID" key="TownHallQuestionID" joinType="left" phrase="Question Type|A method of grouping questions of similar types so that cultural inferences may be drawn based on a predominance of interest" sample="1"/>
+		<CodeField name="QuestionType" key="QuestionTypeID" phrase="Question Type|A method of grouping questions of similar types so that cultural inferences may be drawn based on a predominance of interest" sample="Operations" codeTypeID="220"/>
+		<ForeignField name="SubmittedByID" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="SubmittedByID" key="TownHallQuestionID" joinType="left" phrase="Submitted By|The name of the individual that submitted the question into into the system" sample="1"/>
+		<ForeignField name="SubmittedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SubmittedByID" joinType="left" phrase="Submitted By|The name of the individual that submitted the question into the system" sample="Jane Doe"/>
+		<ForeignField name="PersonAskedID" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="PersonAskedID" key="TownHallQuestionID" joinType="left" phrase="Person Asked|The name of the person being asked the question" sample="1"/>
+		<ForeignField name="PersonAsked" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAskedID" joinType="left" phrase="Person Asked|The name of the person being asked the question" sample="Larry Hansen"/>
+		<ForeignField name="QuestionStatusID" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="QuestionStatusID" key="TownHallQuestionID" joinType="left" phrase="Question Status|Answer status of the question" sample="1"/>
+		<CodeField name="QuestionStatus" key="QuestionStatusID" phrase="Question Status|Answer status of the question" sample="Satisfactorily Answered" codeTypeID="221"/>
+		<RemoteField name="PersonAnsweringID" defaultValue="defaultorgID" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="66" phrase="Person Answering|The name of the person answering the question" sample="1"/>
+		<ForeignField name="PersonAnswering" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAnsweringID" joinType="left" phrase="Person Answering|The name of the person answering the question" sample="Dan Zahlis"/>
+		<ForeignField name="QuestionAsked" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="QuestionAsked" key="TownHallQuestionID" joinType="left" phrase="Question|A clear and direct question which is important to the person asking the question" sample="Is the company going to shut down the Malaga operations? If so, why?"/>
+		<ForeignField name="QuestionDetails" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="QuestionDetails" key="TownHallQuestionID" joinType="left" phrase="Details|Additional details about the question being asked and additional information the person asking would like to share about the question or their motivation for asking it" sample="I just want to know if I need to be looking for another job to support my family"/>
+		<ForeignField name="TownHallQuestion" foreignTable="twn" foreignKey="TownHallQuestionID" foreignField="TownHallQuestion" key="TownHallQuestionID" joinType="left" phrase="Question|A combined field used to describe this question when associating it with other records" sample="Mattias Thorslund asking Larry Hansen | Active Agenda, HQ | 09-21-2003 | Satisfactorily Answered"/>
+		<TableField name="AnswertoQuestion" type="text" validate="noValidation" phrase="Answer|A clear and direct answer which is intended to fully answer the question being asked to the best of the answering person's ability" sample="Undecided. The company is considering a number of cost reduction measures to protect the solvency of the organization. Plant closure is one of the options being considered but is presently considered an option of last resort. Thank you for your question. If you have any further questions, please do not hesitate to ask"/>
+		<RemoteField name="ReceivedDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="5" phrase="Received Date|The date and time the question was first received by the person answering the question" sample="01/01/2004"/>
+		<RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="System Entry Date|The date and time the answer was entered into the system" sample="01/01/2004 12:02:34"/>
+		<!--<CalculatedField name="ReceivingDelay" type="int" calcFunction="timediff" params="ReceivedDate SubmittalDate" validate="" phrase="Receival Delay|A calculated field based on the amount of time between the date the question was submitted and the date the question was received by the person answering the question" sample="30"/>
+		-->
+		<CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate SubmittalDate" validate="" phrase="Entry Delay|A calculated field based on the amount of time between the date the question was submitted and the date the answer was entered into the system" sample="30"/>
+		<RemoteField name="AnswerDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="27" phrase="Answer Date|The date and time the person answering the question provided the answer" sample="01/01/2004"/>
+		<CalculatedField name="AnswerDelay" type="int" calcFunction="timediff" params="AnswerDate SubmittalDate" validate="" phrase="Answer Delay|A calculated field based on the amount of time between the date the question was submitted and the date the question was answered" sample="30"/>
+		<!--<CombinedField name="ReceivingDelayCalc" phrase="Receival Delay|A calculated field based on the amount of time between the date the question was submitted and the date the question was received by the person answering the question" sample="30 Hours"><CombinedFieldRef name="ReceivingDelay"/>_Hours</CombinedField>
+		-->
+		<CombinedField name="EntryDelayCalc" phrase="Entry Delay|A calculated field based on the amount of time between the date the question was submitted and the date the answer was entered into the system" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours</CombinedField>
+		<CombinedField name="AnswerDelayCalc" phrase="Answer Delay|A calculated field based on the amount of time between the date the question was submitted and the date the question was answered" sample="30 Hours"><CombinedFieldRef name="AnswerDelay"/>_Hours</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">
+			<CombinedFieldRef name="PersonAnswering"/>
+			<CombinedFieldRef name="Organization"/>
+		</CombinedField>
+		<CombinedField name="TownHallAnswer" phrase="Town Hall Answer|A combined field used to describe this town hall answer when associating it with other records" sample="Dan Zahlis answering Mattias Thorslund |  Active Agenda, Inc.">
+			<CombinedFieldRef name="PersonAnswering"/>
+			<CombinedFieldRef name="Organization"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TownHallAnswerID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="TownHallAnswer"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="TownHallAnswerID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="twna"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="TownHallAnswerID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="twna"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="TownHallAnswerID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="twna"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List answers to town hall questions">
+			<ListField name="TownHallAnswerID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SubmittedBy" phrase="Person Asking"/>
+			<ListField name="QuestionAsked" phrase="Question Asked"/>
+			<ListField name="PersonAnswering" phrase="Person Answering"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search answers to town hall questions">
+			<ComboField name="TownHallQuestionID" findMode="text">
+				<SampleItem ID="1" name="Mattias Thorslund asking Larry Hansen | Active Agenda, HQ | 09-21-2003 | Satisfactorily Answered"/>
+				<SampleItem ID="2" name="Larry Hansen asking Mattias Thorslund | Active Agenda, HQ | 09-21-2004 | Unsatisfactorily Answered"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<DateField name="SubmittalDate"/>
+			<DateField name="ReceivedDate"/>
+			<DateField name="AnswerDate"/>
+			<CodeComboField name="QuestionTypeID" findMode="text">
+				<SampleItem ID="1" name="Business Operations"/>
+				<SampleItem ID="2" name="Employee Safety"/>
+				<SampleItem ID="3" name="Hostile Work Environment"/>
+				<SampleItem ID="4" name="Labor Relations"/>
+				<SampleItem ID="5" name="Operational Efficiency"/>
+				<SampleItem ID="6" name="Product Safety"/>
+				<SampleItem ID="7" name="Product Quality"/>
+				<SampleItem ID="8" name="Sexual Harassment"/>
+			</CodeComboField>
+			<PersonComboField name="PersonAskedID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAnsweringID" findMode="alpha">
+				<SampleItem ID="1" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="QuestionStatusID">
+				<SampleItem ID="1" name="Satisfactorily Answered"/>
+				<SampleItem ID="2" name="Unsatisfactorily Answered"/>
+				<SampleItem ID="3" name="Refused"/>
+				<SampleItem ID="4" name="Ignored"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a question">
+			<ViewField name="TownHallAnswerID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SubmittalDate"/>
+			<ViewField name="QuestionType"/>
+			<ViewField name="QuestionAsked"/>
+			<ViewField name="QuestionDetails"/>
+			<ViewField name="PersonAsked"/>
+			<ViewField name="QuestionStatus"/>
+			<ViewField name="PersonAnswering"/>
+			<ViewField name="AnswertoQuestion"/>
+			<ViewField name="ReceivedDate"/>
+			<ViewField name="AnswerDate"/>
+			<ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+				<ViewField name="SubmittalDate"/>
+				<ViewField name="ReceivedDate"/>
+				<!--<ViewField name="ReceivingDelayCalc"/>
+				-->
+				<ViewField name="EntryDate"/>
+				<ViewField name="EntryDelayCalc"/>
+				<ViewField name="AnswerDate"/>
+				<ViewField name="AnswerDelayCalc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a question">
+			<ViewField name="TownHallAnswerID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="QuestionTypeID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="QuestionTypeID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="TownHallQuestionID" listParentField="QuestionTypeID"/>
+				<SampleItem ID="1" name="Business Operations"/>
+				<SampleItem ID="2" name="Employee Safety"/>
+				<SampleItem ID="3" name="Hostile Work Environment"/>
+				<SampleItem ID="4" name="Labor Relations"/>
+				<SampleItem ID="5" name="Operational Efficiency"/>
+				<SampleItem ID="6" name="Product Safety"/>
+				<SampleItem ID="7" name="Product Quality"/>
+				<SampleItem ID="8" name="Sexual Harassment"/>
+			</CodeComboField>
+			<ComboField name="TownHallQuestionID" findMode="text" parentField="QuestionTypeID">
+				<UpdateFieldRef name="PersonAsked"/>
+				<UpdateFieldRef name="QuestionDetails"/>
+				<SampleItem ID="1" name="Mattias Thorslund asking Larry Hansen | Active Agenda, HQ | 09-21-2003 | Satisfactorily Answered"/>
+				<SampleItem ID="2" name="Larry Hansen asking Mattias Thorslund | Active Agenda, HQ | 09-21-2004 | Unsatisfactorily Answered"/>
+			</ComboField>
+			<ViewField name="PersonAsked" parentField="TownHallQuestionID"/>
+			<ViewField name="QuestionAsked" parentField="TownHallQuestionID"/>
+			<ViewField name="QuestionDetails" parentField="TownHallQuestionID"/>
+			<PersonComboField name="PersonAnsweringID" findMode="alpha">
+				<SampleItem ID="1" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<MemoField name="AnswertoQuestion" rows="5" cols="75"/>
+			<DateField name="ReceivedDate"/>
+			<DateField name="AnswerDate"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the answer">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the answer">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the answer" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="TownHallAnswerID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SubmittalDate"/>
+		<ViewField name="ReceivedDate"/>
+		<ViewField name="QuestionType"/>
+		<ViewField name="TownHallQuestion"/>
+		<ViewField name="QuestionDetails"/>
+		<ViewField name="PersonAsked"/>
+		<ViewField name="PersonAnswering"/>
+		<ViewField name="AnswertoQuestion"/>
+		<ViewField name="AnswerDate"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="twna" phrase="Answers">
+			<InvisibleField name="TownHallAnswerID"/>
+			<ViewField name="PersonAnswering" sample="Dan Zahlis"/>
+			<ViewField name="AnswertoQuestion" sample="Undecided. The company is considering a number of cost reduction measures to protect the solvency of the organization. Plant closure is one of the options being considered but is presently considered an option of last resort. Thank you for your question. If you have any further questions, please do not hesitate to ask"/>
+			<ViewField name="AnswerDelayCalc" sample="2.2"/>
+		</ViewGrid>
+		<EditGrid moduleID="twna" phrase="Answers">
+			<GridForm>
+				<PersonComboField name="PersonAnsweringID" findMode="alpha">
+					<SampleItem ID="1" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<MemoField name="AnswertoQuestion" rows="5" cols="75"/>
+				<DateField name="ReceivedDate"/>
+				<DateField name="AnswerDate"/>
+			</GridForm>
+			<InvisibleField name="TownHallAnswerID"/>
+			<ViewField name="PersonAnswering" sample="Dan Zahlis"/>
+			<ViewField name="AnswertoQuestion" sample="Undecided. The company is considering a number of cost reduction measures to protect the solvency of the organization. Plant closure is one of the options being considered but is presently considered an option of last resort. Thank you for your question. If you have any further questions, please do not hesitate to ask"/>
+			<ViewField name="AnswerDelayCalc" sample="2.2"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Town Hall Answers By Question Type">
+			<GroupByField name="QuestionType"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Town Hall Answers By Question Type">
+			<GroupByField name="QuestionType"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Town Hall Answers By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Town Hall Answers By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Town Hall Answers By Person Asked">
+			<GroupByField name="PersonAsked"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Town Hall Answers By Person Asked">
+			<GroupByField name="PersonAsked"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Town Hall Answers By Status">
+			<GroupByField name="QuestionStatus"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Town Hall Answers By Status">
+			<GroupByField name="QuestionStatus"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Town Hall Answers By Person Asking">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Town Hall Answers By Person Asking">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Town Hall Answers By Person Answering">
+			<GroupByField name="PersonAnswering"/>
+			<SummaryField name="ActionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Town Hall Answers By Person Answering">
+			<GroupByField name="PersonAnswering"/>
+			<SummaryField name="ActionID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Survey Questions" moduleID="surq" parentModule="sur" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Survey Question" pluralRecordName="Survey Questions">
+    <ModuleFields>
+        <TableField name="QuestionID" type="int" dbFlags="not null auto_increment" phrase="QuestionID|An automatically assigned number used to associate questions with surveys" sample="1"/>
+        <TableField name="SurveyID" type="int" dbFlags="not null" phrase="Survey ID|An automatically assigned number used to track surveys" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="sur" foreignKey="SurveyID" foreignField="OrganizationID" key="SurveyID" joinType="left" phrase="Organization|The name of the organization conducting the survey" sample="Active Agenda, HQ"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization conducting the survey" sample="Active Agenda, HQ"/>
+        <ForeignField name="SurveyName" foreignTable="sur" foreignKey="SurveyID" foreignField="SurveyName" key="SurveyID" joinType="left" phrase="Survey Name|Title of the survey" sample="Safety Program Perception Survey"/>
+        <ForeignField name="Survey" foreignTable="sur" foreignKey="SurveyID" foreignField="Survey" key="SurveyID" joinType="left" phrase="Survey|A combined field used to describe this survey when associating it with other records" sample="Safety Program Perception Survey; Hansen Excellence Scale"/>
+        <TableField name="SurveyQuestion" type="varchar(255)" phrase="Question|A questions contained within the survey" sample="Does your supervisor give a 'hoot' about your safety?"/>
+        <TableField name="QuestionGroupID" type="int" phrase="Question Group|A question group which is used to 'roll-up' question values and generate results by question groups" sample="2"/>
+        <ForeignField name="QuestionGroup" foreignTable="surqg" foreignKey="QuestionGroupID" foreignField="Name" key="QuestionGroupID" joinType="left" phrase="Question Group|A question group which is used to 'roll-up' question values and generate results by question groups" sample="Leadership"/>
+        <TableField name="SortOrder" type="int" phrase="Sort Order|A value used to organize question groups into a preferred order" sample="1"/>
+        <SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'surq'" localKey="QuestionID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="SurveyName"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="QuestionGroup"/>;_<CombinedFieldRef name="SurveyQuestion"/>;_</CombinedField>
+        <CombinedField name="Question" phrase="Question|A combined field used to describe this survey question when associating it with other records" sample="Safety Program Perception Survey | Does your supervisor give a 'hoot' about your safety? | Leadership | Sort Order: 1"><CombinedFieldRef name="SurveyName"/>;_<CombinedFieldRef name="SurveyQuestion"/>;_<CombinedFieldRef name="QuestionGroup"/>;_
+            Sort Order:_<CombinedFieldRef name="SortOrder"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="QuestionID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Question"/>
+        <RecordLabelField name="RecordLabel"/>
+        <Index name="SurveyID">
+            <FieldRef name="SurveyID"/>
+        </Index>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="QuestionID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="surq"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List survey questions">
+            <ListField name="QuestionID" phrase="Question ID"/>
+            <ListField name="SurveyName" phrase="Survey Name"/>
+            <ListField name="Question" phrase="Question"/>
+            <ListField name="QuestionGroup" phrase="Question Group"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search survey questions">
+            <ComboField name="SurveyID" findMode="text">
+                <SampleItem ID="1" name="Safety Program Perception Survey; Hansen Excellence Scale"/>
+                <SampleItem ID="2" name="Safety Program Perception Survey; Eckenfelder Scale"/>
+                <SampleItem ID="3" name="Safety Program Perception Survey; Petersen Scale"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="QuestionGroupID" findMode="text">
+                <SampleItem ID="1" name="Safety Program Perception Survey; Hansen Excellence Scale"/>
+                <SampleItem ID="2" name="Safety Program Perception Survey; Eckenfelder Scale"/>
+                <SampleItem ID="3" name="Safety Program Perception Survey; Petersen Scale"/>
+            </ComboField>
+            <CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|The screen used to view summary information about the questions of all surveys">
+            <ViewField name="QuestionID"/>
+            <ViewField name="SurveyName"/>
+            <ViewField name="Question"/>
+            <ViewField name="QuestionGroup"/>
+            <ViewField name="SortOrder"/>
+            <ViewField name="RiskImperatives"/>
+        </ViewScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a survey question">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="rsk"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="QuestionID"/>
+        <ViewField name="SurveyName"/>
+        <ViewField name="Question"/>
+        <ViewField name="QuestionGroup"/>
+        <ViewField name="SortOrder"/>
+        <ViewField name="RiskImperatives"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="surq" phrase="Questions">
+            <InvisibleField name="QuestionID"/>
+            <ViewField name="QuestionGroup" sample="Leadership"/>
+            <ViewField name="SortOrder" sample="1"/>
+            <ViewField name="SurveyQuestion" sample="Does your supervisor give a 'hoot' about your safety?"/>
+        </ViewGrid>
+        <EditGrid moduleID="surq" phrase="Questions">
+            <GridForm>
+                <InvisibleField name="QuestionID"/>
+                <CodeComboField name="QuestionGroupID" findMode="text" sample="Leadership">
+                    <SampleItem ID="1" name="Leadership"/>
+                    <SampleItem ID="2" name="Involvement"/>
+                    <SampleItem ID="3" name="Integrity"/>
+                    <SampleItem ID="4" name="Trustworthiness"/>
+                </CodeComboField>
+                <MemoField name="SurveyQuestion" rows="3" cols="75" sample="Does your supervisor give a 'hoot' about your safety?"/>
+                <EditField name="SortOrder" size="5" maxLength="5" sample="1"/>
+            </GridForm>
+            <ViewField name="QuestionGroup" sample="Leadership"/>
+            <ViewField name="SortOrder" sample="1"/>
+            <ViewField name="Question" sample="Does your supervisor give a 'hoot' about your safety?"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 503 $" date="$Date: 2007-02-17 04:46:15 -0800 (Sat, 17 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,424 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Training Considerations" moduleID="tracn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="C:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Training Consideration" pluralRecordName="Training Considerations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="TrainingConsiderationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track the association of training considerations with records throughout the application" sample="1"/>
+		<TableField name="GuidanceOrganizationID" type="int" dbFlags="unsigned not null" phrase="Guidance Organization|A combined field used to describe the guidance organization when associating it with other records" sample="1"/>
+		<ForeignField name="RelatedModuleID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedModuleID" key="GuidanceOrganizationID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the guidance" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the guidance" sample="Task Types"/>
+		<ForeignField name="RelatedRecordID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedRecordID" key="GuidanceOrganizationID" joinType="left" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<ForeignField name="RelatedRecordDescription" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedRecordDescription" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Type|A short phrase used to describe the type of guidance being provided by the guidance organization" sample="Cleaning Floors"/>
+		<ForeignField name="OrganizationID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="OrganizationID" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Organization|The name of the organization providing guidance" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Guidance Organization|The name of the organization providing guidance" sample="Active Agenda, HQ"/>
+		<ForeignField name="OrganizationLogo" foreignTable="org" foreignKey="OrganizationID" foreignField="GuidanceLogoImage" key="OrganizationID" joinType="left" phrase="Organization Logo|Displays the logo of the guidance organization" sample="Active Agenda, HQ"/>
+		<ForeignField name="Description" foreignTable="org" foreignKey="OrganizationID" foreignField="Description" key="OrganizationID" joinType="left" phrase="Description|Text description of the organization" sample="Software Development company and risk services provider"/>
+		<ForeignField name="OrganizationType" foreignTable="org" foreignKey="OrganizationID" foreignField="OrganizationType" key="OrganizationID" joinType="left" phrase="Organization Type|A detailed description of the organization type" sample="Manufacturing | Ice Cream Production Facility"/>
+		<ForeignField name="GuidanceOrganization" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="GuidanceOrganization" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Provided By|A combined field used to describe the guidance organization when associating it with guidance types" sample="Task Types | Cleaning Floors | Active Agenda, Inc."/>
+		<ForeignField name="GuidancePersonID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="GuidancePersonID" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Person|The individual providing guidance for consideration" sample="1"/>
+		<ForeignField name="GuidancePerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="GuidancePersonID" joinType="left" phrase="Guidance Person|The individual providing guidance for consideration" sample="Mattias Thorslund"/>
+		<TableField name="CourseID" type="int" dbFlags="unsigned not null" phrase="Course|A combined field used to describe this course when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingTypeID" foreignTable="tra" foreignKey="CourseID" foreignField="TrainingTypeID" key="CourseID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingCategoryID" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingCategoryID" key="TrainingTypeID" joinType="left" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+		<CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+		<ForeignField name="TrainingTypeDesc" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingTypeDesc" key="TrainingTypeID" joinType="left" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+		<ForeignField name="TrainingType" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingType" key="TrainingTypeID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"/>
+		<ForeignField name="OrgLevelID" foreignTable="tra" foreignKey="CourseID" foreignField="OrgLevelID" key="CourseID" joinType="left" phrase="Organization Level|The hierarchical level of the organization" sample="1"/>
+		<CodeField name="OrgLevel" key="OrgLevelID" phrase="Organization Level|The hierarchical level of the organization" sample="Leadership" codeTypeID="22"/>
+		<ForeignField name="CourseOrganizationID" foreignTable="tra" foreignKey="CourseID" foreignField="OrganizationID" key="CourseID" joinType="left" phrase="Course Provider|The organization with primary responsibility for the design, development, and support for this course throughout the enterprise" sample="1"/>
+		<ForeignField name="CourseOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Course Provider|The organization with primary responsibility for the design, development, and support for this course throughout the enterprise" sample="Active Agenda, HQ"/>
+		<ForeignField name="PersonAccountableID" foreignTable="tra" foreignKey="CourseID" foreignField="PersonAccountableID" key="CourseID" joinType="left" phrase="Person Accountable|The person responsible for maintaining course content currency and quality" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person responsible for maintaining course content currency and quality" sample="Mattias Thorslund"/>
+		<ForeignField name="CourseCode" foreignTable="tra" foreignKey="CourseID" foreignField="CourseCode" key="CourseID" joinType="left" phrase="Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods" sample="9928-021"/>
+		<ForeignField name="CourseTitle" foreignTable="tra" foreignKey="CourseID" foreignField="CourseTitle" key="CourseID" joinType="left" phrase="Title|A brief name used to identify the course offering" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+		<ForeignField name="CourseDesc" foreignTable="tra" foreignKey="CourseID" foreignField="CourseDesc" key="CourseID" joinType="left" phrase="Description|A detailed description of the course" sample="The Introduction to Hazard Analysis of Critical Control Points (HACCP) course provides attendees with a working knowledge of company and regulatory product quality requirements. The course also provides attendees with a working knowledge of the company's internal policies and controls deployed to protect consumers from product quality deficiencies."/>
+		<ForeignField name="CourseObj" foreignTable="tra" foreignKey="CourseID" foreignField="CourseObj" key="CourseID" joinType="left" phrase="Objective|A detailed description of the course objective. The course objective should reflect the knowledge expected of attendees as they complete the course" sample="The objective of the Introduction to HACCP course is to provide attendees with the level of understanding required to perform operational duties within a HACCP environment. This course is designed to provide visitors to a HACCP environment with the requisite level of understanding to avoid product contamination behaviors during visitations."/>
+		<ForeignField name="RegulatoryRequired" foreignTable="tra" foreignKey="CourseID" foreignField="RegulatoryRequired" key="CourseID" joinType="left" phrase="Regulatory Required|Whether this training course is required to satisfy a regulatory requirement" sample="Yes"/>
+		<ForeignField name="CourseStatusID" foreignTable="tra" foreignKey="CourseID" foreignField="CourseStatusID" key="CourseID" joinType="left" phrase="Status|Status of the course curriculum and level of completion" sample="1"/>
+		<CodeField name="CourseStatus" key="CourseStatusID" phrase="Status|Status of the course curriculum and level of completion" sample="Under Development" codeTypeID="128"/>
+		<ForeignField name="Course" foreignTable="tra" foreignKey="CourseID" foreignField="Course" key="CourseID" joinType="left" phrase="Course|A combined field used to describe this course when associating it with other records" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-101.1"/>
+		<TableField name="TrainingConsiderationTitle" type="varchar(128)" validate="notEmpty" phrase="Consideration Title|A short title or phrase used to describe the training consideration" sample="California facilities should consider training all employees in HAACP and GMPs"/>
+		<TableField name="TrainingConsiderationDescription" type="text" validate="notEmpty" phrase="Consideration|A detailed description of the training consideration and the manner in which the activity associated with the related record may be impacted by the regulation" sample="California utilizes a state agency to enforce federal US Department of Agriculture regulations. California has numerous requirements which exceed those of the USDA"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related module record associated with the guidance"/>
+		<CombinedField name="RelatedModuleRecord" phrase="Guidance Type|The related module name and specific type of guidance" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>:_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+        <LinkField name="RelatedGuidanceRecordLink" foreignModuleID="gui" recordIDField="GuidanceOrganizationID" phrase="Guidance Record Link|An internal link to the related guidance record"/>
+		<CombinedField name="RelatedGuidanceRecord" phrase="Provided By|The name of the person and organization providing the guidance" sample="Provided by Dan Zahlis of Active Agenda, Inc."><CombinedFieldRef name="GuidancePerson"/>_of_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="CourseTitleCode" phrase="Course|The title and code used to identify the course" sample="Provided by Dan Zahlis of Active Agenda, Inc."><CombinedFieldRef name="CourseTitle"/>;_Code:_<CombinedFieldRef name="CourseCode"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="People Employees | California Wage and Hours Regulation | California facilities should consider local impact"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="Course"/>;_<CombinedFieldRef name="TrainingConsiderationTitle"/></CombinedField>
+		<CombinedField name="TrainingConsideration" phrase="Training Consideration|A combined field used to describe the training consideration when associating it with other records" sample="People Employees | California Wage and Hours Regulation"><CombinedFieldRef name="TrainingConsiderationTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TrainingConsiderationID"/>
+		</PrimaryKey>
+		<OwnerField name="GuidanceOrganizationID"/>
+		<RecordDescriptionField name="TrainingConsideration"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training considerations">
+			<ListField name="TrainingConsiderationID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="CourseTitle" phrase="Course"/>
+			<ListField name="TrainingConsiderationTitle" phrase="Consideration"/>
+            <ListField name="GuidancePerson" link="RelatedGuidanceRecordLink" phrase="Guidance By"/>
+            <InvisibleField name="RelatedGuidanceRecordLink"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training considerations">
+			<OrgComboField name="GuidanceOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="GuidancePersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<OrgComboField name="CourseOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="OrgLevelID" findMode="text">
+				<SampleItem ID="1" name="Corporate"/>
+				<SampleItem ID="2" name="Regional"/>
+				<SampleItem ID="3" name="Local"/>
+			</CodeComboField>
+			<EditField name="TrainingConsiderationTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the training consideration">
+			<ViewField name="TrainingConsiderationID"/>
+            <ViewField name="RelatedGuidanceRecord" link="RelatedGuidanceRecordLink"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="CourseOrganization"/>
+			<ViewField name="CourseTitleCode"/>
+			<ViewField name="CourseDesc"/>
+			<ViewField name="TrainingConsiderationTitle"/>
+			<ViewField name="TrainingConsiderationDescription"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the training consideration">
+			<ViewField name="TrainingConsiderationID"/>
+			<ViewField name="RelatedModuleRecord"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="GuidanceOrganization"/>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<UpdateFieldRef name="CourseOrganization"/>
+				<UpdateFieldRef name="CourseTitle"/>
+				<UpdateFieldRef name="CourseDesc"/>
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<ViewField name="CourseOrganization" parentField="CourseID"/>
+			<ViewField name="CourseTitle" parentField="CourseID"/>
+			<ViewField name="CourseDesc" parentField="CourseID"/>
+			<EditField name="TrainingConsiderationTitle" size="75" maxLength="128"/>
+			<MemoField name="TrainingConsiderationDescription" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+        <ViewField name="TrainingConsiderationID"/>
+        <ViewField name="RelatedGuidanceRecord" link="RelatedGuidanceRecordLink"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="CourseTitleCode"/>
+        <ViewField name="CourseDesc"/>
+        <ViewField name="TrainingConsiderationTitle"/>
+        <ViewField name="TrainingConsiderationDescription"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="tracn" phrase="Training Guidance" isGuidance="yes" verticalDisplay="yes">
+			<InvisibleField name="TrainingConsiderationID"/>
+			<ViewField name="OrganizationLogo"/>
+			<ViewField name="CourseTitleCode" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP) | 101"/>
+			<ViewField name="TrainingConsiderationTitle" sample="Consider HACCP training for all California Employees"/>
+			<ViewField name="TrainingConsiderationDescription" sample="California utilizes a state agency to enforce federal US Department of Agriculture regulations. California has numerous requirements which exceed those of the USDA"/>
+			<ViewField name="GuidanceOrganization" sample="Active Agenda, Inc."/>
+			<ViewField name="GuidancePerson" sample="Dan Zahlis"/>
+			<OrderByField name="GuidanceOrganization"/>
+			<VerticalFormat>
+				<LogoField name="OrganizationLogo"/>
+				<TitleField name="CourseTitleCode"/>
+				<TitleField name="TrainingConsiderationTitle"/>
+				<FeatureField name="TrainingConsiderationDescription"/>
+			</VerticalFormat>
+		</ViewGrid>
+		<EditGrid moduleID="tracn" phrase="Training Guidance">
+			<GridForm>
+				<InvisibleField name="TrainingConsiderationID"/>
+				<CodeComboField name="TrainingCategoryID" findMode="text">
+					<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+					<SampleItem ID="1" name="Disease"/>
+					<SampleItem ID="2" name="Complaint"/>
+					<SampleItem ID="3" name="Illness"/>
+					<SampleItem ID="4" name="Injury"/>
+					<SampleItem ID="5" name="Publicity"/>
+					<SampleItem ID="6" name="Theft"/>
+				</CodeComboField>
+				<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+					<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+					<SampleItem ID="1" name="Employee (Leadership)"/>
+					<SampleItem ID="2" name="Employee (Management)"/>
+					<SampleItem ID="3" name="Employee (Staff)"/>
+					<SampleItem ID="4" name="Employee (Line)"/>
+					<SampleItem ID="5" name="Employee (Administration)"/>
+					<SampleItem ID="6" name="Employee (Contractor)"/>
+				</ComboField>
+				<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+					<UpdateFieldRef name="CourseTitle"/>
+					<UpdateFieldRef name="CourseDesc"/>
+					<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+					<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+					<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+				</ComboField>
+				<ViewField name="CourseTitle" parentField="CourseID"/>
+				<ViewField name="CourseDesc" parentField="CourseID"/>
+				<EditField name="TrainingConsiderationTitle" size="75" maxLength="128"/>
+				<MemoField name="TrainingConsiderationDescription" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="TrainingConsiderationID"/>
+			<ViewField name="TrainingConsiderationTitle" sample="Consider HACCP training for all California Employees"/>
+			<ViewField name="TrainingConsiderationDescription" sample="California utilizes a state agency to enforce federal US Department of Agriculture regulations. California has numerous requirements which exceed those of the USDA"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Training Considerations By Guidance Organization">
+			<GroupByField name="GuidanceOrganization"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Training Considerations By Guidance Organization">
+			<GroupByField name="GuidanceOrganization"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Training Considerations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Training Considerations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Training Considerations By Guidance Person">
+			<GroupByField name="GuidancePerson"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Training Considerations By Guidance Person">
+			<GroupByField name="GuidancePerson"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Training Considerations By Organization Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Training Considerations By Organization Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Training Considerations By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Training Considerations By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Training Considerations By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Training Considerations By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Training Considerations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Training Considerations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Training Considerations By Regulatory Required">
+			<GroupByField name="RegulatoryRequired"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Training Considerations By Regulatory Required">
+			<GroupByField name="RegulatoryRequired"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Training Considerations By Course Status">
+			<GroupByField name="CourseStatus"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Training Considerations By Course Status">
+			<GroupByField name="CourseStatus"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Training Considerations By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Training Considerations By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingConsiderationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

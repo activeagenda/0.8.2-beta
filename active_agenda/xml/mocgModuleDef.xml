@@ -1,0 +1,326 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Change Guidelines" moduleID="mocg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Change Guideline" pluralRecordName="Change Guidelines" addNewName="Guideline" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="ChangeGuidelineID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track the types of changes to be managed by an organization" sample="1"/>
+		<TableField name="PolicyOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Policy Organization|The organization responsible for usuing the change management guideline" sample="1"/>
+		<ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization responsible for usuing the change management guideline" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="143" phrase="Person Accountable|The individual assigned primary accountability for providing oversight and support for the change management guideline" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for providing oversight and support for the change management guideline" sample="Mattias Thorslund"/>
+		<TableField name="ChangeCategoryID" type="int" validate="RequireSelection" phrase="Change Category|The category of change requiring management" sample="1"/>
+		<CodeField name="ChangeCategory" key="ChangeCategoryID" phrase="Change Category|The category of change requiring management" sample="New Person" codeTypeID="48"/>
+		<TableField name="GuidelineTitle" type="varchar(128)" validate="notEmpty" phrase="Guidline Title|A short, descriptive, title for the management of change guideline" sample="New Employee (Management)"/>
+		<TableField name="Scope" type="text" validate="noValidation" phrase="Scope|A detailed description of the scope of the change type" sample="Adding new employees shall include a complete review of the job duties and a hazard analysis of the tasks to be performed by the incumbent employee. New employees must also be medically qualified for the work"/>
+		<TableField name="Degree" type="text" validate="noValidation" phrase="Degree|A detailed description of the degree of the change type" sample="The addition of new employees requires a thorough review of the employee's background and prior work experience."/>
+		<TableField name="DesignConsiderations" type="text" validate="noValidation" phrase="Design|A detailed description of the design considerations to be made as a result of the change type" sample="New employee assignments should involve a review of work process and task design."/>
+		<TableField name="ConstructionConsiderations" type="text" validate="noValidation" phrase="Construction|A detailed description of the construction considerations to be made as a result of the change type" sample="New employees may require work area modifications to accomodate disabilities. Consideration should be given to any feedback received by the industrial medical provider regarding necessary workplace design accomodations."/>
+		<TableField name="OperationalConsiderations" type="text" validate="noValidation" phrase="Operations|A detailed description of the operational considerations to be made as a result of the change type" sample="Thorough discussions shall be held with all departments affected by the addition of a new empoyee. Every effort should be made to hire employees with prior experience with all required operational equipment."/>
+		<TableField name="MaintenanceConsiderations" type="text" validate="noValidation" phrase="Maintenance|A detailed description of the maintenance considerations to be made as a result of the change type" sample="Consideration shall be given for the requirements to maintain or retain an employee before extending an offer of employment. Employees represent a substantial investment and retention is imperative. Consideration shall be given to the specific requirements to maintain a positive employment relationship and retain an employee on an employee-by-employee basis."/>
+		<TableField name="DecommissionConsiderations" type="text" validate="noValidation" phrase="Decommission|A detailed description of the decommissioning considerations to be made as a result of the change type" sample="Consideration shall be given to the costs and impact of ending the employment relationship before extending an offer of employment."/>
+		<TableField name="GuidelineStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the management of change guideline" sample="1"/>
+		<CodeField name="GuidelineStatus" key="GuidelineStatusID" phrase="Status|The present status of the management of change guideline" sample="Under Development" codeTypeID="218"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="New Person (Employee) | Active Agenda, HQ"><CombinedFieldRef name="ChangeCategory"/>_(<CombinedFieldRef name="GuidelineTitle"/></CombinedField>
+		<CombinedField name="ChangeGuideline" phrase="Change Guideline|A combined field used to describe this management of change guidline when associating it with other records" sample="New Person (Employee)">
+			<CombinedFieldRef name="GuidelineTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChangeGuidelineID"/>
+		</PrimaryKey>
+		<OwnerField name="PolicyOrganizationID"/>
+		<RecordDescriptionField name="ChangeGuideline"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mocg"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mocg"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mocg"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mocg"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mocg"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List change management guidelines">
+			<ListField name="ChangeGuidelineID" phrase="Record ID"/>
+			<ListField name="ChangeCategory" phrase="Category"/>
+			<ListField name="PolicyOrganization" phrase="Policy Organization"/>
+			<ListField name="GuidelineTitle" phrase="Guideline Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search change management guidelines">
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ChangeCategoryID" findMode="text">
+				<SampleItem ID="1" name="New Person"/>
+				<SampleItem ID="2" name="New Process"/>
+				<SampleItem ID="3" name="New Operation"/>
+				<SampleItem ID="4" name="New Material"/>
+				<SampleItem ID="5" name="Change to Existing Process"/>
+				<SampleItem ID="6" name="Change to Existing Operation"/>
+				<SampleItem ID="7" name="Change to Existing Personnel"/>
+				<SampleItem ID="8" name="Change to Existing Material"/>
+			</CodeComboField>
+			<EditField name="GuidelineTitle" size="75" maxLength="128"/>
+			<CodeComboField name="GuidelineStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Development Postponed"/>
+				<SampleItem ID="3" name="Awaiting Approval"/>
+				<SampleItem ID="4" name="Approved"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the change management guideline">
+			<ViewField name="ChangeGuidelineID"/>
+			<ViewField name="PolicyOrganization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ChangeCategory"/>
+			<ViewField name="GuidelineTitle"/>
+			<ViewField name="Scope"/>
+			<ViewField name="Degree"/>
+			<ViewField name="DesignConsiderations"/>
+			<ViewField name="ConstructionConsiderations"/>
+			<ViewField name="OperationalConsiderations"/>
+			<ViewField name="MaintenanceConsiderations"/>
+			<ViewField name="DecommissionConsiderations"/>
+			<ViewField name="GuidelineStatus"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the change management guideline">
+			<ViewField name="ChangeGuidelineID"/>
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ChangeCategoryID" findMode="text">
+				<SampleItem ID="1" name="New Person"/>
+				<SampleItem ID="2" name="New Process"/>
+				<SampleItem ID="3" name="New Operation"/>
+				<SampleItem ID="4" name="New Material"/>
+				<SampleItem ID="5" name="Change to Existing Process"/>
+				<SampleItem ID="6" name="Change to Existing Operation"/>
+				<SampleItem ID="7" name="Change to Existing Personnel"/>
+				<SampleItem ID="8" name="Change to Existing Material"/>
+			</CodeComboField>
+			<EditField name="GuidelineTitle" size="75" maxLength="128"/>
+			<MemoField name="Scope" rows="5" cols="75"/>
+			<MemoField name="Degree" rows="5" cols="75"/>
+			<CodeComboField name="GuidelineStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Development Postponed"/>
+				<SampleItem ID="3" name="Awaiting Approval"/>
+				<SampleItem ID="4" name="Approved"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Design" phrase="Design|Edit the design considerations for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="DesignConsiderations" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Construction" phrase="Construction|Edit the construction considerations for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="ConstructionConsiderations" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Operations" phrase="Operations|Edit the operational considerations for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="OperationalConsiderations" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Maintenance" phrase="Maintenance|Edit the maintenance considerations for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="MaintenanceConsiderations" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Decommission" phrase="Decommission|Edit the decommissioning considerations for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="DecommissionConsiderations" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance organizations with the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the change management guideline">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the change management guideline" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChangeGuidelineID"/>
+		<ViewField name="PolicyOrganization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="ChangeCategory"/>
+		<ViewField name="GuidelineTitle"/>
+		<ViewField name="Scope"/>
+		<ViewField name="Degree"/>
+		<ViewField name="GuidelineStatus"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Change Guidelines By Category">
+			<GroupByField name="ChangeCategory"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Change Guidelines By Category">
+			<GroupByField name="ChangeCategory"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Change Guidelines By Status">
+			<GroupByField name="GuidelineStatus"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Change Guidelines By Status">
+			<GroupByField name="GuidelineStatus"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Change Guidelines By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Change Guidelines By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Change Guidelines By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Change Guidelines By Person Accountable">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="ChangeGuidelineID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

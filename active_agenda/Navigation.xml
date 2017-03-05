@@ -1,0 +1,694 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="NavigationViewer.xsl"?>
+<!--
+    LICENSE NOTE:
+
+    Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+    Unless explicitly acquired and licensed from Licensor under a "commercial license",
+    the contents of this file are subject to the Reciprocal Public License ("RPL")
+    Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+    or use this file in either source code or executable form, except in compliance
+    with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+    Active Agenda Inc. at http://www.activeagenda.net/license.
+
+    All software distributed under the Licenses is provided strictly on an "AS IS"
+    basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+    INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+    OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+    limitations under the Licenses.
+
+    author         Dan Zahlis <dzahlis@activeagenda.net>
+    author         Mattias Thorslund <mthorslund@activeagenda.net>
+    copyright      2003-2007 Active Agenda Inc.
+    license        http://www.activeagenda.net/license
+
+
+    Navigation.xml
+
+    This file contains the structural definition of links and category items for the navigation tree.
+    The hierarchy of the items inside the Navigation element are to be represented by the system
+    as a navigation tree.
+
+    The navigation tree can be rendered in many ways - that is not encoded in this document. Therefore,
+    this document can be used to render an expandable/collapsible tree view using JavaScript, or
+    plain HTML (though multi-frame layouts will need some scripting to open more than one page
+    with a single click), or any other technology that might render a navigation tree.
+
+    This allows us or a customer to change the look-and-feel of the navigation tree on a per-site basis.
+    Each site will have its own Navigation.xml file, allowing per-site customization of the order or visibility
+    of the various items in the navigation tree.
+
+    The system will check a user's permissions before displaying a link in the navigation tree that is
+    displayed to the user.
+
+
+    Types of elements:
+
+    <Navigation>
+        This is the root element - all other items must be contain within this element.
+    </Navigation>
+
+    <InternalLink>
+        This defines a custom link to any page within the site. By default, it does not open a new browser.
+
+        The value of primary and secondary targets should include the relative path only (no "http://",
+        and no "www.sitename.com"). It should only consist of the script to be run and any values passed.
+        For scripting platform independence, the file extension is not required (it will be added by the
+        system if not present). Therefore, the following is valid: "page?a=1&amp;b=2".
+        Note that ampersands need to be escaped as "&amp;".
+
+        Attributes:
+            - primary
+                The primary target of the link. In the no-frame layout, this is the only link that will be opened.
+                In the multi-frame layout, this target will be opened in the frame referred to by the 'frame'
+                attribute. (required)
+            - secondary
+                A secondary link target. In the multi-frame layout, this is the page that will be loaded
+                in the frame not referred to in the 'frame' attribute. Will not be loaded in the no-frame layout.
+                (optional - when not present, the frame not referred to by 'frame' will remain as is)
+            - frame
+                What frame to load the primary target into. Can be"upper", "lower", or "replace". The
+                "replace" value will abandon the frame-set and load the primary target directly in the
+                browser - this is mainly useful in the "logout" link. (optional; defaults to "upper")
+            - expand
+                Used in multi-frame layouts only. Can be either "upper", "lower", or "both". (optional;
+                defaults to "both")
+            - phrase
+                The phrase that should be displayed in the link. (required)
+            - newbrowser
+                If "true", the link will open a new browser. (optional; defaults to "false")
+    </InternalLink>
+
+    <ExternalLink>
+        This defines a link to anywhere on the Web. Opens a new browser by default.
+        The target value must include the site name ("www.sitename.com") but the protocol
+        is optional; it defaults to "http://".
+
+        Attributes:
+            - target
+                The target of the link.
+            - phrase
+                The phrase that should be displayed in the link.
+    </ExternalLink>
+
+    <ModuleLink>
+        This is a shorter and more concise way of defining an internal link to a module.
+        It takes the module ID of a module and uses it to create the proper links. By
+        default, it will open the module's Search screen in the upper frame and the
+        List screen in the lower frame. In a non-frame layout, the List screen is displayed.
+
+        Attributes:
+            - moduleID
+                The module ID code for the module. (required)
+            - phrase
+                The phrase to be displayed in the link. (optional - will use moduleID to look up the
+                name of the module if not present)
+    </ModuleLink>
+
+    <Category>
+        This is a non-link item, that serves to group a number of other items.
+
+        Attributes:
+            - phrase
+                The phrase that should be displayed. (required)
+    </Category>
+
+    Any of these elements can take any number of sub-elements, which means that the sub-elments
+    will be displayed one level deeper in the hierarchy, below the containing elements.
+-->
+<Navigation>
+	<Category phrase="">
+		<Category phrase="Global">
+			<Category phrase="Modules|Manage associated information throughout the application">
+				<ModuleLink moduleID="act" phrase="Actions|View, enter, assign, and track actions throughout the organization"/>
+				<ModuleLink moduleID="att" phrase="Attachments|View files attached to records throughout the application or attach new files"/>
+				<ModuleLink moduleID="cos" phrase="Costs|View costs associated with records throughout the application or add new costs">
+					<ModuleLink moduleID="cost" phrase="Cost Types|Add, view or edit cost of risk types"/>
+					<ModuleLink moduleID="cose" phrase="Expenditures|Add, view or edit cost of risk expenditures"/>
+				</ModuleLink>
+				<ExternalLink target="activeagenda.net/discussions/" phrase="Discussions (External)|Participate in Active Agenda's global discussion boards"/>
+				<ModuleLink moduleID="lnk" phrase="Links|View Internet links associated with records throughout the application"/>
+				<ModuleLink moduleID="nts" phrase="Notes|View the notes attached to records throughout the application or create new notes"/>
+				<ModuleLink moduleID="ntf" phrase="Notifications|View the notification requirements established throughout the application or assign new notification requirements"/>
+			</Category>
+			<Category phrase="Views|View information across the enterprise">
+				<ModuleLink moduleID="dat" phrase="Dates|View the assignment of dates with related records throughout the application"/>
+                <Category phrase="Financial|View financial exposures and opportunities identified across the enterprise">
+                    <ModuleLink moduleID="cosex" phrase="Exposures|View financial exposures associated with records throughout the application"/>
+                    <ModuleLink moduleID="opt" phrase="Opportunities|View financial opportunities associated with records throughout the application"/>
+                </Category>
+				<ModuleLink moduleID="gui" phrase="Guidance|View or edit guidance provided by guidance organizations">
+					<ModuleLink moduleID="agrc" phrase="Agreements|View or edit agreement considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="aprd" phrase="Audits|View or edit audit considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="rtcc" phrase="Causation|View or edit root cause considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="busc" phrase="Continuity|View or edit business continuity considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="bcqc" phrase="Consequences|View or edit business consequence considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="cosc" phrase="Cost Exposures|View or edit cost exposure considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="eqpc" phrase="Equipment|View or edit equipment considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="hzc" phrase="Hazards|View or edit hazard considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="insc" phrase="Insurance|View or edit insurance considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="orgtc" phrase="Job Titles|View or edit job title considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="medc" phrase="Medical Exams|View or edit medical exam considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="optc" phrase="Opportunities|View or edit financial opportunity considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="oppc" phrase="Permits|View or edit permit considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="pubc" phrase="Publicity|View or edit publicity considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="regc" phrase="Regulations|View or edit regulatory considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="orgr" phrase="Requirements|View or edit organizational requirements suggested by guidance organizations"/>
+					<ModuleLink moduleID="rspc" phrase="Responsibilities|View or edit responsibility considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="rskc" phrase="Risk Imperatives|View or edit risk imperative considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="stdc" phrase="Standards|View or edit standards considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="supc" phrase="Suppliers|View or edit supplier considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="tracn" phrase="Training|View or edit training considerations suggested by guidance organizations"/>
+					<ModuleLink moduleID="valc" phrase="Values|View or edit values considerations suggested by guidance organizations"/>
+				</ModuleLink>
+				<Category phrase="People|View information associated with people across the enterprise">
+					<ModuleLink moduleID="acc" phrase="Accountabilities|View the accountability assignments of human resources made throughout the application"/>
+					<ModuleLink moduleID="inv" phrase="Involvement|View the involvement of people inside and outside the organization"/>
+				</Category>
+				<Category phrase="Precautions|View precautionary information across the enterprise">
+					<ModuleLink moduleID="bcq" phrase="Business Consequences|View business consequences associated with records throughout the application">
+						<ModuleLink moduleID="bcqt" phrase="Consequence Types|Add, view, and edit business consequence types"/>
+					</ModuleLink>
+					<ModuleLink moduleID="chma" phrase="Chemicals|View the association of chemicals with related records throughout the application"/>
+					<ModuleLink moduleID="cosex" phrase="Exposures|View the association of cost exposures with related records throughout the application"/>
+					<ModuleLink moduleID="hza" phrase="Hazards|View hazards associated with records throughout the application">
+						<ModuleLink moduleID="cnt" phrase="Controls|View and edit controls associated with hazards identified throughout the enterprise"/>
+						<ModuleLink moduleID="eqpa" phrase="Equipment|View and edit equipment associated with hazards identified throughout the enterprise"/>
+						<ModuleLink moduleID="hazt" phrase="Hazard Types|Add, view, or edit hazard types and related guidance"/>
+					</ModuleLink>
+					<ModuleLink moduleID="hzea" phrase="Enery Control|View the association of energy control procedures with related records throughout the application">
+						<ModuleLink moduleID="hzeea" phrase="Sources|View and edit energy sources associated with related records throughout the enterprise"/>
+					</ModuleLink>
+					<ModuleLink moduleID="orgla" phrase="Locations|View the association of physical locations with related records throughout the application"/>
+					<ModuleLink moduleID="oppa" phrase="Permits|View the association of operating permits with related records throughout the application"/>
+					<ModuleLink moduleID="rskxa" phrase="Risk Matrix|View the assignment of risk likelihoods, severities, and recommendations with related records throughout the organization"/>
+					<ModuleLink moduleID="rtc" phrase="Root Causes|View the assessment of root causes of loss made throughout the application">
+						<ModuleLink moduleID="rtp" phrase="Recommendations|View or edit the recommendations to prevent the reoccurence of incidents"/>
+					</ModuleLink>
+				</Category>
+				<Category phrase="Property|View information associated with property across the enterprise">
+					<ModuleLink moduleID="apr" phrase="Asset Protection|View asset protection measures associated with related records throughout the application">
+						<ModuleLink moduleID="aprd" phrase="Considerations|View asset protection considerations assigned to respective audit items"/>
+					</ModuleLink>
+					<ModuleLink moduleID="eqpa" phrase="Equipment|View the association of equipment with related records throughout the application"/>
+					<ModuleLink moduleID="insa" phrase="Insurance|View the association of insurance policies with related records throughout the application">
+                        <ModuleLink moduleID="clm" phrase="Claims|View the association of claims with related records throughout the application">
+                            <ModuleLink moduleID="lch" phrase="Loss Characteristics|View the association of loss Characteristics with claims"/>
+                        </ModuleLink>
+					</ModuleLink>
+					<ModuleLink moduleID="wam" phrase="Weights and Measures|View the relationships of weights and measures made throughout the application"/>
+				</Category>
+				<Category phrase="Practices|View information associated with procedures and business practices across the enterprise">
+					<ModuleLink moduleID="agr" phrase="Agreements|View risk control agreements and/or contracts across the enterprise">
+						<ModuleLink moduleID="agrt" phrase="Setup Types|Add, view, or edit agreement types and related guidance"/>
+					</ModuleLink>
+					<ModuleLink moduleID="bpc" phrase="Best Practices|View the best practices identified across the enterprise"/>
+					<ModuleLink moduleID="busa" phrase="Business Continuation|View the business continuation requirements and associated efforts across the enterprise"/>
+					<ModuleLink moduleID="cnt" phrase="Controls|View the risk controls associated with related records throughout the application"/>
+					<ModuleLink moduleID="orgda" phrase="Departments|View the association of organizational departments with related records throughout the application"/>
+					<ModuleLink moduleID="doca" phrase="Documents|View the association of documentation requirements with related records throughout the application">
+                        <ModuleLink moduleID="docs" phrase="Status|View the association of documentation status with related records throughout the application"/>
+					</ModuleLink>
+					<ModuleLink moduleID="evt" phrase="Events|View the association of events with related records throughout the application"/>
+					<ModuleLink moduleID="gloa" phrase="Glossary Items|View the association of glossary items with related records throughout the application"/>
+					<ModuleLink moduleID="jana" phrase="Job Analyses|View the association of job analyses with related records throughout the application"/>
+					<ModuleLink moduleID="orgja" phrase="Job Titles|View the association of job titles with related records throughout the application"/>
+					<ModuleLink moduleID="filr" phrase="File Records|View the association of database records with physical files"/>
+					<ModuleLink moduleID="parpa" phrase="Policies|View the association of partnerships and policies with related records throughout the application"/>
+					<ModuleLink moduleID="pub" phrase="Publicity|View the association of publicity exposures with related records throughout the application">
+						<ModuleLink moduleID="pubt" phrase="Publicity Types|Add, view, or edit publicity types and related guidance"/>
+					</ModuleLink>
+					<ModuleLink moduleID="rega" phrase="Regulations|View the association of regulations with related records throughout the organization"/>
+					<ModuleLink moduleID="rsp" phrase="Responsibilities|View the organizational responsibility assignments made throughout the application"/>
+					<ModuleLink moduleID="stda" phrase="Standards|View the association of standards with related records throughout the organization"/>
+					<ModuleLink moduleID="sup" phrase="Suppliers|View the suppliers of products or services throughout the organization"/>
+                    <Category phrase="Tasks|View information associated with tasks performed across the enterprise">
+                        <ModuleLink moduleID="tasc" phrase="Carrying|View tasks that require carrying"/>
+                        <ModuleLink moduleID="tasga" phrase="General Activities|View tasks that require general activities"/>
+                        <ModuleLink moduleID="tashu" phrase="Hand Use|View tasks that require hand use"/>
+                        <ModuleLink moduleID="tasl" phrase="Lifting|View tasks that require lifting"/>
+					</Category>
+					<ModuleLink moduleID="traca" phrase="Training Courses|View the association of training cousres with related records throughout the organization"/>
+					<ModuleLink moduleID="vala" phrase="Values|View the association of organizational values with related records throughout the organization"/>
+					<ModuleLink moduleID="wrk" phrase="Work Orders|View the work orders initiated and in progress throughout the organization"/>
+				</Category>
+				<ModuleLink moduleID="rskcl" phrase="Risk Classifications|View the association of risk classifications with related records throughout the application"/>
+				<ModuleLink moduleID="rsk" phrase="Risk Imperatives|View the association of risk imperatives with related records throughout the application"/>
+			</Category>
+		</Category>
+		<Category phrase="Assets|Manage information associated with assets of the organization">
+			<ModuleLink moduleID="bud" phrase="Budgets|Add, view, or edit budgets">
+				<ModuleLink moduleID="buda" phrase="Accounts|View or edit budget accounts"/>
+				<ModuleLink moduleID="budat" phrase="Account Types|Add, view, or edit budget account types"/>
+			</ModuleLink>
+			<ModuleLink moduleID="bui" phrase="Buildings|Add, view, or edit information about buildings">
+				<ModuleLink moduleID="buit" phrase="Building Types|Add, view, or edit building types and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="eqp" phrase="Equipment|Add, view, or edit information about equipment used throughout the organization">
+				<ModuleLink moduleID="eqpin" phrase="Inventory|Add, view, or edit equipment inventories">
+					<ModuleLink moduleID="eqptr" phrase="Transactions|Add, view, or edit equipment inventory transactions"/>
+					<ModuleLink moduleID="eqpt" phrase="Equipment Types|Add, view, or edit equipment types and related guidance"/>
+				</ModuleLink>
+			</ModuleLink>
+			<ModuleLink moduleID="oas" phrase="Other Assets|Add, view, or edit information about other assets">
+				<ModuleLink moduleID="oasin" phrase="Inventory|Add, view, or edit other asset inventories">
+					<ModuleLink moduleID="oast" phrase="Transactions|Add, view, or edit other asset inventory transactions"/>
+				</ModuleLink>
+			</ModuleLink>
+			<ModuleLink moduleID="aproi" phrase="Other Items|Add, view, or edit other checklist items">
+				<ModuleLink moduleID="april" phrase="Locations|View or edit other checklist items"/>
+			</ModuleLink>
+			<ModuleLink moduleID="veh" phrase="Vehicles|Add, view, or edit information about fleet vehicles">
+				<ModuleLink moduleID="veha" phrase="Assignments|View or edit vehicle assignments"/>
+				<ModuleLink moduleID="vehmd" phrase="Models|Add, view, or edit vehicle models used within the organization"/>
+				<ModuleLink moduleID="vehml" phrase="Odometers|Add, view, or edit vehicle mileage"/>
+				<ModuleLink moduleID="vehtn" phrase="Tracking Numbers|Add, view, or edit vehicle tracking numbers"/>
+				<ModuleLink moduleID="veht" phrase="Vehicle Types|Add, view, or edit vehicle types and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="sup" phrase="Suppliers|View or edit information about equipment and/or asset suppliers">
+				<ModuleLink moduleID="supt" phrase="Supplier|Add, view, or edit supplier types and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="tru" phrase="Trust Accounts|Add, view, or edit trust accounts">
+				<ModuleLink moduleID="trud" phrase="Distributions|View trust account distributions">
+					<ModuleLink moduleID="true" phrase="Expenditures|View trust account expenditures"/>
+					<ModuleLink moduleID="trut" phrase="Transfers|Add, view, or edit trust account transfers"/>
+				</ModuleLink>
+			</ModuleLink>
+		</Category>
+		<Category phrase="Asset Protection|Manage information associated with the protection of assets">
+			<ModuleLink moduleID="busa" phrase="Continuity Plans|View and edit business continuation requirements established throughout the enterprise">
+				<ModuleLink moduleID="bus" phrase="Plan Guidelines|Add, view, or edit business continuity plan guidelines"/>
+			</ModuleLink>
+			<ModuleLink moduleID="orgci" phrase="Certificates of Insurance|Add, view, or edit certificates of insurance associated with specific organizations"/>
+			<ModuleLink moduleID="aprc" phrase="Checklists|Add, view, or edit asset protection checklists">
+				<ModuleLink moduleID="aprch" phrase="History|Add, view, or edit checklist performance history">
+					<ModuleLink moduleID="aprcd" phrase="Deficiencies|View checklist deficiencies"/>
+				</ModuleLink>
+			</ModuleLink>
+			<!--<ModuleLink moduleID="insld" phrase="Development Factors|Add, view, or edit loss development factors">
+                <ModuleLink moduleID="inslp" phrase="Setup Loss Periods|Setup, view, or edit loss periods to be associated with loss development factors">
+                    <ModuleLink moduleID="inslt" phrase="Triangle Values|View or edit triangle values associated with loss periods which are used to calculate loss development factors">
+                        <ModuleLink moduleID="inslc" phrase="Loss Costs|View loss costs included in the calculation of loss development factors"/>
+                        <ModuleLink moduleID="insli" phrase="Cost Increases|View loss cost increases associated with cost evaluations and comparisons over time"/>
+                        <ModuleLink moduleID="inslf" phrase="Loss Factors|View or edit loss factors to be used in calculating loss development factors"/>
+                    </ModuleLink>
+                </ModuleLink>
+            </ModuleLink>-->
+			<ModuleLink moduleID="ins" phrase="Insurance Policies|Add, view, or edit insurance policies">
+				<ModuleLink moduleID="inst" phrase="Insurance Types|Add, view, or edit insurance types and related guidance"/>
+				<ModuleLink moduleID="inso" phrase="Insureds|View or edit insurance policy assignments"/>
+			</ModuleLink>
+		</Category>
+		<Category phrase="Communications|Manage information associated with communication methods">
+			<ModuleLink moduleID="moc" phrase="Changes|Add, view, or edit changes at local facilities">
+				<ModuleLink moduleID="mocg" phrase="Change Guidelines|Add, view, or edit change management guidelines"/>
+			</ModuleLink>
+			<ModuleLink moduleID="cor" phrase="Corrective Actions|Add, view, or edit corrective actions taken to modify behavior">
+				<ModuleLink moduleID="corst" phrase="Situation Types|Add, view, or edit corrective action situations and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="doc" phrase="Documentation|Add, view, or edit management and compliance documentation utilized throughout the organization">
+				<ModuleLink moduleID="doct" phrase="Documentation Types|Add, view, or edit documentataion types and related guidance"/>
+				<ModuleLink moduleID="docr" phrase="View Recipients|View or edit documentation recipients"/>
+			</ModuleLink>
+			<ModuleLink moduleID="fbk" phrase="Feedback|Add, view, or edit feedback">
+				<ModuleLink moduleID="fbkr" phrase="Feedback Response|Add, view, or edit feedback response"/>
+			</ModuleLink>
+			<ModuleLink moduleID="filph" phrase="Physical Files|Add, view, or edit physical files">
+                <ModuleLink moduleID="fil" phrase="File Requirements|Add, view or edit physical file retention requirements"/>
+			</ModuleLink>
+			<ModuleLink moduleID="hzr" phrase="Hazard Reporting|Add, view, or edit hazard reports"/>
+			<ModuleLink moduleID="ict" phrase="Incentives|Add, view, or edit incentive criteria (conditions for positive consequences)">
+				<ModuleLink moduleID="ictas" phrase="View Adoptions|View or edit incentive criteria adopted by organizations and associate local award values with award criteria"/>
+				<ModuleLink moduleID="icta" phrase="Awards|Add, view, or edit incentive awards"/>
+			</ModuleLink>
+			<ModuleLink moduleID="jan" phrase="Job Analyses|Add, view, or edit job analyses">
+				<ModuleLink moduleID="tas" phrase="General Tasks|Add, view, or edit general tasks performed by throughout the enterprise">
+					<ModuleLink moduleID="tast" phrase="Task Types|Add, view, or edit task types and related guidance"/>
+				</ModuleLink>
+				<ModuleLink moduleID="jank" phrase="Skill Requirements|View, or edit skills required to perform a job"/>
+			</ModuleLink>
+			<ModuleLink moduleID="mtg" phrase="Meetings|Add, view, or edit a meeting">
+				<ModuleLink moduleID="mtga" phrase="View Attendance|View or edit meeting attendance information"/>
+				<ModuleLink moduleID="mtgm" phrase="Master Meetings|Add, view, or edit master meetings">
+					<ModuleLink moduleID="mtgma" phrase="View Assignments|Add, view, or edit master meeting assignments to local operating locations"/>
+				</ModuleLink>
+			</ModuleLink>
+			<ModuleLink moduleID="mea" phrase="Measurements|Add, view, or edit an organizational measurement">
+				<ModuleLink moduleID="meaa" phrase="Assignments|View, or edit measurement assignments"/>
+			</ModuleLink>
+			<ModuleLink moduleID="par" phrase="Partnerships|Add, view, or edit partnerships">
+				<ModuleLink moduleID="parle" phrase="Local Expectations|View or edit local partnership expectations"/>
+				<ModuleLink moduleID="para" phrase="Audits|View or edit local partnership audits">
+					<ModuleLink moduleID="parss" phrase="Shared Scores|View or edit shared partnership audit scores"/>
+					<ModuleLink moduleID="parls" phrase="Local Scores|View or edit local expectation audit scores"/>
+				</ModuleLink>
+				<ModuleLink moduleID="parp" phrase="Policies|Add, view, or edit partnership policies">
+					<ModuleLink moduleID="parpe" phrase="Policy Expectations|View or edit policy expectations"/>
+				</ModuleLink>
+			</ModuleLink>
+			<ModuleLink moduleID="pos" phrase="Postings|Add, view, or edit public postings utilized to communicate">
+				<ModuleLink moduleID="posa" phrase="View Assignments|View or edit public postings utilized to communicate"/>
+			</ModuleLink>
+			<ModuleLink moduleID="reg" phrase="Regulations|Add, view, or edit a regulation"/>
+			<ModuleLink moduleID="res" phrase="Resources|Add, view, or edit human resources available throughout the organization">
+                <ModuleLink moduleID="prtt" phrase="Participation Types|Add, view, or edit participation types"/>
+			</ModuleLink>
+			<ModuleLink moduleID="sgg" phrase="Suggestions|Add, view, or edit a suggestion"/>
+			<Category phrase="Skills Matrix|Manage information associated with knowledge, skill, and ability requirements">
+				<ModuleLink moduleID="ksaae" phrase="Areas|Add, view, or edit general skill areas"/>
+				<ModuleLink moduleID="ksasc" phrase="Capabilities|Add, view, or edit capabilities"/>
+				<ModuleLink moduleID="ksa" phrase="KSA's|Add, view, or edit knowledge, skill, and ability requirements"/>
+				<ModuleLink moduleID="ksal" phrase="KSA Levels|Add, view, or edit KSA Levels"/>
+			</Category>
+			<ModuleLink moduleID="std" phrase="Standards|Add, view, or edit a standard"/>
+			<ModuleLink moduleID="sur" phrase="Surveys|Add, view, or edit a survey">
+				<ModuleLink moduleID="surqg" phrase="View Question Groups|View or edit question groups associated with surveys"/>
+				<ModuleLink moduleID="surq" phrase="View Questions|View or edit survey questions and assign the questions to question groups"/>
+				<ModuleLink moduleID="sursv" phrase="Setup Scales|Add, view, or edit a scale used to score a survey and benchmark results"/>
+				<Category phrase="Participation">
+					<ModuleLink moduleID="surp" phrase="Participate|Participate in a survey"/>
+					<ModuleLink moduleID="surr" phrase="View Results|View the results of surveys"/>
+				</Category>
+			</ModuleLink>
+			<ModuleLink moduleID="twn" phrase="Town Hall|Add, view, or edit town hall questions">
+				<ModuleLink moduleID="twna" phrase="Answers|Add, view, or edit answers to town hall questions"/>
+			</ModuleLink>
+			<ModuleLink moduleID="tra" phrase="Training Courses|Add, view, or edit training courses">
+				<ModuleLink moduleID="trac" phrase="Certifications|Add, view, or edit training certifications">
+					<ModuleLink moduleID="tracp" phrase="Prerequisites|Add, view, or edit training certification prerequisites"/>
+				</ModuleLink>
+				<ModuleLink moduleID="tracl" phrase="Classes|Add, view, or edit training classes">
+					<ModuleLink moduleID="traas" phrase="Attendees|View, or edit attendees having completed scheduled training classes"/>
+				</ModuleLink>
+				<ModuleLink moduleID="trai" phrase="Instructors|View, or edit training instructors"/>
+				<ModuleLink moduleID="tram" phrase="Materials|Add, view, or edit training materials">
+					<ModuleLink moduleID="trama" phrase="Course Associations|View or edit training material associations with training couses"/>
+				</ModuleLink>
+				<ModuleLink moduleID="trap" phrase="Prerequisites|Add, view, or edit training prerequisites"/>
+				<ModuleLink moduleID="trapv" phrase="Providers|View or edit training course providers"/>
+				<ModuleLink moduleID="trak" phrase="Skills|View, or edit skills associated with training courses"/>
+				<ModuleLink moduleID="trat" phrase="Types|Add, view or edit training types"/>
+			</ModuleLink>
+			<ModuleLink moduleID="val" phrase="Values|Add, view, or edit missions, values, or beliefs">
+				<ModuleLink moduleID="vals" phrase="Shared Values|View or edit shared  organizational missions, values, or beliefs"/>
+				<ModuleLink moduleID="valt" phrase="Values Threats|View threats to an organizational mission, value, or belief"/>
+			</ModuleLink>
+		</Category>
+		<Category phrase="Facilities|Manage information associated with the organizational facilities">
+			<ModuleLink moduleID="cat" phrase="Catalogs|Add, view, or edit purchasing catalogs">
+				<ModuleLink moduleID="cata" phrase="View Assignments|View the purchase catalogs assigned to operating locations throughout the organization"/>
+			</ModuleLink>
+			<ModuleLink moduleID="chm" phrase="Chemicals|Add, view, or edit chemicals and related information">
+				<ModuleLink moduleID="chmco" phrase="Components|View or edit chemical components"/>
+				<ModuleLink moduleID="chmer" phrase="Exposure Routes|View or edit routes of chemical exposure"/>
+				<ModuleLink moduleID="chmin" phrase="Inventory|View, or edit chemical inventory items and related information">
+					<ModuleLink moduleID="chmtr" phrase="Transactions|Add, view, or edit chemical inventory transactions"/>
+				</ModuleLink>
+				<ModuleLink moduleID="chmh" phrase="Handling Procedures|View or edit chemical handling procedures"/>
+				<ModuleLink moduleID="chmpa" phrase="Phrase Associations|View chemical risk and safety phrases associated with chemicals"/>
+				<ModuleLink moduleID="chmth" phrase="Threshold Values|View or edit chemical threshold limit values"/>
+				<Category phrase="Setup">
+					<ModuleLink moduleID="chmhc" phrase="Hazard Classifications|Add, view, or edit chemical hazard classifications"/>
+					<ModuleLink moduleID="chmph" phrase="Phrases|Add, view, or edit chemical phrases"/>
+					<ModuleLink moduleID="chmt" phrase="Types|Add, view, or edit chemical types"/>
+				</Category>
+			</ModuleLink>
+			<ModuleLink moduleID="hze" phrase="Energy Control|Add, view, or edit hazardous energy control procedures">
+				<ModuleLink moduleID="hzee" phrase="Energy Sources|Add, view, or edit sources of energy"/>
+			</ModuleLink>
+			<ModuleLink moduleID="gapo" phrase="Gap Analyses|Add, view or modify organizational gap analyses">
+				<ModuleLink moduleID="gap" phrase="Analysis Items|Add, view, or modify gap analysis items"/>
+			</ModuleLink>
+			<ModuleLink moduleID="med" phrase="Medical Exams|Add, view or modify medical examinations">
+				<ModuleLink moduleID="medet" phrase="Exam Types|Add, view, or modify medical examination types"/>
+				<ModuleLink moduleID="medee" phrase="Elements|View, or modify medical examination elements"/>
+				<ModuleLink moduleID="medes" phrase="Services|View, or modify medical examination services"/>
+				<ModuleLink moduleID="medep" phrase="Steps|View, or modify medical examination procedural steps"/>
+			</ModuleLink>
+			<ModuleLink moduleID="opp" phrase="Operating Permits|Add, view, or edit operating permits">
+				<ModuleLink moduleID="oppt" phrase="Permit Types|Add, view, or edit operating permit types"/>
+				<Category phrase="View|View items affected by operating permits">
+					<ModuleLink moduleID="oppap" phrase="Applications|View or edit operating permit applications"/>
+					<ModuleLink moduleID="oppba" phrase="Buildings Affected|View or edit buildings affected by operating permits"/>
+					<ModuleLink moduleID="oppca" phrase="Chemicals Affected|View or edit chemicals affected by operating permits"/>
+					<ModuleLink moduleID="oppcr" phrase="Conditions|View or edit conditions and requirements of operating permits"/>
+					<ModuleLink moduleID="oppea" phrase="Equipment Affected|View or edit equipment affected by operating permits"/>
+					<ModuleLink moduleID="oppno" phrase="Permit Numbers|View or edit numbers associated with operating permits"/>
+					<ModuleLink moduleID="oppoa" phrase="Organizations Affected|View or edit organizations affected by operating permits"/>
+					<ModuleLink moduleID="opppc" phrase="Permit Categories|View or edit categories of operating permits"/>
+					<ModuleLink moduleID="opppf" phrase="Permit Fees|View or edit permit fees associated with operating permits"/>
+					<ModuleLink moduleID="oppp" phrase="Penalties|View or edit penalties associated with operating permits"/>
+					<ModuleLink moduleID="opprr" phrase="Reporting Requirements|View or edit reporting requirements associated with operating permits"/>
+					<ModuleLink moduleID="oppsa" phrase="Systems Affected|View or edit systems affected by operating permits"/>
+					<ModuleLink moduleID="oppwa" phrase="Waste Streams Affected|View or edit waste streams affected by operating permits"/>
+				</Category>
+			</ModuleLink>
+			<Category phrase="Special Hazards|Manage information associated with special hazards encountered by the organization">
+				<ModuleLink moduleID="csp" phrase="Confined Spaces|Add, view, or edit confined spaces">
+					<ModuleLink moduleID="cspp" phrase="Permits|Add, view, or edit confined space entry permits"/>
+					<ModuleLink moduleID="cspt" phrase="Setup Types|Add, view, or edit confined space types and related guidance"/>
+				</ModuleLink>
+				<ModuleLink moduleID="ewk" phrase="Elevated Work Activities|Add, view, or edit elevated work activities">
+					<ModuleLink moduleID="ewkp" phrase="Permits|Add, view, or edit elevated work permits"/>
+					<ModuleLink moduleID="ewkt" phrase="Setup Types|Add, view, or edit elevated work types and related guidance"/>
+				</ModuleLink>
+				<ModuleLink moduleID="hwk" phrase="Hot Work Activities|Add, view, or edit hot work activities">
+					<ModuleLink moduleID="hwkp" phrase="Permits|Add, view, or edit hot work permits"/>
+					<ModuleLink moduleID="hwkt" phrase="Setup Types|Add, view, or edit hot work types and related guidance"/>
+				</ModuleLink>
+				<ModuleLink moduleID="lbr" phrase="Line Breaking Activities|Add, view, or edit line breaking activities">
+					<ModuleLink moduleID="lbrp" phrase="Permits|Add, view, or edit line breaking permits"/>
+					<ModuleLink moduleID="lbrt" phrase="Setup Types|Add, view, or edit line break types and related guidance"/>
+				</ModuleLink>
+			</Category>
+			<ModuleLink moduleID="sys" phrase="Systems|Add, view, or edit systems">
+				<ModuleLink moduleID="syst" phrase="System|Add, view, or edit system types and related guidance"/>
+				<ModuleLink moduleID="syss" phrase="Sub-Systems|View or edit sub-systems">
+					<ModuleLink moduleID="sysc" phrase="Components|View or edit sub-system components"/>
+					<ModuleLink moduleID="sysct" phrase="Component Types|Setup sub-system component types"/>
+				</ModuleLink>
+			</ModuleLink>
+			<ModuleLink moduleID="was" phrase="Waste Stream|Add, view, or edit waste streams">
+				<ModuleLink moduleID="wasdf" phrase="Disposal Facilities|View or edit waste disposal facility associations"/>
+				<ModuleLink moduleID="wass" phrase="Storage|View or edit waste storage methods and quantities"/>
+				<ModuleLink moduleID="wassy" phrase="Systems|View or edit systems affected by waste streams"/>
+				<ModuleLink moduleID="wastp" phrase="Transporters|View or edit waste transporter associations">
+					<ModuleLink moduleID="wastf" phrase="Transfers|View or edit waste transfers"/>
+				</ModuleLink>
+				<ModuleLink moduleID="wast" phrase="Waste Types|Add, view, or edit waste types and related guidance"/>
+			</ModuleLink>
+		</Category>
+		<Category phrase="Incidents|Manage information associated with situations and incidents">
+			<ModuleLink moduleID="ire" phrase="Incident Reports|Add, view, or edit an incident report">
+				<Category phrase="Losses|Manage information associated with losses sustained by the organization">
+					<ModuleLink moduleID="lppb" phrase="Buildings|View or edit losses associated with buildings"/>
+					<ModuleLink moduleID="lpa" phrase="Employment Practices|View or edit losses associated with employment practices">
+						<ModuleLink moduleID="lpas" phrase="View Complaint Subjects|View or edit complaint subjects associated with employment practice losses"/>
+					</ModuleLink>
+					<ModuleLink moduleID="len" phrase="Environment|View or edit losses associated with environmental releases"/>
+					<ModuleLink moduleID="lppe" phrase="Equipment|View or edit losses associated with equipment"/>
+					<ModuleLink moduleID="lit" phrase="Information Technology|View or edit losses associated with information technology">
+						<ModuleLink moduleID="litii" phrase="Setup Indicators|View or edit information technology incident indicators"/>
+					</ModuleLink>
+					<ModuleLink moduleID="lppo" phrase="Other Assets|View or edit losses associated with other assets"/>
+					<ModuleLink moduleID="lin" phrase="People|View or edit losses associated with the injuries or illnesses of people">
+						<ModuleLink moduleID="linc" phrase="Setup Categories|Add, view, or edit injury categories and related guidance"/>
+						<ModuleLink moduleID="lint" phrase="Setup Types|Add, view, or edit injury types and related guidance"/>
+						<Category phrase="View">
+							<ModuleLink moduleID="lini" phrase="Injuries/Illnesses|View or edit specific injuries and illnesses incurred"/>
+							<ModuleLink moduleID="linm" phrase="Work Modifications|View or edit injury or illness related work modifications"/>
+						</Category>
+					</ModuleLink>
+					<ModuleLink moduleID="lpd" phrase="Products or Services|View or edit losses associated with products or services">
+						<ModuleLink moduleID="lpdps" phrase="Products Involved|View or edit products details associated with a products or services loss"/>
+					</ModuleLink>
+					<ModuleLink moduleID="lppv" phrase="Vehicles|View or edit losses associated with vehicles"/>
+					<Category phrase="View or Modify|View or edit information associated with losses">
+						<ModuleLink moduleID="clm" phrase="Claims|View or edit claims"/>
+						<ModuleLink moduleID="lli" phrase="Loss Legitimacies|View or edit loss legitimacy ratings"/>
+						<ModuleLink moduleID="lch" phrase="Loss Characteristics|View or edit loss characteristics"/>
+						<ModuleLink moduleID="lco" phrase="Loss Costs|View or edit loss costs">
+							<ModuleLink moduleID="lcot" phrase="Setup Types|View or edit loss cost types"/>
+						</ModuleLink>
+						<ModuleLink moduleID="lstt" phrase="Loss Status Types|View or edit loss status types"/>
+					</Category>
+				</Category>
+				<Category phrase="View or Modify|View or edit information associated with reported incidents">
+					<Category phrase="Contacts|View or edit contact information associated with reported incidents">
+						<ModuleLink moduleID="irel" phrase="Letter|View or edit letter contacts"/>
+						<ModuleLink moduleID="iret" phrase="Telephone|View or edit telephone contacts"/>
+						<ModuleLink moduleID="irev" phrase="Visitation|View or edit visitations"/>
+					</Category>
+					<ModuleLink moduleID="iren" phrase="Incident Numbers|View or edit report numbers associated with incident reports"/>
+					<ModuleLink moduleID="ireoc" phrase="Outside Counsel|View or edit outside counsel associated with incident reports"/>
+					<ModuleLink moduleID="irepo" phrase="Policy Violations|View or edit policy violations associated with incident reports"/>
+					<ModuleLink moduleID="ires" phrase="Situations|View situations associated with incident reports"/>
+					<ModuleLink moduleID="pub" phrase="Publicity|View the association of publicity exposures with related records throughout the application"/>
+				</Category>
+			</ModuleLink>
+			<ModuleLink moduleID="sit" phrase="Situations|Add, view, or edit the list of situations requiring a formal incident response by the organization">
+				<ModuleLink moduleID="sitc" phrase="Contacts|View or edit the contact list based on the severity of a situation"/>
+				<ModuleLink moduleID="sitd" phrase="Drills|View or edit situation response drills"/>
+				<ModuleLink moduleID="sitrp" phrase="Setup Procedures|Add, view, or edit situation response procedures">
+					<ModuleLink moduleID="sitrs" phrase="View Procedural Steps|View or edit situation response procedure steps"/>
+				</ModuleLink>
+				<ModuleLink moduleID="sitt" phrase="Setup Types|Add, view, or edit situation types and related guidance"/>
+			</ModuleLink>
+		</Category>
+		<ModuleLink moduleID="org" phrase="Organizations|Add, view, or edit organizations">
+			<ModuleLink moduleID="orgwa" phrase="Availability|Add, view, or edit work availability">
+				<ModuleLink moduleID="orgwu" phrase="Setup Unavailability Types|Add, view, or edit work unavailability types"/>
+			</ModuleLink>
+			<ModuleLink moduleID="orgdp" phrase="Departments|Add, view, or edit departments"/>
+			<ModuleLink moduleID="orgdv" phrase="Divisions|Add, view, or edit divisions"/>
+			<ModuleLink moduleID="orgjt" phrase="Job Titles|Add, view, or edit job titles">
+				<ModuleLink moduleID="orgtt" phrase="Title Types|Add, view, or edit job title types and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="orgl" phrase="Locations|Add, view, or edit locations">
+				<ModuleLink moduleID="orglt" phrase="Location Types|Add, view, or edit location types and related guidance"/>
+			</ModuleLink>
+			<ModuleLink moduleID="orgt" phrase="Organization Types|Add, view, or edit organization types and related guidance"/>
+			<Category phrase="Operations Data">
+				<ModuleLink moduleID="opdh" phrase="Hours Worked|Add, view, or edit hours worked for a stated period of time"/>
+				<ModuleLink moduleID="opdps" phrase="Products and Services|Add, view, or edit products and services offered">
+					<ModuleLink moduleID="opdpt" phrase="Product and Service Types|Add, view, or edit product or service types"/>
+				</ModuleLink>
+				<ModuleLink moduleID="opdr" phrase="Revenues|Add, view, or edit revenues earned over a stated period of time"/>
+			</Category>
+			<ModuleLink moduleID="orgra" phrase="Requirements|Add, view, or edit organizational requirements"/>
+			<ModuleLink moduleID="orgrg" phrase="Regions|Add, view, or edit regions"/>
+		</ModuleLink>
+		<ModuleLink moduleID="ppl" phrase="People|Manage information associated with people">
+			<ModuleLink moduleID="pple" phrase="Employment|Add, view, or edit employment information">
+				<ModuleLink moduleID="pplam" phrase="Availability|Add, view, or edit information about employee availability modifications"/>
+				<ModuleLink moduleID="ppld" phrase="Dependents|Add, view, or edit information about employee dependents"/>
+				<ModuleLink moduleID="pplem" phrase="Emergency Contacts|Add, view, or edit information about employee emergency contacts"/>
+				<ModuleLink moduleID="ppljt" phrase="Job Title History|Add, view, or edit information about employee job title histories"/>
+				<ModuleLink moduleID="pplep" phrase="Prior Employers|View, or edit prior employers"/>
+				<ModuleLink moduleID="pplek" phrase="Skills|View, or edit skills acquired based on experience"/>
+				<ModuleLink moduleID="ppleq" phrase="Qualifications|Add, view, or edit information about employee qualifications"/>
+				<ModuleLink moduleID="pplat" phrase="Setup Availability Types|Add, view, or edit availability modification types"/>
+			</ModuleLink>
+		</ModuleLink>
+		<Category phrase="Administration|Add, view, or edit administrative utilities">
+			<Category moduleID="app" phrase="Application|View summary information about this software application">
+				<!--<ModuleLink moduleID="xxx" phrase="Branding"/>
+                <ModuleLink moduleID="brl" phrase="Business Rules"/>-->
+				<ModuleLink moduleID="codt" phrase="Codes"/>
+				<ModuleLink moduleID="glo" phrase="Glossary|Add, view, or edit the glossary of terms utilized throughout the organization"/>
+				<Category phrase="Localities|Add, view, or edit information about localities used throughout the application">
+					<ModuleLink moduleID="cti" phrase="Counties|Add, view, or edit the list of counties used throughout the application"/>
+					<ModuleLink moduleID="ctr" phrase="Countries|Add, view, or edit the list of countries used throughout the application"/>
+					<ModuleLink moduleID="sta" phrase="States|Add, view, or edit the list of states used throughout the application"/>
+				</Category>
+				<!--<ModuleLink moduleID="xxx" phrase="Languages"/>-->
+				<ModuleLink moduleID="mod" phrase="Modules|A list of the modules within the application">
+					<ModuleLink moduleID="moddr" phrase="Direction|Add, view, or modify module direction"/>
+					<ModuleLink moduleID="gapo" phrase="Gap Analyses|Add, view or modify organizational gap analyses">
+						<ModuleLink moduleID="gap" phrase="Analysis Items|Add, view, or modify gap analysis items"/>
+					</ModuleLink>
+					<ModuleLink moduleID="modir" phrase="Issue Reports|Add, view, or modify module issue reports"/>
+				</ModuleLink>
+				<Category phrase="Notifications">
+					<ModuleLink moduleID="modnr" phrase="Notification Recipients|View or modify module notification list recipients"/>
+					<ModuleLink moduleID="ntfap" phrase="Notification Approvers|View or modify module notification approvers"/>
+				</Category>
+				<Category phrase="Risk Matrix">
+					<ModuleLink moduleID="rskl" phrase="Risk Likelihoods|Add, view, or edit the list of risk likelihoods used to generate and associate risk indices throughout the application"/>
+					<ModuleLink moduleID="rsks" phrase="Risk Severities|Add, view, or edit the list of risk severities used to generate and associate risk indices throughout the application"/>
+					<ModuleLink moduleID="rskx" phrase="Risk Indices|Add, view, or edit the list of risk indices used throughout the application"/>
+				</Category>
+				<ModuleLink moduleID="spt" phrase="Support Documentation|Add, view, or edit module support documentation"/>
+				<ModuleLink moduleID="uts" phrase="Units of Measure|Add, view, or edit units of measure">
+					<ModuleLink moduleID="pkg" phrase="Packaging Units|View packaging unit equivalents assigned to records"/>
+				</ModuleLink>
+			</Category>
+			<Category phrase="List Types">
+				<ModuleLink moduleID="agrt" phrase="Agreement|Add, view, or edit agreement types and related guidance"/>
+				<ModuleLink moduleID="budat" phrase="Budget Account|Add, view, or edit budget account types"/>
+				<ModuleLink moduleID="buit" phrase="Building|Add, view, or edit building types and related guidance"/>
+				<ModuleLink moduleID="bus" phrase="Business Continuity|Add, view, or edit business continuation guidelines"/>
+				<ModuleLink moduleID="bcqt" phrase="Business Consequences|Add, view, or edit business consequence type lists"/>
+				<ModuleLink moduleID="mocg" phrase="Change Management|View or edit management of change guidelines"/>
+				<Category phrase="Chemicals|Add, view, or edit chemical type lists">
+					<ModuleLink moduleID="chmhc" phrase="Hazard Classifications|Add, view, or edit chemical hazard classifications"/>
+					<ModuleLink moduleID="chmph" phrase="Hazard Phrases|Add, view, or edit chemical phrases"/>
+					<ModuleLink moduleID="chmt" phrase="Hazard Types|Add, view, or edit chemical types"/>
+				</Category>
+				<Category phrase="Claims|Add, view, or edit loss claim lists">
+					<ModuleLink moduleID="lcot" phrase="Loss Costs|View or edit loss cost types"/>
+					<ModuleLink moduleID="llit" phrase="Loss Legitimacy|View or edit loss legitimacy types"/>
+					<ModuleLink moduleID="lstt" phrase="Loss Status|View or edit loss status types"/>
+				</Category>
+				<ModuleLink moduleID="cspt" phrase="Confined Space|View or edit confined space types and related guidance"/>
+				<ModuleLink moduleID="corst" phrase="Corrective Action|View or edit corrective action situations and related guidance"/>
+				<ModuleLink moduleID="cost" phrase="Costs|Add, view or edit cost of risk types"/>
+				<ModuleLink moduleID="doct" phrase="Documentation|View or edit documentataion types and related guidance"/>
+				<ModuleLink moduleID="ewkt" phrase="Elevated Work|Add, view, or edit elevated work types and related guidance"/>
+				<ModuleLink moduleID="eqpt" phrase="Equipment|Add, view, or edit equipment types and related guidance"/>
+				<ModuleLink moduleID="hazt" phrase="Hazard|Add, view, or edit hazard types and related guidance"/>
+				<ModuleLink moduleID="hwkt" phrase="Hot Work|Add, view, or edit hot work types and related guidance"/>
+				<Category phrase="Incidents|Add, view, or edit incident code lists">
+					<ModuleLink moduleID="litii" phrase="IT Incident Indicators|Add, view or edit information technology incident indicators"/>
+				</Category>
+				<Category phrase="Industry Codes">
+					<ModuleLink moduleID="nais" phrase="Sectors|A list of the highest-level categories"/>
+					<ModuleLink moduleID="naiss" phrase="Subsectors|A list of the second-highest categories"/>
+					<ModuleLink moduleID="naig" phrase="Groups|A list of the third level categories"/>
+					<ModuleLink moduleID="naic" phrase="Codes|A list of categories at the most detailed level"/>
+				</Category>
+				<Category phrase="Injury">
+					<Category phrase="Codes|Add, view, or edit injury code lists">
+						<ModuleLink moduleID="linbt" phrase="Body Part Types|Add, view, or edit body part types associated with injury and/or illness">
+							<ModuleLink moduleID="linbp" phrase="Body Parts|Add, view, or edit body parts associated with injury and/or illness"/>
+						</ModuleLink>
+						<ModuleLink moduleID="linet" phrase="Exposure Types|Add, view, or edit exposure types leading to injury and/or illness">
+							<ModuleLink moduleID="linex" phrase="Exposures|Add, view, or edit exposures associated with injury and/or illness"/>
+						</ModuleLink>
+						<ModuleLink moduleID="linnt" phrase="Nature Types|Add, view, or edit nature of injury and/or illness types">
+							<ModuleLink moduleID="linna" phrase="Natures|Add, view, or edit natures of injury and/or illness"/>
+						</ModuleLink>
+						<ModuleLink moduleID="linst" phrase="Source Types|Add, view, or edit source of injury and/or illness types">
+							<ModuleLink moduleID="linsc" phrase="Sources|Add, view, or edit sources of injury and/or illness"/>
+						</ModuleLink>
+					</Category>
+					<ModuleLink moduleID="linc" phrase="Categories|Add, view, or edit injury categories and related guidance"/>
+					<ModuleLink moduleID="lint" phrase="Types|Add, view, or edit injury types and related guidance"/>
+				</Category>
+				<ModuleLink moduleID="inst" phrase="Insurance|Add, view, or edit insurance types and related guidance"/>
+				<ModuleLink moduleID="orgtt" phrase="Job Titles|Add, view or edit job title types"/>
+				<ModuleLink moduleID="lbrt" phrase="Line Break|Add, view, or edit line break types and related guidance"/>
+				<ModuleLink moduleID="orglt" phrase="Location|Add, view, or edit location types and related guidance"/>
+				<ModuleLink moduleID="medet" phrase="Medical Exam|Add, view, or edit medical examination types and related guidance"/>
+				<ModuleLink moduleID="orgt" phrase="Organization|Add, view, or edit organization types and related guidance">
+					<ModuleLink moduleID="orgwu" phrase="Work Unavailability|Add, view, or edit work unavailability types"/>
+				</ModuleLink>
+				<ModuleLink moduleID="oppt" phrase="Permit|Add, view, or edit permit types and related guidance"/>
+				<ModuleLink moduleID="prtt" phrase="Participation|Add, view, or edit participation types"/>
+				<ModuleLink moduleID="opdpt" phrase="Products and Services|Add, view, or edit product or service types"/>
+				<Category phrase="People|Add, view, or edit people list types">
+					<ModuleLink moduleID="pplat" phrase="Availability|Add, view, or edit availability modification types"/>
+				</Category>
+				<ModuleLink moduleID="filt" phrase="Physical Files|Add, view, or edit physical file types and related guidance"/>
+				<ModuleLink moduleID="pubt" phrase="Publicity|Add, view, or edit publicity types and related guidance"/>
+				<ModuleLink moduleID="rtct" phrase="Root Causes|Add, view, or edit causation types and related guidance"/>
+				<ModuleLink moduleID="sitt" phrase="Situation Response|View or edit incident response situation types and related guidance"/>
+				<ModuleLink moduleID="supt" phrase="Supplier|Add, view, or edit supplier types and related guidance"/>
+				<ModuleLink moduleID="sursv" phrase="Survey Scales|Add, view, or edit a scale used to score a survey and benchmark results"/>
+				<ModuleLink moduleID="syst" phrase="System|Add, view, or edit system types and related guidance">
+					<ModuleLink moduleID="sysct" phrase="System Components|Setup sub-system component types"/>
+				</ModuleLink>
+				<ModuleLink moduleID="tast" phrase="Task|Add, view, or edit task types and related guidance"/>
+				<ModuleLink moduleID="trat" phrase="Training|Add, view or edit training types"/>
+				<ModuleLink moduleID="veht" phrase="Vehicle|Add, view, or edit vehicle types and related guidance"/>
+				<ModuleLink moduleID="wast" phrase="Waste|Add, view, or edit waste types and related guidance"/>
+			</Category>
+			<ModuleLink moduleID="usr" phrase="Users">
+				<ModuleLink moduleID="dsb" phrase="Dashboard"/>
+			</ModuleLink>
+		</Category>
+		<InternalLink primary="logout" target="http://192.168.1.200/logout.php" phrase="Log out"/>
+	</Category>
+</Navigation>

@@ -1,0 +1,791 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Suppliers" moduleID="sup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Supplier" pluralRecordName="Suppliers" allowAddRecord="no" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="SupplierID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track organizations which supply goods and/or services to the organization" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the supplier" sample="eqp"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the supplier" sample="Equipment"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		<TableField name="SupplierTypeID" type="int" dbFlags="unsigned not null" phrase="Supplier Type|A combined field used to describe this supplier type when associating it with other records" sample="1"/>
+		<ForeignField name="SupplierCategoryID" foreignTable="supt" foreignKey="SupplierTypeID" foreignField="SupplierCategoryID" key="SupplierTypeID" joinType="left" phrase="Category|A method for grouping suppliers of similar characteristics" sample="1"/>
+		<CodeField name="SupplierCategory" key="SupplierCategoryID" phrase="Category|A method for grouping suppliers of similar characteristics" sample="Services" codeTypeID="243"/>
+		<ForeignField name="SupplierTypeTitle" foreignTable="supt" foreignKey="SupplierTypeID" foreignField="SupplierTypeTitle" key="SupplierTypeID" joinType="left" phrase="Type|A title or phrase used to describe a specific type of supplier" sample="Loss Control"/>
+		<ForeignField name="SupplierTypeDesc" foreignTable="supt" foreignKey="SupplierTypeID" foreignField="SupplierTypeDesc" key="SupplierTypeID" joinType="left" phrase="Description|A brief but thorough description of the specific type of supplier exposure" sample="Suppliers engaged in providing services to reduce operational loss"/>
+		<ForeignField name="SupplierType" foreignTable="supt" foreignKey="SupplierTypeID" foreignField="SupplierType" key="SupplierTypeID" joinType="left" phrase="Supplier Type|A combined field used to describe this supplier type when associating it with other records" sample="Services | Loss Control"/>
+		<TableField name="SupplierOrgID" type="int" validate="RequireSelection" phrase="Supplier|The name of the supplier" sample="1"/>
+		<ForeignField name="SupplierOrg" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="SupplierOrgID" joinType="left" phrase="Supplier|The name of the supplier" sample="Vallen Safety Supply"/>
+		<RemoteField name="SupplierContactID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="73" phrase="Supplier Contact|The name of the individual working for the supplier which is responsible for maintaining the customer relationship with the specified organization" sample="1"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="SupplierContactID" joinType="left" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<ForeignField name="SupplierContact" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupplierContactID" joinType="left" phrase="Supplier Contact|The name of the individual working for the supplier which is responsible for maintaining the customer relationship with the specified organization" sample="Larry Hansen"/>
+		<TableField name="PrimarySupplier" type="bool" validate="noValidation" dbFlags="default 0" phrase="Primary Supplier|Whether this supplier is the primary supplier of the goods and/or services" sample="Yes"/>
+		<TableField name="SupplierTitle" type="varchar(128)" validate="noValidation" phrase="Supplier Title|A word or short phrase used to identify the supplier and/or the supplier relationship with the organization" sample="Strawberry supplier"/>
+		<TableField name="ItemDescription" type="text" validate="noValidation" phrase="Item Description|A brief but thorough description of the item supplied by the supplier" sample="The supplier supplies raw strawberries for use in the strawberry swirl ice cream."/>
+		<TableField name="RelationshipID" type="int" validate="RequireSelection" phrase="Relationship|Whether the supplier is internal to the organization, external to the organization, or a subordinate relationship (e.g. sub-contractor)" sample="1"/>
+		<CodeField name="Relationship" key="RelationshipID" phrase="Category|A method for grouping suppliers of similar characteristics" sample="Internal" codeTypeID="251"/>
+		<TableField name="SupplierRelationship" type="bool" validate="noValidation" dbFlags="default 0" phrase="Relationship|Whether this supplier is internal to the organization required to furnish a Certificate of Product Liability" sample="Yes"/>
+		<TableField name="ProductLiabilityCertificate" type="bool" validate="noValidation" dbFlags="default 0" phrase="Liability Certificate|Whether this supplier is required to furnish a Certificate of Product Liability" sample="Yes"/>
+		<TableField name="LiabilityExpiration" type="date" validate="notEmpty" phrase="Certificate Expiration|Date the Product Liability Certificate will expire" sample="01/01/2004"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Organization|The name of the organization which utilizes the supplier to purchase the related item" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization which utilzes the supplier to purchase the related item" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="82" phrase="Person Accountable|The individual assigned primary accountability for managing the supplier relationship between the specified organization and the specified supplier" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the supplier relationship between the specified organization and the specified supplier" sample="Mattias Thorslund"/>
+		<TableField name="CatalogID" type="int" validate="noValidation" phrase="Catalog|A description of the catalog based on a combination of field values assigned from within the Catalogs module" sample="1"/>
+		<ForeignField name="CatalogTypeID" foreignTable="cat" foreignKey="CatalogID" foreignField="CatalogTypeID" key="CatalogID" joinType="left" phrase="Catalog Type|The type of catalog used by the organization for the purchase of goods and/or services" sample="1"/>
+		<CodeField name="CatalogType" key="CatalogTypeID" phrase="Catalog Type|The type of catalog used by the organization for the purchase of goods and/or services" sample="Safety Equipment" codeTypeID="55"/>
+		<ForeignField name="Catalog" foreignTable="cat" foreignKey="CatalogID" foreignField="Catalog" key="CatalogID" joinType="left" phrase="Catalog|A description of the catalog based on a combination of field values assigned from within the Catalogs module" sample="Vallen 2004 Industrial Safety Supply Catalog; Vallen Safety Supply Company, Inc.; 423;  09-28-2003;  Out of date"/>
+		<TableField name="CatalogPgNo" type="varchar(10)" validate="noValidation" phrase="Catalog Page Number|The page number of the supplier's current catalog where the equipment can be found" sample="411"/>
+		<TableField name="PartNo" type="varchar(30)" validate="noValidation" phrase="Part Number|The part number assigned to the equipment by the equipment supplier" sample="3710"/>
+		<TableField name="ItemURL" type="varchar(128)" validate="noValidation" phrase="Internet Link|A link to the supplier's website where the item can be reviewed" sample="www.vallen.com/respirators/3m3710"/>
+		<TableField name="UnitCost" type="money" validate="Money notNegative" phrase="Unit Cost|The price charged by the supplier for the equipment based on the supplier's price per base unit" sample="$200.00"/>
+		<TableField name="BaseUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="BaseUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="BaseUnitID" joinType="left" phrase="Base Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="BaseUnitCategory" key="BaseUnitCategoryID" phrase="Base Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="BaseUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="BaseUnitID" joinType="left" phrase="Base Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="MinimumUnitOrder" type="float" validate="noValidation" phrase="Minimum Unit Order|The minimum number of equipment units required to be purchased to receive the unit cost" sample="12"/>
+		<TableField name="MinimumOrderUoMID" type="int" validate="RequireSelection" phrase="Minimum Order Units|The units of measure associated with the supplier's minimum order level requirements" sample="1"/>
+		<ForeignField name="MinimumOrderCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="MinimumOrderUoMID" joinType="left" phrase="Minimum Order Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="MinimumOrderCategory" key="MinimumOrderCategoryID" phrase="Minimum Order Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="MinimumOrderUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="MinimumOrderUoMID" joinType="left" phrase="Minimum Order Units|The units of measure associated with the supplier's minimum order level requirements" sample="Millimeter"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="SupplierID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'sup'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the supplier" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="SupplierID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'sup'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the supplier" sample="702.00"/>
+		<CombinedField name="CatalogListing" phrase="Catalog Listing|The catalog page number(s) where the item is listed" sample="Vallen Safety Supply Company, Inc. pp.24-25"><CombinedFieldRef name="Catalog"/>_pp._<CombinedFieldRef name="CatalogPgNo"/></CombinedField>
+		<CombinedField name="CostPerUnit" phrase="Cost Per Unit|A combined field used to describe the cost per unit when associating it with other records" sample="Vallen Safety Supply Company, Inc.; Safety Equipment; Active Agenda, HQ"><CombinedFieldRef name="UnitCost"/>_<CombinedFieldRef name="BaseUnit"/></CombinedField>
+		<CombinedField name="MinimumOrder" phrase="Minimum Unit Order|A combined field used to describe the minimum unit order when associating it with other records" sample="Vallen Safety Supply Company, Inc.; Safety Equipment; Active Agenda, HQ"><CombinedFieldRef name="MinimumUnitOrder"/>_<CombinedFieldRef name="MinimumOrderUoM"/></CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="SupplierOrg"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Supplier" phrase="Supplier|A combined field used to describe this supplier when associating it with other records" sample="Vallen Safety Supply Company, Inc.; Safety Equipment; Active Agenda, HQ"><CombinedFieldRef name="SupplierOrg"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SupplierID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Supplier"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Exposure Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Exposures" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Policy Associations" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="SupplierTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="supt"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="pkg" name="Packaging Units and Equivalents" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SupplierID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sup"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List suppliers associated with related records">
+			<ListField name="SupplierID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="SupplierOrg" phrase="Supplier"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search suppliers associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Partnerships"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Injury Loss"/>
+				<SampleItem ID="4" name="Hazard Reports"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<CodeComboField name="SupplierCategoryID" findMode="text">
+				<UpdateFieldRef name="SupplierTypeID" listParentField="SupplierCategoryID"/>
+				<SampleItem ID="1" name="Services"/>
+				<SampleItem ID="2" name="Chemicals"/>
+				<SampleItem ID="3" name="Equipment"/>
+				<SampleItem ID="4" name="Ingredients"/>
+				<SampleItem ID="5" name="Insurance"/>
+				<SampleItem ID="6" name="Labor"/>
+				<SampleItem ID="7" name="Parts"/>
+				<SampleItem ID="8" name="Real Property"/>
+				<SampleItem ID="9" name="Vehicles"/>
+			</CodeComboField>
+			<ComboField name="SupplierTypeID" findMode="text" parentField="SupplierCategoryID">
+				<SampleItem ID="1" name="Services - Loss Control"/>
+				<SampleItem ID="2" name="Services - Janitorial"/>
+				<SampleItem ID="3" name="Services - Environmental"/>
+				<SampleItem ID="4" name="Services - Legal"/>
+				<SampleItem ID="5" name="Services - Payroll"/>
+				<SampleItem ID="6" name="Services - Banking"/>
+				<SampleItem ID="7" name="Services - Training"/>
+				<SampleItem ID="8" name="Services - Marketing"/>
+				<SampleItem ID="9" name="Services - Distribution"/>
+			</ComboField>
+			<EditField name="SupplierTypeTitle" size="75" maxLength="128"/>
+			<EditField name="SupplierTitle" size="75" maxLength="128"/>
+			<OrgComboField name="SupplierOrgID" findMode="text">
+				<SampleItem ID="1" name="Vallen Safety Supply Company, Inc."/>
+				<SampleItem ID="2" name="Orr Safety Supply Company, Inc."/>
+				<SampleItem ID="3" name="Grainger, Inc."/>
+				<SampleItem ID="4" name="Zee Medical, Inc."/>
+			</OrgComboField>
+			<CodeRadioField name="RelationshipID">
+				<SampleItem ID="1" name="Internal"/>
+				<SampleItem ID="2" name="External"/>
+				<SampleItem ID="3" name="Subordinate"/>
+			</CodeRadioField>
+			<PersonComboField name="SupplierContactID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="PrimarySupplier"/>
+			<MemoField name="ItemDescription" rows="5" cols="75"/>
+			<CheckBoxField name="ProductLiabilityCertificate"/>
+			<DateField name="LiabilityExpiration"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CatalogTypeID" findMode="text">
+				<UpdateFieldRef name="CatalogID"/>
+				<SampleItem ID="1" name="Safety Equipment"/>
+				<SampleItem ID="2" name="Sanitation Supplies"/>
+				<SampleItem ID="3" name="Quality Control Devices"/>
+				<SampleItem ID="4" name="Training Services"/>
+			</CodeComboField>
+			<ComboField name="CatalogID" findMode="text" parentField="CatalogTypeID">
+				<SampleItem ID="1" name="2004 Industrial Safety Supply Catalog; Vallen Safety Supply Company, Inc.; 09-28-2003;  Out of date"/>
+				<SampleItem ID="2" name="Grainger Supply Catalog; Grainger, Inc.; 09-28-2003;  Current [non-exclusive]"/>
+				<SampleItem ID="3" name="Zee Medical 2004 Safety Catalog; Zee Medical, Inc.; 09-28-2003;  Current [exclusive]"/>
+			</ComboField>
+			<EditField name="CatalogPgNo" size="10" maxLength="10"/>
+			<EditField name="PartNo" size="30" maxLength="30"/>
+			<EditField name="ItemURL" size="75" maxLength="128"/>
+			<EditField name="UnitCost" size="15" maxLength="15">
+				<ComboField name="BaseUnitCategoryID">
+					<UpdateFieldRef name="BaseUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="BaseUnitID" parentField="BaseUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="MinimumUnitOrder" size="15" maxLength="15">
+				<ComboField name="MinimumOrderCategoryID">
+					<UpdateFieldRef name="MinimumOrderUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="MinimumOrderUoMID" parentField="MinimumOrderCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a supplier associated with a related record">
+			<ViewField name="SupplierID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="SupplierCategory"/>
+			<ViewField name="SupplierType"/>
+			<ViewField name="SupplierTitle"/>
+			<ViewField name="SupplierTypeDesc"/>
+			<ViewField name="ItemDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="SupplierOrg"/>
+			<ViewField name="Relationship"/>
+			<ViewField name="SupplierContact"/>
+			<ViewField name="PrimarySupplier"/>
+			<ViewField name="ItemDescription"/>
+			<ViewField name="ProductLiabilityCertificate"/>
+			<ViewField name="LiabilityExpiration"/>
+			<ViewField name="CatalogListing"/>
+			<ViewField name="PartNo"/>
+			<ViewField name="ItemURL" link="ItemURL"/>
+			<ViewField name="CostPerUnit"/>
+			<ViewField name="MinimumOrder"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="pkg"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a supplier associated with a related record">
+			<ViewField name="SupplierID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<CodeComboField name="SupplierCategoryID" findMode="text">
+				<UpdateFieldRef name="SupplierTypeID" listParentField="SupplierCategoryID"/>
+				<SampleItem ID="1" name="Services"/>
+				<SampleItem ID="2" name="Chemicals"/>
+				<SampleItem ID="3" name="Equipment"/>
+				<SampleItem ID="4" name="Ingredients"/>
+				<SampleItem ID="5" name="Insurance"/>
+				<SampleItem ID="6" name="Labor"/>
+				<SampleItem ID="7" name="Parts"/>
+				<SampleItem ID="8" name="Real Property"/>
+				<SampleItem ID="9" name="Vehicles"/>
+			</CodeComboField>
+			<ComboField name="SupplierTypeID" findMode="text" parentField="SupplierCategoryID">
+				<UpdateFieldRef name="SupplierTypeDesc"/>
+				<SampleItem ID="1" name="Services - Loss Control"/>
+				<SampleItem ID="2" name="Services - Janitorial"/>
+				<SampleItem ID="3" name="Services - Environmental"/>
+				<SampleItem ID="4" name="Services - Legal"/>
+				<SampleItem ID="5" name="Services - Payroll"/>
+				<SampleItem ID="6" name="Services - Banking"/>
+				<SampleItem ID="7" name="Services - Training"/>
+				<SampleItem ID="8" name="Services - Marketing"/>
+				<SampleItem ID="9" name="Services - Distribution"/>
+			</ComboField>
+			<EditField name="SupplierTitle" size="75" maxLength="128"/>
+			<ViewField name="SupplierTypeDesc" parentField="SupplierTypeID"/>
+			<MemoField name="ItemDescription" rows="5" cols="75"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="SupplierOrgID" findMode="text">
+				<SampleItem ID="1" name="Vallen Safety Supply Company, Inc."/>
+				<SampleItem ID="2" name="Orr Safety Supply Company, Inc."/>
+				<SampleItem ID="3" name="Grainger, Inc."/>
+				<SampleItem ID="4" name="Zee Medical, Inc."/>
+			</OrgComboField>
+			<CodeRadioField name="RelationshipID">
+				<SampleItem ID="1" name="Internal"/>
+				<SampleItem ID="2" name="External"/>
+				<SampleItem ID="3" name="Subordinate"/>
+			</CodeRadioField>
+			<PersonComboField name="SupplierContactID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="PrimarySupplier"/>
+			<CheckBoxField name="ProductLiabilityCertificate"/>
+			<DateField name="LiabilityExpiration"/>
+			<CodeComboField name="CatalogTypeID" findMode="text">
+				<UpdateFieldRef name="CatalogID"/>
+				<SampleItem ID="1" name="Safety Equipment"/>
+				<SampleItem ID="2" name="Sanitation Supplies"/>
+				<SampleItem ID="3" name="Quality Control Devices"/>
+				<SampleItem ID="4" name="Training Services"/>
+			</CodeComboField>
+			<ComboField name="CatalogID" findMode="text" parentField="CatalogTypeID">
+				<SampleItem ID="1" name="2004 Industrial Safety Supply Catalog; Vallen Safety Supply Company, Inc.; 09-28-2003;  Out of date"/>
+				<SampleItem ID="2" name="Grainger Supply Catalog; Grainger, Inc.; 09-28-2003;  Current [non-exclusive]"/>
+				<SampleItem ID="3" name="Zee Medical 2004 Safety Catalog; Zee Medical, Inc.; 09-28-2003;  Current [exclusive]"/>
+			</ComboField>
+			<EditField name="CatalogPgNo" size="10" maxLength="10"/>
+			<EditField name="PartNo" size="30" maxLength="30"/>
+			<EditField name="ItemURL" size="75" maxLength="128"/>
+			<EditField name="UnitCost" size="15" maxLength="15">
+				<Self/>
+				<ComboField name="BaseUnitCategoryID">
+					<UpdateFieldRef name="BaseUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="BaseUnitID" parentField="BaseUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="MinimumUnitOrder" size="15" maxLength="15">
+				<Self/>
+				<ComboField name="MinimumOrderCategoryID">
+					<UpdateFieldRef name="MinimumOrderUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="MinimumOrderUoMID" parentField="MinimumOrderCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Exposures" phrase="Exposures|Associate cost exposures with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the supplier">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="PackagingEquivalents" phrase="Equivalents|Associate a supplier with equivalent packaging units">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="pkg"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the supplier">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the supplier">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the supplier">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the supplier" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SupplierID"/>
+		<InvisibleField name="SupplierTypeID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="SupplierCategory"/>
+		<ViewField name="SupplierType"/>
+		<ViewField name="SupplierTitle"/>
+		<ViewField name="SupplierTypeDesc"/>
+		<ViewField name="ItemDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="SupplierOrg"/>
+		<ViewField name="Relationship"/>
+		<ViewField name="SupplierContact"/>
+		<ViewField name="PrimarySupplier"/>
+		<ViewField name="ItemDescription"/>
+		<ViewField name="ProductLiabilityCertificate"/>
+		<ViewField name="LiabilityExpiration"/>
+		<ViewField name="CatalogListing"/>
+		<ViewField name="PartNo"/>
+		<ViewField name="ItemURL" link="ItemURL"/>
+		<ViewField name="CostPerUnit"/>
+		<ViewField name="MinimumOrder"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="sup" phrase="Suppliers">
+			<InvisibleField name="SupplierID"/>
+			<ViewField name="SupplierOrg" sample="Acculab"/>
+			<ViewField name="ContactCard" sample="Jane Doestein"/>
+			<ViewField name="CostPerUnit" sample="$100.00 Case"/>
+			<ViewField name="MinimumOrder" sample="1 Case"/>
+		</ViewGrid>
+		<EditGrid moduleID="sup" phrase="Suppliers">
+			<GridForm>
+				<InvisibleField name="SupplierID"/>
+				<CodeComboField name="SupplierCategoryID" findMode="text">
+					<UpdateFieldRef name="SupplierTypeID" listParentField="SupplierCategoryID"/>
+					<SampleItem ID="1" name="Services"/>
+					<SampleItem ID="2" name="Chemicals"/>
+					<SampleItem ID="3" name="Equipment"/>
+					<SampleItem ID="4" name="Ingredients"/>
+					<SampleItem ID="5" name="Insurance"/>
+					<SampleItem ID="6" name="Labor"/>
+					<SampleItem ID="7" name="Parts"/>
+					<SampleItem ID="8" name="Real Property"/>
+					<SampleItem ID="9" name="Vehicles"/>
+				</CodeComboField>
+				<ComboField name="SupplierTypeID" findMode="text" parentField="SupplierCategoryID">
+					<UpdateFieldRef name="SupplierTypeDesc"/>
+					<SampleItem ID="1" name="Services - Loss Control"/>
+					<SampleItem ID="2" name="Services - Janitorial"/>
+					<SampleItem ID="3" name="Services - Environmental"/>
+					<SampleItem ID="4" name="Services - Legal"/>
+					<SampleItem ID="5" name="Services - Payroll"/>
+					<SampleItem ID="6" name="Services - Banking"/>
+					<SampleItem ID="7" name="Services - Training"/>
+					<SampleItem ID="8" name="Services - Marketing"/>
+					<SampleItem ID="9" name="Services - Distribution"/>
+				</ComboField>
+				<EditField name="SupplierTitle" size="75" maxLength="128"/>
+				<ViewField name="SupplierTypeDesc" parentField="SupplierTypeID"/>
+				<MemoField name="ItemDescription" rows="5" cols="75"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<OrgComboField name="SupplierOrgID" findMode="text">
+					<SampleItem ID="1" name="Vallen Safety Supply Company, Inc."/>
+					<SampleItem ID="2" name="Orr Safety Supply Company, Inc."/>
+					<SampleItem ID="3" name="Grainger, Inc."/>
+					<SampleItem ID="4" name="Zee Medical, Inc."/>
+				</OrgComboField>
+				<CodeRadioField name="RelationshipID">
+					<SampleItem ID="1" name="Internal"/>
+					<SampleItem ID="2" name="External"/>
+					<SampleItem ID="3" name="Subordinate"/>
+				</CodeRadioField>
+				<PersonComboField name="SupplierContactID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CheckBoxField name="PrimarySupplier"/>
+				<CheckBoxField name="ProductLiabilityCertificate"/>
+				<DateField name="LiabilityExpiration"/>
+				<EditField name="UnitCost" size="15" maxLength="15">
+					<Self/>
+					<ComboField name="BaseUnitCategoryID">
+						<UpdateFieldRef name="BaseUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="BaseUnitID" parentField="BaseUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<EditField name="MinimumUnitOrder" size="15" maxLength="15">
+					<Self/>
+					<ComboField name="MinimumOrderCategoryID">
+						<UpdateFieldRef name="MinimumOrderUoMID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="MinimumOrderUoMID" parentField="MinimumOrderCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+			</GridForm>
+			<InvisibleField name="SupplierID"/>
+			<ViewField name="SupplierOrg" sample="Acculab"/>
+			<ViewField name="ContactCard" sample="Jane Doestein"/>
+			<ViewField name="CostPerUnit" sample="$100.00 Case"/>
+			<ViewField name="MinimumOrder" sample="1 Case"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Suppliers By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Suppliers By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Suppliers By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Suppliers By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Suppliers By Type">
+			<GroupByField name="SupplierType"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Suppliers By Type">
+			<GroupByField name="SupplierType"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Suppliers By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Suppliers By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Suppliers By Supplier">
+			<GroupByField name="SupplierOrg"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Suppliers By Supplier">
+			<GroupByField name="SupplierOrg"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Suppliers By Catalog">
+			<GroupByField name="Catalog"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Suppliers By Catalog">
+			<GroupByField name="Catalog"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Suppliers By Category">
+			<GroupByField name="SupplierCategory"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Suppliers By Category">
+			<GroupByField name="SupplierCategory"/>
+			<SummaryField name="SupplierID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,377 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Handling Procedures" moduleID="chmh" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Handling Procedure" pluralRecordName="Chemical Handling Procedures" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ChemHandProcID" type="int" dbFlags="unsigned auto_increment not null" phrase="Procedure ID|An automatically assigned number used to track chemical handling procedures" sample="1"/>
+		<TableField name="ChemicalID" type="int" validate="noValidation" phrase="Chemical ID|An automatically assigned number used to track material safety data sheets for chemicals used by the organization" sample="1"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="CommonName" key="ChemicalID" joinType="left" phrase="Chemical Name|The common name of the chemical used at this location" sample="Methyl Ethyl Goo"/>
+		<ForeignField name="SpecialHand" foreignTable="chm" foreignKey="ChemicalID" foreignField="SpecialHand" key="ChemicalID" joinType="left" phrase="Special Handling|A detailed description of any special handling requirements associated with this chemical" sample="Avoid any contact with milk products when handling this chemical. Avoid any shaking or repid mixing to avoid explosion."/>
+		<TableField name="OrganizationID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="14" phrase="Person Accountable|The individual assigned primary accountability for developing and maintaining these handling procedures" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for developing and maintaining these handling procedures" sample="Mattias Thorslund"/>
+		<TableField name="HandlingProcName" type="varchar(128)" validate="notEmpty" phrase="Handling Procedure Name|A brief name used to describe this specific chemical handling procedure associated with this specific chemical" sample="Use of Ammonia for Mix Tank Cleaning"/>
+		<TableField name="ChemicalUseTypeID" type="int" validate="RequireSelection" phrase="Manner of Use|The manner in which the chemical is being used" sample="1"/>
+		<CodeField name="ChemicalUseType" key="ChemicalUseTypeID" phrase="Manner of Use|The manner in which the chemical is being used" sample="Sanitation" codeTypeID="265"/>
+		<TableField name="HandlingProcStatusID" type="int" validate="RequireSelection" phrase="Procedure Status|Status of the handling procedures assigned to this chemical at this organization" sample="1"/>
+		<CodeField name="HandlingProcStatus" key="HandlingProcStatusID" phrase="Procedure Status|Status of the handling procedures assigned to this chemical at this organization" sample="Under Development" codeTypeID="161"/>
+		<ForeignField name="Responsibilitiesdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="Responsibilitiesdf" key="ChemicalID" joinType="left" phrase="Assigned Responsibilities|A detailed description of the minimum responsibilities associated with using this chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="The person accountable is the ultimate authority regarding purchase and use of this chemical"/>
+		<TableField name="Responsibilities" type="text" validate="noValidation" phrase="Local Responsibilities|A detailed description of the responsibilities associated with using this chemical at this local organization" sample="The person accountable is the ultimate authority regarding purchase and use of this chemical"/>
+		<ForeignField name="Verificationdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="Verificationdf" key="ChemicalID" joinType="left" phrase="Assigned Verification|A detailed description of the minimum verification procedures associated with using this chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="Labels from original containers must be checked against the transport label to verify proper handling warnings"/>
+		<TableField name="Verification" type="text" validate="noValidation" phrase="Local Verification|A detailed description of the verification procedures associated with using this chemical at this local organization" sample="Labels from original containers must be checked against the transport label to verify proper handling warnings"/>
+		<ForeignField name="Preparationdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="Preparationdf" key="ChemicalID" joinType="left" phrase="Assigned Preparation|A detailed description of the minimum preparation procedures associated with using this chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="1. Secure required protective equipment prior to use of this chemical. 2. Notify the Sanitation Supervisor and one member of the emergency response team prior to using this chemical. 3. Flood the application site with water before application"/>
+		<TableField name="Preparation" type="text" validate="noValidation" phrase="Local Preparation|A detailed description of the preparation procedures associated with using this chemical at this local organization" sample="1. Secure required protective equipment prior to use of this chemical. 2. Notify the Sanitation Supervisor and one member of the emergency response team prior to using this chemical. 3. Flood the application site with water before application"/>
+		<ForeignField name="Applicationdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="Applicationdf" key="ChemicalID" joinType="left" phrase="Assigned Application|A detailed description of the minimum application procedures associated with using this chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="1. Mix the chemical with water at a ratio of 2 parts water to 1 part Chemical. 2. Apply the chemical to the effected site liberally through an industrial sprayer"/>
+		<TableField name="Application" type="text" validate="noValidation" phrase="Local Application|A detailed description of the application procedures associated with using the chemical at this local organization" sample="1. Mix the chemical with water at a ratio of 2 parts water to 1 part Chemical. 2. Apply the chemical to the effected site liberally through an industrial sprayer"/>
+		<ForeignField name="PostApplicationdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="PostApplicationdf" key="ChemicalID" joinType="left" phrase="Assigned Post Application|A detailed description of the minimum post application procedures associated with using this chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="1. Decontaminate all protective equipment by rinsing thoroughly with water. 2. return protective equipment to sanitation supply room. 2. Notify the Sanitation Supervisor and the emergency response team member that use is being discontinued. 3. Dilute unused chemical with water 10:1 and flush down sanitation drain"/>
+		<TableField name="PostApplication" type="text" validate="noValidation" phrase="Local Post Application|A detailed description of the post application procedures associated with using this chemical  at this local organization" sample="1. Decontaminate all protective equipment by rinsing thoroughly with water. 2. return protective equipment to sanitation supply room. 2. Notify the Sanitation Supervisor and the emergency response team member that use is being discontinued. 3. Dilute unused chemical with water 10:1 and flush down sanitation drain"/>
+		<ForeignField name="Precautionsdf" foreignTable="chm" foreignKey="ChemicalID" foreignField="Precautionsdf" key="ChemicalID" joinType="left" phrase="Assigned Precautions|A detailed description of the minimum precautions to be taken when using the chemical which are assigned by the person accountable for this chemical throughout the enterprise" sample="1. Avoid direct skin contact. 2. Avoid contact with eyes. 3. Avoid overspray"/>
+		<TableField name="Precautions" type="text" validate="noValidation" phrase="Local Precautions|A detailed description of the precautions to be taken when using the chemical at this local organization" sample="1. Avoid direct skin contact. 2. Avoid contact with eyes. 3. Avoid overspray"/>
+		<ForeignField name="FirstAiddf" foreignTable="chm" foreignKey="ChemicalID" foreignField="FirstAiddf" key="ChemicalID" joinType="left" phrase="Assigned First Aid|A detailed description of the first aid response to be taken if exposed to this chemical which is assigned by the person accountable for this chemical throughout the enterprise" sample="1. Eye contact: proceed to emergency eyewash unit and flush eyes liberally with water for 15 minutes. 2. Skin contact: proceed to emergency shower unit and flush effected area liberally with water for 5 minutes."/>
+		<TableField name="FirstAid" type="text" validate="noValidation" phrase="Local First Aid|A detailed description of the first aid response to be taken if exposed to the chemical in use at this local organization" sample="1. Eye contact: proceed to emergency eyewash unit and flush eyes liberally with water for 15 minutes. 2. Skin contact: proceed to emergency shower unit and flush effected area liberally with water for 5 minutes."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="HandlingProcName"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="ChemHandProc" phrase="Chemical Handling Procedure|A combined field used to describe this chemical handling procedure when associating it with other records" sample="Methyl Ethyl Goo; Use of Ammonia for Mix Tank Cleaning; Active Agenda, HQ"><CombinedFieldRef name="HandlingProcName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChemHandProcID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="ChemHandProc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemical handling assignments">
+			<ListField name="ChemHandProcID" phrase="Record ID"/>
+			<ListField name="ChemicalID" phrase="Chemical ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Chemical" phrase="Chemical"/>
+			<ListField name="HandlingProcName" phrase="Procedure Title"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+			<ListField name="HandlingProcStatus" phrase="Procedure Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemical handling assignments">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="HandlingProcName" size="75" maxLength="128"/>
+			<CodeComboField name="ChemicalUseTypeID" findMode="text">
+				<SampleItem ID="1" name="Sanitation"/>
+				<SampleItem ID="2" name="Maintenance"/>
+				<SampleItem ID="3" name="Production"/>
+				<SampleItem ID="4" name="Fumigation"/>
+				<SampleItem ID="5" name="Food Ingredient"/>
+				<SampleItem ID="6" name="Laboratory Analysis"/>
+			</CodeComboField>
+			<ComboField name="HandlingProcStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="3" name="Complete"/>
+				<SampleItem ID="5" name="Incomplete"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about chemical handling procedures associated with this chemical at this location">
+			<ViewField name="ChemHandProcID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="HandlingProcName"/>
+			<ViewField name="SpecialHand"/>
+			<ViewField name="ChemicalUseType"/>
+			<ViewField name="HandlingProcStatus"/>
+			<ViewField name="Responsibilitiesdf"/>
+			<ViewField name="Responsibilities"/>
+			<ViewField name="Verificationdf"/>
+			<ViewField name="Verification"/>
+			<ViewField name="Preparationdf"/>
+			<ViewField name="Preparation"/>
+			<ViewField name="Applicationdf"/>
+			<ViewField name="Application"/>
+			<ViewField name="PostApplicationdf"/>
+			<ViewField name="PostApplication"/>
+			<ViewField name="Precautionsdf"/>
+			<ViewField name="Precautions"/>
+			<ViewField name="FirstAiddf"/>
+			<ViewField name="FirstAid"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit information about chemical handling procedures associated with this chemical which are specific to this organization">
+			<ViewField name="ChemHandProcID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<ViewField name="SpecialHand"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="HandlingProcName" size="75" maxLength="128"/>
+			<CodeComboField name="ChemicalUseTypeID" findMode="text">
+				<SampleItem ID="1" name="Sanitation"/>
+				<SampleItem ID="2" name="Maintenance"/>
+				<SampleItem ID="3" name="Production"/>
+				<SampleItem ID="4" name="Fumigation"/>
+				<SampleItem ID="5" name="Food Ingredient"/>
+				<SampleItem ID="6" name="Laboratory Analysis"/>
+			</CodeComboField>
+			<ComboField name="HandlingProcStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="Incomplete"/>
+			</ComboField>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Edit responsibilities associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="Responsibilities" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Verification" phrase="Verification|Edit verification procedures associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="Verification" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Preparation" phrase="Preparation|Edit preparation procedures associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="Preparation" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Application" phrase="Application|Edit application procedures associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="Application" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="PostApplication" phrase="Post Application|Edit post application procedures associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="PostApplication" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Precautions" phrase="Precautions|Edit precautions associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="Precautions" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="FirstAid" phrase="First Aid|Edit first aid procedures associated with this chemical which are specific to this organization">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="FirstAid" rows="10" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChemHandProcID"/>
+		<ViewField name="ChemicalID"/>
+		<ViewField name="Chemical"/>
+		<ViewField name="SpecialHand"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="HandlingProcName"/>
+		<ViewField name="HandlingProcStatus"/>
+		<ViewField name="FirstAiddf"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="chmh" phrase="Handling Procedures">
+			<InvisibleField name="ChemHandProcID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="HandlingProcName" sample="Use of Ammonia for Mix Tank Cleaning"/>
+			<ViewField name="ChemicalUseType" sample="Sanitation"/>
+			<ViewField name="HandlingProcStatus" sample="Under Development"/>
+		</ViewGrid>
+		<EditGrid moduleID="chmh" phrase="Handling Procedures">
+			<GridForm>
+				<InvisibleField name="ChemHandProcID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<EditField name="HandlingProcName" size="75" maxLength="128" sample="Use of Ammonia for Mix Tank Cleaning"/>
+				<CodeComboField name="HandlingProcStatusID" sample="Under Development">
+					<SampleItem ID="1" name="Under Development"/>
+					<SampleItem ID="2" name="Complete"/>
+					<SampleItem ID="3" name="Incomplete"/>
+				</CodeComboField>
+				<CodeComboField name="ChemicalUseTypeID" findMode="text">
+					<SampleItem ID="1" name="Sanitation"/>
+					<SampleItem ID="2" name="Maintenance"/>
+					<SampleItem ID="3" name="Production"/>
+					<SampleItem ID="4" name="Fumigation"/>
+					<SampleItem ID="5" name="Food Ingredient"/>
+					<SampleItem ID="6" name="Laboratory Analysis"/>
+				</CodeComboField>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="HandlingProcName" sample="Use of Ammonia for Mix Tank Cleaning"/>
+			<ViewField name="ChemicalUseType" sample="Sanitation"/>
+			<ViewField name="HandlingProcStatus" sample="Under Development"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Chemical Handling Procedures By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemical Handling Procedures By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Chemical Handling Procedures By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Chemical Handling Procedures By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Chemical Handling Procedures By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Chemical Handling Procedures By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Chemical Handling Procedures By Chemical Use Type">
+			<GroupByField name="ChemicalUseType"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Chemical Handling Procedures By Chemical Use Type">
+			<GroupByField name="ChemicalUseType"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Chemical Handling Procedures By Status">
+			<GroupByField name="HandlingProcStatus"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Chemical Handling Procedures By Status">
+			<GroupByField name="HandlingProcStatus"/>
+			<SummaryField name="ChemHandProcID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

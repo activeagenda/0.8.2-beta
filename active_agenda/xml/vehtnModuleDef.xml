@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Vehicle Tracking Numbers" moduleID="vehtn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Vehicle Tracking Number" pluralRecordName="Vehicle Tracking Numbers" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="VehicleTrackingNoID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track reported situations and incidents by multiple stakeholders" sample="1"/>
+		<TableField name="VehicleID" type="int" validate="RequireSelection" phrase="Vehicle ID|An automatically assigned number used to track vehicles of all types" sample="1"/>
+		<ForeignField name="AssignedOrganizationID" listType="allParticipants" foreignTable="veh" foreignKey="VehicleID" foreignField="AssignedOrganizationID" key="VehicleID" joinType="left" phrase="Assigned Organization|The name of the local organization assigned to, and responsible for, this vehicle" sample="1"/>
+		<ForeignField name="AssignedOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AssignedOrganizationID" joinType="left" phrase="Assigned Organization|The name of the local organization assigned to, and responsible for, this vehicle" sample="Active Agenda, Sweden"/>
+		<ForeignField name="VehicleModelID" foreignTable="veh" foreignKey="VehicleID" foreignField="VehicleModelID" key="VehicleID" joinType="left" phrase="Model|The model of the vehicle assigned by the vehicle manufacturer" sample="1"/>
+		<ForeignField name="VehicleModel" foreignTable="vehmd" foreignKey="VehicleModelID" foreignField="VehicleModel" key="VehicleModelID" joinType="left" phrase="Vehicle Model|A combined field used to associate this vehicle model with another record" sample="Landrover; Discovery; LSEi"/>
+		<ForeignField name="VehicleTypeID" foreignTable="veh" foreignKey="VehicleID" foreignField="VehicleTypeID" key="VehicleID" joinType="left" phrase="Vehicle Type|A combined field used to describe this vehicle type when associating it with other records" sample="1"/>
+		<ForeignField name="VehicleType" foreignTable="veht" foreignKey="VehicleTypeID" foreignField="VehicleType" key="VehicleTypeID" joinType="left" phrase="Vehicle Type|A combined field used to describe this vehicle type when associating it with other records" sample="Direct Store Delivery Refrigeration Vehicle; Active Agenda, HQ"/>
+		<ForeignField name="Vehicle" foreignTable="veh" foreignKey="VehicleID" foreignField="Vehicle" key="VehicleID" joinType="left" phrase="Vehicle|A combined field used to describe this vehicle when associating it with other records" sample="Landrover, Discovery; 9FSE187"/>
+		<TableField name="VehicleTrackingNumberTypeID" type="int" validate="RequireSelection" phrase="Number Type|The type of number used to track vehicles" sample="1"/>
+		<CodeField name="VehicleTrackingNumberType" key="VehicleTrackingNumberTypeID" phrase="Number Type|The type of number used to track vehicles" sample="SafTRAK" codeTypeID="253"/>
+		<TableField name="TrackingNumber" type="varchar(50)" validate="notEmpty" phrase="Tracking Number|A unique number used to track vehicles" sample="ST-7726"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Vehicle"/>;_<CombinedFieldRef name="VehicleTrackingNumberType"/>:_<CombinedFieldRef name="TrackingNumber"/></CombinedField>
+		<CombinedField name="VehicleTrackingNo" phrase="Tracking Number|A combined field used to describe this vehicle tracking number when associating it with other records" sample="Landrover, Discovery; 9FSE187 | SafTRAK: ST-7726"><CombinedFieldRef name="Vehicle"/>;_<CombinedFieldRef name="VehicleTrackingNumberType"/>:_<CombinedFieldRef name="TrackingNumber"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="VehicleTrackingNoID"/>
+		</PrimaryKey>
+		<OwnerField name="AssignedOrganizationID"/>
+		<RecordDescriptionField name="VehicleTrackingNo"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List tracking numbers associated with vehicles">
+			<ListField name="VehicleTrackingNoID" phrase="Record ID"/>
+			<ListField name="AssignedOrganization" phrase="Organization"/>
+			<ListField name="Vehicle" phrase="Vehicle"/>
+			<ListField name="VehicleTrackingNumberType" phrase="Tracking Number Type"/>
+			<ListField name="TrackingNumber" phrase="Tracking Number"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search tracking numbers associated with vehicles">
+			<OrgComboField name="AssignedOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="VehicleModelID" findMode="text">
+				<SampleItem ID="1" name="Discovery"/>
+				<SampleItem ID="2" name="Range Rover"/>
+			</ComboField>
+			<CodeComboField name="VehicleTypeID" findMode="text">
+				<SampleItem ID="1" name="Sport Utility"/>
+				<SampleItem ID="2" name="Sedan"/>
+				<SampleItem ID="3" name="Trailer"/>
+				<SampleItem ID="4" name="Van"/>
+			</CodeComboField>
+			<ComboField name="VehicleID" findMode="text">
+				<SampleItem ID="1" name="Sport Utility"/>
+				<SampleItem ID="2" name="Sedan"/>
+				<SampleItem ID="3" name="Trailer"/>
+				<SampleItem ID="4" name="Van"/>
+			</ComboField>
+			<CodeComboField name="VehicleTrackingNumberTypeID" findMode="text">
+				<SampleItem ID="1" name="SafTRAK"/>
+				<SampleItem ID="2" name="D.O.T. Number"/>
+				<SampleItem ID="3" name="Fleet Tracking Number"/>
+			</CodeComboField>
+			<EditField name="TrackingNumber" size="50" maxLength="50"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a vehicle tracking number associated with a  vehicle">
+			<ViewField name="VehicleTrackingNoID"/>
+			<ViewField name="AssignedOrganization"/>
+			<ViewField name="VehicleModel"/>
+			<ViewField name="VehicleType"/>
+			<ViewField name="Vehicle"/>
+			<ViewField name="VehicleTrackingNumberType"/>
+			<ViewField name="TrackingNumber"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a vehicle tracking number associated with a  vehicle">
+			<ViewField name="VehicleTrackingNoID"/>
+			<OrgComboField name="AssignedOrganizationID" findMode="text">
+				<UpdateFieldRef name="VehicleID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="VehicleID" findMode="text" parentField="AssignedOrganizationID">
+				<SampleItem ID="1" name="Sport Utility"/>
+				<SampleItem ID="2" name="Sedan"/>
+				<SampleItem ID="3" name="Trailer"/>
+				<SampleItem ID="4" name="Van"/>
+			</ComboField>
+			<CodeComboField name="VehicleTrackingNumberTypeID" findMode="text">
+				<SampleItem ID="1" name="SafTRAK"/>
+				<SampleItem ID="2" name="D.O.T. Number"/>
+				<SampleItem ID="3" name="Fleet Tracking Number"/>
+			</CodeComboField>
+			<EditField name="TrackingNumber" size="50" maxLength="50"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="vehtn" phrase="Tracking Numbers">
+			<InvisibleField name="VehicleTrackingNoID"/>
+			<ViewField name="VehicleTrackingNumberType" sample="SafTRAK"/>
+			<ViewField name="TrackingNumber" sample="ST-7726"/>
+		</ViewGrid>
+		<EditGrid moduleID="vehtn" phrase="Tracking Numbers">
+			<GridForm>
+				<InvisibleField name="VehicleTrackingNoID"/>
+				<CodeComboField name="VehicleTrackingNumberTypeID" findMode="text" sample="SafTRAK">
+					<SampleItem ID="1" name="SafTRAK"/>
+					<SampleItem ID="2" name="D.O.T. Number"/>
+					<SampleItem ID="3" name="Fleet Tracking Number"/>
+				</CodeComboField>
+				<EditField name="TrackingNumber" size="50" maxLength="50" sample="ST-7726"/>
+			</GridForm>
+			<ViewField name="VehicleTrackingNumberType" sample="SafTRAK"/>
+			<ViewField name="TrackingNumber" sample="ST-7726"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

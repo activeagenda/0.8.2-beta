@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Additional Insureds" moduleID="orgca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Additional Insured" pluralRecordName="Additional Insureds" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="AdditionalInsuredID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number that is automatically assigned and is used to associate additional insureds with certificates of insurance" sample="1"/>
+        <TableField name="CertificateID" type="int" dbFlags="unsigned not null" phrase="Certificate|A combined field used to describe this certificate when associating it with other records" sample="1"/>
+        <ForeignField name="NamedOrgID" foreignTable="orgci" foreignKey="CertificateID" foreignField="NamedOrgID" key="CertificateID" joinType="left" phrase="Policy Holder|The organization which is identified on the policy Declarations page as the Named Insured of the insurance policy. The Named Insured is required to provide and maintain currency of the policy and provide updated certificates of insurance to the Additional Insured prior to ANY lapse of policy coverage" sample="1"/>
+        <ForeignField name="NamedOrg" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="NamedOrgID" joinType="left" phrase="Policy Holder|The organization which is identified on the policy Declarations page as the Named Insured of the insurance policy. The Named Insured is required to provide and maintain currency of the policy and provide updated certificates of insurance to the Additional Insured prior to ANY lapse of policy coverage" sample="Active Agenda, HQ"/>
+        <ForeignField name="CarrierID" foreignTable="orgci" foreignKey="CertificateID" foreignField="CarrierID" key="CertificateID" joinType="left" phrase="Carrier|Name of the insurance carrier providing the certificate of insurance" sample="1"/>
+        <ForeignField name="Carrier" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="CarrierID" joinType="left" phrase="Carrier|Name of the insurance carrier providing the certificate of insurance" sample="American Insurance Group"/>
+        <ForeignField name="PolicyTypeID" foreignTable="orgci" foreignKey="CertificateID" foreignField="PolicyTypeID" key="CertificateID" joinType="left" phrase="Policy Type|The type of insurance coverage provided by the carrier to the contractor and evidenced by the certificate of insurance" sample="1"/>
+        <CodeField name="PolicyType" key="PolicyTypeID" phrase="Policy Type|The type of insurance coverage provided by the carrier to the contractor and evidenced by the certificate of insurance" sample="General Liability" codeTypeID="3"/>
+        <ForeignField name="CertificateNo" foreignTable="orgci" foreignKey="CertificateID" foreignField="CertificateNo" key="CertificateID" joinType="left" phrase="Certificate Number|The number assigned to the certificate of insurance by the insurance carrier or issuing insurance broker" sample="COI4-AIG-GL-2003-CAGC92882"/>
+        <ForeignField name="EffectiveDate" foreignTable="orgci" foreignKey="CertificateID" foreignField="EffectiveDate" key="CertificateID" joinType="left" phrase="Effective Date|The date the insurance policy referred to in the certificate of insurance went into effect" sample="01/01/2004"/>
+        <ForeignField name="ExpirationDate" foreignTable="orgci" foreignKey="CertificateID" foreignField="ExpirationDate" key="CertificateID" joinType="left" phrase="Expiration Date|The date the insurance policy referred to in the certificate of insurance will no longer be in effect" sample="01/01/2004"/>
+        <ForeignField name="DaysRemaining" foreignTable="orgci" foreignKey="CertificateID" foreignField="DaysRemaining" key="CertificateID" joinType="left" phrase="Days Remaining|The total number of days remaining before the certificate of insurance expires" sample="30"/>
+        <ForeignField name="CertificateAttached" type="bool" foreignTable="orgci" foreignKey="CertificateID" foreignField="CertificateAttached" key="CertificateID" joinType="left" phrase="Certificate Attached|Whether the certificate of insurance has been attached to this record" sample="Yes"/>
+        <ForeignField name="CoverageAmount" foreignTable="orgci" foreignKey="CertificateID" foreignField="CoverageAmount" key="CertificateID" joinType="left" phrase="Coverage Amount|Amount of insurance coverage provided by the insurance carrier and evidenced by the certificate of insurance and stated in the currency assigned to this installation of the software" sample="1,000,000"/>
+        <ForeignField name="PersonAccountableID" foreignTable="orgci" foreignKey="CertificateID" foreignField="PersonAccountableID" key="CertificateID" joinType="left" phrase="Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the 'named' organizations" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the 'named' organizations" sample="Mattias Thorslund"/>
+        <ForeignField name="Certificate" foreignTable="orgci" foreignKey="CertificateID" foreignField="Certificate" key="CertificateID" joinType="left" phrase="Certificate|A combined field used to describe this certificate when associating it with other records" sample="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAGC92882; American Insurance Group; 09-21-2003"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned" phrase="Additional Insured|The organization named as an additional insured on the certificate of insurance" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Additional Insured|The organization named as an additional insured on the certificate of insurance" sample="Active Agenda, HQ"/>
+        <RemoteField name="LocalPersonAccountableID" defaultValue="defaultorgID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="145" phrase="Local Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the organization 'named' as an additional insured" sample="1"/>
+        <ForeignField name="LocalPersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LocalPersonAccountableID" joinType="left" phrase="Local Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the organization 'named' as an additional insured" sample="Mattias Thorslund"/>
+        <TableField name="Circumstances" type="text" validate="notEmpty" phrase="Circumstances|A detailed description of the circumstances which led to organization being named as an additional insured on the policy of the 'named insured" sample="Clovis Unified School school district has contracted with Active Agenda, Inc. to use a portion of its facilities for vocational training"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Clovis Unified School District Policy Type: Workers' Compensation No: 8827726 Named: Active Agenda Expires: 02/01/2007'">Insured_<CombinedFieldRef name="NamedOrg"/>_Policy_Type:_<CombinedFieldRef name="PolicyType"/>_No:_<CombinedFieldRef name="CertificateNo"/>_Named:_<CombinedFieldRef name="Organization"/>_Expires:_<CombinedFieldRef name="ExpirationDate"/></CombinedField>
+        <CombinedField name="AdditionalInsured" phrase="Additional Insured|A combined field used to describe the additional insured when associating it with other records" sample="Clovis Unified School District Policy Type: Workers' Compensation No: 8827726 Named: Active Agenda Expires: 02/01/2007'"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="PolicyType"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="AdditionalInsuredID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="AdditionalInsured"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List organizations named as additional insureds on certificates of insurance">
+            <ListField name="AdditionalInsuredID" phrase="Record ID"/>
+            <ListField name="NamedOrg" phrase="Policy Holder"/>
+            <ListField name="PolicyType" phrase="Policy Type"/>
+            <ListField name="CertificateNo" phrase="Certificate Number"/>
+            <ListField name="Organization" phrase="Additional Insured"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search organizations named as additional insureds on certificates of insurance">
+            <EditField name="CertificateNo" size="75" maxLength="128"/>
+            <ComboField name="CertificateID" findMode="text">
+                <SampleItem ID="1" name="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAGC92882; Active Agenda, Inc.; 09-21-2003"/>
+                <SampleItem ID="2" name="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAGC92253; Active Agenda, Inc.; 09-21-2003"/>
+                <SampleItem ID="3" name="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAGC92266; Active Agenda, Inc.; 09-21-2003"/>
+                <SampleItem ID="4" name="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAG345682; Active Agenda, Inc.; 09-21-2003"/>
+            </ComboField>
+            <OrgComboField name="NamedOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <CodeComboField name="PolicyTypeID" findMode="text">
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </CodeComboField>
+            <MoneyField name="CoverageAmount"/>
+            <DateField name="EffectiveDate"/>
+            <DateField name="ExpirationDate"/>
+            <CheckBoxField name="CertificateAttached"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="American Insurance Group"/>
+                <SampleItem ID="2" name="Cigna"/>
+                <SampleItem ID="3" name="CNA"/>
+            </OrgComboField>
+            <PersonComboField name="LocalPersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <OrgComboField name="CarrierID" findMode="text">
+                <SampleItem ID="1" name="American Insurance Group"/>
+                <SampleItem ID="2" name="Cigna"/>
+                <SampleItem ID="3" name="CNA"/>
+            </OrgComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about organizations named as additional insureds on certificates of insurance">
+            <ViewField name="AdditionalInsuredID"/>
+            <ViewField name="CertificateID"/>
+            <ViewField name="CertificateNo"/>
+            <ViewField name="NamedOrg"/>
+            <ViewField name="PolicyType"/>
+            <ViewField name="CoverageAmount"/>
+            <ViewField name="Carrier"/>
+            <ViewField name="EffectiveDate"/>
+            <ViewField name="ExpirationDate"/>
+            <ViewField name="DaysRemaining"/>
+            <ViewField name="CertificateAttached"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="Organization"/>
+            <ViewField name="LocalPersonAccountable"/>
+            <ViewField name="Circumstances"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about organizations named as additional insureds on certificates of insurance">
+            <ViewField name="AdditionalInsuredID"/>
+            <ViewField name="CertificateID"/>
+            <ViewField name="CertificateNo"/>
+            <ViewField name="NamedOrg"/>
+            <ViewField name="PolicyType"/>
+            <ViewField name="CoverageAmount"/>
+            <ViewField name="Carrier"/>
+            <ViewField name="EffectiveDate"/>
+            <ViewField name="ExpirationDate"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="CertificateAttached"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="American Insurance Group"/>
+                <SampleItem ID="2" name="Cigna"/>
+                <SampleItem ID="3" name="CNA"/>
+            </OrgComboField>
+            <PersonComboField name="LocalPersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <MemoField name="Circumstances" rows="5" cols="75"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="orgca" phrase="Additionally Insured">
+            <InvisibleField name="AdditionalInsuredID"/>
+            <ViewField name="NamedOrg" sample="Clovis Unified School District"/>
+            <ViewField name="PolicyType" sample="General Liability"/>
+            <ViewField name="CertificateNo" sample="99282"/>
+            <ViewField name="Organization" sample="Active Agenda, Inc."/>
+            <ViewField name="ExpirationDate" sample="09/15/2006"/>
+            <ViewField name="DaysRemaining" sample="30"/>
+            <ViewField name="CertificateAttached" sample="Yes"/>
+        </ViewGrid>
+        <EditGrid moduleID="orgca" phrase="Additionally Insured">
+            <GridForm>
+                <InvisibleField name="AdditionalInsuredID"/>
+                <OrgComboField name="OrganizationID" findMode="text">
+                    <SampleItem ID="1" name="American Insurance Group"/>
+                    <SampleItem ID="2" name="Cigna"/>
+                    <SampleItem ID="3" name="CNA"/>
+                </OrgComboField>
+                <PersonComboField name="LocalPersonAccountableID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <MemoField name="Circumstances" rows="5" cols="75"/>
+            </GridForm>
+            <InvisibleField name="AdditionalInsuredID"/>
+            <ViewField name="Organization" sample="Active Agenda, Inc."/>
+            <ViewField name="Circumstances" sample="Clovis Unified School District is using one of our facilities to conduct classes and we requested a COI naming us an an additional insured on their general liability policy"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Named Insureds by Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Named Insureds by Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Named Insureds By Policy Type">
+            <GroupByField name="PolicyType"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Named Insureds By Policy Type">
+            <GroupByField name="PolicyType"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Named Insureds by Local Person Accountable">
+            <GroupByField name="LocalPersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Named Insureds by Local Person Accountable">
+            <GroupByField name="LocalPersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Named Insureds By Carrier">
+            <GroupByField name="Carrier"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Named Insureds By Carrier">
+            <GroupByField name="Carrier"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Named Insureds By Certificate Attached">
+            <GroupByField name="CertificateAttached"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Named Insureds By Certificate Attached">
+            <GroupByField name="CertificateAttached"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Named Insureds by Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Named Insureds by Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

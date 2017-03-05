@@ -1,0 +1,253 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'ExpenditureID' => gettext("Record ID|An automatically assigned number used to track expenditures"),
+   'RelatedModuleRecord' => gettext("Cost Record|The module and record associated with the cost"),
+   'Title' => gettext("Cost Title|A concise title that describes the cost"),
+   'CostDesc' => gettext("Cost Description|A detailed description of the cost being tracked"),
+   'CostDate' => gettext("Cost Date|The date this cost amount was incurred by the organization"),
+   'Incurred' => gettext("Total Cost|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software"),
+   'PONumber' => gettext("P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose"),
+   'ExpenseDate' => gettext("Expense Date|The specific date the expense occurred"),
+   'ExpenseTitle' => gettext("Expense Title|A brief title used to describe the expense paid from the trust distribution account"),
+   'ExpenseDesc' => gettext("Expense Description|A detailed description of the expense paid from the trust distribution account"),
+   'ExpenseAmount' => gettext("Paid Amount|The amount of the expense, stated in the currency assigned to this installation of the software"),
+   'PayeeOrg' => gettext("Payee Organization|The organization receiving payment"),
+   'PayeePerson' => gettext("Payee Person|The name of the individual receiving payment"),
+   'ExpensePaymentMethod' => gettext("Payment Method|The method used to pay the expense"),
+   'TransactionDocNumber' => gettext("Payment Document Number|The type and number associated with the payment document (e.g. Personal Check (562)"),
+   'AccountOrganization' => gettext("Account Organization|The organization responsible for managing the budget account"),
+   'AccountCategory' => gettext("Account Category|A broad categoy used to group accounts of similar types"),
+   'AccountType' => gettext("Account Type|A combined field used to describe this account type when associating it with other records"),
+   'Account' => gettext("Account|A combined field used to describe the budget account when associating it with other records"),
+   'AccountDesc' => gettext("Account Description|A detailed description of the budget account")
+   );
+
+
+    $sections = unserialize('a:2:{i:0;a:3:{s:6:"phrase";s:11:"Expenditure";s:3:"sql";s:2489:"SELECT 
+   `cose`.ExpenditureID,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`cos1`.RelatedRecordID,\'\'),\')\'),\' Module (Record ID: )\') AS RelatedModuleRecord,
+   `cos1`.Title AS Title,
+   `cos1`.CostDesc AS CostDesc,
+   `dat1`.RelatedDate AS CostDate,
+   `cos1`.Incurred AS Incurred,
+   `cos1`.PONumber AS PONumber,
+   `cose`.ExpenseDate,
+   `cose`.ExpenseTitle,
+   `cose`.ExpenseDesc,
+   `cose`.ExpenseAmount,
+   `org2`.Name AS PayeeOrg,
+   `ppl1`.DisplayName AS PayeePerson,
+   `cod2`.Description AS ExpensePaymentMethod,
+   `cose`.TransactionDocNumber,
+   `org1`.Name AS AccountOrganization,
+   `cod1`.Description AS AccountCategory,
+   NULLIF(CONCAT(IFNULL(`budat1`.AccountTypeTitle,\'\')),\'\') AS AccountType,
+   NULLIF(CONCAT(IFNULL(`buda1`.AccountName,\'\'),\' | \',IFNULL(`buda1`.AccountNumber,\'\')),\' | \') AS Account,
+   `buda1`.AccountDesc AS AccountDesc,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`cos1`.Title,\'\'),\' | \',IFNULL(ROUND(`cos1`.Incurred, 2),\'\')),\' | \'),\'\'),\' | \',IFNULL(`cose`.ExpenseDate,\'\'),\' | \',IFNULL(ROUND(`cose`.ExpenseAmount, 2),\'\')),\' |  | \') AS RecordLabel,
+   `buda1`.AccountOrganizationID AS AccountOrganizationID
+FROM `cose`
+   
+     LEFT OUTER JOIN `cos` AS cos1 
+   ON (`cose`.CostID = `cos1`.CostID )
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`cose`.PayeeOrgID = `org2`.OrganizationID )
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`cose`.ExpenditureID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'cose\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'1\')
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`cose`.ExpensePaymentMethodID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'227\')
+     LEFT OUTER JOIN `buda` AS buda1 
+   ON (`cose`.AccountID = `buda1`.AccountID )
+     LEFT OUTER JOIN `mod` AS mod1 
+   ON (`cos1`.RelatedModuleID = `mod1`.ModuleID )
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`cos1`.CostID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'cos\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'18\')
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`buda1`.AccountOrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `budat` AS budat1 
+   ON (`buda1`.AccountTypeID = `budat1`.AccountTypeID )
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`budat1`.AccountCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'31\')
+WHERE
+   cose.ExpenditureID=\'/**RecordID**/\'";s:6:"fields";a:20:{s:13:"ExpenditureID";O:9:"viewfield":16:{s:4:"name";s:13:"ExpenditureID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Record ID|An automatically assigned number used to track expenditures";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"RelatedModuleRecord";O:9:"viewfield":16:{s:4:"name";s:19:"RelatedModuleRecord";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:58:"Cost Record|The module and record associated with the cost";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:5:"Title";O:9:"viewfield":16:{s:4:"name";s:5:"Title";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:50:"Cost Title|A concise title that describes the cost";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostDesc";O:9:"viewfield":16:{s:4:"name";s:8:"CostDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:65:"Cost Description|A detailed description of the cost being tracked";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostDate";O:9:"viewfield":16:{s:4:"name";s:8:"CostDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Cost Date|The date this cost amount was incurred by the organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Incurred";O:9:"viewfield":16:{s:4:"name";s:8:"Incurred";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:134:"Total Cost|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"PONumber";O:9:"viewfield":16:{s:4:"name";s:8:"PONumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:124:"P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"ExpenseDate";O:9:"viewfield":16:{s:4:"name";s:11:"ExpenseDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:51:"Expense Date|The specific date the expense occurred";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ExpenseTitle";O:9:"viewfield":16:{s:4:"name";s:12:"ExpenseTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Expense Title|A brief title used to describe the expense paid from the trust distribution account";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"ExpenseDesc";O:9:"viewfield":16:{s:4:"name";s:11:"ExpenseDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Expense Description|A detailed description of the expense paid from the trust distribution account";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"ExpenseAmount";O:9:"viewfield":16:{s:4:"name";s:13:"ExpenseAmount";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Paid Amount|The amount of the expense, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"PayeeOrg";O:9:"viewfield":16:{s:4:"name";s:8:"PayeeOrg";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Payee Organization|The organization receiving payment";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"PayeePerson";O:9:"viewfield":16:{s:4:"name";s:11:"PayeePerson";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Payee Person|The name of the individual receiving payment";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"ExpensePaymentMethod";O:9:"viewfield":16:{s:4:"name";s:20:"ExpensePaymentMethod";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Payment Method|The method used to pay the expense";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"TransactionDocNumber";O:9:"viewfield":16:{s:4:"name";s:20:"TransactionDocNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Payment Document Number|The type and number associated with the payment document (e.g. Personal Check (562)";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"AccountOrganization";O:9:"viewfield":16:{s:4:"name";s:19:"AccountOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:81:"Account Organization|The organization responsible for managing the budget account";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"AccountCategory";O:9:"viewfield":16:{s:4:"name";s:15:"AccountCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Account Category|A broad categoy used to group accounts of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"AccountType";O:9:"viewfield":16:{s:4:"name";s:11:"AccountType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Account Type|A combined field used to describe this account type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"Account";O:9:"viewfield":16:{s:4:"name";s:7:"Account";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Account|A combined field used to describe the budget account when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"AccountDesc";O:9:"viewfield":16:{s:4:"name";s:11:"AccountDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:64:"Account Description|A detailed description of the budget account";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}i:1;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:4:{s:13:"viewgrid_filr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"filr";s:6:"phrase";s:14:"Physical Files";s:6:"number";N;s:6:"Fields";a:6:{s:12:"FileRecordID";O:14:"invisiblefield":11:{s:4:"name";s:12:"FileRecordID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Record ID|An automatically assigned number used to associate records with physical files";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:147:"SELECT 
+    count(*) 
+FROM `filr`
+   
+WHERE filr._Deleted = 0
+   AND `filr`.RelatedModuleID = \'cose\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1268:"SELECT 
+   `filr`.FileRecordID,
+`filph1`.FilingOrganizationID AS FilingOrganizationID,
+`org1`.Name AS FilingOrganization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+`filph1`.FileName AS FileName,
+`filph1`.FileNumber AS FileNumber,
+NULLIF(CONCAT(IFNULL(`filph1`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph1`.FileRetentionID,\'\')),\'\') AS SystemNumber
+FROM `filr`
+
+   LEFT OUTER JOIN `filph` AS filph1 
+   ON (`filr`.FileRetentionID = `filph1`.FileRetentionID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`filph1`.FilingOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph1`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph1`.FileReqID = `fil1`.FileReqID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE filr._Deleted = 0
+AND `filr`.RelatedModuleID = \'cose\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:12:"FileRecordID";s:3:"int";s:18:"FilingOrganization";N;s:8:"Location";N;s:8:"FileName";N;s:10:"FileNumber";N;s:12:"SystemNumber";N;}s:4:"name";N;s:10:"fieldAlign";a:6:{s:12:"FileRecordID";s:5:"right";s:18:"FilingOrganization";s:4:"left";s:8:"Location";s:7:"justify";s:8:"FileName";s:4:"left";s:10:"FileNumber";s:4:"left";s:12:"SystemNumber";s:7:"justify";}}s:13:"viewgrid_prta";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prta";s:6:"phrase";s:16:"Accountabilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantAccID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantAccID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Person Accountable|The name of the person accountable";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"AccountabilityType";O:9:"viewfield":16:{s:4:"name";s:18:"AccountabilityType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Accountability Type|The participant\'s specific type of accountability";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AccountabilityStatus";O:9:"viewfield":16:{s:4:"name";s:20:"AccountabilityStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Accountability Status|The present status of this participant\'s ongoing involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:147:"SELECT 
+    count(*) 
+FROM `prta`
+   
+WHERE prta._Deleted = 0
+   AND `prta`.RelatedModuleID = \'cose\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1173:"SELECT 
+   `prta`.ParticipantAccID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonAccountable,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS AccountabilityType,
+`cod1`.Description AS AccountabilityStatus
+FROM `prta`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prta`.RelatedRecordID = rdc1.RecordID AND `prta`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`prta`.ParticipantAccID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'prta\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'70\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prta`.AccountabilityTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `acc` AS acc2 
+    ON (`prta`.ParticipantAccID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'prta\'
+     AND `acc2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`acc2`.AccountabilityStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prta._Deleted = 0
+AND `prta`.RelatedModuleID = \'cose\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantAccID";s:3:"int";s:17:"PersonAccountable";N;s:18:"AccountabilityType";N;s:20:"AccountabilityStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantAccID";s:5:"right";s:17:"PersonAccountable";s:4:"left";s:18:"AccountabilityType";s:7:"justify";s:20:"AccountabilityStatus";s:4:"left";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:147:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'cose\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1152:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'cose\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:143:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'cose\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:677:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'cose\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

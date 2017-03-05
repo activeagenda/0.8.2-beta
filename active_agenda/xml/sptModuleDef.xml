@@ -1,0 +1,359 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Support Documents" moduleID="spt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Support Document" pluralRecordName="Support Documents" allowAddRecord="no" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="SupportDocumentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track support documents" sample="1"/>
+		<TableField name="ModuleID" type="varchar(5)" validate="RequireSelection" phrase="Module ID|The module ID of the module this document is intended to support" sample="cor"/>
+		<ForeignField name="Module" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="ModuleID" joinType="left" phrase="Module Name|The name of the module this document is intended to support" sample="Corrective Actions"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="112" phrase="Person Accountable|The individual assigned primary accountability for managing the support document's format, use, and currency for this specific implementation of the software" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the support document's format, use, and currency for this specific implementation of the software" sample="Mattias Thorslund"/>
+		<TableField name="LocalDocumentationStatusID" type="int" validate="noValidation" phrase="Local Status|Development status of the local support documentation" sample="2"/>
+		<CodeField name="LocalDocumentationStatus" key="LocalDocumentationStatusID" phrase="Local Status|Development status of the local support documentation" sample="Some Documentation" codeTypeID="194"/>
+		<TableField name="WikiArticle" type="varchar(128)" validate="noValidation" phrase="Implementation URL|The Internet address of the Wiki page corresponding with the module's implementation support guide" sample="http://www.activeagenda.net/documentation/index.php?title=Hazard_Abatement_Module"/>
+		<RemoteField name="WikiArticlePersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="112" phrase="Implementation Support Wiki Person|The individual assigned primary accountability for managing the implementation support document's format, content, and currency on the Internet Wiki site" sample="1"/>
+		<ForeignField name="WikiArticlePersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="WikiArticlePersonAccountableID" joinType="left" phrase="Implementation Support Wiki Person|The individual assigned primary accountability for managing the implementation support document's format, content, and currency on the Internet Wiki site" sample="Mattias Thorslund"/>
+		<TableField name="WikiArticleStatusID" type="int" validate="noValidation" phrase="Implementation Wiki Status|Development status of the implementation support documentation Wiki on the Internet" sample="2"/>
+		<CodeField name="WikiArticleStatus" key="WikiArticleStatusID" phrase="Implementation Wiki Status|Development status of the implementation support documentation Wiki on the Internet" sample="Not Started" codeTypeID="194"/>
+		<TableField name="WikiGuide" type="varchar(128)" validate="noValidation" phrase="User Guide URL|The Internet address of the Wiki page corresponding with the module's user guide'" sample="http://www.activeagenda.net/documentation/index.php?title=Hazard_Abatement_Guide"/>
+		<RemoteField name="WikiGuidePersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="112" phrase="User Guide Wiki Person|The individual assigned primary accountability for managing the user guide document's format, content, and currency on the Internet Wiki site" sample="1"/>
+		<ForeignField name="WikiGuidePersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="WikiGuidePersonAccountableID" joinType="left" phrase="User Guide Wiki Person|The individual assigned primary accountability for managing the user guide document's format, content, and currency on the Internet Wiki site" sample="Mattias Thorslund"/>
+		<TableField name="WikiGuideStatusID" type="int" validate="noValidation" phrase="User Guide Wiki Status|Development status of the user guide Wiki on the Internet" sample="2"/>
+		<CodeField name="WikiGuideStatus" key="WikiGuideStatusID" phrase="User Guide Wiki Status|Development status of the user guide Wiki on the Internet" sample="Not Started" codeTypeID="194"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Module"/>;_<CombinedFieldRef name="WikiArticle"/></CombinedField>
+		<CombinedField name="SupportDocument" phrase="Support Document|A combined field used to describe this support document when associating it with other records" sample="Corrective Actions">
+			<CombinedFieldRef name="Module"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SupportDocumentID"/>
+		</PrimaryKey>
+		<Index name="ModuleID">
+			<FieldRef name="ModuleID"/>
+		</Index>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="SupportDocument"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="spts" name="Support Document Section" parentKey="SupportDocumentID" localKey="SupportDocumentID"/>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SupportDocumentID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="spt"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SupportDocumentID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="spt"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SupportDocumentID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="spt"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List documentation requirements">
+			<ListField name="SupportDocumentID" phrase="Record ID"/>
+			<ListField name="ModuleID" phrase="Module ID"/>
+            <ListField name="Module" phrase="Module Name"/>
+			<ListField name="WikiArticle" link="WikiArticle" phrase="Implementation Support URL"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search documentation requirements">
+			<ComboField name="ModuleID" findMode="text">
+				<SampleItem ID="1" name="Injury Loss"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Asset Protection"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="LocalDocumentationStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+			<PersonComboField name="WikiArticlePersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="WikiArticleStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+			<PersonComboField name="WikiGuidePersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="WikiGuideStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view module support documentation">
+			<ViewField name="SupportDocumentID"/>
+			<ViewField name="ModuleID"/>
+			<ViewField name="Module"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="LocalDocumentationStatus"/>
+			<ViewField name="WikiArticle" link="WikiArticle"/>
+			<ViewField name="WikiArticlePersonAccountable"/>
+			<ViewField name="WikiArticleStatus"/>
+			<ViewField name="WikiGuide"/>
+			<ViewField name="WikiGuidePersonAccountable"/>
+			<ViewField name="WikiGuideStatus"/>
+			<ViewGrid moduleID="spts"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit module support documentation">
+			<ViewField name="SupportDocumentID"/>
+			<ViewField name="ModuleID"/>
+			<ViewField name="Module"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="LocalDocumentationStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+			<EditField name="WikiArticle" size="75" maxLength="128"/>
+			<PersonComboField name="WikiArticlePersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="WikiArticleStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+			<EditField name="WikiGuide" size="75" maxLength="128"/>
+			<PersonComboField name="WikiGuidePersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="WikiGuideStatusID" findMode="text">
+				<SampleItem ID="1" name="No Documentation"/>
+				<SampleItem ID="2" name="Some Documentation"/>
+				<SampleItem ID="3" name="Moderate Documentation"/>
+				<SampleItem ID="4" name="Substantial Documentation"/>
+				<SampleItem ID="5" name="Complete Documentation"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Sections" phrase="Sections|The screen to edit sections of the documentation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="spts"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the module support document">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the module support document">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the module support document" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SupportDocumentID"/>
+		<ViewField name="ModuleID"/>
+		<ViewField name="Module"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="LocalDocumentationStatus"/>
+		<ViewField name="WikiArticle" link="WikiArticle"/>
+		<ViewField name="WikiArticlePersonAccountable"/>
+		<ViewField name="WikiArticleStatus"/>
+		<ViewField name="WikiGuide" link="WikiGuide"/>
+		<ViewField name="WikiGuidePersonAccountable"/>
+		<ViewField name="WikiGuideStatus"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Local Support Documentation By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Local Support Documentation By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Local Support Documentation By Status">
+			<GroupByField name="LocalDocumentationStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Local Support Documentation By Status">
+			<GroupByField name="LocalDocumentationStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Implementation Wiki By Person Accountable">
+			<GroupByField name="WikiArticlePersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Implementation Wiki By Person Accountable">
+			<GroupByField name="WikiArticlePersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Implementation Wiki By Status">
+			<GroupByField name="WikiArticleStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Implementation Wiki By Status">
+			<GroupByField name="WikiArticleStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="User Guide Wiki By Person Accountable">
+			<GroupByField name="WikiGuidePersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="User Guide Wiki By Person Accountable">
+			<GroupByField name="WikiGuidePersonAccountable"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="User Guide Wiki By Status">
+			<GroupByField name="WikiGuideStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="User Guide Wiki By Status">
+			<GroupByField name="WikiGuideStatus"/>
+			<SummaryField name="SupportDocumentID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 533 $" date="$Date: 2007-02-25 23:10:27 -0800 (Sun, 25 Feb 2007) $"/>
+</Module>

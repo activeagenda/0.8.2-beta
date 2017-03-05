@@ -1,0 +1,409 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Incentive Associations" moduleID="ictas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Incentive Association" pluralRecordName="Incentive Associations" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="IncentiveAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate incentive criteria and award values with local organizations and persons accountable" sample="1"/>
+        <TableField name="IncentiveID" type="int" validate="RequireSelection" phrase="Incentive|A description of the incentive criteria based on a combination of field values assigned from within the Incentives module" sample="1"/>
+        <ForeignField name="IncentiveCriteria" foreignTable="ict" foreignKey="IncentiveID" foreignField="IncentiveCriteria" key="IncentiveID" joinType="left" phrase="Incentive Criteria|The criteria required to be satisfied in order to receive the incentive" sample="Participating in a self-inspection or audit"/>
+        <ForeignField name="Incentive" foreignTable="ict" foreignKey="IncentiveID" foreignField="Incentive" key="IncentiveID" joinType="left" phrase="Incentive|A description of the incentive criteria based on a combination of field values assigned from within the Incentives module" sample="Participating in a self-inspection or audit"/>
+        <ForeignField name="IncentiveDescription" foreignTable="ict" foreignKey="IncentiveID" foreignField="IncentiveDescription" key="IncentiveID" joinType="left" phrase="Incentive Description|A detailed description of the incentive criteria and specific activity required to satisfy the criteria and result in an incentive award" sample="Any employee that participates in a self-inspection or audit of ANY established checklist will receive the award associated with this incentive criteria. Audit results must be turned into the person accountable for the audit checklist prior to the issuance of an award."/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The organization where this incentive criteria is utilized" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization where this incentive criteria is utilized" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="43" phrase="Person Accountable|The individual assigned primary accountability for managing this incentive criteria and associated awards at this specific organization" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this incentive criteria and associated awards at this specific organization" sample="Mattias Thorslund"/>
+        <TableField name="IncentiveTypeID" type="int" validate="RequireSelection" phrase="Incentive Type|The type of incentive award provided for satisfying the incentive criteria" sample="1"/>
+        <CodeField name="IncentiveType" key="IncentiveTypeID" phrase="Incentive Type|The type of incentive award provided for satisfying the incentive criteria" sample="Day Off With Pay" codeTypeID="166"/>
+        <TableField name="AverageValue" type="money" validate="Money notEmpty notNegative" phrase="Average Value|Average cash value of the incentive award associated with satisfaction of the incentive criteria, stated in the currency assigned to this installation of the software. The average value can be different from the actual value if the value is associated with variable salary levels" sample="10,000.00"/>
+        <TableField name="IncentiveStatusID" type="int" validate="RequireSelection" phrase="Status|The status of this incentive criteria and related award values at this specific organization" sample="1"/>
+        <CodeField name="IncentiveStatus" key="IncentiveStatusID" phrase="Status|The status of this incentive criteria and related award values at this specific organization" sample="Active" codeTypeID="67"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Incentive"/>_at_<CombinedFieldRef name="Organization"/>_awards_<CombinedFieldRef name="AverageValue"/></CombinedField>
+        <CombinedField name="IncentiveAssoc" phrase="Incentive Associations|A combined field used to describe this incentive association when describing it within other records" sample="Participating in a self-inspection or audit | Average Value: 10,000.00"><CombinedFieldRef name="Incentive"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="IncentiveAssocID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="IncentiveAssoc"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="valc" name="Values Considerations" parentKey="IncentiveID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ict"/>
+        </SubModule>
+        <SubModule moduleID="vala" name="Values Associations" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="IncentiveID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ict"/>
+        </SubModule>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="IncentiveID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ict"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="IncentiveID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ict"/>
+        </SubModule>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="stdc" name="Standards Considerations" parentKey="IncentiveID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ict"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="IncentiveAssocID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ictas"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List incentive criteria and values">
+            <ListField name="IncentiveAssocID" phrase="Record ID"/>
+            <ListField name="IncentiveCriteria" phrase="Criteria"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="IncentiveType" phrase="Type"/>
+            <ListField name="AverageValue" phrase="Value"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search incentive criteria and values">
+            <ComboField name="IncentiveID" findMode="text">
+                <SampleItem ID="1" name="Participating in a self-inspection or audit"/>
+                <SampleItem ID="2" name="Participating in a non-required training"/>
+                <SampleItem ID="3" name="Participating in a quality control cutting"/>
+                <SampleItem ID="4" name="Participating on the emergency response team"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="IncentiveTypeID" findMode="text">
+                <SampleItem ID="1" name="Day Off With Pay"/>
+                <SampleItem ID="2" name="Award Gift Certificate"/>
+                <SampleItem ID="3" name="Award Certificate"/>
+                <SampleItem ID="4" name="Award Patch"/>
+            </CodeComboField>
+            <MoneyField name="AverageValue"/>
+            <CodeComboField name="IncentiveStatusID">
+                <SampleItem ID="1" name="Active"/>
+                <SampleItem ID="2" name="Outdated"/>
+                <SampleItem ID="3" name="Postponed"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the utilization of an incentive and the associated value">
+            <ViewField name="IncentiveAssocID"/>
+            <ViewField name="IncentiveCriteria"/>
+            <ViewField name="IncentiveType"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="AverageValue"/>
+            <ViewField name="IncentiveStatus"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="vala"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="bcq"/>
+                <ViewGrid moduleID="rsk"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the utilization of an incentive and the associated value">
+            <ViewField name="IncentiveAssocID"/>
+            <ComboField name="IncentiveID" findMode="text">
+                <SampleItem ID="1" name="Participating in a self-inspection or audit; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Participating in a non-required training; Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Participating in a quality control cutting; Active Agenda, Latvia"/>
+                <SampleItem ID="4" name="Participating on the emergency response team; Active Agenda, HQ"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="IncentiveTypeID" findMode="text">
+                <SampleItem ID="1" name="Day Off With Pay"/>
+                <SampleItem ID="2" name="Award Gift Certificate"/>
+                <SampleItem ID="3" name="Award Certificate"/>
+                <SampleItem ID="4" name="Award Patch"/>
+            </CodeComboField>
+            <MoneyField name="AverageValue"/>
+            <CodeComboField name="IncentiveStatusID">
+                <SampleItem ID="1" name="Active"/>
+                <SampleItem ID="2" name="Outdated"/>
+                <SampleItem ID="3" name="Postponed"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="bcqc"/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="Culture" phrase="Culture|Associate values with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="valc"/>
+            <EditGrid moduleID="vala"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="regc"/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="stdc"/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="rskc"/>
+            <EditGrid moduleID="rsk"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the incentive">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the incentive">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical incentive file">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+		<!--<RecordReportScreen name="RecordReports" phrase="Reports|View reports on the incentive item"/>-->
+		<ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="IncentiveAssocID"/>
+        <ViewField name="IncentiveID"/>
+        <ViewField name="IncentiveCriteria"/>
+        <ViewField name="IncentiveType"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="AverageValue"/>
+        <ViewField name="IncentiveStatus"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="ictas" phrase="Adopting Organizations">
+            <InvisibleField name="IncentiveAssocID"/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="IncentiveType" sample="Day Off With Pay"/>
+            <ViewField name="AverageValue" sample="USD 80.00"/>
+            <ViewField name="IncentiveStatus" sample="Active"/>
+        </ViewGrid>
+        <EditGrid moduleID="ictas" phrase="Adopting Organizations">
+            <GridForm>
+                <InvisibleField name="IncentiveAssocID"/>
+                <OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                    <SampleItem ID="3" name="Active Agenda, New York"/>
+                    <SampleItem ID="4" name="Active Agenda, Munich"/>
+                </OrgComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <CodeComboField name="IncentiveTypeID" findMode="text" sample="Day Off With Pay">
+                    <SampleItem ID="1" name="Day Off With Pay"/>
+                    <SampleItem ID="2" name="Award Gift Certificate"/>
+                    <SampleItem ID="3" name="Award Certificate"/>
+                    <SampleItem ID="4" name="Award Patch"/>
+                </CodeComboField>
+                <MoneyField name="AverageValue" sample="USD 80.00"/>
+                <CodeComboField name="IncentiveStatusID" sample="Active">
+                    <SampleItem ID="1" name="Active"/>
+                    <SampleItem ID="2" name="Outdated"/>
+                    <SampleItem ID="3" name="Postponed"/>
+                </CodeComboField>
+            </GridForm>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="IncentiveType" sample="Day Off With Pay"/>
+            <ViewField name="AverageValue" sample="USD 80.00"/>
+            <ViewField name="IncentiveStatus" sample="Active"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Incentive Associations By Incentive">
+            <GroupByField name="Incentive"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Incentive Associations By Incentive">
+            <GroupByField name="Incentive"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Incentive Associations By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Incentive Associations By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Incentive Associations By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Incentive Associations By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Incentive Associations By Status">
+            <GroupByField name="IncentiveStatus"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Incentive Associations By Status">
+            <GroupByField name="IncentiveStatus"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Incentive Associations By Incentive Type">
+            <GroupByField name="IncentiveType"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Incentive Associations By Incentive Type">
+            <GroupByField name="IncentiveType"/>
+            <SummaryField name="IncentiveAssocID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,334 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Incident Report Situations" moduleID="ires" parentModule="ire" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Incident Report Situation" pluralRecordName="Incident Report Situations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="IncidentReportSituationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Situation ID|Numerical ID used to associate incident report situations with incident reports" sample="1"/>
+		<TableField name="IncidentReportID" type="int" validate="noValidation" phrase="Incident Report ID|An automatically assigned number used to track situations and incidents" sample="11"/>
+		<ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Report|A combined field used to describe this incident report when associating it with other records" sample="Thorslund Discrimination Claim; Active Agenda, HQ; 10-28-2003; 1"/>
+		<ForeignField name="OrganizationID" foreignTable="ire" foreignKey="IncidentReportID" foreignField="OrganizationID" key="IncidentReportID" joinType="left" phrase="Organization|The primary organization involved in the incident" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The primary organization involved in the incident" sample="Active Agenda, HQ"/>
+		<TableField name="SituationTypeID" type="int" dbFlags="unsigned not null" validate="RequireSelection" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="1"/>
+		<ForeignField name="SituationCategoryID" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationCategoryID" key="SituationTypeID" joinType="left" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="1"/>
+		<CodeField name="SituationCategory" key="SituationCategoryID" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="Disease" codeTypeID="26"/>
+		<ForeignField name="SituationType" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationType" key="SituationTypeID" joinType="left" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="Injury (employee)"/>
+		<ForeignField name="SituationTypeDescription" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationDescription" key="SituationTypeID" joinType="left" phrase="Situation Description|A thorough description of the situation type" sample="Employee injury requiring medical treatment by a licensed medical provider OR an industrial nurse."/>
+		<TableField name="SituationDescription" type="text" validate="notEmpty" phrase="Situation Description|A specific description of the situation resulting in the incident report" sample="Mr. Thorslund attended the local industrial medical provider an she treated his broken arm."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Employee injury requiring medical treatment | Active Agenda, Inc."><CombinedFieldRef name="IncidentReport"/>;_<CombinedFieldRef name="SituationCategory"/>:_<CombinedFieldRef name="SituationType"/></CombinedField>
+		<CombinedField name="IncidentReportSituation" phrase="Incident Report Situation|A combined field used to describe this incident report situation when associating it with other records" sample="Thorslund Discrimination Claim; Active Agenda, HQ; 10-28-2003; 1 | Employee injury requiring medical treatment | Employee injury requiring medical treatment"><CombinedFieldRef name="IncidentReport"/>;_<CombinedFieldRef name="SituationCategory"/>:_<CombinedFieldRef name="SituationType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="IncidentReportSituationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="IncidentReportSituation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<!--consider passing considerations from ires to ire when IncidentReportID = [*IncidentReportID*]. This would enable the passing of considerations from guidance org to local org to an incident -->
+        <SubModule moduleID="valc" name="Values Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+        <SubModule moduleID="cosc" name="Cost Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+        <SubModule moduleID="pubc" name="Publicity Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+        <SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="SituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitt"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="IncidentReportSituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ires"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List situations associated with incident reports">
+			<ListField name="IncidentReportSituationID" phrase="Record ID"/>
+			<ListField name="IncidentReportID" phrase="Report ID" align="center"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SituationCategory" phrase="Category"/>
+			<ListField name="SituationType" phrase="Type"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search situations associated with incident reports">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</CodeComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about situations associated with incident reports">
+			<ViewField name="IncidentReportSituationID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SituationCategory"/>
+			<ViewField name="SituationType"/>
+			<ViewField name="SituationTypeDescription"/>
+			<ViewField name="SituationDescription"/>
+			<ViewScreenSection name="Considerations" phrase="Considerations">
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about situations associated with incident reports">
+			<ViewField name="IncidentReportSituationID"/>
+			<ViewField name="IncidentReport"/>
+			<CodeComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</CodeComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<UpdateFieldRef name="SituationTypeDescription"/>
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+			<ViewField name="SituationTypeDescription"/>
+			<MemoField name="SituationDescription" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values considerations with the reported situation">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Consequences" phrase="Consequences|Associate business consequence considerations with the reported situation">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Cost Exposures|Associate cost exposures with the reported situation">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulatory considerations with the reported situation">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards considerations with the reported situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="stdc"/>
+			<ViewGrid moduleID="stda"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="IncidentReportSituationID"/>
+		<InvisibleField name="SituationTypeID"/>
+		<ViewField name="IncidentReport"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SituationCategory"/>
+		<ViewField name="SituationType"/>
+		<ViewField name="SituationTypeDescription"/>
+		<ViewField name="SituationDescription"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="ires" phrase="Associate Situations">
+			<ViewField name="SituationCategory" sample="Injury (employee)"/>
+			<ViewField name="SituationType" sample="First Aid Only Injury"/>
+			<ViewField name="SituationDescription" sample="Mr. Thorslund attended the local industrial medical provider an she treated his broken arm."/>
+		</ViewGrid>
+		<EditGrid moduleID="ires" phrase="Associate Situations">
+			<GridForm>
+				<InvisibleField name="IncidentReportSituationID"/>
+				<CodeComboField name="SituationCategoryID" findMode="text">
+					<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+					<SampleItem ID="1" name="Injury (employee)"/>
+					<SampleItem ID="2" name="Injury (customer)"/>
+					<SampleItem ID="3" name="Operational (downtime)"/>
+					<SampleItem ID="4" name="Product Recall"/>
+					<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+					<SampleItem ID="6" name="Information Technology"/>
+				</CodeComboField>
+				<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+					<UpdateFieldRef name="SituationTypeDescription"/>
+					<SampleItem ID="1" name="First Aid Only Injury"/>
+					<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+					<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+				</ComboField>
+				<ViewField name="SituationTypeDescription" parentField="SituationTypeID"/>
+				<MemoField name="SituationDescription" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="IncidentReportSituationID"/>
+			<ViewField name="SituationCategory" sample="Injury (employee)"/>
+			<ViewField name="SituationType" sample="First Aid Only Injury"/>
+			<ViewField name="SituationDescription" sample="Mr. Thorslund attended the local industrial medical provider an she treated his broken arm."/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Incident Report Situations by Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Incident Report Situations by Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Incident Report Situations by Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Incident Report Situations by Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</ParetoChart>
+		<RadarChart name="Radar01" title="Incident Report Situations by Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</RadarChart>
+		<RadarChart name="Radar02" title="Incident Report Situations by Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie03" title="Incident Report Situations by Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Incident Report Situations by Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncidentReportSituationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

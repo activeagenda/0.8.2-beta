@@ -1,0 +1,395 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Transactions" moduleID="chmtr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Transaction" pluralRecordName="Chemical Transactions" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ChemicalTransactionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Transaction ID|An automatically assigned number used to track inventory transactions" sample="1"/>
+		<TableField name="ChemicalInventoryID" type="int" validate="RequireSelection" phrase="Inventory ID|An automatically assigned number used to track chemical inventory" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="OrganizationID" key="ChemicalInventoryID" joinType="left" phrase="Organization|The name of the organization where the Chemical is located" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the Chemical is located" sample="Active Agenda, HQ"/>
+		<ForeignField name="LocationID" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="LocationID" key="ChemicalInventoryID" joinType="left" phrase="Location|Specific location within the facility where the chemical is located" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the chemical is located" sample="Maintenance Shop, Chemical Cage"/>
+		<ForeignField name="ChemicalID" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="ChemicalID" key="ChemicalInventoryID" joinType="left" phrase="Chemical|The specific chemical which is involved in the transaction" sample="1"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="Chemical" key="ChemicalID" joinType="left" phrase="Chemical|A combined field used to describe this record when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+		<ForeignField name="NewChemicalStorageMethodID" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="ChemicalStorageMethodID" key="ChemicalInventoryID" joinType="left" phrase="New Storage Method|The specific method used to store the chemical on site" sample="1"/>
+		<CodeField name="NewChemicalStorageMethod" key="NewChemicalStorageMethodID" phrase="New Storage Method|The specific method used to store the chemical on site" sample="55 Gallon Drums" codeTypeID="115"/>
+		<TableField name="TransactionTypeID" type="int" validate="noValidation" phrase="Transaction Type|The type of inventory transaction which occurred on this date at this location" sample="1"/>
+		<CodeField name="TransactionType" key="TransactionTypeID" phrase="Transaction Type|The type of inventory transaction which occurred on this date at this location" sample="Issued" codeTypeID="46"/>
+		<!--the Transaction Type codetype should be controlled so that the user cannot eliminate the "transfer" choice. DFZ 8-5-2004-->
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="18" phrase="Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory" sample="Mattias Thorslund"/>
+		<RemoteField name="TransactionSubjectID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="12" phrase="Transaction Subject|The name of the individual receiving the inventory item or returning the item to the inventory" sample="1"/>
+		<ForeignField name="TransactionSubject" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TransactionSubjectID" joinType="left" phrase="Transaction Subject|The name of the individual the chemical was issued to, OR the name of the individual returning the inventory item, OR the name of the person entering a new item into inventory" sample="Mattias Thorslund"/>
+		<TableField name="TransactionAmount" type="int" validate="Number notNegative notZero notEmpty" phrase="Amount|The amount of chemical involved in this transaction" sample="25"/>
+		<TableField name="TransAmountUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="TransAmountUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TransAmountUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="TransAmountUnitCategory" key="TransAmountUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="TransAmountUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TransAmountUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<ForeignField name="NewLocationID" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="LocationID" key="ChemicalInventoryID" joinType="left" phrase="New Location|The specific location within the facility where to which the chemical is being transferred" sample="1"/>
+		<ForeignField name="NewLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="New Location|The specific location within the facility where to which the chemical is being transferred" sample="Server Room; Administration Building; 023 "/>
+		<!-- the new location cb should only display if the transaction type=transfer. If the transaction is a transfer, the newly selected location should be saved to the OtherAssetInventory table. DFZ 8-5-2004-->
+		<RemoteField name="TransactionDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="14" phrase="Transaction Date|The date this chemical transaction occurred" sample="01/01/2004"/>
+		<TableField name="TransactionTime" type="time" validate="noValidation" phrase="Transaction Time|The time this chemical transaction occurred" sample="12:30 pm"/>
+		<TableField name="EstimatedReturnDate" type="date" validate="noValidation" phrase="Estimated Return Date|The date the excess or unused chemical is estimated to be returned" sample="09-28-2003"/>
+		<TableField name="EstimatedReturnTime" type="time" validate="noValidation" phrase="Estimated Return Time|The time the excess or unused chemical is estimated to be returned" sample="12:30 pm"/>
+		<TableField name="ActualReturnDate" type="date" validate="noValidation" phrase="Actual Return Date|The date the excess or unused chemical is actually returned to inventory at this specific location" sample="09-28-2003"/>
+		<TableField name="ActualReturnTime" type="time" validate="noValidation" phrase="Actual Return Time|The time the excess or unused chemical is actually returned to inventory at this specific location" sample="12:30 pm"/>
+		<TableField name="IssueDesc" type="varchar(255)" validate="noValidation" phrase="Issue Description|A brief description of any issues identified by the person returning the chemical into inventory" sample="The water was contaminated by the brush which had picked up sawdust contaminants during application. The excess water was deposited into the water solvent waste barrel at the waste drum storage pad (see associated waste record)."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Water; Hydrogen Dioxide; 1336-21-6 | Issued | 09-28-2003"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="TransactionType"/>;_<CombinedFieldRef name="TransactionDate"/></CombinedField>
+		<CombinedField name="AmountofTransaction" phrase="Amount of Transaction|A combined field used to describe the amount of chemical involved in the transaction when associating it with other records" sample="2 Gallon(s)"><CombinedFieldRef name="TransactionAmount"/>_<CombinedFieldRef name="TransAmountUoM"/></CombinedField>
+		<CombinedField name="ChemicalTransaction" phrase="Chemical Transaction|A combined field used to describe this chemical transaction when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6 | Issued | 09-28-2003"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="TransactionType"/>;_<CombinedFieldRef name="TransactionDate"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChemicalTransactionID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="ChemicalTransaction"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemical inventory transactions">
+			<ListField name="ChemicalTransactionID" phrase="Transaction ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="Chemical" phrase="Chemical"/>
+			<ListField name="TransactionType" phrase="Transaction Type"/>
+			<ListField name="AmountofTransaction" phrase="Amount"/>
+			<ListField name="TransactionDate" phrase="Date"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemical inventory transactions">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<UpdateFieldRef name="ChemicalID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Maintenance Shop, Chemical Cage"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ChemicalID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+				<SampleItem ID="2" name="Methyl Ethyl Goo; Slime Sauce; 12346-43-8; In Use"/>
+			</ComboField>
+			<CodeRadioField name="TransactionTypeID">
+				<SampleItem ID="1" name="Issued"/>
+				<SampleItem ID="2" name="Returned"/>
+				<SampleItem ID="3" name="Added"/>
+				<SampleItem ID="4" name="Transferred"/>
+			</CodeRadioField>
+			<ComboField name="NewLocationID" findMode="text">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<EditField name="TransactionAmount" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TransAmountUnitCategoryID">
+					<UpdateFieldRef name="TransAmountUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="TransAmountUoMID" parentField="TransAmountUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<CodeComboField name="NewChemicalStorageMethodID" findMode="text">
+				<SampleItem ID="1" name="55 Gallon Drums"/>
+				<SampleItem ID="3" name="Above Ground Storage Tank"/>
+				<SampleItem ID="5" name="Receiver"/>
+				<SampleItem ID="7" name="Below Ground Storage Tank"/>
+			</CodeComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="TransactionSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="TransactionDate"/>
+			<TimeField name="TransactionTime"/>
+			<DateField name="EstimatedReturnDate"/>
+			<TimeField name="EstimatedReturnTime"/>
+			<DateField name="ActualReturnDate"/>
+			<TimeField name="ActualReturnTime"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about chemical inventory transactions">
+			<ViewField name="ChemicalTransactionID"/>
+			<ViewField name="ChemicalInventoryID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<ViewField name="TransactionType"/>
+			<ViewField name="TransactionAmount">
+				<ViewField name="TransAmountUoM"/>
+			</ViewField>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TransactionSubject"/>
+			<ViewField name="TransactionDate"/>
+			<ViewField name="TransactionTime"/>
+			<ViewField name="EstimatedReturnDate"/>
+			<ViewField name="EstimatedReturnTime"/>
+			<ViewField name="ActualReturnDate"/>
+			<ViewField name="ActualReturnTime"/>
+			<ViewField name="IssueDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about chemical inventory transactions">
+			<ViewField name="ChemicalTransactionID"/>
+			<ViewField name="ChemicalInventoryID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<UpdateFieldRef name="ChemicalID"/>
+				<UpdateFieldRef name="NewLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+			<!--if an item is Transferred a record should be saved to the transferring organization (Transferred) and the receiving organization (Added). DFZ 4-1-2004-->
+			<ComboField name="ChemicalID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+				<SampleItem ID="2" name="Methyl Ethyl Goo; Slime Sauce; 12346-43-8; In Use"/>
+			</ComboField>
+			<CodeRadioField name="TransactionTypeID">
+				<SampleItem ID="1" name="Issued"/>
+				<SampleItem ID="2" name="Returned"/>
+				<SampleItem ID="3" name="Added"/>
+				<SampleItem ID="4" name="Transferred"/>
+			</CodeRadioField>
+			<EditField name="TransactionAmount" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TransAmountUnitCategoryID">
+					<UpdateFieldRef name="TransAmountUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="TransAmountUoMID" parentField="TransAmountUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<ComboField name="NewLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<CodeComboField name="NewChemicalStorageMethodID" findMode="text">
+				<SampleItem ID="1" name="55 Gallon Drums"/>
+				<SampleItem ID="3" name="Above Ground Storage Tank"/>
+				<SampleItem ID="5" name="Receiver"/>
+				<SampleItem ID="7" name="Below Ground Storage Tank"/>
+			</CodeComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="TransactionSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<!--the TransactionSubject field is only available if the TransactionType=Issued or Returned. If the TransactionType=Added, the Transaction Subject filed should be view only and read "None". DFZ 4-1-2004-->
+			<DateField name="TransactionDate"/>
+			<TimeField name="TransactionTime"/>
+			<DateField name="EstimatedReturnDate"/>
+			<TimeField name="EstimatedReturnTime"/>
+			<DateField name="ActualReturnDate"/>
+			<TimeField name="ActualReturnTime"/>
+			<!--Estimated and Actual Return Date and Time fields are only available if the TransactionType=Issued or Returned. Otherwise, the system should write "None". DFZ 4-1-2004-->
+			<!--Estimated and Actual Return Date and Time fields should allow for a 'null' entry. DFZ 4-1-2004-->
+			<MemoField name="IssueDesc" rows="5" cols="75"/>
+			<!-- the IssueDesc field is only available if the TransactionType=Issued or Returned. Otherwise, the system should write "None". DFZ 4-1-2004-->
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Chemical Transactions By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemical Transactions By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Chemical Transactions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Chemical Transactions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Chemical Transactions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Chemical Transactions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Chemical Transactions By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Chemical Transactions By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Chemical Transactions By Transaction Type">
+			<GroupByField name="TransactionType"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Chemical Transactions By Transaction Type">
+			<GroupByField name="TransactionType"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Chemical Transactions By Transaction Subject">
+			<GroupByField name="TransactionSubject"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Chemical Transactions By Transaction Subject">
+			<GroupByField name="TransactionSubject"/>
+			<SummaryField name="ChemicalTransactionID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

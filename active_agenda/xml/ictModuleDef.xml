@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Incentives" moduleID="ict" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Incentive" pluralRecordName="Incentives" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="IncentiveID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track incentive criteria" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The name of the organization sponsoring or supporting the incentive criteria throughout the enterprise" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization sponsoring or supporting the incentive criteria throughout the enterprise" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="42" phrase="Person Accountable|The original author of and/or individual assigned primary accountability for managing this incentive award criteria throughout the enterprise" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The original author of and/or individual assigned primary accountability for managing this incentive award criteria throughout the enterprise" sample="Mattias Thorslund"/>
+		<TableField name="IncentiveCriteria" type="varchar(128)" validate="notEmpty" phrase="Incentive Criteria|The criteria that must be satisfied in order to receive the incentive" sample="Participating in a self-inspection or audit"/>
+		<TableField name="IncentiveDescription" type="text" validate="notEmpty" phrase="Incentive Description|A detailed description of the incentive criteria and specific activity required to satisfy the criteria and result in an incentive award" sample="Any employee that participates in a self-inspection or audit of ANY established checklist will receive the award associated with this incentive criteria. Audit results must be turned into the person accountable for the audit checklist prior to the issuance of an award."/>
+		<RemoteField name="CreationDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="4" phrase="Creation Date|The date the incentive criteria was introduced or first authored" sample="01/01/2004"/>
+		<SummaryField name="AverageEnterpriseValue" type="money" summaryFunction="average" summaryField="AverageValue" summaryKey="IncentiveAssocID" summaryModuleID="ictas" localKey="IncentiveID" phrase="Average Enterprise Value|A calculated field representing the average cash value assigned to this incentive criteria based on the values assigned by all adopting organizations" sample="USD $30.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">
+			<CombinedFieldRef name="IncentiveCriteria"/>
+		</CombinedField>
+		<CombinedField name="Incentive" phrase="Incentive|A combined field used to describe this incentive criteria when associating it with other records" sample="Participating in a self-inspection or audit">
+			<CombinedFieldRef name="IncentiveCriteria"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="IncentiveID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Incentive"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="ictas" name="Incentive Associations" parentKey="IncentiveID" localKey="IncentiveID"/>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="IncentiveID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ict"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="IncentiveID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ict"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="IncentiveID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ict"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="IncentiveID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ict"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="IncentiveID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ict"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List incentive criteria">
+			<ListField name="IncentiveID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Accountable"/>
+			<ListField name="IncentiveCriteria" phrase="Criteria"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search incentive criteria">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="IncentiveCriteria" size="75" maxLength="128"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an incentive, its criteria, and its detailed description">
+			<ViewField name="IncentiveID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="IncentiveCriteria"/>
+			<ViewField name="IncentiveDescription"/>
+			<ViewField name="CreationDate"/>
+			<ViewField name="AverageEnterpriseValue"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="ictas"/>
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an incentive, its criteria, and its detailed description">
+			<ViewField name="IncentiveID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="IncentiveCriteria" size="75" maxLength="128"/>
+			<MemoField name="IncentiveDescription" rows="5" cols="75"/>
+			<DateField name="CreationDate"/>
+		</EditScreen>
+		<EditScreen name="Adoptions" phrase="Adoptions|Associate organizations adopting the incentive criteria and distinguish respective award values">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="ictas"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the incentive">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the incentive">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the incentive">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical incentive file">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with incentive criteria" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="IncentiveID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="IncentiveCriteria"/>
+		<ViewField name="IncentiveDescription"/>
+		<ViewField name="CreationDate"/>
+		<ViewField name="AverageEnterpriseValue"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Incentives By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncentiveID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Incentives By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="IncentiveID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Incentives By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="IncentiveID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Incentives By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="IncentiveID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

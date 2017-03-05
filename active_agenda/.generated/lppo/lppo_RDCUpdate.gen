@@ -1,0 +1,83 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:1027:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'lppo\' AS ModuleID,
+   lppo.LossOtherAssetID AS RecordID,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`oas2`.OtherAssetTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`dat5`.RelatedDate,\'\')),\' | \') AS Value,
+`oasin1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `lppo`
+LEFT OUTER JOIN `rdc` ON (lppo.LossOtherAssetID = rdc.RecordID AND rdc.ModuleID = \'lppo\')
+   
+   LEFT OUTER JOIN `oasin` AS oasin1 
+   ON (`lppo`.OtherAssetInventoryID = `oasin1`.OtherAssetInventoryID )
+   LEFT OUTER JOIN `clm` AS clm1 
+    ON (`lppo`.LossOtherAssetID = `clm1`.RelatedRecordID 
+     AND `clm1`.RelatedModuleID = \'lppo\'
+     AND `clm1`._Deleted = 0)
+   LEFT OUTER JOIN `oas` AS oas2 
+   ON (`oasin1`.OtherAssetID = `oas2`.OtherAssetID )
+   LEFT OUTER JOIN `dat` AS dat5 
+    ON (`clm1`.ClaimID = `dat5`.SourceRecordID 
+     AND `dat5`.SourceModuleID = \'clm\'
+     AND `dat5`._Deleted = 0
+     AND `dat5`.DateDescriptorID = \'34\')
+WHERE lppo.LossOtherAssetID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:932:"UPDATE rdc
+INNER JOIN lppo ON (rdc.RecordID = lppo.LossOtherAssetID AND rdc.ModuleID = \'lppo\')
+   
+   LEFT OUTER JOIN `oasin` AS oasin1 
+   ON (`lppo`.OtherAssetInventoryID = `oasin1`.OtherAssetInventoryID )
+   LEFT OUTER JOIN `clm` AS clm1 
+    ON (`lppo`.LossOtherAssetID = `clm1`.RelatedRecordID 
+     AND `clm1`.RelatedModuleID = \'lppo\'
+     AND `clm1`._Deleted = 0)
+   LEFT OUTER JOIN `oas` AS oas2 
+   ON (`oasin1`.OtherAssetID = `oas2`.OtherAssetID )
+   LEFT OUTER JOIN `dat` AS dat5 
+    ON (`clm1`.ClaimID = `dat5`.SourceRecordID 
+     AND `dat5`.SourceModuleID = \'clm\'
+     AND `dat5`._Deleted = 0
+     AND `dat5`.DateDescriptorID = \'34\')
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`oas2`.OtherAssetTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`dat5`.RelatedDate,\'\')),\' | \'),
+rdc.OrganizationID = `oasin1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'lppo\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

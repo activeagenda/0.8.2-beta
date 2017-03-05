@@ -1,0 +1,97 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:1286:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'nts\' AS ModuleID,
+   nts.NoteID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`nts_l`.createDate,\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\')),\' |  | \') AS Value,
+`rdc1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `nts`
+LEFT OUTER JOIN `rdc` ON (nts.NoteID = rdc.RecordID AND rdc.ModuleID = \'nts\')
+   
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`nts`.RelatedRecordID = rdc1.RecordID AND `nts`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN (
+                SELECT
+                    `nts_l`.NoteID,
+                    `nts_l`._ModDate AS createDate,
+                    `nts_l`._ModBy AS createBy
+                FROM `nts_l`
+                INNER JOIN (
+                    SELECT
+                        NoteID,
+                        MIN(_RecordID) AS MinRecordID
+                    FROM `nts_l`
+                    GROUP BY NoteID) as `nts_min`
+                ON `nts_l`._RecordID = `nts_min`.MinRecordID
+                ) AS nts_l
+                ON (`nts`.NoteID = nts_l.NoteID)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`nts_l`.createBy = `ppl1`.PersonID )
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`nts`.RelatedModuleID = `mod1`.ModuleID )
+WHERE nts.NoteID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:1213:"UPDATE rdc
+INNER JOIN nts ON (rdc.RecordID = nts.NoteID AND rdc.ModuleID = \'nts\')
+   
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`nts`.RelatedRecordID = rdc1.RecordID AND `nts`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN (
+                SELECT
+                    `nts_l`.NoteID,
+                    `nts_l`._ModDate AS createDate,
+                    `nts_l`._ModBy AS createBy
+                FROM `nts_l`
+                INNER JOIN (
+                    SELECT
+                        NoteID,
+                        MIN(_RecordID) AS MinRecordID
+                    FROM `nts_l`
+                    GROUP BY NoteID) as `nts_min`
+                ON `nts_l`._RecordID = `nts_min`.MinRecordID
+                ) AS nts_l
+                ON (`nts`.NoteID = nts_l.NoteID)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`nts_l`.createBy = `ppl1`.PersonID )
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`nts`.RelatedModuleID = `mod1`.ModuleID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`nts_l`.createDate,\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\')),\' |  | \'),
+rdc.OrganizationID = `rdc1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'nts\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

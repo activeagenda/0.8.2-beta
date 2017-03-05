@@ -1,0 +1,279 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Trust Distributions" moduleID="trud" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Trust Distribution" pluralRecordName="Trust Distributions" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="TrustDistributionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track account transfers between accounts used to finance the risk management process" sample="1"/>
+        <TableField name="TrustAccountID" type="int" dbFlags="unsigned not null" phrase="Trust Account|A combined field used to describe this trust account when associating it with other records" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="tru" foreignKey="TrustAccountID" foreignField="OrganizationID" key="TrustAccountID" joinType="left" phrase="Organization|The organization responsible for funding and managing the trust account" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for funding and managing the trust account" sample="Active Agenda, Sweden"/>
+        <ForeignField name="PersonAccountableID" foreignTable="tru" foreignKey="TrustAccountID" foreignField="PersonAccountableID" key="TrustAccountID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the trust account" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the trust account" sample="Mattias Thorslund"/>
+        <ForeignField name="AccountName" foreignTable="tru" foreignKey="TrustAccountID" foreignField="AccountName" key="TrustAccountID" joinType="left" phrase="Account Name|A unique name or title used to identify the trust account" sample="2006 Quality Trust Account"/>
+        <ForeignField name="TrustAccountNumber" foreignTable="tru" foreignKey="TrustAccountID" foreignField="TrustAccountNumber" key="TrustAccountID" joinType="left" phrase="Account Number|A unique number used to identify the trust account" sample="MTT-2004-01"/>
+        <ForeignField name="AccountDesc" foreignTable="tru" foreignKey="TrustAccountID" foreignField="AccountDesc" key="TrustAccountID" joinType="left" phrase="Account Description|A detailed description of the trust account" sample="This account is utilized by employees as a discretionary fund to improve business methods, processes or conditions"/>
+        <ForeignField name="EffectiveDate" type="date" foreignTable="tru" foreignKey="TrustAccountID" foreignField="EffectiveDate" key="TrustAccountID" joinType="left" phrase="Effective Date|The date the trust account became effective" sample="01/01/2004"/>
+        <ForeignField name="ExpirationDate" type="date" foreignTable="tru" foreignKey="TrustAccountID" foreignField="ExpirationDate" key="TrustAccountID" joinType="left" phrase="Expiration Date|The date the trust account expires" sample="01/01/2004"/>
+        <ForeignField name="TrustAmount" type="money" foreignTable="tru" foreignKey="TrustAccountID" foreignField="TrustAmount" key="TrustAccountID" joinType="left" phrase="Amount of Trust|The amount of trust issued to each participant in the trust account. The trust amount is stated in the currency assigned to this installation of the software" sample="1,000.00"/>
+        <ForeignField name="AccountStatusID" foreignTable="tru" foreignKey="TrustAccountID" foreignField="AccountStatusID" key="TrustAccountID" joinType="left" phrase="Status|Present status of the trust account" sample="1"/>
+        <CodeField name="AccountStatus" key="AccountStatusID" phrase="Status|Present status of the trust account" sample="Active" codeTypeID="83"/>
+        <ForeignField name="TrustAccount" foreignTable="tru" foreignKey="TrustAccountID" foreignField="TrustAccount" key="TrustAccountID" joinType="left" phrase="Trust Account|A combined field used to describe this trust account when associating it with other records" sample="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+        <SummaryField name="TrustExpenseValue" type="money" summaryFunction="sum" summaryField="Incurred" summaryKey="RelatedRecordID" RelatedModuleID="trud" summaryModuleID="cos" localKey="TrustDistributionID" phrase="Expense Value|A calculated field representing the total value of all expenses associated with distributed Trust Accounts." sample="USD $3,600,000.00"/>
+        <CalculatedField name="AccountBalance" type="money" calcFunction="subtract" params="TrustAmount TrustExpenseValue" validate="" phrase="Account Balance|A calculated field based on subtracting all expenses associated with the trust account distributions from the total value of the trust account" sample="$2,500.00"/>
+        <RemoteField name="TrustedPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="1" phrase="Trusted Person|The name of the individual receiving the trust distribution" sample="1"/>
+        <ForeignField name="TrustedPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TrustedPersonID" joinType="left" phrase="Trusted Person|The name of the individual receiving the trust distribution" sample="Jane Doe"/>
+        <ForeignField name="DepartmentID" foreignTable="orgda" foreignKey="RelatedRecordID" foreignField="DepartmentID" key="TrustedPersonID" listCondition="RelatedModuleID = 'pple'" joinType="left" phrase="Department ID|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+        <ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+        <CombinedField name="DistAcctNumber" phrase="Distribution Number|A combined field used to generate a unique distribution account number" sample="9918817 - 5 - 423 - 232"><CombinedFieldRef name="TrustAccountNumber"/>_-_<CombinedFieldRef name="OrganizationID"/>_-_<CombinedFieldRef name="TrustedPersonID"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 2006 Quality Trust Account  | 1,000.00"><CombinedFieldRef name="TrustedPerson"/>;_<CombinedFieldRef name="TrustAccount"/>;_<CombinedFieldRef name="TrustAmount"/>_per_person</CombinedField>
+        <CombinedField name="TrustDistribution" phrase="Trust Distribution|A combined field used to describe the trust distribution when associating it with other records" sample="Mattias Thorslund | 2006 Quality Trust Account  | 1,000.00"><CombinedFieldRef name="TrustedPerson"/>;_<CombinedFieldRef name="TrustAccount"/>;_<CombinedFieldRef name="TrustAmount"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="TrustDistributionID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="TrustDistribution"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="cos" name="Trust Expenditures" parentKey="TrustDistributionID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="trud"/>
+        </SubModule>
+        <!--<SubModule moduleID="trut" name="Trust Account Transfers" parentKey="TrustDistributionID" localKey="TrustDistributionID"/>
+        This SM reference will be used to display transfers occurring within the trut module-->
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="TrustDistributionID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="trud"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List risk finance transactions">
+            <ListField name="TrustDistributionID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="TrustAccount" phrase="Trust Account"/>
+            <ListField name="TrustedPerson" phrase="Trusted Person"/>
+            <ListField name="TrustAmount" phrase="Trust Amount"/>
+            <ListField name="AccountBalance" phrase="Balance"/>
+            <ListField name="DistAcctNumber" phrase="Distribution Number"/>
+            <ListField name="ExpirationDate" phrase="Expiration Date"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search risk finance transactions">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="DepartmentID"/>
+                <UpdateFieldRef name="TrustAccountID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Human Resources, Local, 77282"/>
+                <SampleItem ID="3" name="Legal, Corporate, 732552"/>
+                <SampleItem ID="5" name="Compliance, Regional, 12382"/>
+                <SampleItem ID="7" name="Compliance, Local, 32582"/>
+            </ComboField>
+            <ComboField name="TrustAccountID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Employee Trust Fund"/>
+                <SampleItem ID="2" name="Insurance"/>
+                <SampleItem ID="3" name="Department Capital"/>
+                <SampleItem ID="4" name="Personal Protective Equipment"/>
+            </ComboField>
+            <PersonComboField name="TrustedPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="TrustAccountNumber" size="50" maxLength="50"/>
+            <MoneyField name="TrustAmount"/>
+            <DateField name="EffectiveDate"/>
+            <DateField name="ExpirationDate"/>
+            <CodeRadioField name="AccountStatusID">
+                <SampleItem ID="1" name="Active"/>
+                <SampleItem ID="2" name="Closed"/>
+            </CodeRadioField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|The screen used to view summary information about risk finance transactions">
+            <ViewField name="TrustDistributionID"/>
+            <ViewField name="TrustAccount"/>
+            <ViewField name="Organization"/>
+            <ViewField name="TrustedPerson"/>
+            <ViewField name="TrustAmount"/>
+            <ViewField name="AccountBalance"/>
+            <ViewField name="ExpirationDate"/>
+            <ViewField name="AccountStatus"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the trust distribution" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="TrustDistributionID"/>
+        <ViewField name="TrustAccount"/>
+        <ViewField name="Organization"/>
+        <ViewField name="TrustedPerson"/>
+        <ViewField name="TrustAmount"/>
+        <ViewField name="AccountBalance"/>
+        <ViewField name="ExpirationDate"/>
+        <ViewField name="AccountStatus"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="trud" phrase="Distribution of Trust">
+            <InvisibleField name="TrustDistributionID"/>
+            <ViewField name="Organization" sample="Organization"/>
+            <ViewField name="TrustedPerson" sample="Trusted Person"/>
+            <ViewField name="Department" sample="Department"/>
+            <ViewField name="AccountBalance" sample="Balance"/>
+        </ViewGrid>
+        <SearchSelectGrid moduleID="trud" phrase="Distribution of Trust" primaryListField="TrustedPerson">
+            <SearchForm>
+                <OrgComboField name="OrganizationID" findMode="text">
+                    <UpdateFieldRef name="DepartmentID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda Latvia"/>
+                </OrgComboField>
+                <ComboField name="DepartmentID" parentField="OrganizationID">
+                    <SampleItem ID="1" name="Packaging"/>
+                    <SampleItem ID="2" name="Processing"/>
+                    <SampleItem ID="3" name="Administration"/>
+                </ComboField>
+            </SearchForm>
+        </SearchSelectGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Trusted Persons By Trust Account">
+            <GroupByField name="TrustAccount"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Trusted Persons By Trust Account">
+            <GroupByField name="TrustAccount"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Trusted Persons By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Trusted Persons By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Trusted Persons By Account Status">
+            <GroupByField name="AccountStatus"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Trusted Persons By Account Status">
+            <GroupByField name="AccountStatus"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Trusted Persons By Department">
+            <GroupByField name="Department"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Trusted Persons By Department">
+            <GroupByField name="Department"/>
+            <SummaryField name="TrustDistributionID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

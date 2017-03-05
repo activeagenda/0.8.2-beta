@@ -1,0 +1,213 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    //check if user has permission to view or edit record
+    $allowEdit = $User->CheckListScreenPermission();
+
+    $pageTitle = gettext("Business Continuation Plans");
+    $screenPhrase = gettext("List");
+
+    //remove search filter if user requested it
+    if('1' == $_GET['clear']){
+        unset($_SESSION['Search_'.$ModuleID]);
+    } 
+
+    //clean up query string
+    unset($qsArgs['clear']);
+    unset($qsArgs['defaultFilter']);
+    $sQS = MakeQS($qsArgs);
+
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //fix up query string - remove record ID and Screen
+    unset($qsArgs["rid"]);
+    unset($qsArgs['scr']);
+    $qs = MakeQS($qsArgs);
+    $linked = array_keys($linkFields);
+
+    $tabs['List'] = Array('', gettext("List"), 'self');
+
+    if ($allowEdit){
+        $tabs['New'] = array("", gettext("No Add New|To add a new Business Continuation Plan you must go to a parent module"), 'disabled');$tabs['Search'] = array("search.php?mdl=busa", gettext("Search|Search business continuation requirements"));$tabs['Charts'] = array("charts.php?mdl=busa", gettext("Charts"));$tabs = array_merge($tabs, $tempTabs);
+    } else {
+        $tabs['New'] = array("", gettext("No Add New|To add a new Business Continuation Plan you must go to a parent module"), 'disabled');$tabs['Search'] = array("search.php?mdl=busa", gettext("Search|Search business continuation requirements"));$tabs['Charts'] = array("charts.php?mdl=busa", gettext("Charts"));$tabs = array_merge($tabs, $tempTabs);
+    }
+
+
+    //phrases for table headers, in field order
+    $headers = array(
+   'BusinessContID' => gettext("Record ID"),
+   'RelatedModule' => gettext("Related Module"),
+   'RelatedRecordDescription' => gettext("Related Record Description"),
+   'RelatedRecordLink' => '',
+   'BusRecoveryTitle' => gettext("Title"),
+   'IsBestPractice' => ''
+   );
+
+
+    //table column alignment values
+    $fieldAlign = array(
+'BusinessContID' => 'center',
+'RelatedModule' =>  'left',
+'RelatedRecordDescription' =>  'left',
+'RelatedRecordLink' => 'hide',
+'BusRecoveryTitle' =>  'left',
+'IsBestPractice' => 'right'
+);
+
+
+    //table column data types - to format values (Yes/No, date, number, etc.)
+    $fieldTypes = array(
+'BusinessContID' => 'int',
+'RelatedModule' => 'varchar(128)',
+'RelatedRecordDescription' => '',
+'BusRecoveryTitle' => 'varchar(128)',
+'IsBestPractice' => 'tinyint'
+);
+
+
+    $linkFields = array(
+   'RelatedRecordDescription' => "RelatedRecordLink"
+   );
+
+
+    //owner field SQL filter string
+    $ownerFieldFilter = "`busa`.OrganizationID IN (%s)";
+
+
+    $useBestPractices = false; //default value
+    $useBestPractices = true;
+
+
+    $defaultOrderBys = unserialize('a:1:{s:14:"BusinessContID";b:0;}');
+
+    $listFilterSQL = $User->getListFilterSQL($ModuleID);
+
+    $nColumns = count($headers);
+
+    $offset = intval($_GET['o']);
+
+    if(isset($_SESSION['Search_'.$ModuleID])){
+        $search = $_SESSION['Search_'.$ModuleID];
+    } else {
+
+        //create an empty Search object
+        $search = GetNewSearch($ModuleID);
+
+        if('1' != $_GET['clear']){
+            $search->loadUserDefault($User->PersonID);
+        }
+        $_SESSION['Search_'.$ModuleID] = $search;
+
+    }
+
+    $search = $_SESSION['Search_'.$ModuleID];
+    $perPage = intval($_GET['pp']);
+
+    $listData =& new ListData($ModuleID, $search->getListSQL(null, true), $perPage, $fieldTypes, true);
+    $nRows = $listData->getCount();
+    if(0 == $nRows){
+        $content = gettext("The request returned no data. Please try a different search.<br><br>");
+    } else {
+        $startRow = intval($_GET['sr']);
+        $renderer =& new ListRenderer(
+            $ModuleID,
+            $listData,
+            $headers,
+            'view.php?',
+            'list.php?',
+            $fieldAlign,
+            'list',
+            $linkFields
+        );
+        $renderer->useBestPractices = $useBestPractices;
+        $content = $renderer->render($startRow, $defaultOrderBys);
+    }
+
+    //return just the table HTML if this is an AJAX-style call
+    if(1 == $_GET['rpc']){
+        die($content);
+    }
+
+    //add the link to let user clear the filter
+    if(is_object($search)){
+        if('1' == $_GET['defaultFilter']){
+            $search->saveUserDefault($User->PersonID);
+        }
+
+        $content .= "<br />\n";
+        $content .= '<div class="searchFilter"><b>'.gettext("Search Filter Conditions").':</b><br />'."\n";
+        $content .= $search->getPhrases();
+
+        if($search->hasConditions()){
+
+            $content .= "<br />\n<br />\n";
+            if($search->isUserDefault){
+                $content .= gettext("This is your default search for this module.");
+            } else {
+                $defaultSearchLink = '<a href="list.php?defaultFilter=1&'.$sQS.'">'.gettext("Make this my Default Filter for this module").'</a>';
+                $content .= $defaultSearchLink;
+            }
+
+            $content .= "<br />\n";
+            $clearSearchLink = '<a href="list.php?clear=1&'.$sQS.'">'.gettext("Clear Search Filter (removing conditions)").'</a>';
+            $content .= $clearSearchLink;
+        }
+
+        $content .= "<br />\n<br />\n<b>Download Data:</b><br>\n";
+
+        $content .= '<div class="dl_icon">';
+        $content .= '<a href="dataDownload.php?type=1&'.$sQS.'" title="'.gettext("Download as Comma-separated Values (flat file)").'"><img src="'.$theme_web.'/img/dl-csv.png"/><br />';
+        $content .= gettext("CSV");
+        $content .= '</a></div>';
+
+        $content .= '<div class="dl_icon">';
+        $content .= '<a href="dataDownload.php?type=2&'.$sQS.'" title="'.gettext("Download as an XML file").'"><img src="'.$theme_web.'/img/dl-xml.png"/><br />';
+        $content .= gettext("XML");
+        $content .= '</a></div>';
+
+        $content .= '<div class="dl_icon">';
+        $content .= '<a href="dataDownload.php?type=3&'.$sQS.'" title="'.gettext("Download as an Excel file").'"><img src="'.$theme_web.'/img/dl-excel.png"/><br />';
+        $content .= gettext("Excel");
+        $content .= '</div>';
+        $content .= "</a>\n";
+        //custom code
+        /**CUSTOM_CODE|accReassign**/
+
+        $content .= '<div class="dl_icon_clear">&nbsp;</div>';
+        $content .= "</div><br />\n";
+    }
+?>

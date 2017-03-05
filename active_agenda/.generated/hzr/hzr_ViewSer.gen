@@ -1,0 +1,369 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'HazardID' => gettext("Record ID|An automatically assigned number used to track reported hazards"),
+   'HazardTitle' => gettext("Report Title|A brief title used to identify the reported hazard"),
+   'Description' => gettext("Report Description|A detailed description of the hazard report"),
+   'PersonReporting' => gettext("Person Reporting|The name of the individual that reported the hazard"),
+   'SubmittalDate' => gettext("Submittal Date|Date the hazard abatement item was submitted by the person reporting the hazard"),
+   'ReceivedDate' => gettext("Received Date|The date and time the hazard report was received by the hazard abatement program administrator"),
+   'EntryDate' => gettext("System Entry Date|The date and time the hazard report was entered into the system"),
+   'Organization' => gettext("Organization|The name of the organization reporting the hazard"),
+   'PersonAccountable' => gettext("Person Accountable|The individual assigned primary accountability for managing and mitigating the identified hazards"),
+   'ReportSource' => gettext("Source of Report|Original source of the hazard report"),
+   'HazAbateStatus' => gettext("Status|Status of the abatement activity to mitigate the hazard"),
+   'ResolvedDate' => gettext("Resolution Date|The date and time the hazard was resolved"),
+   'TotalEstOpp' => gettext("Estimated Opportunity|The total estimated financial opportunity associated with the reported hazard"),
+   'TotalEstExp' => gettext("Estimated Exposure|The total estimated cost exposure associated with the reported hazard")
+   );
+$phrases[1] = array(
+   'SubmittalDate' => gettext("Submittal Date|Date the hazard abatement item was submitted by the person reporting the hazard"),
+   'ReceivedDate' => gettext("Received Date|The date and time the hazard report was received by the hazard abatement program administrator"),
+   'ReceivingDelayCalc' => gettext("Receiving Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was received"),
+   'EntryDate' => gettext("System Entry Date|The date and time the hazard report was entered into the system"),
+   'EntryDelayCalc' => gettext("Entry Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was entered into the system"),
+   'ResolvedDate' => gettext("Resolution Date|The date and time the hazard was resolved"),
+   'ResponseDelayCalc' => gettext("Resolution Delay|A calculated field based on the amount of time between the date the hazard was submitted and the date the hazard was resolved")
+   );
+
+
+    $sections = unserialize('a:3:{i:0;a:3:{s:6:"phrase";s:13:"Hazard Report";s:3:"sql";s:3169:"SELECT 
+   `hzr`.HazardID,
+   `hzr`.HazardTitle,
+   `hzr`.Description,
+   `ppl2`.DisplayName AS PersonReporting,
+   `dat1`.RelatedDate AS SubmittalDate,
+   `hzr`.ReceivedDate,
+   `hzr_l`.createDate AS EntryDate,
+   `org1`.Name AS Organization,
+   `ppl1`.DisplayName AS PersonAccountable,
+   `cod1`.Description AS ReportSource,
+   `cod2`.Description AS HazAbateStatus,
+   `dat2`.RelatedDate AS ResolvedDate,
+   `opt1`.TotalEstOpp AS TotalEstOpp,
+   `cosex1`.TotalEstExp AS TotalEstExp,
+   NULLIF(CONCAT(IFNULL(`hzr`.HazardTitle,\'\'),\' | \',IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(`cod2`.Description,\'\')),\' |  | \') AS RecordLabel,
+   `hzr`.OrganizationID
+FROM `hzr`
+   
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`hzr`.HazardID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'hzr\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'30\')
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`hzr`.HazardID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'hzr\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'43\')
+     LEFT OUTER JOIN (
+                SELECT
+                    `hzr_l`.HazardID,
+                    `hzr_l`._ModDate AS createDate,
+                    `hzr_l`._ModBy AS createBy
+                FROM `hzr_l`
+                INNER JOIN (
+                    SELECT
+                        HazardID,
+                        MIN(_RecordID) AS MinRecordID
+                    FROM `hzr_l`
+                    GROUP BY HazardID) as `hzr_min`
+                ON `hzr_l`._RecordID = `hzr_min`.MinRecordID
+                ) AS hzr_l
+                ON (`hzr`.HazardID = hzr_l.HazardID)
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`hzr`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`hzr`.HazardID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'hzr\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'147\')
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`hzr`.ReportSourceID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'236\')
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`hzr`.HazAbateStatusID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'162\')
+     LEFT OUTER JOIN `dat` AS dat2 
+    ON (`hzr`.HazardID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'hzr\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'23\')
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`opt`.Estimate, 2)) AS TotalEstOpp,
+`opt`.RelatedRecordID FROM `opt` 
+ WHERE `opt`._Deleted = 0 
+ AND RelatedModuleID = \'hzr\' 
+ AND \'hzr\' = `opt`.RelatedModuleID
+GROUP BY `opt`.RelatedRecordID 
+) AS opt1 
+ON (`hzr`.HazardID = opt1.RelatedRecordID) 
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`cosex`.Estimate, 2)) AS TotalEstExp,
+`cosex`.RelatedRecordID FROM `cosex` 
+ WHERE `cosex`._Deleted = 0 
+ AND RelatedModuleID = \'hzr\' 
+ AND \'hzr\' = `cosex`.RelatedModuleID
+GROUP BY `cosex`.RelatedRecordID 
+) AS cosex1 
+ON (`hzr`.HazardID = cosex1.RelatedRecordID) 
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`inv1`.PersonInvolvedID = `ppl2`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE
+   hzr.HazardID=\'/**RecordID**/\'";s:6:"fields";a:14:{s:8:"HazardID";O:9:"viewfield":16:{s:4:"name";s:8:"HazardID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:73:"Record ID|An automatically assigned number used to track reported hazards";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"HazardTitle";O:9:"viewfield":16:{s:4:"name";s:11:"HazardTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Report Title|A brief title used to identify the reported hazard";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Description";O:9:"viewfield":16:{s:4:"name";s:11:"Description";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Report Description|A detailed description of the hazard report";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"PersonReporting";O:9:"viewfield":16:{s:4:"name";s:15:"PersonReporting";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Person Reporting|The name of the individual that reported the hazard";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"SubmittalDate";O:9:"viewfield":16:{s:4:"name";s:13:"SubmittalDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Submittal Date|Date the hazard abatement item was submitted by the person reporting the hazard";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ReceivedDate";O:9:"viewfield":16:{s:4:"name";s:12:"ReceivedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:108:"Received Date|The date and time the hazard report was received by the hazard abatement program administrator";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"EntryDate";O:9:"viewfield":16:{s:4:"name";s:9:"EntryDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:81:"System Entry Date|The date and time the hazard report was entered into the system";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Organization|The name of the organization reporting the hazard";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:116:"Person Accountable|The individual assigned primary accountability for managing and mitigating the identified hazards";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ReportSource";O:9:"viewfield":16:{s:4:"name";s:12:"ReportSource";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Source of Report|Original source of the hazard report";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"HazAbateStatus";O:9:"viewfield":16:{s:4:"name";s:14:"HazAbateStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Status|Status of the abatement activity to mitigate the hazard";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ResolvedDate";O:9:"viewfield":16:{s:4:"name";s:12:"ResolvedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Resolution Date|The date and time the hazard was resolved";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"TotalEstOpp";O:9:"viewfield":16:{s:4:"name";s:11:"TotalEstOpp";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Estimated Opportunity|The total estimated financial opportunity associated with the reported hazard";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:11:"TotalEstExp";O:9:"viewfield":16:{s:4:"name";s:11:"TotalEstExp";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Estimated Exposure|The total estimated cost exposure associated with the reported hazard";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:1;a:3:{s:6:"phrase";s:16:"Dates and Delays";s:3:"sql";s:1546:"SELECT 
+   `dat1`.RelatedDate AS SubmittalDate,
+   `hzr`.ReceivedDate,
+   NULLIF(CONCAT(IFNULL(TIMEDIFF(`hzr`.ReceivedDate, `dat1`.RelatedDate),\'\'),\' Hours\'),\' Hours\') AS ReceivingDelayCalc,
+   `hzr_l`.createDate AS EntryDate,
+   NULLIF(CONCAT(IFNULL(TIMEDIFF(`hzr_l`.createDate, `dat1`.RelatedDate),\'\'),\' Hours\'),\' Hours\') AS EntryDelayCalc,
+   `dat2`.RelatedDate AS ResolvedDate,
+   NULLIF(CONCAT(IFNULL(TIMEDIFF(`dat2`.RelatedDate, `dat1`.RelatedDate),\'\'),\' Hours\'),\' Hours\') AS ResponseDelayCalc,
+   `hzr`.OrganizationID
+FROM `hzr`
+   
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`hzr`.HazardID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'hzr\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'43\')
+     LEFT OUTER JOIN (
+                SELECT
+                    `hzr_l`.HazardID,
+                    `hzr_l`._ModDate AS createDate,
+                    `hzr_l`._ModBy AS createBy
+                FROM `hzr_l`
+                INNER JOIN (
+                    SELECT
+                        HazardID,
+                        MIN(_RecordID) AS MinRecordID
+                    FROM `hzr_l`
+                    GROUP BY HazardID) as `hzr_min`
+                ON `hzr_l`._RecordID = `hzr_min`.MinRecordID
+                ) AS hzr_l
+                ON (`hzr`.HazardID = hzr_l.HazardID)
+     LEFT OUTER JOIN `dat` AS dat2 
+    ON (`hzr`.HazardID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'hzr\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'23\')
+WHERE
+   hzr.HazardID=\'/**RecordID**/\'";s:6:"fields";a:7:{s:13:"SubmittalDate";O:9:"viewfield":16:{s:4:"name";s:13:"SubmittalDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Submittal Date|Date the hazard abatement item was submitted by the person reporting the hazard";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ReceivedDate";O:9:"viewfield":16:{s:4:"name";s:12:"ReceivedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:108:"Received Date|The date and time the hazard report was received by the hazard abatement program administrator";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"ReceivingDelayCalc";O:9:"viewfield":16:{s:4:"name";s:18:"ReceivingDelayCalc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:155:"Receiving Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was received";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:9:"EntryDate";O:9:"viewfield":16:{s:4:"name";s:9:"EntryDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:81:"System Entry Date|The date and time the hazard report was entered into the system";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:14:"EntryDelayCalc";O:9:"viewfield":16:{s:4:"name";s:14:"EntryDelayCalc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:166:"Entry Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was entered into the system";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:12:"ResolvedDate";O:9:"viewfield":16:{s:4:"name";s:12:"ResolvedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Resolution Date|The date and time the hazard was resolved";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"ResponseDelayCalc";O:9:"viewfield":16:{s:4:"name";s:17:"ResponseDelayCalc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:142:"Resolution Delay|A calculated field based on the amount of time between the date the hazard was submitted and the date the hazard was resolved";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:2;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:6:{s:12:"viewgrid_hza";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"hza";s:6:"phrase";s:7:"Hazards";s:6:"number";N;s:6:"Fields";a:5:{s:8:"HazardID";O:14:"invisiblefield":11:{s:4:"name";s:8:"HazardID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Record ID|An automatically assigned number used to track general hazards";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:11:"HazCategory";O:9:"viewfield":16:{s:4:"name";s:11:"HazCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:93:"Hazard Category|A broadly defined title or phrase used to group similar categories of hazards";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"HazardType";O:9:"viewfield":16:{s:4:"name";s:10:"HazardType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Hazard Type|A combined field used to describe this hazard type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"HazardTitle";O:9:"viewfield":16:{s:4:"name";s:11:"HazardTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Title|A short phrase or title used to describe the hazard";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"HazardStatus";O:9:"viewfield":16:{s:4:"name";s:12:"HazardStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:46:"Status|Current status of the identified hazard";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `hza`
+   
+WHERE hza._Deleted = 0
+   AND `hza`.RelatedModuleID = \'hzr\'
+AND `hza`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:638:"SELECT 
+   `hza`.HazardID,
+`hza`.LocationOrganizationID,
+`cod1`.Description AS HazCategory,
+NULLIF(CONCAT(IFNULL(`hazt1`.HazType,\'\')),\'\') AS HazardType,
+`hza`.HazardTitle,
+`cod2`.Description AS HazardStatus
+FROM `hza`
+
+   LEFT OUTER JOIN `hazt` AS hazt1 
+   ON (`hza`.HazardTypeID = `hazt1`.HazardTypeID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`hza`.HazardStatusID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'43\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`hazt1`.HazCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'62\')
+WHERE hza._Deleted = 0
+AND `hza`.RelatedModuleID = \'hzr\'
+AND `hza`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:8:"HazardID";s:3:"int";s:11:"HazCategory";N;s:10:"HazardType";N;s:11:"HazardTitle";s:12:"varchar(128)";s:12:"HazardStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:8:"HazardID";s:5:"right";s:11:"HazCategory";s:4:"left";s:10:"HazardType";s:7:"justify";s:11:"HazardTitle";s:4:"left";s:12:"HazardStatus";s:4:"left";}}s:14:"viewgrid_cosex";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"cosex";s:6:"phrase";s:18:"Exposure Estimates";s:6:"number";N;s:6:"Fields";a:7:{s:14:"CostExposureID";O:14:"invisiblefield":11:{s:4:"name";s:14:"CostExposureID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:130:"Record ID|An automatically assigned number used to track the association of cost exposures with records throughout the application";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:67:"Organization|The primary organization affected by the cost exposure";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"CostCategory";O:9:"viewfield":16:{s:4:"name";s:12:"CostCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Category|A cost of risk categorization which enables an organization to characterize cost of risk exposures";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostType";O:9:"viewfield":16:{s:4:"name";s:8:"CostType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Cost Type|The specific cost of risk exposure type";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"CostExposureTitle";O:9:"viewfield":16:{s:4:"name";s:17:"CostExposureTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Title|A concise title that describes the cost exposure";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Estimate";O:9:"viewfield":16:{s:4:"name";s:8:"Estimate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"Estimate|The total estimated amount of the cost exposure";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"DetrimentFrequency";O:9:"viewfield":16:{s:4:"name";s:18:"DetrimentFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:76:"Detriment Frequency|A combined field used to display the detriment frequency";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:150:"SELECT 
+    count(*) 
+FROM `cosex`
+   
+WHERE cosex._Deleted = 0
+   AND `cosex`.RelatedModuleID = \'hzr\'
+AND `cosex`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:904:"SELECT 
+   `cosex`.CostExposureID,
+`cosex`.OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS CostCategory,
+NULLIF(CONCAT(IFNULL(`cost1`.CostTitle,\'\')),\'\') AS CostType,
+`cosex`.CostExposureTitle,
+`cosex`.Estimate,
+NULLIF(CONCAT(IFNULL(`cosex`.FinancialDetrimentFrequency,\'\'),\' per \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' per \') AS DetrimentFrequency
+FROM `cosex`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`cosex`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `cost` AS cost1 
+   ON (`cosex`.CostTypeID = `cost1`.CostTypeID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`cosex`.FinancialDetrimentFrequencyUnitID = `uts1`.UnitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`cost1`.CostCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'124\')
+WHERE cosex._Deleted = 0
+AND `cosex`.RelatedModuleID = \'hzr\'
+AND `cosex`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:7:{s:14:"CostExposureID";s:3:"int";s:12:"Organization";N;s:12:"CostCategory";N;s:8:"CostType";N;s:17:"CostExposureTitle";s:12:"varchar(128)";s:8:"Estimate";s:5:"money";s:18:"DetrimentFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:7:{s:14:"CostExposureID";s:5:"right";s:12:"Organization";s:4:"left";s:12:"CostCategory";s:4:"left";s:8:"CostType";s:7:"justify";s:17:"CostExposureTitle";s:4:"left";s:8:"Estimate";s:5:"right";s:18:"DetrimentFrequency";s:7:"justify";}}s:12:"viewgrid_opt";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"opt";s:6:"phrase";s:21:"Opportunity Estimates";s:6:"number";N;s:6:"Fields";a:5:{s:21:"OpportunityEstimateID";O:14:"invisiblefield":11:{s:4:"name";s:21:"OpportunityEstimateID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Record ID|An automatically assigned number used to track the association of cost Opportunitys with records throughout the application";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"OwnerOrganization";O:9:"viewfield":16:{s:4:"name";s:17:"OwnerOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"Organization|The name of the organization associated with the estimated opportunity";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"OpportunityEstimateTitle";O:9:"viewfield":16:{s:4:"name";s:24:"OpportunityEstimateTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Title|A concise title that describes the estimated opportunity";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Estimate";O:9:"viewfield":16:{s:4:"name";s:8:"Estimate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:40:"Estimate|The total estimated opportunity";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"BenefitFrequency";O:9:"viewfield":16:{s:4:"name";s:16:"BenefitFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Benefit Frequency|A combined field used to display the benefit frequency";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `opt`
+   
+WHERE opt._Deleted = 0
+   AND `opt`.RelatedModuleID = \'hzr\'
+AND `opt`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:606:"SELECT 
+   `opt`.OpportunityEstimateID,
+`opt`.OwnerOrganizationID,
+`org1`.Name AS OwnerOrganization,
+`opt`.OpportunityEstimateTitle,
+`opt`.Estimate,
+NULLIF(CONCAT(IFNULL(`opt`.FinancialBenefitFrequency,\'\'),\' per \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' per \') AS BenefitFrequency
+FROM `opt`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`opt`.OwnerOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`opt`.FinancialBenefitFrequencyUnitID = `uts1`.UnitID )
+WHERE opt._Deleted = 0
+AND `opt`.RelatedModuleID = \'hzr\'
+AND `opt`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:21:"OpportunityEstimateID";s:3:"int";s:17:"OwnerOrganization";N;s:24:"OpportunityEstimateTitle";s:12:"varchar(128)";s:8:"Estimate";s:5:"money";s:16:"BenefitFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:5:{s:21:"OpportunityEstimateID";s:5:"right";s:17:"OwnerOrganization";s:4:"left";s:24:"OpportunityEstimateTitle";s:4:"left";s:8:"Estimate";s:5:"right";s:16:"BenefitFrequency";s:7:"justify";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'hzr\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1151:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'hzr\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:13:"viewgrid_filr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"filr";s:6:"phrase";s:14:"Physical Files";s:6:"number";N;s:6:"Fields";a:6:{s:12:"FileRecordID";O:14:"invisiblefield":11:{s:4:"name";s:12:"FileRecordID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Record ID|An automatically assigned number used to associate records with physical files";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `filr`
+   
+WHERE filr._Deleted = 0
+   AND `filr`.RelatedModuleID = \'hzr\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1267:"SELECT 
+   `filr`.FileRecordID,
+`filph1`.FilingOrganizationID AS FilingOrganizationID,
+`org1`.Name AS FilingOrganization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+`filph1`.FileName AS FileName,
+`filph1`.FileNumber AS FileNumber,
+NULLIF(CONCAT(IFNULL(`filph1`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph1`.FileRetentionID,\'\')),\'\') AS SystemNumber
+FROM `filr`
+
+   LEFT OUTER JOIN `filph` AS filph1 
+   ON (`filr`.FileRetentionID = `filph1`.FileRetentionID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`filph1`.FilingOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph1`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph1`.FileReqID = `fil1`.FileReqID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE filr._Deleted = 0
+AND `filr`.RelatedModuleID = \'hzr\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:12:"FileRecordID";s:3:"int";s:18:"FilingOrganization";N;s:8:"Location";N;s:8:"FileName";N;s:10:"FileNumber";N;s:12:"SystemNumber";N;}s:4:"name";N;s:10:"fieldAlign";a:6:{s:12:"FileRecordID";s:5:"right";s:18:"FilingOrganization";s:4:"left";s:8:"Location";s:7:"justify";s:8:"FileName";s:4:"left";s:10:"FileNumber";s:4:"left";s:12:"SystemNumber";s:7:"justify";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'hzr\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:676:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'hzr\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

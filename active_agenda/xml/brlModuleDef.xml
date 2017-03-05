@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Business Rules" moduleID="brl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\Emprise\ActiveAgenda\ModuleDef.xsd">
+	<ModuleFields>
+		<TableField name="ModuleID" type="varchar(5)" dbFlags="not null" phrase="Module ID|A number assigned to each module of the appliaction" sample="cor"/>
+		<TableField name="Name" type="varchar(30)" phrase="Module Name|The name of the module" sample="Corrective Actions"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Emprise HQ"/>
+		<TableField name="PersonAccountableID" type="int" phrase="Person Accountable|The individual assigned primary accountability for the subject matter of this record" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for the subject matter of this record" sample="Mattias Thorslund"/>
+		<TableField name="FileRetention" type="varchar(10)" phrase="Physical File Retention|The amount of time a physical and/or electronic file must be retained before disposal" sample="7"/>
+		<TableField name="FileRetentionUnitsID" type="int" phrase="Units|The units associated with the file retention period" sample="1"/>
+		<CodeField name="FileRetentionUnits" key="FileRetentionUnitsID" phrase="Units|The units associated with the file retention period" sample="Year/s" codeTypeID="99"/>
+		<TableField name="ModuleStatusID" type="int" phrase="Module Status|Current implementation status of the module" sample="1"/>
+		<CodeField name="ModuleStatus" key="ModuleStatusID" phrase="Module Status|Current implementation status of the module" sample="Active - Required" codeTypeID="99"/>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ModuleID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<StatusField name="ModuleStatusID"/>
+		<PersonAccountableField name="PersonAccountableID"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="fil" name="File Locations" join="brl.ModuleID = fil.SourceModuleID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List business rules">
+			<ListField name="ModuleID" phrase="Module ID"/>
+			<ListField name="Name" phrase="Module Name"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Accountable"/>
+			<ListField name="ModuleStatus" phrase="Module Status"/>
+		</ListScreen>
+		<ViewScreen name="View" phrase="View|The screen used to view summary information about business rules">
+			<ViewField name="ModuleID"/>
+			<ViewField name="Name"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="FileRetention">
+				<ViewField name="FileRetentionUnits"/>
+			</ViewField>
+			<ViewField name="ModuleStatus"/>
+			<ViewGrid moduleID="fil" phrase="Location of Physical Files Associated With This Module">
+				<InvisibleField name="LocationID"/>
+				<ViewField name="Organization" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Emprise HQ"/>
+				<ViewField name="BuildingID" phrase="Building|A physical structure tracked by an organization" sample="Administration Office"/>
+				<ViewField name="RoomName" phrase="Room Name|A unique name assigned to a room within the respective building" sample="Human Resources File Storage Room"/>
+				<ViewField name="RoomNumber" phrase="Room Number|A unique number assigned to rooms, by the organization, for facility tracking and mapping purposes" sample="234"/>
+			</ViewGrid>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|The screen used to edit summary information about modules">
+			<ViewField name="ModuleID"/>
+			<ViewField name="Name"/>
+			<ComboField name="OrganizationID">
+				<SampleItem ID="1" name="Emprise HQ"/>
+				<SampleItem ID="2" name="Emprise, Sacramento"/>
+				<SampleItem ID="3" name="Emprise, New York"/>
+				<SampleItem ID="4" name="Emprise, Munich"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+			<EditPlusCodeField name="FileRetention" size="5" codeFieldName="FileRetentionUnitsID" codeTypeID="99">
+				<SampleItem ID="1" name="Year/s"/>
+				<SampleItem ID="2" name="Day/s"/>
+				<SampleItem ID="3" name="Hour/s"/>
+				<SampleItem ID="4" name="Week/s"/>
+				<SampleItem ID="5" name="Month/s"/>
+			</EditPlusCodeField>
+			<ComboField name="ModuleStatusID">
+				<SampleItem ID="1" name="In Use"/>
+				<SampleItem ID="2" name="Postponed"/>
+				<SampleItem ID="3" name="Unavialable"/>
+			</ComboField>
+		</EditScreen>
+		<EditScreen name="Locations" phrase="File Locations|The screen used to associate physical file locations with modules">
+			<ViewField name="ModuleID"/>
+			<ViewField name="Name"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="FileRetention">
+				<ViewField name="FileRetentionUnits"/>
+			</ViewField>
+			<ViewField name="ModuleStatus"/>
+			<EditGrid moduleID="fil" phrase="Location of Physical Files Associated With This Module">
+				<InvisibleField name="LocationID"/>
+				<ComboField name="OrganizationID" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Emprise HQ">
+					<SampleItem ID="1" name="Emprise HQ"/>
+					<SampleItem ID="2" name="Emprise, Sacramento"/>
+					<SampleItem ID="3" name="Emprise, New York"/>
+					<SampleItem ID="4" name="Emprise, Munich"/>
+				</ComboField>
+				<ComboField name="BuildingID" phrase="Building|A physical structure tracked by an organization" sample="Administration Office">
+					<SampleItem ID="1" name="Administration Office"/>
+					<SampleItem ID="3" name="Work In Progress"/>
+					<SampleItem ID="5" name="Shipping and Receiving Warehouse"/>
+					<SampleItem ID="7" name="Production Building"/>
+				</ComboField>
+				<ComboField name="RoomNameID" phrase="Room Name|A unique name assigned to a room within the respective building" sample="Human Resources File Storage Room">
+					<SampleItem ID="1" name="Human Resources File Storage Room"/>
+					<SampleItem ID="3" name="Office of Quality Assurance Manager"/>
+					<SampleItem ID="5" name="Office of Techical Director"/>
+					<SampleItem ID="7" name="Office of Marketing Director"/>
+				</ComboField>
+				<ViewField name="RoomNumber" phrase="Room Number|A unique number assigned to rooms, by the organization, for facility tracking and mapping purposes" sample="234"/>
+			</EditGrid>
+		</EditScreen>
+	</Screens>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,340 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'WorkOrderID' => gettext("Record ID|Numerical ID to identify and track work orders"),
+   'RelatedModuleRecord' => gettext("Related Record|A combined field used to display the related module name and record ID"),
+   'RelatedRecordDescription' => gettext("Record Description|A description of the related record based on a combination of field values assigned from within the related module"),
+   'WorkOrderTitle' => gettext("Work Order Title|A short and descriptive title used to describe the work order"),
+   'WorkOrderDesc' => gettext("Work Order Description|A detailed description of the work being requested"),
+   'Organization' => gettext("Organization|The organization with primary responsibility for this work order"),
+   'PersonAccountable' => gettext("Person Accountable|The individual assigned primary accountability for tracking and managing this work order"),
+   'SystemWorkOrderNumber' => gettext("System Work Order Number|A combined field used to describe assign a work order number from the system automatically"),
+   'WorkOrderNo' => gettext("Work Order Number|A unique number assigned to the work order. This number is usually assigned by a maintenance and engineering department and is pre-printed on work order forms"),
+   'WorkOrderType' => gettext("Work Order Type|A general category used to group work orders of similar types"),
+   'IssuedDate' => gettext("Issued Date|Date the work order was issued"),
+   'AssignedDate' => gettext("Assigned Date|Date the work order was generated"),
+   'PersonAssigned' => gettext("Person Assigned|The individual assigned responsibility for performing the work requested"),
+   'AssignedDueDate' => gettext("Assigned Due Date|Date the work order should be completed by"),
+   'CompletionDate' => gettext("Completion Date|Date the work order was completed"),
+   'Priority' => gettext("Priority|The level of priority associated with this work order"),
+   'WorkOrderStatus' => gettext("Status|The present status of the work order"),
+   'RiskImperatives' => gettext("Risk Imperatives|A list of associated Risk Imperatives")
+   );
+$phrases[1] = array(
+   'IssuedDate' => gettext("Issued Date|Date the work order was issued"),
+   'AssignedDate' => gettext("Assigned Date|Date the work order was generated"),
+   'AssignmentDelayCalc' => gettext("Assignment Delay|A calculated field based on the amount of time between the issued date and the final assignment date"),
+   'CompletionDate' => gettext("Completion Date|Date the work order was completed"),
+   'CompletionDelayCalc' => gettext("Completion Delay|A calculated field based on the number of days between the issued date and the completion date")
+   );
+
+
+    $sections = unserialize('a:3:{i:0;a:3:{s:6:"phrase";s:10:"Work Order";s:3:"sql";s:3811:"SELECT 
+   `wrk`.WorkOrderID,
+   CONCAT(\'internal:view.php?mdl=\',`wrk`.RelatedModuleID,\'&rid=\',`wrk`.RelatedRecordID) AS RelatedRecordLink,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`wrk`.RelatedRecordID,\'\'),\')\'),\' Module (Record ID: )\') AS RelatedModuleRecord,
+   `rdc1`.Value AS RelatedRecordDescription,
+   `wrk`.WorkOrderTitle,
+   `wrk`.WorkOrderDesc,
+   `org1`.Name AS Organization,
+   `ppl1`.DisplayName AS PersonAccountable,
+   NULLIF(CONCAT(\'WO: \',IFNULL(`wrk`.OrganizationID,\'\'),\' - \',IFNULL(`wrk`.WorkOrderID,\'\')),\'WO:  - \') AS SystemWorkOrderNumber,
+   `wrk`.WorkOrderNo,
+   `cod1`.Description AS WorkOrderType,
+   `dat1`.RelatedDate AS IssuedDate,
+   `dat2`.RelatedDate AS AssignedDate,
+   `ppl2`.DisplayName AS PersonAssigned,
+   `dat3`.RelatedDate AS AssignedDueDate,
+   `dat4`.RelatedDate AS CompletionDate,
+   `cod2`.Description AS Priority,
+   `cod3`.Description AS WorkOrderStatus,
+   `rsk1`.RiskImperatives AS RiskImperatives,
+   NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(`wrk`.WorkOrderTitle,\'\'),\' (\',IFNULL(NULLIF(CONCAT(\'WO: \',IFNULL(`wrk`.OrganizationID,\'\'),\' - \',IFNULL(`wrk`.WorkOrderID,\'\')),\'WO:  - \'),\'\'),\') | \',IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`rdc1`.Value,\'\')),\' |  () |  | \') AS RecordLabel,
+   `wrk`.OrganizationID
+FROM `wrk`
+   
+     LEFT OUTER JOIN `mod` AS mod1 
+   ON (`wrk`.RelatedModuleID = `mod1`.ModuleID )
+     LEFT OUTER JOIN `rdc` AS rdc1 ON (`wrk`.RelatedRecordID = rdc1.RecordID AND `wrk`.RelatedModuleID = rdc1.ModuleID)
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`wrk`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`wrk`.WorkOrderID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'wrk\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'96\')
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`wrk`.WorkOrderTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'259\')
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`wrk`.WorkOrderID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'wrk\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'47\')
+     LEFT OUTER JOIN `dat` AS dat2 
+    ON (`wrk`.WorkOrderID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'wrk\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'2\')
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`wrk`.WorkOrderID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'wrk\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'75\')
+     LEFT OUTER JOIN `dat` AS dat3 
+    ON (`wrk`.WorkOrderID = `dat3`.SourceRecordID 
+     AND `dat3`.SourceModuleID = \'wrk\'
+     AND `dat3`._Deleted = 0
+     AND `dat3`.DateDescriptorID = \'1\')
+     LEFT OUTER JOIN `dat` AS dat4 
+    ON (`wrk`.WorkOrderID = `dat4`.SourceRecordID 
+     AND `dat4`.SourceModuleID = \'wrk\'
+     AND `dat4`._Deleted = 0
+     AND `dat4`.DateDescriptorID = \'3\')
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`wrk`.PriorityID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'214\')
+     LEFT OUTER JOIN `cod` AS cod3 
+   ON (`wrk`.WorkOrderStatusID = `cod3`.CodeID 
+     AND `cod3`.CodeTypeID = \'258\')
+     LEFT OUTER JOIN (SELECT 
+GROUP_CONCAT(`cod1`.Description ORDER BY `cod1`.Description SEPARATOR \', \') AS RiskImperatives,
+`rsk`.RelatedRecordID FROM `rsk` 
+
+LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsk`.RiskImperativeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'234\')
+ WHERE `rsk`._Deleted = 0 
+ AND RelatedModuleID = \'wrk\' 
+ AND \'wrk\' = `rsk`.RelatedModuleID
+GROUP BY `rsk`.RelatedRecordID 
+) AS rsk1 
+ON (`wrk`.WorkOrderID = rsk1.RelatedRecordID) 
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`inv1`.PersonInvolvedID = `ppl2`.PersonID )
+WHERE
+   wrk.WorkOrderID=\'/**RecordID**/\'";s:6:"fields";a:18:{s:11:"WorkOrderID";O:9:"viewfield":16:{s:4:"name";s:11:"WorkOrderID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"Record ID|Numerical ID to identify and track work orders";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"RelatedModuleRecord";O:9:"viewfield":16:{s:4:"name";s:19:"RelatedModuleRecord";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:85:"Related Record|A combined field used to display the related module name and record ID";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";s:17:"RelatedRecordLink";s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"RelatedRecordDescription";O:9:"viewfield":16:{s:4:"name";s:24:"RelatedRecordDescription";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Record Description|A description of the related record based on a combination of field values assigned from within the related module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"WorkOrderTitle";O:9:"viewfield":16:{s:4:"name";s:14:"WorkOrderTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:78:"Work Order Title|A short and descriptive title used to describe the work order";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"WorkOrderDesc";O:9:"viewfield":16:{s:4:"name";s:13:"WorkOrderDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:73:"Work Order Description|A detailed description of the work being requested";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:77:"Organization|The organization with primary responsibility for this work order";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Person Accountable|The individual assigned primary accountability for tracking and managing this work order";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:21:"SystemWorkOrderNumber";O:9:"viewfield":16:{s:4:"name";s:21:"SystemWorkOrderNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"System Work Order Number|A combined field used to describe assign a work order number from the system automatically";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"WorkOrderNo";O:9:"viewfield":16:{s:4:"name";s:11:"WorkOrderNo";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:176:"Work Order Number|A unique number assigned to the work order. This number is usually assigned by a maintenance and engineering department and is pre-printed on work order forms";s:8:"dataType";s:11:"varchar(30)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"WorkOrderType";O:9:"viewfield":16:{s:4:"name";s:13:"WorkOrderType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:77:"Work Order Type|A general category used to group work orders of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"IssuedDate";O:9:"viewfield":16:{s:4:"name";s:10:"IssuedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:42:"Issued Date|Date the work order was issued";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"AssignedDate";O:9:"viewfield":16:{s:4:"name";s:12:"AssignedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Assigned Date|Date the work order was generated";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"PersonAssigned";O:9:"viewfield":16:{s:4:"name";s:14:"PersonAssigned";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Person Assigned|The individual assigned responsibility for performing the work requested";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"AssignedDueDate";O:9:"viewfield":16:{s:4:"name";s:15:"AssignedDueDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:60:"Assigned Due Date|Date the work order should be completed by";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"CompletionDate";O:9:"viewfield":16:{s:4:"name";s:14:"CompletionDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Completion Date|Date the work order was completed";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Priority";O:9:"viewfield":16:{s:4:"name";s:8:"Priority";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Priority|The level of priority associated with this work order";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"WorkOrderStatus";O:9:"viewfield":16:{s:4:"name";s:15:"WorkOrderStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:43:"Status|The present status of the work order";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"RiskImperatives";O:9:"viewfield":16:{s:4:"name";s:15:"RiskImperatives";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Risk Imperatives|A list of associated Risk Imperatives";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:1;a:3:{s:6:"phrase";s:16:"Dates and Delays";s:3:"sql";s:1033:"SELECT 
+   `dat1`.RelatedDate AS IssuedDate,
+   `dat2`.RelatedDate AS AssignedDate,
+   NULLIF(CONCAT(IFNULL(TIMEDIFF(`dat2`.RelatedDate, `dat1`.RelatedDate),\'\'),\' Hours\'),\' Hours\') AS AssignmentDelayCalc,
+   `dat4`.RelatedDate AS CompletionDate,
+   NULLIF(CONCAT(IFNULL(TIMEDIFF(`dat4`.RelatedDate, `dat1`.RelatedDate),\'\'),\' Hours\'),\' Hours\') AS CompletionDelayCalc,
+   `wrk`.OrganizationID
+FROM `wrk`
+   
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`wrk`.WorkOrderID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'wrk\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'47\')
+     LEFT OUTER JOIN `dat` AS dat2 
+    ON (`wrk`.WorkOrderID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'wrk\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'2\')
+     LEFT OUTER JOIN `dat` AS dat4 
+    ON (`wrk`.WorkOrderID = `dat4`.SourceRecordID 
+     AND `dat4`.SourceModuleID = \'wrk\'
+     AND `dat4`._Deleted = 0
+     AND `dat4`.DateDescriptorID = \'3\')
+WHERE
+   wrk.WorkOrderID=\'/**RecordID**/\'";s:6:"fields";a:5:{s:10:"IssuedDate";O:9:"viewfield":16:{s:4:"name";s:10:"IssuedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:42:"Issued Date|Date the work order was issued";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"AssignedDate";O:9:"viewfield":16:{s:4:"name";s:12:"AssignedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Assigned Date|Date the work order was generated";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"AssignmentDelayCalc";O:9:"viewfield":16:{s:4:"name";s:19:"AssignmentDelayCalc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Assignment Delay|A calculated field based on the amount of time between the issued date and the final assignment date";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:14:"CompletionDate";O:9:"viewfield":16:{s:4:"name";s:14:"CompletionDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Completion Date|Date the work order was completed";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"CompletionDelayCalc";O:9:"viewfield":16:{s:4:"name";s:19:"CompletionDelayCalc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:111:"Completion Delay|A calculated field based on the number of days between the issued date and the completion date";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:2;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:5:{s:12:"viewgrid_bcq";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bcq";s:6:"phrase";s:21:"Business Consequences";s:6:"number";N;s:6:"Fields";a:5:{s:21:"BusinessConsequenceID";O:14:"invisiblefield":11:{s:4:"name";s:21:"BusinessConsequenceID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Record ID|An automatically assigned number used to associate business consequences with related records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bcq";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:74:"Organization|The primary organization affected by the business consequence";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bcq";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ConsequenceTitle";O:9:"viewfield":16:{s:4:"name";s:16:"ConsequenceTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:86:"Consequence Title|A short title used to specifically describe the business consequence";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bcq";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:23:"BusinessConsequenceType";O:9:"viewfield":16:{s:4:"name";s:23:"BusinessConsequenceType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:67:"Business Consequence Type|The specific type of business consequence";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bcq";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"NatureofConsequence";O:9:"viewfield":16:{s:4:"name";s:19:"NatureofConsequence";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"Nature of Consequence|Whether the business consequence will have a beneficial or detrimental impact on the business";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bcq";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `bcq`
+   
+WHERE bcq._Deleted = 0
+   AND `bcq`.RelatedModuleID = \'wrk\'
+AND `bcq`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:677:"SELECT 
+   `bcq`.BusinessConsequenceID,
+`bcq`.OrganizationID,
+`org1`.Name AS Organization,
+`bcq`.ConsequenceTitle,
+NULLIF(CONCAT(IFNULL(`bcqt1`.ConsequenceType,\'\')),\'\') AS BusinessConsequenceType,
+`cod2`.Description AS NatureofConsequence
+FROM `bcq`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`bcq`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `bcqt` AS bcqt1 
+   ON (`bcq`.BusinessConsequenceTypeID = `bcqt1`.BusinessConsequenceTypeID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`bcq`.NatureofConsequenceID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'204\')
+WHERE bcq._Deleted = 0
+AND `bcq`.RelatedModuleID = \'wrk\'
+AND `bcq`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:21:"BusinessConsequenceID";s:3:"int";s:12:"Organization";N;s:16:"ConsequenceTitle";s:12:"varchar(128)";s:23:"BusinessConsequenceType";N;s:19:"NatureofConsequence";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:21:"BusinessConsequenceID";s:5:"right";s:12:"Organization";s:4:"left";s:16:"ConsequenceTitle";s:4:"left";s:23:"BusinessConsequenceType";s:7:"justify";s:19:"NatureofConsequence";s:4:"left";}}s:13:"viewgrid_prta";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prta";s:6:"phrase";s:16:"Accountabilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantAccID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantAccID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Person Accountable|The name of the person accountable";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"AccountabilityType";O:9:"viewfield":16:{s:4:"name";s:18:"AccountabilityType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Accountability Type|The participant\'s specific type of accountability";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AccountabilityStatus";O:9:"viewfield":16:{s:4:"name";s:20:"AccountabilityStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Accountability Status|The present status of this participant\'s ongoing involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prta`
+   
+WHERE prta._Deleted = 0
+   AND `prta`.RelatedModuleID = \'wrk\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1172:"SELECT 
+   `prta`.ParticipantAccID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonAccountable,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS AccountabilityType,
+`cod1`.Description AS AccountabilityStatus
+FROM `prta`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prta`.RelatedRecordID = rdc1.RecordID AND `prta`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`prta`.ParticipantAccID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'prta\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'70\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prta`.AccountabilityTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `acc` AS acc2 
+    ON (`prta`.ParticipantAccID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'prta\'
+     AND `acc2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`acc2`.AccountabilityStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prta._Deleted = 0
+AND `prta`.RelatedModuleID = \'wrk\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantAccID";s:3:"int";s:17:"PersonAccountable";N;s:18:"AccountabilityType";N;s:20:"AccountabilityStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantAccID";s:5:"right";s:17:"PersonAccountable";s:4:"left";s:18:"AccountabilityType";s:7:"justify";s:20:"AccountabilityStatus";s:4:"left";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'wrk\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1151:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'wrk\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:13:"viewgrid_filr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"filr";s:6:"phrase";s:14:"Physical Files";s:6:"number";N;s:6:"Fields";a:6:{s:12:"FileRecordID";O:14:"invisiblefield":11:{s:4:"name";s:12:"FileRecordID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Record ID|An automatically assigned number used to associate records with physical files";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `filr`
+   
+WHERE filr._Deleted = 0
+   AND `filr`.RelatedModuleID = \'wrk\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1267:"SELECT 
+   `filr`.FileRecordID,
+`filph1`.FilingOrganizationID AS FilingOrganizationID,
+`org1`.Name AS FilingOrganization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+`filph1`.FileName AS FileName,
+`filph1`.FileNumber AS FileNumber,
+NULLIF(CONCAT(IFNULL(`filph1`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph1`.FileRetentionID,\'\')),\'\') AS SystemNumber
+FROM `filr`
+
+   LEFT OUTER JOIN `filph` AS filph1 
+   ON (`filr`.FileRetentionID = `filph1`.FileRetentionID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`filph1`.FilingOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph1`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph1`.FileReqID = `fil1`.FileReqID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE filr._Deleted = 0
+AND `filr`.RelatedModuleID = \'wrk\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:12:"FileRecordID";s:3:"int";s:18:"FilingOrganization";N;s:8:"Location";N;s:8:"FileName";N;s:10:"FileNumber";N;s:12:"SystemNumber";N;}s:4:"name";N;s:10:"fieldAlign";a:6:{s:12:"FileRecordID";s:5:"right";s:18:"FilingOrganization";s:4:"left";s:8:"Location";s:7:"justify";s:8:"FileName";s:4:"left";s:10:"FileNumber";s:4:"left";s:12:"SystemNumber";s:7:"justify";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'wrk\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:676:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'wrk\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

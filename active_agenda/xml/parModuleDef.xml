@@ -1,0 +1,619 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Partnerships" moduleID="par" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Partnership" pluralRecordName="Partnerships" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="PartnershipID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track unique partnerships" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Implementing Organization|The organization with primary responsibility for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Implementing Organization|The organization with primary responsibility for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="Active Agenda, HQ"/>
+		<TableField name="PartnershipTitle" type="varchar(128)" validate="notEmpty" phrase="Partnership Title|A unique title assigned to the partnership by the implementing organization" sample="Corrective Actions Program - Clovis"/>
+		<TableField name="PartnershipNumber" type="varchar(25)" validate="notEmpty" phrase="Partnership Number|A unique number assigned to the partnership by the implementing organization" sample="17"/>
+		<TableField name="PartnershipPolicyID" type="int" dbFlags="unsigned not null" phrase="Policy|A combined field used to describe this partnership policy when associating it with other records" sample="1"/>
+		<ForeignField name="PolicyOrganizationID" defaultValue="defaultorgID" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyOrganizationID" key="PartnershipPolicyID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="1"/>
+		<ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="Active Agenda, HQ"/>
+		<ForeignField name="PolicyTitleID" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyTitleID" key="PartnershipPolicyID" joinType="left" phrase="Partnership Title|The name of the partnership to be implemented at the local organization" sample="1"/>
+		<CodeField name="PolicyTitle" key="PolicyTitleID" phrase="Policy Title|The name of the partnership to be implemented at the local organization" sample="Family and Medical Leave" codeTypeID="201"/>
+		<ForeignField name="PolicyNumber" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyNumber" key="PartnershipPolicyID" joinType="left" phrase="Policy Number|A number assigned to a partnership for purposes of standardizing the format and structure of partnership manuals" sample="10.0"/>
+		<ForeignField name="PolicyPurpose" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyPurpose" key="PartnershipPolicyID" joinType="left" phrase="Policy Purpose|A detailed description of the purpose for the partnership; such as, regulatory reguirement, best practices, corporate requirement, etc." sample="Regulatory compliance (OSHA, EPA, USDA), corporate mandate and best practices"/>
+		<TableField name="PartnershipPurpose" type="text" validate="noValidation" phrase="Partnership Purpose|A detailed description of the local purpose for the partnership; such as, local regulatory reguirements, best local practices, regional requirements, etc." sample="The Family and Medical Leave partnership is designed to address family and medical leave across functional boundries. The Family and Medical Leave partnership is similar to most company's Leave of Absence program but this partnership addresses Family and Medical Leave of all types (i.e. care for family, disability, etc.) and applies to all business functions and risk imperatives"/>
+		<ForeignField name="PolicyScope" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyScope" key="PartnershipPolicyID" joinType="left" phrase="Policy Scope|A detailed description of the scope of the partnership. The scope reflects the authority and organizational reach of the partnership" sample="All departments and employees of the local organization"/>
+		<TableField name="PartnershipScope" type="text" validate="noValidation" phrase="Partnership Scope|A detailed description of the local scope of the partnership. The scope reflects the local authority and organizational reach of the partnership" sample="The Family and Medical Leave partnership is designed to address family and medical leave across functional boundries. The Family and Medical Leave partnership is similar to most company's Leave of Absence program but this partnership addresses Family and Medical Leave of all types (i.e. care for family, disability, etc.) and applies to all business functions and risk imperatives"/>
+		<ForeignField name="PartnershipPolicy" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PartnershipPolicy" key="PartnershipPolicyID" joinType="left" phrase="Policy|A combined field used to describe this partnership policy when associating it with other records" sample="Incentives | Policy Number: 10.0 | Active Agenda, HQ"/>
+        <TableField name="CommitmentStatement" type="text" dbFlags="" phrase="Commitment Statement|A statement made on behalf of the organization and displayed to pledge support for programs and/or policies implemented by the organization" sample="Management and leadership will support the program with financial and human resources as required for success"/>
+		<RemoteField name="CommittedLeaderID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="185" phrase="Committed Leader|The highest ranking leadership person pledging to support the implementation of the partnership with human and financial resources" sample="1"/>
+		<ForeignField name="CommittedLeader" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="CommittedLeaderID" joinType="left" phrase="Committed Leader|The highest ranking leadership person pledging to support the implementation of the partnership with human and financial resources" sample="Dan Zahlis"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="71" phrase="Person Accountable|The individual assigned primary accountability for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="Mattias Thorslund"/>
+		<TableField name="PartnershipStatusID" type="int" validate="RequireSelection" phrase="Partnership Status|Development status of the partnership" sample="1"/>
+		<CodeField name="PartnershipStatus" key="PartnershipStatusID" phrase="Partnership Status|Development status of the partnership" sample="Under Development" codeTypeID="200"/>
+		<RemoteField name="LastReviewDate" type="date" validate="notEmpty" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="20" phrase="Last Review|The date of the last formal review of the partnership" sample="01/01/2004"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'par'" localKey="PartnershipID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="PartnershipID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'par'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the partnership" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="PartnershipID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'par'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the partnership" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PartnershipTitle"/>;_<CombinedFieldRef name="PartnershipStatus"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Partnership" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="Incentives | Active Agenda, HQ | Under Development">
+			<CombinedFieldRef name="PartnershipTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PartnershipID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Partnership"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="parse" name="Shared Expectations" parentKey="PartnershipID" localKey="PartnershipID"/>
+		<SubModule moduleID="parle" name="Local Expectations" parentKey="PartnershipID" localKey="PartnershipID"/>
+		<SubModule moduleID="para" name="Partnership Audits" parentKey="PartnershipID" localKey="PartnershipID"/>
+		<SubModule moduleID="parpa" name="Partnership Associations" parentKey="PartnershipID" localKey="PartnershipID"/>
+		<SubModule moduleID="gloa" name="Glossary Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Conitinuity" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Permit Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Permit Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibility Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="rskcl" name="Risk Classifications" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="traca" name="Training Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="PartnershipPolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="parp"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="PartnershipID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="par"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List partnerships">
+			<ListField name="PartnershipID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PolicyTitle" phrase="Policy Title"/>
+			<ListField name="PartnershipTitle" phrase="Partnership Title"/>
+			<ListField name="PartnershipStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search partnerships">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="CommittedLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="PolicyOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="PolicyTitleID" findMode="text">
+				<SampleItem ID="1" name="Incentives"/>
+				<SampleItem ID="2" name="Accident Investigations"/>
+				<SampleItem ID="3" name="Training Records"/>
+				<SampleItem ID="4" name="Hazard Abatement"/>
+				<SampleItem ID="5" name="Asset Protection"/>
+			</ComboField>
+			<CodeComboField name="PartnershipStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="Waived"/>
+			</CodeComboField>
+			<EditField name="PartnershipTitle" size="75" maxLength="128"/>
+			<EditField name="PolicyNumber" size="10" maxLength="25"/>
+			<EditField name="PartnershipNumber" size="10" maxLength="25"/>
+			<DateField name="LastReviewDate"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a partnership">
+			<ViewField name="PartnershipID"/>
+			<ViewField name="PolicyTitle"/>
+			<ViewField name="PolicyNumber"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PartnershipTitle"/>
+			<ViewField name="PartnershipNumber"/>
+			<ViewField name="PartnershipPurpose"/>
+			<ViewField name="PartnershipScope"/>
+            <ViewField name="CommitmentStatement"/>
+			<ViewField name="CommittedLeader"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="PartnershipStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="LastReviewDate"/>
+			<InvisibleField name="PartnershipPolicyID"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="parse"/>
+				<ViewGrid moduleID="parle"/>
+				<ViewGrid moduleID="para"/>
+				<ViewGrid moduleID="parpa" phrase="Related Module Records">
+					<InvisibleField name="PartnershipAssocID"/>
+					<ViewField name="RelatedModule" phrase="Module" sample="Active Agenda, Sweden"/>
+					<ViewField name="RelatedRecordID" phrase="Record ID" sample="Partnership Number"/>
+					<ViewField name="RelatedRecordDescription" phrase="Description" sample="Mattias Thorslund"/>
+					<ViewField name="OwnerOrganization" phrase="Organization" sample="Corrective Actions"/>
+				</ViewGrid>
+				<InvisibleField name="PartnershipPolicyID"/>
+				<ViewGrid moduleID="gloa"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="pub"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="rskcl"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="traca"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a partnership">
+			<ViewField name="PartnershipID"/>
+			<ComboField name="PolicyOrganizationID" findMode="text">
+				<UpdateFieldRef name="PartnershipPolicyID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="PartnershipPolicyID" findMode="text" parentField="PolicyOrganizationID">
+				<UpdateFieldRef name="PolicyNumber"/>
+				<UpdateFieldRef name="PolicyPurpose"/>
+				<UpdateFieldRef name="PolicyScope"/>
+				<SampleItem ID="1" name="Active Agenda, HQ | Incentives"/>
+				<SampleItem ID="2" name="Active Agenda, HQ | Accident Investigations"/>
+				<SampleItem ID="3" name="Active Agenda, HQ | Training Records"/>
+				<SampleItem ID="4" name="Active Agenda, HQ | Hazard Abatement"/>
+				<SampleItem ID="5" name="Active Agenda, HQ | Asset Protection"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<EditField name="PartnershipTitle" size="75" maxLength="128"/>
+			<ViewField name="PolicyNumber" parentField="PartnershipPolicyID"/>
+			<EditField name="PartnershipNumber" size="10" maxLength="25"/>
+			<ViewField name="PolicyPurpose" parentField="PartnershipPolicyID"/>
+			<MemoField name="PartnershipPurpose" rows="5" cols="75"/>
+			<ViewField name="PolicyScope" parentField="PartnershipPolicyID"/>
+			<MemoField name="PartnershipScope" rows="5" cols="75"/>
+            <MemoField name="CommitmentStatement" rows="5" cols="75"/>
+			<PersonComboField name="CommittedLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="PartnershipStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="Waived"/>
+			</CodeComboField>
+			<DateField name="LastReviewDate"/>
+		</EditScreen>
+		<EditScreen name="SharedExpectations" phrase="Shared|Score shared expectations associated with the partnership">
+			<InvisibleField name="PartnershipPolicyID"/>
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="parse"/>
+		</EditScreen>
+		<EditScreen name="LocalExpectations" phrase="Local|Assign local expectations to the partnership">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="parle"/>
+		</EditScreen>
+		<EditScreen name="Glossary" phrase="Glossary|Associate glossary terms with the partnership">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gloa"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate agreements with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuity" phrase="Continuity|Associate business continuity requirements with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance consequences with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="pubc"/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibilities with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Classifications" phrase="Classifications|Associate risk classifications with the partnership">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rskcl"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate training with the partnership">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="tracn"/>
+			<EditGrid moduleID="traca"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the partnership">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the partnership">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the partnership">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the partnership" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="RecordReports" phrase="Reports|View reports for this partnership"/>
+        <ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="PartnershipID"/>
+		<InvisibleField name="PartnershipPolicyID"/>
+		<ViewField name="PolicyTitle"/>
+		<ViewField name="PolicyNumber"/>
+		<ViewField name="PartnershipTitle"/>
+		<ViewField name="PartnershipNumber"/>
+		<ViewField name="PolicyOrganization"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+		<ViewField name="LastReviewDate"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="par" phrase="Partnerships">
+			<InvisibleField name="PartnershipID"/>
+			<ViewField name="Organization" sample="Active Agenda, Sweden"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="PartnershipTitle" sample="Corrective Actions"/>
+			<ViewField name="PartnershipNumber" sample="Partnership Number"/>
+			<ViewField name="PartnershipStatus" sample="Status"/>
+		</ViewGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Partnerships By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie02" title="Partnerships By Status">
+			<GroupByField name="PartnershipStatus"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Partnerships By Status">
+			<GroupByField name="PartnershipStatus"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Partnerships By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Partnerships By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Partnerships By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Partnerships By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Partnerships By Policy Title">
+			<GroupByField name="PolicyTitle"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Partnerships By Policy Title">
+			<GroupByField name="PolicyTitle"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Partnerships By Committed Leader">
+			<GroupByField name="CommittedLeader"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Partnerships By Committed Leader">
+			<GroupByField name="CommittedLeader"/>
+			<SummaryField name="PartnershipID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Best Practices" moduleID="bpc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Best Practice" pluralRecordName="Best Practices" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="BestPracticeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track best practices" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the best practice" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the best practice" sample="Tasks"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Sugar Coating Raisins"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the best practice was identified" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the best practice was identified" sample="Active Agenda, Inc."/>
+		<TableField name="BestPracticeCategoryID" type="int" validate="noValidation" phrase="Best Practice Category|A method of categorizing best practices of similar types" sample="1"/>
+		<CodeField name="BestPracticeCategory" key="BestPracticeCategoryID" phrase="Best Practice Category|A method of categorizing best practices of similar types" sample="Production Process" codeTypeID="108"/>
+		<TableField name="BestPracticeTitle" type="varchar(128)" validate="notEmpty" phrase="Best Practice Title|A descriptive title of the best practice identified" sample="Drying sugar shovel between loads to avoid sugar adherence/loss"/>
+		<TableField name="BestPracticeDesc" type="text" validate="noValidation" phrase="Best Practice Description|A detailed description of the best practice that will help others to emulate to business practice" sample="The task listed help Active Agenda, Inc. to reduce loss by 20% simply because of this additional step taken during production"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="142" phrase="Evaluator|The individual evaluating and awarding the best practice" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Evaluator|The individual evaluating and awarding the best practice" sample="Mattias Thorslund"/>
+		<SummaryField name="RiskClassifications" summaryFunction="list" summaryField="RiskClassification" summaryKey="RelatedRecordID" summaryModuleID="rskcl" summaryCondition="RelatedModuleID = 'bpc'" localKey="BestPracticeID" phrase="Risk Classifications|A list of associated Risk Classifications" sample="Physical"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'bpc'" localKey="BestPracticeID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="Labor Relations"/>
+		<LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Production Process | Drying sugar shovel between loads to avoid sugar adherence/loss"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="BestPracticeTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="BestPractice" phrase="Best Practice|A combined field used to describe this best practice when associating it with other records" sample="Production Process | Drying sugar shovel between loads to avoid sugar adherence/loss"><CombinedFieldRef name="BestPracticeTitle"/>;_<CombinedFieldRef name="RelatedModule"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="BestPracticeID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OwnerOrganizationID"/> None required-->
+		<RecordDescriptionField name="BestPractice"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="rskcl" name="Risk Classifications" parentKey="BestPracticeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="bpc"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="BestPracticeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="bpc"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List the best practices identified across the organization">
+			<ListField name="BestPracticeID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="BestPracticeTitle" phrase="Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search the best practices identified across the organization">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="BestPracticeCategoryID" findMode="text">
+				<SampleItem ID="1" name="Production Process"/>
+				<SampleItem ID="2" name="Leadership"/>
+				<SampleItem ID="3" name="Management"/>
+				<SampleItem ID="4" name="Administration"/>
+				<SampleItem ID="5" name="Participation or Involvement"/>
+				<SampleItem ID="6" name="Knowledge Sharing"/>
+			</CodeComboField>
+			<EditField name="BestPracticeTitle" size="75" maxLength="128"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeCheckSearchField name="RiskClassID" subModuleID="rskc" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskClassificationID" codeTypeID="16" phrase="Risk Classifications|Filter search results by one or more related risk classifications"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a best practice">
+			<ViewField name="BestPracticeID"/>
+			<ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="BestPracticeCategory"/>
+			<ViewField name="BestPracticeTitle"/>
+			<ViewField name="BestPracticeDesc"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="RiskClassifications"/>
+			<ViewField name="RiskImperatives"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a best practice">
+			<ViewField name="BestPracticeID"/>
+			<ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<CodeComboField name="BestPracticeCategoryID" findMode="text">
+				<SampleItem ID="1" name="Production Process"/>
+				<SampleItem ID="2" name="Leadership"/>
+				<SampleItem ID="3" name="Management"/>
+				<SampleItem ID="4" name="Administration"/>
+				<SampleItem ID="5" name="Participation or Involvement"/>
+				<SampleItem ID="6" name="Knowledge Sharing"/>
+			</CodeComboField>
+			<EditField name="BestPracticeTitle" size="75" maxLength="128"/>
+			<MemoField name="BestPracticeDesc" cols="75" rows="5"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="Classifications" phrase="Classifications|Associate risk classifications with a best practice">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rskcl"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a best practice">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="BestPracticeID"/>
+		<ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="OwnerOrganization"/>
+		<ViewField name="BestPracticeCategory"/>
+		<ViewField name="BestPracticeTitle"/>
+		<ViewField name="BestPracticeDesc"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="RiskClassifications"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="bpc" phrase="Best Practices">
+			<InvisibleField name="BestPracticeID"/>
+			<ViewField name="BestPracticeCategory" sample="Production Process"/>
+			<ViewField name="BestPracticeTitle" sample="Drying sugar shovel between loads to avoid sugar adherence/loss"/>
+			<ViewField name="PersonAccountable" sample="Dan Zahlis"/>
+		</ViewGrid>
+		<EditGrid moduleID="bpc" phrase="Best Practices">
+			<GridForm>
+				<InvisibleField name="BestPracticeID"/>
+				<CodeComboField name="BestPracticeCategoryID" findMode="text">
+					<SampleItem ID="1" name="Production Process"/>
+					<SampleItem ID="2" name="Leadership"/>
+					<SampleItem ID="3" name="Management"/>
+					<SampleItem ID="4" name="Administration"/>
+					<SampleItem ID="5" name="Participation or Involvement"/>
+					<SampleItem ID="6" name="Knowledge Sharing"/>
+				</CodeComboField>
+				<EditField name="BestPracticeTitle" size="75" maxLength="128"/>
+				<MemoField name="BestPracticeDesc" cols="75" rows="5"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+			</GridForm>
+			<InvisibleField name="BestPracticeID"/>
+			<ViewField name="BestPracticeCategory" sample="Production Process"/>
+			<ViewField name="BestPracticeTitle" sample="Drying sugar shovel between loads to avoid sugar adherence/loss"/>
+			<ViewField name="PersonAccountable" sample="Dan Zahlis"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Best Practices By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<RadarChart name="Radar02" title="Best Practices By Risk Classification" subModuleID="rskcl" mode="categorize">
+			<GroupByField name="RiskClassification"/>
+			<SummaryField name="RiskClassID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Best Practices By Category">
+			<GroupByField name="BestPracticeCategory"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Best Practices By Category">
+			<GroupByField name="BestPracticeCategory"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Best Practices By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Best Practices By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Best Practices By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Best Practices By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Best Practices By Evaluator">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Best Practices By Evaluator">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="BestPracticeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 520 $" date="$Date: 2007-02-21 18:23:19 -0800 (Wed, 21 Feb 2007) $"/>
+</Module>

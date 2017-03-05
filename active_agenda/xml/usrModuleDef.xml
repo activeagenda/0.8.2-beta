@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Users" moduleID="usr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="User" pluralRecordName="Users" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="PersonID" type="int" validate="notEmpty" dbFlags="unsigned not null" phrase="Person ID|The Person ID of the associated person (users must have a matching record in the People module)." sample="1"/>
+		<ForeignField name="Person" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonID" joinType="left" phrase="Person|The person who is this user." sample="Mattias Thorslund"/>
+		<TableField name="Username" type="varchar(25)" validate="" phrase="Username|The user's login name." sample="jdoe"/>
+		<TableField name="Password" type="varchar(50)" validate="" phrase="Password|The user's password name." sample="secret"/>
+		<TableField name="IsAdmin" type="bool" validate="" phrase="Is Site Administrator|Site Administrators have access to all records in all modules, plus administration features." sample="1"/>
+		<TableField name="LangID" type="varchar(5)" validate="" phrase="Language|The user's preferred language." sample="en_US"/>
+		<CodeField name="Lang" key="LangID" codeTypeID="138" phrase="Language|The user's preferred language"/>
+		<TableField name="DefaultOrganizationID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Default Organization|This field affects user data entry experience by defaulting designated organization fields throughout the application to the name of the organization selected here" sample="1"/>
+		<ForeignField name="DefaultOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="DefaultOrganizationID" joinType="left" phrase="Default Organization|This field affects user data entry experience by defaulting designated organization fields throughout the application to the name of the organization selected here" sample="Active Agenda, HQ"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="PersonID" joinType="left" phrase="Organization ID|The organizationID of the user" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization ID|The organizationID of the user" sample="Active Agenda, HQ"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Person"/>;_<CombinedFieldRef name="Organization"/>;_Default:_<CombinedFieldRef name="DefaultOrganization"/>;_<CombinedFieldRef name="Lang"/></CombinedField>
+		<CombinedField name="User" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Person"/>;_<CombinedFieldRef name="Organization"/>;_Default:_<CombinedFieldRef name="DefaultOrganization"/>;_<CombinedFieldRef name="Lang"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PersonID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="User"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="usrp" name="User Permissions" parentKey="PersonID" localKey="PersonID"/>
+		<SubModule moduleID="usrpo" name="Permitted Organizations" parentKey="PersonID" localKey="PersonID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List users">
+			<ListField name="PersonID" phrase="Record ID"/>
+			<ListField name="Person" phrase="Person"/>
+			<ListField name="Username" phrase="User Name"/>
+			<ListField name="DefaultOrganization" phrase="Default Organization"/>
+			<ListField name="IsAdmin" phrase="Administrator"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search users">
+			<PersonComboField name="PersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="Username" size="15" maxLength="25"/>
+			<CheckBoxField name="IsAdmin"/>
+			<OrgComboField name="DefaultOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View a user">
+			<ViewField name="PersonID"/>
+			<ViewField name="Person"/>
+			<ViewField name="Username"/>
+			<ViewField name="IsAdmin"/>
+			<ViewField name="DefaultOrganization"/>
+			<ViewField name="Lang"/>
+			<ViewGrid moduleID="usrp"/>
+			<ViewGrid moduleID="usrpo"/>
+		</ViewScreen>
+		<!-- control access to this screen: only site admins can edit other user's info, but users can access their own-->
+		<EditScreen name="Form" phrase="Form|Edit a user">
+			<CustomCode location="init">
+				<![CDATA[ include_once(INCLUDE_PATH . '/usrFunctions.php'); ]]>
+			</CustomCode>
+			<CustomCode location="save">
+				<![CDATA[ if(verifyPassword('Password')){ ]]>
+			</CustomCode>
+			<CustomCode location="check_deleted_row_exists">
+				<![CDATA[ checkForDeletedRow('Password'); ]]>
+			</CustomCode>
+			<CustomCode location="save_end">
+				<![CDATA[ } ]]>
+			</CustomCode>
+			<ViewField name="Person"/>
+			<!-- hide this field unless setting up a new user -->
+			<PersonComboField name="PersonID" findMode="alpha" conditionField="*recordID*" conditionValue="empty">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="Username" size="15" maxLength="25"/>
+			<!-- display password fields as"password" type fields -->
+			<PasswordField name="Password" size="15" maxLength="25" confirm="yes"/>
+			<!-- disply only if the current user is a site admin -->
+			<CheckBoxField name="IsAdmin"/>
+			<OrgComboField name="DefaultOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="LangID"/>
+		</EditScreen>
+		<!-- add screens for user preferences-->
+		<EditScreen name="Permissions" phrase="Permissions|Edit permissions to view or edit records of a module">
+			<RecordSummaryFieldsRef/>
+			<CustomCode location="init">
+				<![CDATA[ $jsIncludes = '<script type="text/javascript" src="js/usrPermissionsUI.js"></script>'; ]]>
+			</CustomCode>
+			<CustomCode location="classdef">
+				<![CDATA[ include_once(INCLUDE_PATH . '/usrpPermissionGrid.php'); ]]>
+			</CustomCode>
+			<!-- the permission grid has hard-coded fields so it doesn't need any fields defined here -->
+			<PermissionGrid moduleID="usrp" phrase="Permissions"/>
+		</EditScreen>
+		<EditScreen name="PermittedOrgs" phrase="Permitted Organizations|Edit the assigned organizations">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="usrpo"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="PersonID"/>
+		<ViewField name="Person"/>
+		<ViewField name="Username"/>
+		<ViewField name="DefaultOrganization"/>
+		<ViewField name="IsAdmin"/>
+	</RecordSummaryFields>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

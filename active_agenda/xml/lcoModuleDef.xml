@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Costs" moduleID="lco" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Loss Cost" pluralRecordName="Loss Costs" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LossCostID" type="int" dbFlags="unsigned auto_increment not null" phrase="Claim Cost ID|Numerical ID assigned by the system to associated claims management costs with claims of loss" sample="1"/>
+		<TableField name="ClaimID" type="int" dbFlags="unsigned not null" phrase="Claim ID|The record ID value of the corresponding claim" sample="11"/>
+		<!-- these are left  here so tht the non-converted loss modules will parse.  -->
+		<TableField name="RelatedModuleID" type="varchar(5)" phrase="Related ModuleID|The ModuleID of the Loss Module that this claim refers to" sample="len"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the agreement" sample="Corrective Actions"/>
+		<TableField name="RelatedRecordID" type="int" phrase="Related Record ID|The record id of the loss record that this claim refers to" sample="11"/>
+		<!-- these need to reflect new structure ith clm always being the parent.
+        <TableField name="RelatedRecordID" type="int" phrase="Related Record ID|The record id of the loss record that this claim refers to" sample="11"/>
+        -->
+        <!-- these need to reflect new structure ith clm always being the parent.
+        <DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the loss cost was incurred" sample="1"/>
+        <ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the loss cost was incurred" sample="Active Agenda, Inc."/>
+        -->
+		<ForeignField name="PolicyID" foreignTable="clm" foreignKey="ClaimID" foreignField="PolicyID" key="ClaimID" joinType="left" phrase="Insurance Policy|A description of the insurance policy associated with the loss cost based on a combination of field values assigned from within the Insurance Policies module" sample="General Liability, CNA, CNA-GL-098-2003, 01-01-2003, 01-01-2004"/>
+		<ForeignField name="ClaimNumber" foreignTable="clm" foreignKey="ClaimID" foreignField="ClaimNumber" key="ClaimID" joinType="left" phrase="Claim Number|A unique number assigned by an insurance company or third party administrator responsible for managing the claim" sample="03-001-6717"/>
+		<!-- The policy and claim number data should be inherited from the claim module because there's a 1:1 relationship between a policy and a claim and a claim number''
+		<TableField name="PolicyID" type="int" validate="RequireSelection" phrase="Insurance Policy|A description of the insurance policy associated with the loss cost based on a combination of field values assigned from within the Insurance Policies module" sample="1"/>
+		-->
+		<ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Insurance Policy|A description of the insurance policy associated with the loss cost based on a combination of field values assigned from within the Insurance Policies module" sample="General Liability, CNA, CNA-GL-098-2003, 01-01-2003, 01-01-2004"/>
+		<!--
+        <CalculatedField name="LatestLossCostID" type="int" calcFunction="max" params="ValuationDate LossCostID RelatedModuleID RelatedRecordID" phrase="Latest Loss Cost ID|The LossCostID of the latest Loss Cost record for the same related record" sample="11"/>
+        <ForeignField name="LatestValuationDate" type="date" foreignTable="lco" foreignKey="LossCostID" foreignField="ValuationDate" key="LatestLossCostID" joinType="left" phrase="Latest Valuation|The date of the latest valuation for this loss item" sample="2006-12-10"/>
+        -->
+		<ForeignField name="IntegrationKey" foreignTable="ins" foreignKey="PolicyID" foreignField="IntegrationKey" key="PolicyID" joinType="left" phrase="Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization" sample="DFC2004DFN001"/>
+		<SummaryField name="TotalIncurred" type="money" validate="noValidation" summaryFunction="sum" summaryField="Incurred" localKey="LossCostID" summaryKey="LossCostID" summaryModuleID="lcod" phrase="Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<SummaryField name="TotalPayments" type="money" validate="noValidation" summaryFunction="sum" summaryField="Payments" localKey="LossCostID" summaryKey="LossCostID" summaryModuleID="lcod" phrase="Paid to Date|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<CalculatedField name="TotalOutstanding" type="money" calcFunction="subtract" params="TotalIncurred TotalPayments" phrase="Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts" sample="702.00"/>
+		<!--outstanding values are automatically calculated based on the following formula: Incurred-Payments to Date=Outstanding AND LocalIncurred-LocalPayments=LocalOutstanding-->
+		<TableField name="ValuationDate" type="date" validate="notEmpty" phrase="Valuation Date|The specific date this valuation occurred" sample="01/01/2004"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">
+			<CombinedFieldRef name="TotalIncurred"/>
+		</CombinedField>
+		<CombinedField name="LossCost" phrase="Loss Cost|A combined field used to describe this loss cost when associating it with other records" sample="Operating Permits | ID: 231 | 702.00">
+			<CombinedFieldRef name="TotalIncurred"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LossCostID"/>
+		</PrimaryKey>
+		<!-- enable this again
+            <OwnerField name="OwnerOrganizationID"/>-->
+		<RecordDescriptionField name="LossCost"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="lcod" name="Loss Cost Details" parentKey="LossCostID" localKey="LossCostID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List loss costs and valuation dates">
+			<ListField name="LossCostID" phrase="LossCost ID"/>
+			<ListField name="Policy" phrase="Policy"/>
+			<ListField name="ClaimNumber" phrase="Claim Number"/>
+			<ListField name="TotalIncurred" phrase="Incurred"/>
+			<ListField name="TotalPayments" phrase="Payments"/>
+			<ListField name="TotalOutstanding" phrase="Outstanding"/>
+			<ListField name="ValuationDate" phrase="Valuation Date"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search loss costs and valuation dates">
+			<!--<OrgComboField name="OwnerOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>-->
+            <ComboField name="PolicyID" findMode="text">
+                <SampleItem ID="1" name="CNA, CNA-GL-098-2003, 01-01-03, 01-01-04"/>
+                <SampleItem ID="2" name="Chubb, ChBM-011-2003, 01-01-03, 01-01-04"/>
+                <SampleItem ID="3" name="AIG, AIG-PC-0234-2003, 01-01-03, 01-01-04"/>
+            </ComboField>
+            <EditField name="IntegrationKey"/>
+            <MoneyField name="TotalIncurred"/>
+            <MoneyField name="TotalPayments"/>
+            <MoneyField name="TotalOutstanding"/>
+            <DateField name="ValuationDate"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a loss cost and valuation date">
+            <ViewField name="LossCostID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="ClaimID"/>
+            <ViewField name="Policy"/>
+            <ViewField name="IntegrationKey"/>
+            <ViewField name="TotalIncurred"/>
+            <ViewField name="TotalPayments"/>
+            <ViewField name="TotalOutstanding"/>
+            <ViewField name="ValuationDate"/>
+            <ViewGrid moduleID="lcod"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a loss cost and valuation date">
+            <ViewField name="LossCostID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ComboField name="PolicyID"/>
+            <EditField name="IntegrationKey"/>
+            <DateField name="ValuationDate"/>
+        </EditScreen>
+        <EditScreen name="Details" phrase="Details|Associate details with loss cost entry">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="lcod"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="LossCostID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="Policy"/>
+        <ViewField name="IntegrationKey"/>
+        <ViewField name="TotalIncurred"/>
+        <ViewField name="TotalPayments"/>
+        <ViewField name="TotalOutstanding"/>
+        <ViewField name="ValuationDate"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="lco" phrase="Loss Costs">
+            <InvisibleField name="LossCostID"/>
+            <ViewField name="TotalIncurred" sample="1,000,000.00"/>
+            <ViewField name="TotalPayments" sample="250,000.00"/>
+            <ViewField name="TotalOutstanding" sample="750,000.00"/>
+            <ViewField name="ValuationDate" sample="01/01/2004"/>
+        </ViewGrid>
+        <EditGrid moduleID="lco" phrase="Loss Costs">
+            <GridForm>
+                <InvisibleField name="LossCostID"/>
+                <ViewField name="TotalIncurred" sample="1,000,000.00"/>
+                <ViewField name="TotalPayments" sample="250,000.00"/>
+                <ViewField name="TotalOutstanding" sample="750,000.00"/>
+                <DateField name="ValuationDate" sample="01/01/2004"/>
+            </GridForm>
+            <ViewField name="TotalIncurred" sample="1,000,000.00"/>
+            <ViewField name="TotalPayments" sample="250,000.00"/>
+            <ViewField name="TotalOutstanding" sample="750,000.00"/>
+            <ViewField name="ValuationDate" sample="01/01/2004"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <!--
+        <PieChart name="Pie01" title="Loss Costs By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Loss Costs By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </ParetoChart>
+        -->
+        <!--
+        <PieChart name="Pie02" title="Loss Costs By Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Loss Costs By Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </ParetoChart>-->
+        <PieChart name="Pie03" title="Loss Costs By Insurance Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Loss Costs By Insurance Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="LossCostID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction"/>
+        <DocumentationSection sectionID="Implementation" title="Implementation"/>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements"/>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection"/>
+        <DocumentationSection sectionID="DataInput" title="Data Input"/>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information"/>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning"/>
+        <DocumentationSection sectionID="Training" title="Training"/>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge"/>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions"/>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

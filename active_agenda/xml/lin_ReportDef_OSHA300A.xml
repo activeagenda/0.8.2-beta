@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!-- 
+     LICENSE NOTE:
+
+     Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+     Unless explicitly acquired and licensed from Licensor under a "commercial license",
+     the contents of this file are subject to the Reciprocal Public License ("RPL")
+     Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+     or use this file in either source code or executable form, except in compliance
+     with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+     Active Agenda Inc. at http://www.activeagenda.net/license.
+
+     All software distributed under the Licenses is provided strictly on an "AS IS"
+     basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+     INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+     WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+     OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+     limitations under the Licenses.
+
+     author         Dan Zahlis <dzahlis@activeagenda.net>
+     author         Mattias Thorslund <mthorslund@activeagenda.net>
+     copyright      2003-2007 Active Agenda Inc.
+     license        http://www.activeagenda.net/license
+-->
+<ReportGroup name="Main" author="Active Agenda">
+    <Report name="OSHA300A" title="OSHA 300 Summary" headerField="Organization" singularRecordName="OSHA 300 Summary" displayFormat="PDF" mode="summarize">
+
+        <ReportLocation level="List" group="Main"/>
+
+        <ReportField name="Establishment" moduleFieldName="Organization" summarize="groupby"/>
+        <ReportField name="OrganizationID" summarize="groupby"/>
+        <ReportField name="Year" summarize="groupby">
+            <Transformation function="year_firstday">
+                <ModuleFieldRef name="IncurredTime"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Death" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="4"/>
+                <ModuleFieldRef name="InjIllCategoryID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Away" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="3"/>
+                <ModuleFieldRef name="InjIllCategoryID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Restriction" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="2"/>
+                <ModuleFieldRef name="InjIllCategoryID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="OtherRecordable" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="1"/>
+                <ModuleFieldRef name="InjIllCategoryID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Injury" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="1"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="SkinDisorder" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="2"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Respiratory" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="3"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="Poisoning" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="4"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="HearingLoss" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="5"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <ReportField name="OtherIllness" summarize="sum">
+            <Transformation function="equals">
+                <StaticValue value="6"/>
+                <ModuleFieldRef name="InjIllTypeID"/>
+            </Transformation>
+        </ReportField>
+        <!-- number of days on modified duty -->
+        <ReportField name="DaysModified" summarize="sum"/>
+        <!-- number of days away from work -->
+        <ReportField name="DaysAway" summarize="sum"/>
+
+        <SubReport moduleID="org" name="Organizations" headerField="Organization" singularRecordName="Organization" parentKey="OrganizationID" localKey="OrganizationID" distinct="yes">
+            <ReportField name="Address1"/>
+            <ReportField name="City"/>
+            <ReportField name="StateAbbreviation"/>
+            <ReportField name="PostalCode"/>
+            <ReportField name="IndustryDescription"/>
+            <ReportField name="IndustryCodeID"/>
+            <ReportField name="SIC"/>
+        </SubReport>
+
+        <ReportPage filename="lin_osha300A.pdf">
+            <PageField name="Establishment" reportField="Establishment"/>
+            <PageField name="Year" reportField="Year" format="year_2"/>
+
+            <PageField name="Deaths" reportField="Death"/>
+            <PageField name="DaysAwayCases" reportField="Away"/>
+            <PageField name="JobRestrictionCases" reportField="Restriction"/>
+            <PageField name="OtherRecordableCases" reportField="OtherRecordable"/>
+            <PageField name="Injuries" reportField="Injury"/>
+            <PageField name="SkinDisorders" reportField="SkinDisorder"/>
+            <PageField name="RespiratoryConditions" reportField="Respiratory"/>
+            <PageField name="Poisonings" reportField="Poisoning"/>
+            <PageField name="HearingLoss" reportField="HearingLoss"/>
+            <PageField name="AllOtherIllnesses" reportField="OtherIllness"/>
+
+            <PageField name="DaysJobTransfer" reportField="DaysModified" replaceEmptyValue="0"/>
+            <PageField name="DaysAway" reportField="DaysAway" replaceEmptyValue="0"/>
+
+            <!-- this is a way to get the page fields to make the reference to org -->
+            <PageFieldGroup subReportID="org">
+                <PageField name="StreetAddress" reportField="Address1"/>
+                <PageField name="City" reportField="City"/>
+                <PageField name="State" reportField="StateAbbreviation"/>
+                <PageField name="Zip" reportField="PostalCode"/>
+                <PageField name="NAICS" reportField="IndustryCodeID"/>
+                <PageField name="IndustryDesc" reportField="IndustryDescription"/>
+                <PageField name="SIC" reportField="SIC"/>
+            </PageFieldGroup>
+        </ReportPage>
+    </Report>
+</ReportGroup>

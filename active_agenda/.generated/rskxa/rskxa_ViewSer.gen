@@ -1,0 +1,86 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'IndexAssociationID' => gettext("Record ID|An automatically assigned number used to track risk index associations with related records"),
+   'SourceModuleRecord' => gettext("Related Record|A combined field used to display the source module name and record ID"),
+   'RelatedRecordDescription' => gettext("Source Record Description|A description of the source record based on a combination of field values assigned from within the source module"),
+   'OwnerOrganization' => gettext("Organization|The name of the organization related to the risk index association"),
+   'Likelihood' => gettext("Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module"),
+   'LikelihoodStatus' => gettext("Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat"),
+   'LikelihoodFactors' => gettext("Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat"),
+   'CostSeverityValue' => gettext("Cost Severity Value|A severity value that is calculated based on the summarized costs of the related record"),
+   'Severity' => gettext("Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module"),
+   'IndexValue' => gettext("Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed"),
+   'RiskRecommendation' => gettext("Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:3:{s:6:"phrase";s:22:"Risk Index Association";s:3:"sql";s:2461:"SELECT 
+   `rskxa`.IndexAssociationID,
+   CONCAT(\'internal:view.php?mdl=\',`rskxa`.SourceModuleID,\'&rid=\',`rskxa`.SourceRecordID) AS SourceRecordLink,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`rskxa`.SourceRecordID,\'\'),\')\'),\' Module (Record ID: )\') AS SourceModuleRecord,
+   `rdc1`.Value AS RelatedRecordDescription,
+   `org1`.Name AS OwnerOrganization,
+   NULLIF(CONCAT(IFNULL(`rskl1`.LikelihoodValue,\'\'),\' - \',IFNULL(`rskl1`.RiskLikelihoodTerm,\'\'),\': \',IFNULL(`rskl1`.RiskLikelihood,\'\')),\' - : \') AS Likelihood,
+   `cod1`.Description AS LikelihoodStatus,
+   `rskxa`.LikelihoodFactors,
+   `csc1`.SeverityValue AS CostSeverityValue,
+   NULLIF(CONCAT(IFNULL(`rsks1`.SeverityValue,\'\'),\' - \',IFNULL(`rsks1`.RiskSeverityTerm,\'\'),\': Loss cost of \',IFNULL(ROUND(`rsks1`.SeverityLowCost, 2),\'\'),\' to \',IFNULL(ROUND(`rsks1`.SeverityHighCost, 2),\'\')),\' - : Loss cost of  to \') AS Severity,
+   IFNULL(`rskl1`.LikelihoodValue,0) * IFNULL(IF(`csc1`.SeverityValue > `rsks1`.SeverityValue, `csc1`.SeverityValue, `rsks1`.SeverityValue),0) AS IndexValue,
+   (SELECT RiskRecommendation
+FROM rskx
+WHERE `rskx`.IndexValue <= IFNULL(`rskl1`.LikelihoodValue,0) * IFNULL(IF(`csc1`.SeverityValue > `rsks1`.SeverityValue, `csc1`.SeverityValue, `rsks1`.SeverityValue),0)
+ORDER BY `rskx`.IndexValue DESC
+LIMIT 1) AS RiskRecommendation,
+   NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(IFNULL(`rskl1`.LikelihoodValue,0) * IFNULL(IF(`csc1`.SeverityValue > `rsks1`.SeverityValue, `csc1`.SeverityValue, `rsks1`.SeverityValue),0),\'\'),\' | \',IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`rdc1`.Value,\'\')),\' |  |  | \') AS RecordLabel,
+   `rdc1`.OrganizationID AS OwnerOrganizationID
+FROM `rskxa`
+   
+     LEFT OUTER JOIN `mod` AS mod1 
+   ON (`rskxa`.SourceModuleID = `mod1`.ModuleID )
+     LEFT OUTER JOIN `rdc` AS rdc1 ON (`rskxa`.SourceRecordID = rdc1.RecordID AND `rskxa`.SourceModuleID = rdc1.ModuleID)
+     LEFT OUTER JOIN `rskl` AS rskl1 
+   ON (`rskxa`.LikelihoodID = `rskl1`.LikelihoodID )
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rskxa`.LikelihoodStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'112\')
+     LEFT OUTER JOIN `csc` AS csc1 ON (`rskxa`.SourceRecordID = csc1.RecordID AND `rskxa`.SourceModuleID = csc1.ModuleID)
+     LEFT OUTER JOIN `rsks` AS rsks1 
+   ON (`rskxa`.SeverityID = `rsks1`.SeverityID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`rdc1`.OrganizationID = `org1`.OrganizationID )
+WHERE
+   rskxa.IndexAssociationID=\'/**RecordID**/\'";s:6:"fields";a:11:{s:18:"IndexAssociationID";O:9:"viewfield":16:{s:4:"name";s:18:"IndexAssociationID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Record ID|An automatically assigned number used to track risk index associations with related records";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"SourceModuleRecord";O:9:"viewfield":16:{s:4:"name";s:18:"SourceModuleRecord";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:84:"Related Record|A combined field used to display the source module name and record ID";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";s:16:"SourceRecordLink";s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"RelatedRecordDescription";O:9:"viewfield":16:{s:4:"name";s:24:"RelatedRecordDescription";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:138:"Source Record Description|A description of the source record based on a combination of field values assigned from within the source module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"OwnerOrganization";O:9:"viewfield":16:{s:4:"name";s:17:"OwnerOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Organization|The name of the organization related to the risk index association";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"Likelihood";O:9:"viewfield":16:{s:4:"name";s:10:"Likelihood";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:140:"Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"LikelihoodStatus";O:9:"viewfield":16:{s:4:"name";s:16:"LikelihoodStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:120:"Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"LikelihoodFactors";O:9:"viewfield":16:{s:4:"name";s:17:"LikelihoodFactors";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:128:"Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"CostSeverityValue";O:9:"viewfield":16:{s:4:"name";s:17:"CostSeverityValue";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Cost Severity Value|A severity value that is calculated based on the summarized costs of the related record";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Severity";O:9:"viewfield":16:{s:4:"name";s:8:"Severity";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:135:"Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"IndexValue";O:9:"viewfield":16:{s:4:"name";s:10:"IndexValue";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:251:"Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:18:"RiskRecommendation";O:9:"viewfield":16:{s:4:"name";s:18:"RiskRecommendation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}}');
+
+?>

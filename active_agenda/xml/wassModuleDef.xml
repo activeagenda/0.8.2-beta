@@ -1,0 +1,390 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Waste Storage" moduleID="wass" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Waste Stream Storage Detail" pluralRecordName="Waste Stream Storage Details" allowAddRecord="yes">
+    <ModuleFields>
+        <TableField name="WasteStorageID" type="int" dbFlags="unsigned auto_increment not null" phrase="Waste Storage|An automatically assigned number used to track organizational waste" sample="1"/>
+        <TableField name="WasteID" type="int" validate="noValidation" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="1"/>
+        <ForeignField name="WasteOrganizationID" listType="allParticipants" foreignTable="was" foreignKey="WasteID" foreignField="OrganizationID" key="WasteID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="1"/>
+        <ForeignField name="WasteOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WasteOrganizationID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="Active Agenda, HQ"/>
+        <ForeignField name="WasteTypeID" foreignTable="was" foreignKey="WasteID" foreignField="WasteTypeID" key="WasteID" joinType="left" phrase="Waste Type|A combined field used to describe this waste disposal type when associating it with other records" sample="1"/>
+        <ForeignField name="WasteCategoryID" foreignTable="wast" foreignKey="WasteTypeID" foreignField="WasteCategoryID" key="WasteTypeID" joinType="left" phrase="Category|A broad category used to group waste streams of similar types" sample="1"/>
+        <CodeField name="WasteCategory" key="WasteCategoryID" phrase="Category|A broad category used to group waste streams of similar types" sample="Liquid (hazardous)" codeTypeID="13"/>
+        <ForeignField name="WasteGenerationMethodID" foreignTable="was" foreignKey="WasteID" foreignField="WasteGenerationMethodID" key="WasteID" joinType="left" phrase="Waste Generation Method|The method by which the waste stream was generated" sample="1"/>
+        <CodeField name="WasteGenerationMethod" key="WasteGenerationMethodID" phrase="Waste Generation Method|The method by which the waste stream was generated" sample="Closed System" codeTypeID="14"/>
+        <ForeignField name="WasteTypeID" foreignTable="was" foreignKey="WasteID" foreignField="WasteTypeID" key="WasteID" joinType="left" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="1"/>
+        <CodeField name="WasteType" key="WasteTypeID" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="Cardboard" codeTypeID="11"/>
+        <ForeignField name="Waste" foreignTable="was" foreignKey="WasteID" foreignField="Waste" key="WasteID" joinType="left" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="Ammonium Hydroxide"/>
+        <TableField name="StorageOrganizationID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Storage Organization|Name of the organization generating, storing and shipping the waste" sample="1"/>
+        <ForeignField name="StorageOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="StorageOrganizationID" joinType="left" phrase="Storage Organization|Name of the organization generating, storing and shipping the waste" sample="Active Agenda, HQ"/>
+        <RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Storage Location|Specific location within the facility where the waste stream is stored" sample="1"/>
+        <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Storage Location|Specific location within the facility where the waste stream is stored" sample="Packaging Area"/>
+        <TableField name="StorageMethodID" type="int" validate="RequireSelection" phrase="Storage Method|The specific method used to store the waste on site" sample="1"/>
+        <CodeField name="StorageMethod" key="StorageMethodID" phrase="Storage Method|The specific method used to store the waste on site" sample="Covered Pallets" codeTypeID="80"/>
+        <RemoteField name="EvaluationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="22" phrase="Evaluation Date|The date the waste storage practices were evaluated" sample="01/01/2004"/>
+        <TableField name="Quantity" type="float" validate="Number notEmpty notNegative " phrase="Quantity|The quantity of waste at this location, stored by this method on this evaluation date" sample="1"/>
+        <TableField name="QuantityUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="QuantityUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="QuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="QuantityUnitCategory" key="QuantityUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="QuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="QuantityUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="StorageDesc" type="varchar(255)" validate="notEmpty" phrase="Storage Description|A detailed description of the method and manner of storage for this waste stream" sample="The ammonium hydroxide is stored in a holding vessel under pressure"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="WasteOrganization"/>;_<CombinedFieldRef name="WasteType"/>;_<CombinedFieldRef name="Waste"/>;_<CombinedFieldRef name="Location"/>;_<CombinedFieldRef name="StorageMethod"/></CombinedField>
+        <CombinedField name="WasteStorage" phrase="Waste Storage|A combined field used to describe this waste storage when associating it with other records" sample="Active Agenda, HQ; Cardboard; Ammonium Hydroxide; Packaging Area; Covered Pallets"><CombinedFieldRef name="Waste"/>;_<CombinedFieldRef name="Location"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="WasteStorageID"/>
+        </PrimaryKey>
+        <OwnerField name="WasteOrganizationID"/>
+        <RecordDescriptionField name="WasteStorage"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List waste storage locations, amounts, and methods">
+            <ListField name="WasteStorageID" phrase="Waste Storage ID"/>
+            <ListField name="Waste" phrase="Waste"/>
+            <ListField name="StorageOrganization" phrase="Organization"/>
+            <ListField name="Location" phrase="Location"/>
+            <ListField name="StorageMethod" phrase="Storage Method"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search waste storage locations, amounts, and methods">
+            <OrgComboField name="WasteOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <CodeRadioField name="WasteCategoryID">
+                <SampleItem ID="1" name="Hazardous"/>
+                <SampleItem ID="2" name="Non-hazardous"/>
+                <SampleItem ID="3" name="Hazardous and Non-hazardous"/>
+            </CodeRadioField>
+            <CodeComboField name="WasteGenerationMethodID" findMode="text">
+                <SampleItem ID="1" name="Closed System"/>
+                <SampleItem ID="2" name="Production Process"/>
+                <SampleItem ID="3" name="Packaging Operation"/>
+                <SampleItem ID="4" name="Receiving Operation"/>
+            </CodeComboField>
+            <CodeComboField name="WasteTypeID" findMode="text">
+                <SampleItem ID="1" name="Refrigeration"/>
+                <SampleItem ID="2" name="Process Water"/>
+                <SampleItem ID="3" name="Air Emmissions"/>
+                <SampleItem ID="4" name="Sludge"/>
+                <SampleItem ID="5" name="Raw Ingredient"/>
+                <SampleItem ID="6" name="Product"/>
+            </CodeComboField>
+            <ComboField name="WasteID" findMode="text">
+                <SampleItem ID="1" name="Ammonium Hydroxide"/>
+                <SampleItem ID="2" name="Cardboard"/>
+                <SampleItem ID="3" name="Process Waste Water"/>
+            </ComboField>
+            <OrgComboField name="StorageOrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="StorageOrganizationID">
+                <SampleItem ID="1" name="Engine Room"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <CodeComboField name="StorageMethodID" findMode="text">
+                <SampleItem ID="1" name="55 Gallon Drums"/>
+                <SampleItem ID="3" name="Above Ground Storage Tank"/>
+                <SampleItem ID="5" name="Receiver"/>
+                <SampleItem ID="7" name="Below Ground Storage Tank"/>
+            </CodeComboField>
+            <EditField name="Quantity" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="QuantityUnitCategoryID">
+                    <UpdateFieldRef name="QuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="QuantityUoMID" parentField="QuantityUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="EvaluationDate"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a waste storage location, amount, and method">
+            <ViewField name="WasteStorageID"/>
+            <ViewField name="Waste"/>
+            <ViewField name="StorageOrganization"/>
+            <ViewField name="Location"/>
+            <ViewField name="StorageMethod"/>
+            <ViewField name="Quantity">
+                <ViewField name="QuantityUoM"/>
+            </ViewField>
+            <ViewField name="EvaluationDate"/>
+            <ViewField name="StorageDesc"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a waste storage location, amount, and method">
+            <ViewField name="WasteStorageID"/>
+            <ViewField name="Waste"/>
+            <OrgComboField name="StorageOrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="StorageOrganizationID">
+                <SampleItem ID="1" name="Engine Room"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <CodeComboField name="StorageMethodID" findMode="text">
+                <SampleItem ID="1" name="55 Gallon Drums"/>
+                <SampleItem ID="3" name="Above Ground Storage Tank"/>
+                <SampleItem ID="5" name="Receiver"/>
+                <SampleItem ID="7" name="Below Ground Storage Tank"/>
+            </CodeComboField>
+            <EditField name="Quantity" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="QuantityUnitCategoryID">
+                    <UpdateFieldRef name="QuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="QuantityUoMID" parentField="QuantityUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="EvaluationDate"/>
+            <MemoField name="StorageDesc" rows="5" cols="75"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="wass" phrase="Storage Locations">
+            <ViewField name="WasteOrganization" sample="Active Agenda, HQ"/>
+            <ViewField name="Location" sample="Waste Storage Pad"/>
+            <ViewField name="StorageMethod" sample="Bundled and Stacked"/>
+            <ViewField name="StorageDesc" sample="All waste cardboard is compacted, bundled and stacked on the waste storage pad beneath the pole tent canopy"/>
+        </ViewGrid>
+        <EditGrid moduleID="wass" phrase="Storage Locations">
+            <GridForm>
+                <InvisibleField name="WasteStorageID"/>
+                <OrgComboField name="StorageOrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <UpdateFieldRef name="LocationID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                </OrgComboField>
+                <ComboField name="LocationID" findMode="text" parentField="StorageOrganizationID" sample="Packaging Area">
+                    <SampleItem ID="1" name="Engine Room"/>
+                    <SampleItem ID="2" name="Shipping Bay #1"/>
+                    <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                    <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+                </ComboField>
+                <CodeComboField name="StorageMethodID" findMode="text" sample="Covered Pallets">
+                    <SampleItem ID="1" name="55 Gallon Drums"/>
+                    <SampleItem ID="3" name="Above Ground Storage Tank"/>
+                    <SampleItem ID="5" name="Receiver"/>
+                    <SampleItem ID="7" name="Below Ground Storage Tank"/>
+                </CodeComboField>
+                <EditField name="Quantity" size="5" maxLength="5">
+                    <Self/>
+                    <ComboField name="QuantityUnitCategoryID">
+                        <UpdateFieldRef name="QuantityUoMID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="QuantityUoMID" parentField="QuantityUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+                <DateField name="EvaluationDate" sample="09-28-2003"/>
+                <MemoField name="StorageDesc" rows="5" cols="75" sample="The ammonium hydroxide is stored in a holding vessel under pressure"/>
+            </GridForm>
+            <ViewField name="StorageOrganization" sample="Active Agenda, HQ"/>
+            <ViewField name="Location" sample="Packaging Area"/>
+            <ViewField name="StorageMethod" sample="Covered Pallets"/>
+            <ViewField name="EvaluationDate" sample="09-28-2003"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Waste Storage By Waste Stream">
+            <GroupByField name="Waste"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Waste Storage By Waste Stream">
+            <GroupByField name="Waste"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Waste Storage By Organization">
+            <GroupByField name="WasteOrganization"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Waste Storage By Organization">
+            <GroupByField name="WasteOrganization"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Waste Storage By Waste Category">
+            <GroupByField name="WasteCategory"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Waste Storage By Waste Category">
+            <GroupByField name="WasteCategory"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Waste Storage By Waste Generation Method">
+            <GroupByField name="WasteGenerationMethod"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Waste Storage By Waste Generation Method">
+            <GroupByField name="WasteGenerationMethod"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Waste Storage By Waste Type">
+            <GroupByField name="WasteType"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Waste Storage By Waste Type">
+            <GroupByField name="WasteType"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Waste Storage By Storage Organization">
+            <GroupByField name="StorageOrganization"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Waste Storage By Storage Organization">
+            <GroupByField name="StorageOrganization"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Waste Storage By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Waste Storage By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Waste Storage By Storage Method">
+            <GroupByField name="StorageMethod"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Waste Storage By Storage Method">
+            <GroupByField name="StorageMethod"/>
+            <SummaryField name="WasteStorageID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,412 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Measurements" moduleID="mea" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Measurement" pluralRecordName="Measurements" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="MeasurementID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track measurements used by the organization" sample="1"/>
+		<TableField name="MeasurementTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A word or phrase used to describe this organizational Measurement" sample="Suggestion Rate"/>
+		<TableField name="MeasurementPurpose" type="text" validate="notEmpty" phrase="Purpose|A brief description of the purpose for this measurement" sample="The purpose of this measurement is to comply with OSHA tracking requirements"/>
+		<TableField name="MeasurementRationale" type="text" validate="notEmpty" phrase="Rationale|A detailed description of the rationale for using this measurement. the positive organizational behaviors likely to result from its use and any potential consequences from its use" sample="The rationale for this measurement is strictly OSHA compliance. The measurement has many more risks to our organization than benefits but it is required by law. The primary risk associated with this measurement is underreporting of incidents which may lead to more sever injuries"/>
+		<TableField name="BenchmarkValue" type="float" validate="Number" phrase="Benchmark Value|The value against which measurement results are benchmarked" sample=".05"/>
+		<TableField name="BenchmarkDescription" type="text" validate="noValidation" phrase="Benchmark Description|A brief description of the benchmark value and its source" sample="OSHA BLS statistics for Ice Cream Manufacturers: SIC 2113"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for sponsoring this measurement, tracking performance, and supporting the organization's understanding and use of the measurement" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for sponsoring this measurement, tracking performance, and supporting the organization's understanding and use of the measurement" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="57" phrase="Person Accountable|The person accountable for sponsoring this measurement, tracking performance, and supporting the organization's understanding and use of the measurement" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person accountable for sponsoring this measurement, tracking performance, and supporting the organization's understanding and use of the measurement" sample="Mattias Thorslund"/>
+		<TableField name="MeasurementOriginDate" type="date" validate="notEmpty" phrase="Origin Date|The date the measurement was first used by the organization" sample="09-28-2003"/>
+		<TableField name="MeasurementStatusID" type="int" validate="RequireSelection" phrase="Status|The status of this measurement's use within the organization" sample="1"/>
+		<CodeField name="MeasurementStatus" key="MeasurementStatusID" phrase="Status|The status of this measurement's use within the organization" sample="Active" codeTypeID="192"/>
+		<TableField name="NumeratorTitle" type="varchar(128)" validate="notEmpty" phrase="Numerator Title|A word or phrase used to describe the numerator used for the measurement" sample="Cost of Hazard Abatement"/>
+		<TableField name="NumeratorModuleID" type="varchar(5)" phrase="Numerator Module|The name of the module containing data to be used as the measurement numerator" sample="1"/>
+		<ForeignField name="NumeratorModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="NumeratorModuleID" joinType="left" phrase="Numerator Module|The name of the module containing data to be used as the measurement numerator" sample="Incident Reporting"/>
+		<TableField name="NumeratorOrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Numerator Organization|The organization associated with the numerator module selected" sample="1"/>
+		<ForeignField name="NumeratorOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="NumeratorOrganizationID" joinType="left" phrase="Numerator Organization|The organization associated with the numerator module selected" sample="Active Agenda, HQ"/>
+		<TableField name="NumeratorTypeID" type="int" validate="RequireSelection" phrase="Numerator Type|Whether the measurement numerator is a frequency or cost calculation" sample="3"/>
+		<CodeField name="NumeratorType" key="NumeratorTypeID" phrase="Numerator Type|Whether the measurement numerator is a frequency or cost calculation" sample="Frequency" codeTypeID="71"/>
+		<TableField name="DenominatorTitle" type="varchar(128)" validate="notEmpty" phrase="Denominator Title|A word or phrase used to describe the denominator used for the measurement" sample="Cost of Hazard Abatement"/>
+		<TableField name="DenominatorModuleID" type="varchar(5)" phrase="Denominator Module|The name of the module containing data to be used as the measurement denominator" sample="1"/>
+		<ForeignField name="DenominatorModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="DenominatorModuleID" joinType="left" phrase="Denominator Module|The name of the module containing data to be used as the measurement denominator" sample="Incident Reporting"/>
+		<TableField name="DenominatorOrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Denominator Organization|The organization associated with the denominator module selected" sample="1"/>
+		<ForeignField name="DenominatorOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="DenominatorOrganizationID" joinType="left" phrase="Denominator Organization|The organization associated with the denominator module selected" sample="Active Agenda, HQ"/>
+		<TableField name="DenominatorTypeID" type="int" validate="RequireSelection" phrase="Denominator Type|Whether the measurement denominator is a frequency or cost calculation" sample="3"/>
+		<CodeField name="DenominatorType" key="DenominatorTypeID" phrase="Denominator Type|Whether the measurement denominator is a frequency or cost calculation" sample="Frequency" codeTypeID="71"/>
+		<TableField name="StandardBase" type="float" validate="Number" phrase="Standard Base|The base value to be used for purposes of standardizing the data comparison" sample="200,000"/>
+		<TableField name="ChartTypeID" type="int" validate="RequireSelection" phrase="Chart Type|The type of chart to be used to display the measurement" sample="3"/>
+		<CodeField name="ChartType" key="ChartTypeID" phrase="Chart Type|The type of chart to be used to display the measurement" sample="Histogram" codeTypeID="44"/>
+		<TableField name="XIntervalValue" type="float" validate="Number" phrase="Interval Value (x axis)|The value associated with the 'x' axis interval" sample="7"/>
+		<TableField name="XIntervalID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="XIntervalUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="XIntervalID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="XIntervalUnitCategory" key="XIntervalUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="XInterval" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="XIntervalID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="MeasurementStartDate" type="date" validate="notEmpty" phrase="Start Date|The starting date of the measurement period for charting purposes" sample="09-28-2003"/>
+		<TableField name="MeasurementEndDate" type="date" validate="notEmpty" phrase="End Date|The ending date of the measurement period for charting purposes" sample="09-28-2003"/>
+		<TableField name="Resultant" type="float" validate="Number" phrase="Resultant|The rate which results from the calculation of the numerator module, organization, and type divided by the denominator module, organization, and type" sample="7.8"/>
+		<!--calculated field-->
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'mea'" localKey="MeasurementID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="MeasurementTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Resultant"/></CombinedField>
+		<CombinedField name="Measurement" phrase="Measurement|A combined field used to describe this measurement when associating it with related records" sample="Ratio; Suggestion Rate; Active Agenda, HQ"><CombinedFieldRef name="MeasurementTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="MeasurementID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Measurement"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="meaa" name="Measurement Assignments" parentKey="MeasurementID" localKey="MeasurementID"/>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="MeasurementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="mea"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List organizational measurements">
+			<ListField name="MeasurementID" phrase="Record ID"/>
+			<ListField name="MeasurementTitle" phrase="Measurement Title"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+			<ListField name="MeasurementOriginDate" phrase="Origin Date"/>
+			<ListField name="MeasurementStatus" phrase="Measurement Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search organizational measurements">
+			<EditField name="MeasurementTitle" size="75" maxLength="128"/>
+			<EditField name="BenchmarkValue" size="10" maxLength="10"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="MeasurementOriginDate"/>
+			<CodeComboField name="MeasurementStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="2" name="Discontinued"/>
+				<SampleItem ID="3" name="Postponed"/>
+			</CodeComboField>
+			<EditField name="NumeratorTitle" size="75" maxLength="128"/>
+			<ComboField name="NumeratorModuleID" findMode="text">
+				<SampleItem ID="1" name="Hazard Abatement"/>
+				<SampleItem ID="2" name="Costs"/>
+				<SampleItem ID="3" name="Corrective Actions"/>
+			</ComboField>
+			<OrgComboField name="NumeratorOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="NumeratorTypeID">
+				<SampleItem ID="1" name="Frequency"/>
+				<SampleItem ID="2" name="Cost"/>
+			</CodeRadioField>
+			<EditField name="DenominatorTitle" size="75" maxLength="128"/>
+			<ComboField name="DenominatorModuleID" findMode="text">
+				<SampleItem ID="1" name="Hazard Abatement"/>
+				<SampleItem ID="2" name="Costs"/>
+				<SampleItem ID="3" name="Corrective Actions"/>
+			</ComboField>
+			<OrgComboField name="DenominatorOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="DenominatorTypeID">
+				<SampleItem ID="1" name="Frequency"/>
+				<SampleItem ID="2" name="Cost"/>
+			</CodeRadioField>
+			<EditField name="Resultant" size="10" maxLength="10"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an organizational measurement">
+			<ViewField name="MeasurementID"/>
+			<ViewField name="MeasurementTitle"/>
+			<ViewField name="MeasurementPurpose"/>
+			<ViewField name="MeasurementRationale"/>
+			<ViewField name="BenchmarkDescription"/>
+			<ViewField name="BenchmarkValue"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="MeasurementOriginDate"/>
+			<ViewField name="MeasurementStatus"/>
+			<ViewField name="NumeratorTitle"/>
+			<ViewField name="NumeratorModule"/>
+			<ViewField name="NumeratorOrganization"/>
+			<ViewField name="NumeratorType"/>
+			<ViewField name="DenominatorTitle"/>
+			<ViewField name="DenominatorModule"/>
+			<ViewField name="DenominatorOrganization"/>
+			<ViewField name="DenominatorType"/>
+			<ViewField name="StandardBase"/>
+			<ViewField name="ChartType"/>
+			<ViewField name="XIntervalValue">
+				<ViewField name="XInterval"/>
+			</ViewField>
+			<ViewField name="MeasurementStartDate"/>
+			<ViewField name="MeasurementEndDate"/>
+			<ViewField name="Resultant"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="meaa"/>
+				<ViewGrid moduleID="valc"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an organizational measurement">
+			<ViewField name="MeasurementID"/>
+			<EditField name="MeasurementTitle" size="75" maxLength="128"/>
+			<MemoField name="MeasurementPurpose" rows="5" cols="75"/>
+			<MemoField name="MeasurementRationale" rows="5" cols="75"/>
+			<MemoField name="BenchmarkDescription" rows="5" cols="75"/>
+			<EditField name="BenchmarkValue" size="10" maxLength="10"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="MeasurementOriginDate"/>
+			<CodeComboField name="MeasurementStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="2" name="Discontinued"/>
+				<SampleItem ID="3" name="Postponed"/>
+			</CodeComboField>
+			<EditField name="NumeratorTitle" size="75" maxLength="128"/>
+			<ComboField name="NumeratorModuleID" findMode="text">
+				<SampleItem ID="1" name="Hazard Abatement"/>
+				<SampleItem ID="2" name="Costs"/>
+				<SampleItem ID="3" name="Corrective Actions"/>
+			</ComboField>
+			<OrgComboField name="NumeratorOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="NumeratorTypeID">
+				<SampleItem ID="1" name="Frequency"/>
+				<SampleItem ID="2" name="Cost"/>
+			</CodeRadioField>
+			<EditField name="DenominatorTitle" size="75" maxLength="128"/>
+			<ComboField name="DenominatorModuleID" findMode="text">
+				<SampleItem ID="1" name="Hazard Abatement"/>
+				<SampleItem ID="2" name="Costs"/>
+				<SampleItem ID="3" name="Corrective Actions"/>
+			</ComboField>
+			<OrgComboField name="DenominatorOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="DenominatorTypeID">
+				<SampleItem ID="1" name="Frequency"/>
+				<SampleItem ID="2" name="Cost"/>
+			</CodeRadioField>
+			<EditField name="StandardBase" size="25" maxLength="25"/>
+			<CodeComboField name="ChartTypeID">
+				<SampleItem ID="1" name="Histogram"/>
+				<SampleItem ID="2" name="Line"/>
+				<SampleItem ID="3" name="Pie"/>
+			</CodeComboField>
+			<EditField name="XIntervalValue" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="XIntervalUnitCategoryID">
+					<UpdateFieldRef name="XIntervalID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="XIntervalID" parentField="XIntervalUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<DateField name="MeasurementStartDate"/>
+			<DateField name="MeasurementEndDate"/>
+			<ViewField name="Resultant"/>
+		</EditScreen>
+		<EditScreen name="Assignments" phrase="Assignments|Assign the measurement to additional organizations">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="meaa"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values considerations with an organizational measurement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="valc"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with an organizational measurement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the measurement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the measurement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical measurement file">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with an organizational measurement">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with an organizational measurement" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="MeasurementID"/>
+		<ViewField name="MeasurementTitle"/>
+		<ViewField name="MeasurementPurpose"/>
+		<ViewField name="MeasurementRationale"/>
+		<ViewField name="BenchmarkDescription"/>
+		<ViewField name="BenchmarkValue"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="MeasurementOriginDate"/>
+		<ViewField name="MeasurementStatus"/>
+	</RecordSummaryFields>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

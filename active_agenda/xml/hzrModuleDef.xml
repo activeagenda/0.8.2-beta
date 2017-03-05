@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Hazard Reporting" moduleID="hzr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Hazard Report" pluralRecordName="Hazard Reports" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="HazardID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track reported hazards" sample="11"/>
+		<TableField name="HazardTitle" type="varchar(128)" validate="notEmpty" phrase="Report Title|A brief title used to identify the reported hazard" sample="Step Ladder Between Roof Tops"/>
+		<TableField name="Description" type="text" validate="noValidation" phrase="Report Description|A detailed description of the hazard report" sample="A step ladder is being used to travel between roof tops"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization reporting the hazard" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization reporting the hazard" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="147" phrase="Person Accountable|The individual assigned primary accountability for managing and mitigating the identified hazards" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing and mitigating the identified hazards" sample="Mattias Thorslund"/>
+		<RemoteField name="SubmittalDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="43" phrase="Submittal Date|Date the hazard abatement item was submitted by the person reporting the hazard" sample="01/01/2004"/>
+		<TableField name="ReceivedDate" type="datetime" validate="RequireSelection" phrase="Received Date|The date and time the hazard report was received by the hazard abatement program administrator" sample="01/01/2004"/>
+		<CalculatedField name="ReceivingDelay" type="int" calcFunction="timediff" params="ReceivedDate SubmittalDate" validate="" phrase="Receiving Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was received" sample="30"/>
+		<RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="System Entry Date|The date and time the hazard report was entered into the system" sample="01/01/2004 12:02:34"/>
+		<CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate SubmittalDate" validate="" phrase="Entry Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was entered into the system" sample="30"/>
+		<RemoteField name="ResolvedDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="23" phrase="Resolution Date|The date and time the hazard was resolved" sample="01/01/2004"/>
+		<CalculatedField name="ResolutionDelay" type="int" calcFunction="timediff" params="ResolvedDate SubmittalDate" validate="" phrase="Resolution Delay|A calculated field based on the amount of time between the date the hazard was submitted and the date the hazard was resolved" sample="30"/>
+		<RemoteField name="PersonReportingID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="30" phrase="Person Reporting|The name of the individual that reported the hazard" sample="1"/>
+		<ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the hazard" sample="Jane Doe"/>
+		<TableField name="ReportSourceID" type="int" validate="RequireSelection" phrase="Source of Report|Original source of the hazard report" sample="1"/>
+		<CodeField name="ReportSource" key="ReportSourceID" phrase="Source of Report|Original source of the hazard report" sample="Awaiting Assignment" codeTypeID="236"/>
+		<TableField name="HazAbateStatusID" type="int" validate="RequireSelection" phrase="Status|Status of the abatement activity to mitigate the hazard" sample="2"/>
+		<CodeField name="HazAbateStatus" key="HazAbateStatusID" phrase="Status|Status of the abatement activity to mitigate the hazard" sample="Awaiting Assignment" codeTypeID="162"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="HazardID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'hzr'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the reported hazard" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="HazardID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'hzr'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the reported hazard" sample="702.00"/>
+		<CombinedField name="ReceivingDelayCalc" phrase="Receiving Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was received" sample="30 Hours"><CombinedFieldRef name="ReceivingDelay"/>_Hours</CombinedField>
+		<CombinedField name="EntryDelayCalc" phrase="Entry Delay|A calculated field based on the amount of time between the date the hazard report was submitted and the date the hazard report was entered into the system" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours</CombinedField>
+		<CombinedField name="ResponseDelayCalc" phrase="Resolution Delay|A calculated field based on the amount of time between the date the hazard was submitted and the date the hazard was resolved" sample="30 Hours"><CombinedFieldRef name="ResolutionDelay"/>_Hours</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Step Ladder Used as Bridge Between Roof Tops | Active Agenda, Inc. | Ongoing"><CombinedFieldRef name="HazardTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="HazAbateStatus"/></CombinedField>
+		<CombinedField name="Hazard" phrase="Hazard Abatement Item|A combined field used to describe this hazard abatement item when associated with general hazards" sample="Step Ladder Between Roof Tops, Active Agenda, HQ, Packaging Area, Awaiting Assignment"><CombinedFieldRef name="HazardTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="HazardID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Hazard"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="hza" name="Hazards" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Exposures" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="HazardID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="hzr"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List hazard reports">
+			<ListField name="HazardID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="HazardTitle" phrase="Hazard Report Title"/>
+			<ListField name="SubmittalDate" phrase="Submitted"/>
+			<ListField name="HazAbateStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search hazard reports">
+			<EditField name="HazardTitle" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ReportSourceID" findMode="alpha">
+                <SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="2" name="Internal Audit"/>
+				<SampleItem ID="3" name="External Audit"/>
+				<SampleItem ID="4" name="Contractor Report"/>
+				<SampleItem ID="5" name="Visitor Report"/>
+				<SampleItem ID="6" name="Regulatory Visit"/>
+				<SampleItem ID="7" name="Customer Report"/>
+				<SampleItem ID="8" name="Claim of Loss"/>
+			</CodeComboField>
+			<CodeComboField name="HazAbateStatusID">
+				<SampleItem ID="2" name="Awaiting Assignment"/>
+				<SampleItem ID="4" name="In Work"/>
+				<SampleItem ID="11" name="Mitigated"/>
+				<SampleItem ID="12" name="Self Resolved"/>
+			</CodeComboField>
+			<DateField name="SubmittalDate"/>
+			<DateField name="ReceivedDate"/>
+			<DateField name="EntryDate"/>
+			<DateField name="ResolvedDate"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a hazard">
+			<ViewField name="HazardID"/>
+			<ViewField name="HazardTitle"/>
+			<ViewField name="Description"/>
+			<ViewField name="PersonReporting"/>
+			<ViewField name="SubmittalDate"/>
+			<ViewField name="ReceivedDate"/>
+			<ViewField name="EntryDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ReportSource"/>
+			<ViewField name="HazAbateStatus"/>
+			<ViewField name="ResolvedDate"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+				<ViewField name="SubmittalDate"/>
+				<ViewField name="ReceivedDate"/>
+				<ViewField name="ReceivingDelayCalc"/>
+				<ViewField name="EntryDate"/>
+				<ViewField name="EntryDelayCalc"/>
+				<ViewField name="ResolvedDate"/>
+				<ViewField name="ResponseDelayCalc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a hazard">
+			<ViewField name="HazardID"/>
+			<EditField name="HazardTitle" size="75" maxLength="128"/>
+			<MemoField name="Description" rows="5" cols="75"/>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="SubmittalDate"/>
+			<DateField name="ReceivedDate"/>
+			<ViewField name="EntryDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ReportSourceID" findMode="alpha">
+                <SampleItem ID="1" name="Employee"/>
+				<SampleItem ID="2" name="Internal Audit"/>
+				<SampleItem ID="3" name="External Audit"/>
+				<SampleItem ID="4" name="Contractor Report"/>
+				<SampleItem ID="5" name="Visitor Report"/>
+				<SampleItem ID="6" name="Regulatory Visit"/>
+				<SampleItem ID="7" name="Customer Report"/>
+				<SampleItem ID="8" name="Claim of Loss"/>
+			</CodeComboField>
+			<CodeComboField name="HazAbateStatusID">
+				<SampleItem ID="2" name="Awaiting Assignment"/>
+				<SampleItem ID="4" name="In Work"/>
+				<SampleItem ID="11" name="Mitigated"/>
+				<SampleItem ID="12" name="Self Resolved"/>
+			</CodeComboField>
+			<DateField name="ResolvedDate"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate general hazards with the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Exposures" phrase="Exposures|Associate cost exposures with the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the hazard report">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the hazard report" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="Reports" phrase="Reports|View reports for this hazard report"/>
+        <ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="HazardID"/>
+		<ViewField name="HazardTitle"/>
+		<ViewField name="Description"/>
+		<ViewField name="PersonReporting"/>
+		<ViewField name="SubmittalDate"/>
+		<ViewField name="ReceivedDate"/>
+		<ViewField name="EntryDate"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="ReportSource"/>
+		<ViewField name="HazAbateStatus"/>
+		<ViewField name="ResolvedDate"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Hazard Abatement Reports By Status">
+			<GroupByField name="HazAbateStatus"/>
+			<SummaryField name="HazardID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Hazard Abatement Reports By Status">
+			<GroupByField name="HazAbateStatus"/>
+			<SummaryField name="HazardID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Hazard Abatement Reports By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="HazardID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Hazard Abatement Reports By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="HazardID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Hazard Abatement Reports By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="HazardID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Hazard Abatement Reports By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="HazardID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Hazard Abatement Reports By Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="HazardID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Hazard Abatement Reports By Source">
+			<GroupByField name="ReportSource"/>
+			<SummaryField name="HazardID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

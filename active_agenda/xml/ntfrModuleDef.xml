@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Notification Recipients" moduleID="ntfr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Notification Recipient" pluralRecordName="Notification Recipients" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="NotificationRecipientID" type="int" dbFlags="unsigned not null auto_increment" phrase="Record ID|An automatically assigned number used to track notifications" sample="1"/>
+		<TableField name="NotificationID" type="int" dbFlags="unsigned not null" phrase="Notification ID|The automatically assigned number used to track notifications" sample="1"/>
+		<TableField name="RecipientID" type="int" dbFlags="not null" phrase="Person|The person who is the recipient of the notification" sample="John Q. Public, Jr."/>
+		<ForeignField name="Recipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="RecipientID" joinType="left" phrase="Person ID|The person who is the recipient of the notification" sample="John Q. Public, Jr."/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="RecipientID" joinType="left" phrase="Organization ID|The organization of the person who is the recipient of the notification" sample="John Q. Public, Jr."/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Person ID|The organization of the person who is the recipient of the notification" sample="John Q. Public, Jr."/>
+		<TableField name="StatusID" type="int" dbFlags="default 1" phrase="Status|The current status of the notification" sample="1"/>
+		<CodeField name="Status" key="StatusID" phrase="Status|The current status of the notification" sample="In Preparation" codeTypeID="32"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, HQ: Warehouse"><CombinedFieldRef name="NotificationID"/>;_
+            <CombinedFieldRef name="Recipient"/></CombinedField>
+		<CombinedField name="NotificationRecipient" phrase="Notification Recipient|A combined field used to describe this notification recipient when associating it with other records" sample="Corrective Actions | The AffectedPerson phrase needs to have a space inserted between the words Affected and Person | Resolved"><CombinedFieldRef name="NotificationRecipientID"/>_-_
+            <CombinedFieldRef name="NotificationID"/>_-_
+            <CombinedFieldRef name="Recipient"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="NotificationRecipientID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OwnerOrganizationID"/>-->
+		<RecordDescriptionField name="NotificationRecipient"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Exports>
+		<ViewGrid moduleID="ntfr" phrase="Notification Recipients">
+			<InvisibleField name="NotificationRecipientID"/>
+			<ViewField name="Recipient" sample="John Q. Public, Jr."/>
+			<ViewField name="Status" sample="Sent"/>
+		</ViewGrid>
+		<SearchSelectGrid moduleID="ntfr" phrase="Notification Recipients" primaryListField="Recipient">
+			<SearchForm>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda Sweden"/>
+					<SampleItem ID="3" name="Active Agenda Latvia"/>
+				</OrgComboField>
+			</SearchForm>
+		</SearchSelectGrid>
+	</Exports>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

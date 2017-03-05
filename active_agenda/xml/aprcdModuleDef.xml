@@ -1,0 +1,366 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Asset Protection Checklist Deficiencies" parentModule="aprcd" moduleID="aprcd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Checklist Deficiency" pluralRecordName="Checklist Deficiencies" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ChecklistDeficiencyID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track checklist review deficiencies and remediation activities" sample="1"/>
+		<TableField name="ChecklistHistoryID" type="int" phrase="Checklist History|A combined field used to describe this checklist history when associating it with other records" sample="1"/>
+		<ForeignField name="ReviewDate" foreignTable="aprch" foreignKey="ChecklistHistoryID" foreignField="ReviewDate" key="ChecklistHistoryID" joinType="left" phrase="Review Date|Date the checklist review was performed" sample="01/01/2004"/>
+		<ForeignField name="ChecklistHistory" foreignTable="aprch" foreignKey="ChecklistHistoryID" foreignField="ChecklistHistory" key="ChecklistHistoryID" joinType="left" phrase="Checklist History|A combined field used to describe this checklist history when associating it with other records" sample="Maintenance Shop Paint Area Review | Active Agenda, HQ | Mattias Thorslund | 01/01/2004"/>
+		<TableField name="AssetProtectID" type="int" dbFlags="unsigned not null" phrase="Item|A combined field used to describe this checklist item when associating it with other records" sample="1"/>
+		<ForeignField name="AssetProtect" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtect" key="AssetProtectID" joinType="left" phrase="Item|A combined field used to describe this checklist item when associating it with other records" sample="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+		<ForeignField name="ReviewOrganizationID" defaultValue="defaultorgID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="ReviewOrganizationID" key="AssetProtectID" joinType="left" phrase="Review Organization|The organization where this item is located and can be reviewed" sample="1"/>
+		<ForeignField name="ReviewOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ReviewOrganizationID" joinType="left" phrase="Review Organization|The organization where this item is located and can be reviewed" sample="Active Agenda, HQ"/>
+		<ForeignField name="ReviewLocationID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="ReviewLocationID" key="AssetProtectID" joinType="left" phrase="Review Location|Specific location within the facility where the item is located and can be reviewed" sample="1"/>
+		<ForeignField name="ReviewLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="ReviewLocationID" joinType="left" phrase="Review Location|Specific location within the facility where the item is located and can be reviewed" sample="Packaging Area"/>
+		<ForeignField name="AssetProtectInstruct" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtectInstruct" key="AssetProtectID" joinType="left" phrase="Instructions|Brief instructions for the person performing the asset protection activity" sample="Perform an inventory count, record the results, and update the inventory balance within the equipment inventory module. If the count does not balance, the Accounting Deaprtment should be apprised of all discrepencies."/>
+		<ForeignField name="AcceptableCriteria" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AcceptableCriteria" key="AssetProtectID" joinType="left" phrase="Acceptable Criteria|A brief description of the acceptable criteria for this asset" sample="Inventory counts should balance with the existing inventory level entered into the equipment inventory module."/>
+		<TableField name="DeficiencyTitle" type="varchar(128)" validate="notEmpty" phrase="Deficiency Title|A short phrase or title used to identify the deficiency identified" sample="Respirators covered in dust"/>
+		<TableField name="Deficiency" type="text" validate="noValidation" phrase="Deficiency|A detailed description of the deficiency identified" sample="The 3710 respirators are coated with dust from the grinder, sander and paint booth. The respirators have been coated due to their proximity to the paint work area and the fact that they are hanging, unprotected, from an adjacent paint vice stand"/>
+		<TableField name="Remediation" type="text" validate="noValidation" phrase="Remedy|A detailed description of the remediation steps taken and/or suggested" sample="The respirators were replace and a work order was generated to install a sealable respirator cabinet in the paint area. Remediation training should be scheduled for all Painters regarding respiratory protection standards and the Painter Job Analysis."/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="12" phrase="Person Accountable|The name of the individual assigned primary accountability for mitigating the checklist item deficiency" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the individual assigned primary accountability for mitigating the checklist item deficiency" sample="Mattias Thorslund"/>
+		<TableField name="DeficiencyStatusID" type="int" validate="RequireSelection" phrase="Deficiency Status|Mitigation status of the identified deficiency" sample="1"/>
+		<CodeField name="DeficiencyStatus" key="DeficiencyStatusID" phrase="Deficiency Status|Mitigation status of the identified deficiency" sample="Resolved" codeTypeID="131"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ReviewDate"/>;_<CombinedFieldRef name="AssetProtect"/>;_<CombinedFieldRef name="DeficiencyStatus"/></CombinedField>
+		<CombinedField name="ChecklistDeficiency" phrase="Check List Deficiency|A combined field used to describe this checklist deficiency when associating it with other records" sample="01/01/2004 | Equipment | ID:1 | 3M | 3710 Air Purifying Respirator | Resolved"><CombinedFieldRef name="DeficiencyTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChecklistDeficiencyID"/>
+		</PrimaryKey>
+		<OwnerField name="ReviewOrganizationID"/>
+		<RecordDescriptionField name="ChecklistDeficiency"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="wrk" name="Work Orders" parentKey="ChecklistDeficiencyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprcd"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List checklist deficiencies">
+			<ListField name="ChecklistDeficiencyID" phrase="Record ID"/>
+			<ListField name="ChecklistHistory" phrase="Checklist History"/>
+			<ListField name="AssetProtect" phrase="Defficient Item"/>
+			<ListField name="DeficiencyStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search checklist deficiencies">
+			<ComboField name="ChecklistHistoryID">
+				<SampleItem ID="1" name="Maintenance Shop Paint Area Review | Active Agenda, HQ | Mattias Thorslund | 01/01/2004"/>
+				<SampleItem ID="2" name="Maintenance Shop Review | Active Agenda, HQ | Mattias Thorslund | 01/01/2004"/>
+			</ComboField>
+			<DateField name="ReviewDate"/>
+			<OrgComboField name="ReviewOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ReviewLocationID" findMode="text">
+				<SampleItem ID="1" name="Main Processing, Production Room"/>
+				<SampleItem ID="2" name="Maintenance Shop, Equipment Cage"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="4" name="Administrative Office"/>
+				<SampleItem ID="5" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="AssetProtectID" findMode="text">
+				<SampleItem ID="1" name="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+				<SampleItem ID="2" name="Equipment | ID:45 | 3M | 3712 Self Contained Breathing Apparatus"/>
+				<SampleItem ID="3" name="Equipment | ID:143 | 3M | 3715 Air Purifying Respirator"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="DeficiencyTitle" size="75" maxLength="128"/>
+			<CodeComboField name="DeficiencyStatusID">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Not Resolved"/>
+				<SampleItem ID="3" name="In Progress"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a checklist deficiency">
+			<ViewField name="ChecklistDeficiencyID"/>
+			<ViewField name="ChecklistHistory"/>
+			<ViewField name="ReviewOrganization"/>
+			<ViewField name="ReviewLocation"/>
+			<ViewField name="AssetProtect"/>
+			<ViewField name="AssetProtectInstruct"/>
+			<ViewField name="AcceptableCriteria"/>
+			<ViewField name="DeficiencyTitle"/>
+			<ViewField name="Deficiency"/>
+			<ViewField name="Remediation"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="DeficiencyStatus"/>
+			<ViewGrid moduleID="wrk"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Associate checklist deficiencies with checklist reviews">
+			<ViewField name="ChecklistDeficiencyID"/>
+			<ViewField name="ChecklistHistory"/>
+			<OrgComboField name="ReviewOrganizationID" findMode="text">
+				<UpdateFieldRef name="ReviewLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ReviewLocationID" findMode="text" parentField="ReviewOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="AssetProtectID"/>
+				<SampleItem ID="1" name="Main Processing, Production Room"/>
+				<SampleItem ID="2" name="Maintenance Shop, Equipment Cage"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="4" name="Administrative Office"/>
+				<SampleItem ID="5" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="AssetProtectID" findMode="text" parentField="ReviewLocationID">
+				<SampleItem ID="1" name="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+				<SampleItem ID="2" name="Equipment | ID:45 | 3M | 3712 Self Contained Breathing Apparatus"/>
+				<SampleItem ID="3" name="Equipment | ID:143 | 3M | 3715 Air Purifying Respirator"/>
+			</ComboField>
+			<ViewField name="AssetProtectInstruct"/>
+			<ViewField name="AcceptableCriteria"/>
+			<EditField name="DeficiencyTitle" size="75" maxLength="128"/>
+			<MemoField name="Deficiency" rows="5" cols="75"/>
+			<MemoField name="Remediation" rows="5" cols="75"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="DeficiencyStatusID">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Not Resolved"/>
+				<SampleItem ID="3" name="In Progress"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="WorkOrders" phrase="Orders|Associate work orders with a checklist deficiency">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="wrk"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChecklistDeficiencyID"/>
+		<ViewField name="ChecklistHistory"/>
+		<ViewField name="ReviewOrganization"/>
+		<ViewField name="ReviewLocation"/>
+		<ViewField name="AssetProtect"/>
+        <ViewField name="DeficiencyTitle"/>
+		<ViewField name="Deficiency"/>
+		<ViewField name="Remediation"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="DeficiencyStatus"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="aprcd" phrase="Deficiencies">
+			<InvisibleField name="ChecklistDeficiencyID"/>
+			<ViewField name="ReviewOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ReviewLocation" sample="Development Nook"/>
+			<ViewField name="AssetProtect" sample="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+			<ViewField name="DeficiencyTitle" sample="The computers are plugged into chains of surge protectors"/>
+			<ViewField name="Remediation" sample="Seven new outlets were installed"/>
+			<ViewField name="PersonAccountable" sample="Dan Zahlis"/>
+			<ViewField name="DeficiencyStatus" sample="Mitigated"/>
+		</ViewGrid>
+		<EditGrid moduleID="aprcd" phrase="Checklist Deficiencies">
+			<GridForm>
+				<InvisibleField name="ChecklistDeficiencyID"/>
+				<OrgComboField name="ReviewOrganizationID" findMode="text">
+					<UpdateFieldRef name="ReviewLocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<ComboField name="ReviewLocationID" findMode="text" parentField="ReviewOrganizationID" parentListModuleField="OrganizationID">
+					<UpdateFieldRef name="AssetProtectID"/>
+					<SampleItem ID="1" name="Main Processing, Production Room"/>
+					<SampleItem ID="2" name="Maintenance Shop, Equipment Cage"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="4" name="Administrative Office"/>
+					<SampleItem ID="5" name="Production Line #1"/>
+				</ComboField>
+				<ComboField name="AssetProtectID" findMode="text" parentField="ReviewLocationID">
+					<SampleItem ID="1" name="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+					<SampleItem ID="2" name="Equipment | ID:45 | 3M | 3712 Self Contained Breathing Apparatus"/>
+					<SampleItem ID="3" name="Equipment | ID:143 | 3M | 3715 Air Purifying Respirator"/>
+				</ComboField>
+                <EditField name="DeficiencyTitle" size="75" maxLength="128"/>
+				<MemoField name="Deficiency" rows="5" cols="75"/>
+				<MemoField name="Remediation" rows="5" cols="75"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="DeficiencyStatusID">
+					<SampleItem ID="1" name="Resolved"/>
+					<SampleItem ID="2" name="Not Resolved"/>
+					<SampleItem ID="3" name="In Progress"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="ChecklistDeficiencyID"/>
+			<ViewField name="ReviewOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ReviewLocation" sample="Development Nook"/>
+			<ViewField name="AssetProtect" sample="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+			<ViewField name="DeficiencyTitle" sample="The computers are plugged into chains of surge protectors"/>
+			<ViewField name="DeficiencyStatus" sample="Mitigated"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Checklist Deficiencies By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Checklist Deficiencies By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Checklist Deficiencies By Organization">
+			<GroupByField name="ReviewOrganization"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Checklist Deficiencies By Organization">
+			<GroupByField name="ReviewOrganization"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Checklist Deficiencies By Review Location">
+			<GroupByField name="ReviewLocation"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Checklist Deficiencies By Review Location">
+			<GroupByField name="ReviewLocation"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Checklist Deficiencies By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Checklist Deficiencies By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Checklist Deficiencies By Status">
+			<GroupByField name="DeficiencyStatus"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Checklist Deficiencies By Status">
+			<GroupByField name="DeficiencyStatus"/>
+			<SummaryField name="ChecklistDeficiencyID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

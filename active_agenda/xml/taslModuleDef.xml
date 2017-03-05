@@ -1,0 +1,407 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Lifting Tasks" moduleID="tasl" parentModule="tas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Lifting Task" pluralRecordName="Lifting Tasks" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LiftingID" type="int" dbFlags="unsigned auto_increment not null" phrase="Lifting ID|An automatically assigned number used to associate lifting activities with organizational tasks" sample="45"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the task" sample="eqp"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the task" sample="Equipment"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the task is performed" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the task is performed" sample="Active Agenda, Inc."/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		<TableField name="LiftTaskTitle" type="varchar(128)" validate="notEmpty" phrase="Lift Task Title|A short phrase used to describe the task lifting requirements" sample="Lift 45 pound bags of sugar"/>
+		<TableField name="LiftWeight" type="float" validate="Number notEmpty notNegative" phrase="Lift Weight|The amount of weight lifted during this task over a stated duration" sample="50"/>
+		<TableField name="WeightUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="WeightUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="WeightUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="WeightUnitCategory" key="WeightUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="WeightUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="WeightUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="LiftHeight" type="float" validate="Number notEmpty notNegative" phrase="Lift Height|The height this weight must be lifted during the performance of this task" sample="3"/>
+		<TableField name="DistanceUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="DistanceUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="DistanceUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="DistanceUnitCategory" key="DistanceUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="DistanceUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="DistanceUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="LiftDuration" type="float" validate="Number notEmpty notNegative" phrase="Duration|The duration of the lifting activity" sample="1"/>
+		<TableField name="TimeUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="TimeUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TimeUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="TimeUnitCategory" key="TimeUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="TimeUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TimeUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="Frequency" type="float" validate="Number notEmpty notNegative" phrase="Cycles Per Duration|The frequency of repetitive cycles occurring over the duration of the lifting activity" sample="3"/>
+		<TableField name="LiftingDesc" type="text" validate="notEmpty" phrase="Lifting Description|A detailed description of the lifting activity associated with the task" sample="The operator must lift fifty pound bags of sugar two times per hour."/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="CycleFrequency" phrase="Frequency|A combined field used to describe the cycle frequency of the task" sample="25 pounds"><CombinedFieldRef name="Frequency"/>_time(s)_every_<CombinedFieldRef name="LiftDuration"/>_<CombinedFieldRef name="TimeUnit"/></CombinedField>
+		<CombinedField name="LiftingWeight" phrase="Lifting Weight|A combined field used to describe the lifting weight requirements of the task" sample="25 pounds"><CombinedFieldRef name="LiftWeight"/>_<CombinedFieldRef name="WeightUnit"/></CombinedField>
+		<CombinedField name="LiftingHeight" phrase="Lifting Height|A combined field used to describe the lifting height requirements of the task" sample="5 feet"><CombinedFieldRef name="LiftHeight"/>_<CombinedFieldRef name="DistanceUnit"/></CombinedField>
+		<CombinedField name="LiftingDuration" phrase="Lifting Duration|A combined field used to describe the lifting duration requirements of the task" sample="5 feet"><CombinedFieldRef name="LiftDuration"/>_<CombinedFieldRef name="TimeUnit"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="LiftTaskTitle"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+		<CombinedField name="Lifting" phrase="Lifting|A combined field used to describe this lifting activity when associating it with other records" sample="Active Agenda, HQ | Sugar coating raisins on the sugar shaker"><CombinedFieldRef name="LiftTaskTitle"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LiftingID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="Lifting"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List lifting activities associated with tasks">
+			<ListField name="LiftingID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="LiftTaskTitle" phrase="Lift Task Title"/>
+            <ListField name="CycleFrequency" phrase="Frequency"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search lifting activities associated with tasks">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<EditField name="LiftTaskTitle" size="75" maxLength="128"/>
+			<EditField name="LiftWeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="WeightUnitCategoryID">
+					<UpdateFieldRef name="WeightUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="WeightUnitID" parentField="WeightUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="LiftHeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="DistanceUnitCategoryID">
+					<UpdateFieldRef name="DistanceUnitID"/>
+					<SampleItem ID="1" name="Distance"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="DistanceUnitID" parentField="DistanceUnitCategoryID">
+					<SampleItem ID="1" name="Millimeter"/>
+					<SampleItem ID="2" name="Centimeter"/>
+					<SampleItem ID="3" name="Decimeter"/>
+					<SampleItem ID="4" name="Meter"/>
+				</ComboField>
+			</EditField>
+			<EditField name="LiftDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TimeUnitCategoryID">
+					<UpdateFieldRef name="TimeUnitID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<EditField name="Frequency" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a lifting activity associated with an organizational task">
+			<ViewField name="LiftingID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="LiftTaskTitle"/>
+			<ViewField name="LiftWeight">
+				<ViewField name="WeightUnit"/>
+			</ViewField>
+			<ViewField name="LiftHeight">
+				<ViewField name="DistanceUnit"/>
+			</ViewField>
+			<ViewField name="LiftDuration">
+				<ViewField name="TimeUnit"/>
+			</ViewField>
+			<ViewField name="Frequency"/>
+			<ViewField name="LiftingDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a lifting activity associated with an organizational task">
+			<ViewField name="LiftingID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<EditField name="LiftTaskTitle" size="75" maxLength="128"/>
+			<EditField name="LiftWeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="WeightUnitCategoryID">
+					<UpdateFieldRef name="WeightUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="WeightUnitID" parentField="WeightUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="LiftHeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="DistanceUnitCategoryID">
+					<UpdateFieldRef name="DistanceUnitID"/>
+					<SampleItem ID="1" name="Distance"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="DistanceUnitID" parentField="DistanceUnitCategoryID">
+					<SampleItem ID="1" name="Millimeter"/>
+					<SampleItem ID="2" name="Centimeter"/>
+					<SampleItem ID="3" name="Decimeter"/>
+					<SampleItem ID="4" name="Meter"/>
+				</ComboField>
+			</EditField>
+			<EditField name="LiftDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TimeUnitCategoryID">
+					<UpdateFieldRef name="TimeUnitID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<EditField name="Frequency" size="5" maxLength="5"/>
+			<MemoField name="LiftingDesc" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="tasl" phrase="Lifting">
+			<InvisibleField name="LiftingID"/>
+			<ViewField name="LiftTaskTitle" sample="Lift 45 pound bags of sugar"/>
+			<ViewField name="LiftWeight" sample="10"/>
+			<ViewField name="WeightUnit" sample="Pound/s"/>
+			<ViewField name="LiftHeight" sample="1">
+				<ViewField name="DistanceUnit" sample="Meter/s"/>
+			</ViewField>
+			<ViewField name="LiftDuration" sample="3">
+				<ViewField name="TimeUnit" sample="Hour/s"/>
+			</ViewField>
+			<ViewField name="Frequency" sample="5"/>
+		</ViewGrid>
+		<EditGrid moduleID="tasl" phrase="Lifting">
+			<GridForm>
+				<InvisibleField name="LiftingID"/>
+				<EditField name="LiftTaskTitle" size="75" maxLength="128"/>
+				<EditField name="LiftWeight" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="WeightUnitCategoryID">
+						<UpdateFieldRef name="WeightUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="WeightUnitID" parentField="WeightUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<EditField name="LiftHeight" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="DistanceUnitCategoryID">
+						<UpdateFieldRef name="DistanceUnitID"/>
+						<SampleItem ID="1" name="Distance"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+						<SampleItem ID="6" name="Weight"/>
+					</ComboField>
+					<ComboField name="DistanceUnitID" parentField="DistanceUnitCategoryID">
+						<SampleItem ID="1" name="Millimeter"/>
+						<SampleItem ID="2" name="Centimeter"/>
+						<SampleItem ID="3" name="Decimeter"/>
+						<SampleItem ID="4" name="Meter"/>
+					</ComboField>
+				</EditField>
+				<EditField name="LiftDuration" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="TimeUnitCategoryID">
+						<UpdateFieldRef name="TimeUnitID"/>
+						<SampleItem ID="1" name="Time"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="3" name="Distance"/>
+						<SampleItem ID="4" name="Packaging"/>
+						<SampleItem ID="5" name="Volume"/>
+						<SampleItem ID="6" name="Weight"/>
+					</ComboField>
+					<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+						<SampleItem ID="1" name="Second"/>
+						<SampleItem ID="2" name="Minute"/>
+						<SampleItem ID="3" name="Hour"/>
+						<SampleItem ID="4" name="Day"/>
+					</ComboField>
+				</EditField>
+				<EditField name="Frequency" size="5" maxLength="5" sample="5"/>
+				<MemoField name="LiftingDesc" rows="5" cols="75" sample="The operator must lift fifty pound bags of sugar two times per hour."/>
+			</GridForm>
+			<InvisibleField name="LiftingID"/>
+			<ViewField name="LiftTaskTitle" sample="Lift 45 pound bags of sugar"/>
+			<ViewField name="LiftWeight" sample="10">
+				<ViewField name="WeightUnit" sample="Pound/s"/>
+			</ViewField>
+			<ViewField name="LiftHeight" sample="10">
+				<ViewField name="DistanceUnit" sample="Feet"/>
+			</ViewField>
+			<ViewField name="LiftDuration" sample="3">
+				<ViewField name="TimeUnit" sample="Hour/s"/>
+			</ViewField>
+			<ViewField name="Frequency" sample="5"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,404 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Situation Drills" moduleID="sitd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Situation Drill" pluralRecordName="Situation Drill" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="SituationDrillID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track contacts assigned to the occurrence of situations" sample="1"/>
+        <TableField name="SituationID" type="int" dbFlags="unsigned not null" phrase="Situation|The situation being assessed by the drill" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="sit" foreignKey="SituationID" foreignField="OrganizationID" key="SituationID" joinType="left" phrase="Organization|The name of the organization participating in the situation drill" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization participating in the situation drill" sample="Active Agenda, HQ"/>
+        <ForeignField name="SituationTypeID" foreignTable="sit" foreignKey="SituationID" foreignField="SituationTypeID" key="SituationID" joinType="left" phrase="Situation Type|The type of situation being assessed during the drill" sample="1"/>
+		<ForeignField name="SituationCategoryID" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationCategoryID" key="SituationTypeID" joinType="left" phrase="Situation Category|A broadly defined title used to group similar situation types" sample="1"/>
+		<CodeField name="SituationCategory" key="SituationCategoryID" phrase="Situation Category|A broadly defined title used to group similar situation types" sample="Disease" codeTypeID="26"/>
+        <ForeignField name="SituationType" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationType" key="SituationTypeID" joinType="left" phrase="Situation Type|The type of situation being assessed during the drill" sample="Employee injury requiring medical treatment"/>
+        <ForeignField name="LocalDescription" foreignTable="sit" foreignKey="SituationID" foreignField="LocalDescription" key="SituationID" joinType="left" phrase="Description|An detailed description of the situation type associated with the drill" sample="Injuries involving medical treatment are those which require the treatment of a trained physician. Injuries resulting in a visit to the industrial medical provider are not included if those injuries can be addressed by a non-physician."/>
+        <ForeignField name="Situation" foreignTable="sit" foreignKey="SituationID" foreignField="Situation" key="SituationID" joinType="left" phrase="Situation|The situation being assessed by the drill" sample="Injury (employee); Employee injury requiring medical treatment"/>
+		<TableField name="DrillTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A concise title that describes the situation response drill" sample="Laboratory radiation drill"/>
+		<RemoteField name="BeginTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="24" phrase="Begin Date|The date and time the situation response drill is scheduled to begin or began" sample="01/01/2004 2:00:00"/>
+		<TableField name="EndTime" type="datetime" validate="RequireSelection" phrase="End Date|The date and time the situation response drill is scheduled to end or ended" sample="01/01/2004 4:00:00"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="79" phrase="Person Accountable|The name of the person responsible for coordinating the situation response drill" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="SearchSelect" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person responsible for coordinating the situation response drill" sample="Mattias Thorslund"/>
+		<TableField name="DrillScope" type="varchar(255)" validate="noValidation" phrase="Scope|A description of the scope of the situation response drill" sample="This drill is being scheduled for the labarotory only"/>
+		<TableField name="DrillObjective" type="text" validate="noValidation" phrase="Objective|A description of the situation response drill objective" sample="The drill is being conducted to assess labarotory readiness for an unauthorized introduction of radioactive materials into the laboratory environment. The drill is expected to determine the labortory's ability to detect, isolate, and remove the radioactive materials while moving lab employees to safety"/>
+		<TableField name="DrillPlanning" type="text" validate="noValidation" phrase="Planning|A description of the planning steps, and actions taken to simulate the situation" sample="The drill is being conducted to assess labarotory readiness for an unauthorized introduction of radioactive materials into the laboratory environment. The drill is expected to determine the labortory's ability to detect, isolate, and remove the radioactive materials while moving lab employees to safety"/>
+		<TableField name="KeyLearning" type="text" validate="noValidation" phrase="Key Learning|A detailed description of key learning that should be incorporated into the organization's situation response readiness" sample="We learned that the back doors of the laboratory had been padlocked to prevent employees from using these doors for smoking breaks. The doors will need to have alarms installed and remain unlocked during business hours."/>
+		<TableField name="DrillStatusID" type="int" defaultValue="#1" dbFlags="default 2" validate="RequireSelection" phrase="Drill Status|The status of the drill regarding the incorporation of key learning" sample="1"/>
+		<CodeField name="DrillStatus" key="DrillStatusID" phrase="Drill Status|The status of the drill regarding the incorporation of key learning" sample="Leraning Incorporated" codeTypeID="277"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Laboratory radiation drill; 01-01-2004 2:00:00; Learning Incorporated"><CombinedFieldRef name="DrillTitle"/>;_<CombinedFieldRef name="BeginTime"/>;_<CombinedFieldRef name="DrillStatus"/></CombinedField>
+        <CombinedField name="SituationDrill" phrase="Situation Contact|A combined field used to describe this situation drill when associating it with other records" sample="Laboratory radiation drill; 01-01-2004 2:00:00; Learning Incorporated"><CombinedFieldRef name="DrillTitle"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="SituationDrillID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="SituationDrill"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="sitdp" name="Drill Participants" parentKey="SituationDrillID" localKey="SituationDrillID"/>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="SituationDrillID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitd"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="SituationDrillID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitd"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SituationDrillID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitd"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SituationDrillID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitd"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SituationDrillID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitd"/>
+		</SubModule>
+	</SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List situation contacts">
+            <ListField name="SituationDrillID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="SituationType" phrase="Situation Type"/>
+            <ListField name="DrillTitle" phrase="Drill Title"/>
+            <ListField name="BeginTime" phrase="Begin Time"/>
+            <ListField name="DrillStatus" phrase="Drill Status"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search situation contacts">
+            <OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SituationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="SituationID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Injury (employee) - First Aid Only Injury"/>
+                <SampleItem ID="2" name="Injury (employee) - Injury Requiring Minor Medical Treatment"/>
+                <SampleItem ID="3" name="Injury (employee) - Injury Requiring Major Medical Treatment"/>
+            </ComboField>
+            <EditField name="DrillTitle" size="128" maxLength="128"/>
+			<ComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</ComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="BeginTime"/>
+            <DateField name="EndTime"/>
+            <CodeComboField name="DrillStatusID" orientation="vertical">
+                <SampleItem ID="1" name="Under Evaluation"/>
+                <SampleItem ID="2" name="No Opportunities Identified"/>
+                <SampleItem ID="3" name="Learning Incorporated and Complete"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the situation contact">
+            <ViewField name="SituationDrillID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="SituationCategory"/>
+            <ViewField name="SituationType"/>
+            <ViewField name="Situation"/>
+            <ViewField name="LocalDescription"/>
+            <ViewField name="DrillTitle"/>
+            <ViewField name="BeginTime"/>
+            <ViewField name="EndTime"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="DrillScope"/>
+            <ViewField name="DrillObjective"/>
+            <ViewField name="DrillPlanning"/>
+            <ViewField name="KeyLearning"/>
+            <ViewField name="DrillStatus"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="sitdp"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the situation contact">
+            <ViewField name="SituationDrillID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="SituationCategory"/>
+            <ViewField name="SituationType"/>
+            <ViewField name="Situation"/>
+            <ViewField name="LocalDescription"/>
+            <EditField name="DrillTitle" size="75" maxLength="128"/>
+            <DateField name="BeginTime"/>
+            <DateField name="EndTime"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <MemoField name="DrillScope" cols="75" rows="3"/>
+            <MemoField name="DrillObjective" cols="75" rows="3"/>
+            <MemoField name="DrillPlanning" cols="75" rows="3"/>
+            <MemoField name="KeyLearning" cols="75" rows="3"/>
+            <CodeComboField name="DrillStatusID" orientation="vertical">
+                <SampleItem ID="1" name="Under Evaluation"/>
+                <SampleItem ID="2" name="No Opportunities Identified"/>
+                <SampleItem ID="3" name="Learning Incorporated and Complete"/>
+            </CodeComboField>
+        </EditScreen>
+		<EditScreen name="Participants" phrase="Participants|Associate participants with a situation drill">
+			<RecordSummaryFieldsRef/>
+			<InvisibleField name="OrganizationID"/>
+			<SearchSelectGrid moduleID="sitdp"/>
+		</EditScreen>
+		<EditScreen name="Participation" phrase="Participation|Associate details of participation and involvement with the drill">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sitdp"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the meeting">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the meeting">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participant accountabilities with the meeting">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participant involvement with the meeting">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the meeting" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<!--RecordReportScreen name="RecordReports" phrase="Reports|View the current situation response drill reports"/>-->
+		<!--<ListReportScreen name="ListReports" phrase="Reports|View the situation response drills based on active search criteria"/>-->
+    </Screens>
+	<RecordSummaryFields>
+        <ViewField name="SituationDrillID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="SituationCategory"/>
+        <ViewField name="SituationType"/>
+        <ViewField name="Situation"/>
+        <ViewField name="LocalDescription"/>
+        <ViewField name="DrillTitle"/>
+        <ViewField name="BeginTime"/>
+        <ViewField name="EndTime"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="DrillScope"/>
+        <ViewField name="DrillObjective"/>
+        <ViewField name="DrillPlanning"/>
+        <ViewField name="KeyLearning"/>
+        <ViewField name="DrillStatus"/>
+	</RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="sitd" phrase="Response Drills">
+            <InvisibleField name="SituationDrillID"/>
+            <ViewField name="DrillTitle" sample="Laboratory radiation drill"/>
+            <ViewField name="BeginTime" sample="09-21-2003 2:00:00"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="DrillStatus" sample="Learning Incorporated"/>
+        </ViewGrid>
+        <EditGrid moduleID="sitd" phrase="Response Drills">
+            <GridForm>
+                <InvisibleField name="SituationDrillID"/>
+                <EditField name="DrillTitle" size="75" maxLength="128"/>
+                <DateField name="BeginTime"/>
+                <DateField name="EndTime"/>
+                <PersonComboField name="PersonAccountableID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <MemoField name="DrillScope" cols="75" rows="3"/>
+                <MemoField name="DrillObjective" cols="75" rows="3"/>
+                <MemoField name="DrillPlanning" cols="75" rows="3"/>
+                <MemoField name="KeyLearning" cols="75" rows="3"/>
+                <CodeComboField name="DrillStatusID" orientation="vertical">
+                    <SampleItem ID="1" name="Under Evaluation"/>
+                    <SampleItem ID="2" name="No Opportunities Identified"/>
+                    <SampleItem ID="3" name="Learning Incorporated and Complete"/>
+                </CodeComboField>
+            </GridForm>
+            <InvisibleField name="SituationDrillID"/>
+            <ViewField name="DrillTitle" sample="Laboratory radiation drill"/>
+            <ViewField name="BeginTime" sample="09-21-2003 2:00:00"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="DrillStatus" sample="Learning Incorporated"/>
+        </EditGrid>
+    </Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Drills By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Drills By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Drills By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Drills By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Drills By Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Drills By Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Drills By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Drills By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Drills By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Drills By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Drills By Status">
+			<GroupByField name="DrillStatus"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Drills By Status">
+			<GroupByField name="DrillStatus"/>
+			<SummaryField name="SituationDrillID" type="count"/>
+		</ParetoChart>
+	</Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

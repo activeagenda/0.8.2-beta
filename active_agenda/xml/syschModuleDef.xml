@@ -1,0 +1,485 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="System Chemicals" moduleID="sysch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="System Chemical" pluralRecordName="System Chemicals" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="SystemChemicalID" type="int" dbFlags="unsigned auto_increment not null" phrase="System Chemical ID|An automatically assigned number used to track chemicals associated with systems and processes" sample="1"/>
+		<TableField name="SystemID" type="int" validate="RequireSelection" phrase="SystemID|An automatically assigned number used to track systems and processes within the organization" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="sys" foreignKey="SystemID" foreignField="OrganizationID" key="SystemID" joinType="left" phrase="System Organization|The name of the organization where the system or process exists" sample="1"/>
+		<ForeignField name="Organization" foreignTable="sys" foreignKey="SystemID" foreignField="Organization" key="SystemID" joinType="left" phrase="System Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="System" foreignTable="sys" foreignKey="SystemID" foreignField="SystemName" key="SystemID" joinType="left" phrase="System|A combined field used to describe this system when associating it with other records" sample="Ammonia Refrigeration System; Active Agenda, HQ; 10-28-2003; 1"/>
+		<ForeignField name="SystemDesc" foreignTable="sys" foreignKey="SystemID" foreignField="SystemDesc" key="SystemID" joinType="left" phrase="System Decsription|A detailed description of the system or process" sample="The ammonia refrigeration spans throughout the entire physical building and is utilized to cool the cold storage building and raw ingredient warehouse. The ammonia refrigeration system contains 100,000 pounds of anhydrous ammonia."/>
+		<TableField name="ChemicalInventoryID" type="int" validate="RequireSelection" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="1"/>
+		<ForeignField name="ChemicalOrganizationID" listType="allParticipants" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="OrganizationID" key="ChemicalInventoryID" joinType="left" phrase="Chemical Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="1"/>
+		<ForeignField name="ChemicalOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ChemicalOrganizationID" joinType="left" phrase="Chemical Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Active Agenda, HQ"/>
+		<ForeignField name="LocationID" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="LocationID" key="ChemicalInventoryID" joinType="left" phrase="Location|Specific location within the facility where the chemical is present or the emissions occur" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the chemical is present or the emissions occur" sample="Packaging Area"/>
+		<ForeignField name="ChemicalInventory" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="ChemicalInventory" key="ChemicalInventoryID" joinType="left" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+		<TableField name="MatClassID" type="int" validate="RequireSelection" phrase="Material Classification|The classification associated with releases of this type of material. Material classifications are typically assigned by regulatory agencies" sample="1"/>
+		<CodeField name="MatClass" key="MatClassID" phrase="Material Classification|The classification associated with releases of this type of material. Material classifications are typically assigned by regulatory agencies" sample="Particulate Matter 10" codeTypeID="189"/>
+		<TableField name="DailyVolume" type="float" validate="Number" phrase="Daily Process Volume|The estimated daily chemical use volume associated with this equipment system or process" sample="25"/>
+		<TableField name="DVWeightVolUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="DVWeightVolUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="DVWeightVolUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="DVWeightVolUnitCategory" key="DVWeightVolUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="DVWeightVolUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="DVWeightVolUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="EmissionTypeID" type="int" validate="noValidation" phrase="Emission Type|The potential type of emission from the system or process" sample="1"/>
+		<CodeField name="EmissionType" key="EmissionTypeID" phrase="Emission Type|The potential type of emission from the system or process" sample="Chemical" codeTypeID="144"/>
+		<TableField name="EmissionConc" type="float" validate="Number" phrase="Concentration|The concentration of material potentially emitted from this system or process" sample="25"/>
+		<TableField name="ConcentrationUnitsID" type="int" validate="noValidation" phrase="Concentration Units|Units associated with concentrations of materials such as chemicals or particles" sample="1"/>
+		<CodeField name="ConcentrationUnits" key="ConcentrationUnitsID" phrase="Concentration Units|Units associated with concentrations of materials such as chemicals or particles" sample="Parts Per Million" codeTypeID="34"/>
+		<TableField name="EmissionsEstimate" type="float" validate="Number" phrase="Emissions Estimate|The volume of material potentially emitted from this system or process" sample="25"/>
+		<TableField name="EEWeightVolUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="EEWeightVolUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="EEWeightVolUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="EEWeightVolUnitCategory" key="EEWeightVolUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="EEWeightVolUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="EEWeightVolUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ReleasePeriod" type="float" validate="Number" phrase="Release Period|The period of time used to quantify potential emission rates" sample="1"/>
+		<TableField name="RelPeriodUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="RelPeriodUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="RelPeriodUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="RelPeriodUnitCategory" key="RelPeriodUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="RelPeriodUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="RelPeriodUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="EeMonitoring" type="bool" validate="noValidation" dbFlags="default 0" phrase="Employee Monitoring Required|Check this box if employee exposure monitoring is required for this system or process" sample="Yes"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ChemicalInventory"/>;_<CombinedFieldRef name="System"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="SystemChemical" phrase="System|A combined field used to describe this chemical inventory item when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area">
+			<CombinedFieldRef name="ChemicalInventory"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SystemChemicalID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="SystemChemical"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemicals, chemical amounts, and emission estimates, associated with systems or processes">
+			<ListField name="SystemChemicalID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="System" phrase="System Name"/>
+			<ListField name="ChemicalInventory" phrase="Chemical"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemicals, chemical amounts, and emission estimates, associated with systems or processes">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemID" findMode="text">
+				<SampleItem ID="1" name="Ammonia Refrigeration System; Active Agenda, HQ; 10-28-2003; 1"/>
+				<SampleItem ID="2" name="Stabilization Unit Exhaust; Active Agenda, HQ; 02-28-2004; 1"/>
+			</ComboField>
+			<OrgComboField name="ChemicalOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Office"/>
+				<SampleItem ID="4" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ChemicalInventoryID" findMode="text">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+				<SampleItem ID="2" name="Ammonia; Anhydrous Ammonia; 1341-22-6; Discontinued; Active Agenda, HQ; Engine Room"/>
+				<SampleItem ID="3" name="Goo Slime; Methyl Ethyl Goo; 1346-71-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+			</ComboField>
+			<CodeComboField name="MatClassID" findMode="text">
+				<SampleItem ID="1" name="Particulate Matter 10"/>
+				<SampleItem ID="2" name="HAP"/>
+			</CodeComboField>
+			<CodeComboField name="EmissionTypeID" findMode="text">
+				<SampleItem ID="1" name="Air"/>
+				<SampleItem ID="2" name="Water"/>
+				<SampleItem ID="3" name="Soil"/>
+			</CodeComboField>
+			<EditField name="DailyVolume" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="DVWeightVolUnitCategoryID">
+					<UpdateFieldRef name="DVWeightVolUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="DVWeightVolUnitsID" parentField="DVWeightVolUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="EmissionConc" size="10" maxLength="10">
+				<CodeComboField name="ConcentrationUnitsID" findMode="text">
+					<SampleItem ID="1" name="Parts Per Million"/>
+					<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+				</CodeComboField>
+			</EditField>
+			<EditField name="EmissionsEstimate" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="EEWeightVolUnitCategoryID">
+					<UpdateFieldRef name="EEWeightVolUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="EEWeightVolUnitsID" parentField="EEWeightVolUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="ReleasePeriod" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="RelPeriodUnitCategoryID">
+					<UpdateFieldRef name="RelPeriodUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="RelPeriodUnitsID" parentField="RelPeriodUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a chemical, chemical amount, and emission estimate, associated with a system or process">
+			<ViewField name="SystemChemicalID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="System"/>
+			<ViewField name="SystemDesc"/>
+			<ViewField name="ChemicalInventory"/>
+			<ViewField name="MatClass"/>
+			<ViewField name="DailyVolume">
+				<ViewField name="DVWeightVolUnits"/>
+			</ViewField>
+			<ViewField name="EmissionType"/>
+			<ViewField name="EmissionConc">
+				<ViewField name="ConcentrationUnits"/>
+			</ViewField>
+			<ViewField name="EmissionsEstimate">
+				<ViewField name="EEWeightVolUnits"/>
+			</ViewField>
+			<ViewField name="ReleasePeriod">
+				<ViewField name="RelPeriodUnits"/>
+			</ViewField>
+			<ViewField name="EeMonitoring"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a chemical, chemical amount, and emission estimate, associated with a system or process">
+			<ViewField name="SystemChemicalID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="System"/>
+			<ViewField name="SystemDesc"/>
+			<OrgComboField name="ChemicalOrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="ChemicalOrganizationID">
+				<UpdateFieldRef name="ChemicalInventoryID"/>
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Office"/>
+				<SampleItem ID="4" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ChemicalInventoryID" findMode="text" parentField="LocationID">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+				<SampleItem ID="2" name="Ammonia; Anhydrous Ammonia; 1341-22-6; Discontinued; Active Agenda, HQ; Engine Room"/>
+				<SampleItem ID="3" name="Goo Slime; Methyl Ethyl Goo; 1346-71-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+			</ComboField>
+			<CodeComboField name="MatClassID" findMode="text">
+				<SampleItem ID="1" name="Particulate Matter 10"/>
+				<SampleItem ID="2" name="HAP"/>
+			</CodeComboField>
+			<CodeComboField name="EmissionTypeID" findMode="text">
+				<SampleItem ID="1" name="Air"/>
+				<SampleItem ID="2" name="Water"/>
+				<SampleItem ID="3" name="Soil"/>
+			</CodeComboField>
+			<EditField name="DailyVolume" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="DVWeightVolUnitCategoryID">
+					<UpdateFieldRef name="DVWeightVolUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="DVWeightVolUnitsID" parentField="DVWeightVolUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="EmissionConc" size="10" maxLength="10">
+				<CodeComboField name="ConcentrationUnitsID" findMode="text">
+					<SampleItem ID="1" name="Parts Per Million"/>
+					<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+				</CodeComboField>
+			</EditField>
+			<EditField name="EmissionsEstimate" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="EEWeightVolUnitCategoryID">
+					<UpdateFieldRef name="EEWeightVolUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="EEWeightVolUnitsID" parentField="EEWeightVolUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="ReleasePeriod" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="RelPeriodUnitCategoryID">
+					<UpdateFieldRef name="RelPeriodUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="RelPeriodUnitsID" parentField="RelPeriodUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="sysch" phrase="Chemicals">
+			<InvisibleField name="SystemChemicalID"/>
+			<ViewField name="ChemicalOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Packaging Area"/>
+			<ViewField name="ChemicalInventory" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+			<ViewField name="MatClass" sample="Particulate Matter 10"/>
+			<ViewField name="EmissionType" sample="Chemical"/>
+		</ViewGrid>
+		<EditGrid moduleID="sysch" phrase="Chemicals">
+			<GridForm>
+				<OrgComboField name="ChemicalOrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" parentField="ChemicalOrganizationID" sample="Packaging Area">
+					<UpdateFieldRef name="ChemicalInventoryID"/>
+					<SampleItem ID="1" name="Chemical Storage Area"/>
+					<SampleItem ID="2" name="Shipping Bay #1"/>
+					<SampleItem ID="3" name="Administrative Office"/>
+					<SampleItem ID="4" name="Production Line #1"/>
+				</ComboField>
+				<ComboField name="ChemicalInventoryID" findMode="text" parentField="LocationID" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area">
+					<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+					<SampleItem ID="2" name="Ammonia; Anhydrous Ammonia; 1341-22-6; Discontinued; Active Agenda, HQ; Engine Room"/>
+					<SampleItem ID="3" name="Goo Slime; Methyl Ethyl Goo; 1346-71-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+				</ComboField>
+				<CodeComboField name="MatClassID" findMode="text" sample="Particulate Matter 10">
+					<SampleItem ID="1" name="Particulate Matter 10"/>
+					<SampleItem ID="2" name="HAP"/>
+				</CodeComboField>
+				<CodeComboField name="EmissionTypeID" findMode="text" sample="Chemical">
+					<SampleItem ID="1" name="Air"/>
+					<SampleItem ID="2" name="Water"/>
+					<SampleItem ID="3" name="Soil"/>
+				</CodeComboField>
+				<EditField name="DailyVolume" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="DVWeightVolUnitCategoryID">
+						<UpdateFieldRef name="DVWeightVolUnitsID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="DVWeightVolUnitsID" parentField="DVWeightVolUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<EditField name="EmissionConc" size="10" maxLength="10">
+					<CodeComboField name="ConcentrationUnitsID" findMode="text">
+						<SampleItem ID="1" name="Parts Per Million"/>
+						<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+					</CodeComboField>
+				</EditField>
+				<EditField name="EmissionsEstimate" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="EEWeightVolUnitCategoryID">
+						<UpdateFieldRef name="EEWeightVolUnitsID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="EEWeightVolUnitsID" parentField="EEWeightVolUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<EditField name="ReleasePeriod" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="RelPeriodUnitCategoryID">
+						<UpdateFieldRef name="RelPeriodUnitsID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="RelPeriodUnitsID" parentField="RelPeriodUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+			</GridForm>
+			<ViewField name="ChemicalOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Packaging Area"/>
+			<ViewField name="ChemicalInventory" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+			<ViewField name="MatClass" sample="Particulate Matter 10"/>
+			<ViewField name="EmissionType" sample="Chemical"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

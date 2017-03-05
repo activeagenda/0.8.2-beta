@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Other Asset Transactions" moduleID="oast" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Other Asset Transaction" pluralRecordName="Other Asset Transactions" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="OtherAssetTransactionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Transaction ID|An automatically assigned number used to track inventory transactions" sample="1"/>
+		<TableField name="OtherAssetInventoryID" type="int" validate="RequireSelection" phrase="Inventory ID|An automatically assigned number used to track equipment inventory" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="OrganizationID" key="OtherAssetInventoryID" joinType="left" phrase="Organization|The name of the organization where the asset is located" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the asset is located" sample="Active Agenda, HQ"/>
+		<ForeignField name="LocationID" foreignTable="orgla" foreignKey="SourceRecordID" foreignField="LocationID" key="OtherAssetInventoryID" listCondition="SourceModuleID='oasin'" joinType="left" phrase="Location|Specific location within the facility where the asset is located" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the asset is located" sample="Server Room; Administration Building; 023 "/>
+		<ForeignField name="OtherAssetTypeID" foreignTable="oas" foreignKey="OtherAssetID" foreignField="OtherAssetTypeID" key="OtherAssetID" joinType="left" phrase="Asset Type|A method of classifying and tracking others assets of different types. Other asset types are assigned by the parent organization" sample="1"/>
+		<CodeField name="OtherAssetType" key="OtherAssetTypeID" phrase="Asset Type|A method of classifying and tracking others assets of different types. Other asset types are assigned by the parent organization" sample="Intellectual Property" codeTypeID="23"/>
+		<ForeignField name="OtherAssetID" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="OtherAssetID" key="OtherAssetInventoryID" joinType="left" phrase="Other Asset ID|An automatically assigned number used to track other assets utilized by the organization" sample="1"/>
+		<ForeignField name="OtherAsset" foreignTable="oas" foreignKey="OtherAssetID" foreignField="OtherAsset" key="OtherAssetID" joinType="left" phrase="Other Asset|The name of the asset to be protected" sample="Active Agenda Source Code"/>
+		<TableField name="TransactionTypeID" type="int" validate="RequireSelection" phrase="Transaction Type|The type of inventory transaction which occurred on this date at this location" sample="1"/>
+		<CodeField name="TransactionType" key="TransactionTypeID" phrase="Transaction Type|The type of inventory transaction which occurred on this date at this location" sample="Add" codeTypeID="46"/>
+		<!--the Transaction Type codetype should be controlled so that the user cannot eliminate the "transfer" choice. DFZ 8-5-2004-->
+		<TableField name="TransactionAmount" type="float" validate="Number notNegative notZero notEmpty" phrase="Amount|The number of inventory items involved in this transaction" sample="1"/>
+		<TableField name="TransAmountUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="TransAmountUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TransAmountUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="TransAmountUnitCategory" key="TransAmountUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="TransAmountUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TransAmountUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<ForeignField name="NewLocationID" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="LocationID" key="OtherAssetInventoryID" joinType="left" phrase="New Location|The specific location within the facility where the asset is being transferred to" sample="1"/>
+		<ForeignField name="NewLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="New Location|The specific location within the facility where the asset is being transferred to" sample="Server Room; Administration Building; 023 "/>
+		<!-- the new location cb should only display if the transaction type=transfer. If the transaction is a transfer, the newly selected location should be saved to the OtherAssetInventory table. DFZ 8-5-2004-->
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="64" phrase="Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the individual issuing the inventory item, accepting the returning item OR adding the new item into inventory" sample="Mattias Thorslund"/>
+		<RemoteField name="TransactionSubjectID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="62" phrase="Transaction Subject|The name of the individual receiving the inventory item or returning the item to the inventory" sample="1"/>
+		<ForeignField name="TransactionSubject" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TransactionSubjectID" joinType="left" phrase="Transaction Subject|The name of the individual the equipment was issued to, OR the name of the individual returning the inventory item, OR the name of the person entering a new item into inventory" sample="Mattias Thorslund"/>
+		<RemoteField name="TransactionDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="14" phrase="Transaction Date|The date this asset transaction occurred" sample="01/01/2004"/>
+		<TableField name="TransactionTime" type="time" validate="noValidation" phrase="Transaction Time|The time this asset transaction occurred" sample="12:30 pm"/>
+		<TableField name="EstimatedReturnDate" type="date" validate="noValidation" phrase="Estimated Return Date|The date the asset is estimated to be returned" sample="09-28-2003"/>
+		<TableField name="EstimatedReturnTime" type="time" validate="noValidation" phrase="Estimated Return Time|The time the asset is estimated to be returned" sample="12:30 pm"/>
+		<TableField name="ActualReturnDate" type="date" validate="noValidation" phrase="Actual Return Date|The date the asset is actually returned to inventory at this specific location" sample="09-28-2003"/>
+		<TableField name="ActualReturnTime" type="time" validate="noValidation" phrase="Actual Return Time|The time the asset is actually returned to inventory at this specific location" sample="12:30 pm"/>
+		<TableField name="IssueDesc" type="text" validate="noValidation" phrase="Issue Description|A brief description of any issues identified by the person returning the asset to inventory item" sample="The source code is not properly protected against Internet access."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OtherAsset"/>;_<CombinedFieldRef name="TransactionType"/>;_<CombinedFieldRef name="TransactionDate"/></CombinedField>
+		<CombinedField name="AmountofTransaction" phrase="Amount of Transaction|A combined field used to describe the amount of equipment transacted when associating it with other records" sample="2 Case(s)"><CombinedFieldRef name="TransactionAmount"/>_<CombinedFieldRef name="TransAmountUoM"/></CombinedField>
+		<CombinedField name="OtherAssetTransaction" phrase="Other Asset transaction|A combined field used to describe this asset transaction when associating it with other records" sample="Active Agenda Source Code; Added; 09-28-2003"><CombinedFieldRef name="OtherAsset"/>;_<CombinedFieldRef name="TransactionType"/>;_<CombinedFieldRef name="TransactionDate"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="OtherAssetTransactionID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="OtherAssetTransaction"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List asset inventory transactions">
+			<ListField name="OtherAssetTransactionID" phrase="Transaction ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="OtherAsset" phrase="Asset"/>
+			<ListField name="TransactionType" phrase="Transaction Type"/>
+			<ListField name="AmountofTransaction" phrase="Amount"/>
+			<ListField name="TransactionDate" phrase="Date"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search asset inventory transactions">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<CodeComboField name="OtherAssetTypeID" findMode="text">
+				<SampleItem ID="1" name="Intellectual Property"/>
+				<SampleItem ID="3" name="Cash"/>
+				<SampleItem ID="5" name="People"/>
+				<SampleItem ID="7" name="Knowledge"/>
+				<SampleItem ID="9" name="Investment"/>
+			</CodeComboField>
+			<ComboField name="OtherAssetID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda Source Code"/>
+				<SampleItem ID="2" name="Active Agenda User Documentation"/>
+				<SampleItem ID="3" name="Active Agenda User Training Slides"/>
+			</ComboField>
+			<CodeRadioField name="TransactionTypeID">
+				<SampleItem ID="1" name="Issue"/>
+				<SampleItem ID="2" name="Return"/>
+				<SampleItem ID="3" name="Add"/>
+				<SampleItem ID="4" name="Transfer"/>
+			</CodeRadioField>
+			<ComboField name="NewLocationID" findMode="text">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<EditField name="TransactionAmount" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TransAmountUnitCategoryID">
+					<UpdateFieldRef name="TransAmountUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="TransAmountUoMID" parentField="TransAmountUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="TransactionSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="TransactionDate"/>
+			<TimeField name="TransactionTime"/>
+			<DateField name="EstimatedReturnDate"/>
+			<TimeField name="EstimatedReturnTime"/>
+			<DateField name="ActualReturnDate"/>
+			<TimeField name="ActualReturnTime"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an asset inventory transaction">
+			<ViewField name="OtherAssetTransactionID"/>
+			<ViewField name="OtherAssetInventoryID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="OtherAssetID"/>
+			<ViewField name="OtherAssetType"/>
+			<ViewField name="OtherAsset"/>
+			<ViewField name="TransactionType"/>
+			<ViewField name="TransactionAmount">
+				<ViewField name="TransAmountUoM"/>
+			</ViewField>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TransactionSubject"/>
+			<ViewField name="TransactionDate"/>
+			<ViewField name="TransactionTime"/>
+			<ViewField name="EstimatedReturnDate"/>
+			<ViewField name="EstimatedReturnTime"/>
+			<ViewField name="ActualReturnDate"/>
+			<ViewField name="ActualReturnTime"/>
+			<ViewField name="IssueDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an asset inventory transaction">
+			<ViewField name="OtherAssetTransactionID"/>
+			<ViewField name="OtherAssetInventoryID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<UpdateFieldRef name="NewLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<!--if an item is Transferred a record should be saved to the transferring organization (Transferred) and the receiving organization (Added). DFZ 4-1-2004-->
+			<CodeComboField name="OtherAssetTypeID" findMode="text">
+				<UpdateFieldRef name="OtherAssetID"/>
+				<SampleItem ID="1" name="Intellectual Property"/>
+				<SampleItem ID="3" name="Cash"/>
+				<SampleItem ID="5" name="People"/>
+				<SampleItem ID="7" name="Knowledge"/>
+				<SampleItem ID="9" name="Investment"/>
+			</CodeComboField>
+			<ComboField name="OtherAssetID" findMode="text" parentField="OtherAssetTypeID">
+				<SampleItem ID="1" name="Active Agenda Source Code"/>
+				<SampleItem ID="2" name="Active Agenda User Documentation"/>
+				<SampleItem ID="3" name="Active Agenda User Training Slides"/>
+			</ComboField>
+			<CodeRadioField name="TransactionTypeID">
+				<SampleItem ID="1" name="Issue"/>
+				<SampleItem ID="2" name="Return"/>
+				<SampleItem ID="3" name="Add"/>
+				<SampleItem ID="4" name="Transfer"/>
+			</CodeRadioField>
+			<ComboField name="NewLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<EditField name="TransactionAmount" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TransAmountUnitCategoryID">
+					<UpdateFieldRef name="TransAmountUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="TransAmountUoMID" parentField="TransAmountUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="TransactionSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<!--the TransactionSubject field is only available if the TransactionType=Issued or Returned. If the TransactionType=Added, the Transaction Subject filed should be view only and read "None". DFZ 4-1-2004-->
+			<DateField name="TransactionDate"/>
+			<TimeField name="TransactionTime"/>
+			<DateField name="EstimatedReturnDate"/>
+			<TimeField name="EstimatedReturnTime"/>
+			<DateField name="ActualReturnDate"/>
+			<TimeField name="ActualReturnTime"/>
+			<!--Estimated and Actual Return Date and Time fields are only available if the TransactionType=Issued or Returned. Otherwise, the system should write "None". DFZ 4-1-2004-->
+			<!--Estimated and Actual Return Date and Time fields should allow for a 'null' entry. DFZ 4-1-2004-->
+			<MemoField name="IssueDesc" rows="5" cols="75"/>
+			<!-- the IssueDesc field is only available if the TransactionType=Issued or Returned. Otherwise, the system should write "None". DFZ 4-1-2004-->
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="oast" phrase="Asset Transactions">
+			<InvisibleField name="OtherAssetTransactionID"/>
+			<ViewField name="TransactionType" sample="Add"/>
+			<ViewField name="AmountofTransaction" sample="1 case(s)"/>
+			<ViewField name="NewLocation" sample="Server Room; Administration Building; 023 "/>
+			<ViewField name="TransactionDate" sample="09-28-2003"/>
+		</ViewGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

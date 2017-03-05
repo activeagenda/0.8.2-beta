@@ -1,0 +1,383 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Documentation Recipients" moduleID="docr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Documentation Recipient" pluralRecordName="Documentation Recipients" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="DocumentationRecID" type="int" dbFlags="unsigned auto_increment not null" phrase="Recipient ID|An automatically assigned number used to associate documents with recipients and submission immediacy requirements" sample="1"/>
+		<TableField name="DocumentID" type="int" validate="noValidation" phrase="Document ID|An automatically assigned number used to track documents and forms used by an organization" sample="1"/>
+		<ForeignField name="DocumentTypeID" foreignTable="doc" foreignKey="DocumentID" foreignField="DocumentTypeID" key="DocumentID" joinType="left" phrase="Document Type|The specific type of document or form" sample="1"/>
+		<CodeField name="DocumentType" key="DocumentTypeID" phrase="Document Type|The specific type of document or form" sample="Injury Report Form" codeTypeID="18"/>
+		<ForeignField name="Document" foreignTable="doc" foreignKey="DocumentID" foreignField="Document" key="DocumentID" joinType="left" phrase="Document|A description of the document based on a combination of field values assigned from within the documentation module" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalAll externalAll" validate="RequireSelection" phrase="Organization|The organization designated to receive this document" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization designated to receive this document" sample="Active Agenda, HQ"/>
+		<RemoteField name="RecipientID" defaultValue="defaultorgID" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="21" phrase="Recipient|The individual assigned by the designated organization to receive the document" sample="1"/>
+		<ForeignField name="Recipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="RecipientID" joinType="left" phrase="Recipient|The individual assigned by the designated organization to receive the document" sample="Mattias Thorslund"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="RecipientID" joinType="left" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<TableField name="ReceivingPreferenceID" type="int" validate="RequireSelection" phrase="Preference|The manner in which the contact prefers to receive related documentation" sample="1"/>
+		<CodeField name="ReceivingPreference" key="ReceivingPreferenceID" phrase="Preference|The manner in which the contact prefers to receive related documentation" sample="Facsimile" codeTypeID="70"/>
+		<TableField name="SubImmediacyValue" type="float" validate="RequireSelection" phrase="Submission Immediacy|The value, in combination with the submission immediacy units, which establishes the required contact immediacy" sample="1"/>
+		<TableField name="SubImmediacyID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="SubImmediacyUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SubImmediacyID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="SubImmediacyUnitCategory" key="SubImmediacyUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="SubImmediacy" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SubImmediacyID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ImmediacyDescription" type="text" validate="noValidation" phrase="Immediacy Description|A detailed description of the immediacy requirements, recipient purpose, regulatory reguirement, best practices, corporate requirement, or other pertinent information about this recipient and its assigned level of immediacy" sample="The California Office of Emergency Services requires all companies to report all releases of Extremely Dangerous chemicals immediatley upon release discovery. Failure to report immediately can result in penalties exceeding $15,000 per day for each day a company fails to report"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Document"/>;_<CombinedFieldRef name="Recipient"/>;_<CombinedFieldRef name="SubImmediacyValue"/>_<CombinedFieldRef name="SubImmediacy"/></CombinedField>
+		<CombinedField name="SubmissionImmediacy" phrase="Submission Immediacy|A combined field used to describe the submission immediacy requirements when associating them with other records" sample="Larry Hansen; California Office of Emergency Services; Immediate"><CombinedFieldRef name="SubImmediacyValue"/>_<CombinedFieldRef name="SubImmediacy"/></CombinedField>
+		<CombinedField name="DocumentationRec" phrase="Documentation Recipient|A combined field used to describe this documentation recipient when associating her/him with other records" sample="Larry Hansen; California Office of Emergency Services; Immediate"><CombinedFieldRef name="Recipient"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="SubImmediacyValue"/>_<CombinedFieldRef name="SubImmediacy"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="DocumentationRecID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="DocumentationRec"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List documentation recipient assignments">
+			<ListField name="DocumentationRecID" phrase="Recipient ID"/>
+			<ListField name="Document" phrase="Document"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Recipient" phrase="Recipient"/>
+			<ListField name="ReceivingPreference" phrase="Preference"/>
+			<ListField name="SubmissionImmediacy" phrase="Immediacy"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search documentation recipient assignments">
+			<ComboField name="DocumentTypeID" findMode="text">
+				<SampleItem ID="1" name="Injury Report Form"/>
+				<SampleItem ID="3" name="Agency Report Form"/>
+				<SampleItem ID="5" name="Environmental Release Report Form"/>
+				<SampleItem ID="7" name="Complaint Form"/>
+				<SampleItem ID="9" name="Hazard Abatement Report Form"/>
+				<SampleItem ID="11" name="General Incident Report Form"/>
+			</ComboField>
+			<ComboField name="DocumentID" findMode="text">
+				<SampleItem ID="1" name="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+				<SampleItem ID="2" name="Employee's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+				<SampleItem ID="3" name="Doctor's' First Report of Injury or Illness (CA); Mattias Thorslund"/>
+				<SampleItem ID="4" name="Employee Claim of Injury Form (CA)"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<PersonComboField name="RecipientID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="California Office of Emergency Services"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="ReceivingPreferenceID" orientation="vertical">
+				<SampleItem ID="2" name="Active Agenda Notification"/>
+				<SampleItem ID="5" name="Company Currier"/>
+				<SampleItem ID="1" name="Email (direct)"/>
+				<SampleItem ID="3" name="Fax"/>
+				<SampleItem ID="4" name="Postal Mail"/>
+			</CodeRadioField>
+			<EditField name="SubImmediacyValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="SubImmediacyUnitCategoryID">
+					<UpdateFieldRef name="SubImmediacyID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SubImmediacyID" parentField="SubImmediacyUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a documentation recipient assignment">
+			<ViewField name="DocumentationRecID"/>
+			<ViewField name="DocumentID"/>
+			<ViewField name="DocumentType"/>
+			<ViewField name="Document"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Recipient"/>
+			<ViewField name="ContactCard"/>
+			<ViewField name="ReceivingPreference"/>
+			<ViewField name="SubmissionImmediacy"/>
+			<ViewField name="ImmediacyDescription"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a documentation recipient assignment">
+			<ViewField name="DocumentationRecID"/>
+			<ViewField name="DocumentType"/>
+			<ViewField name="Document"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<PersonComboField name="RecipientID" findMode="alpha">
+				<UpdateFieldRef name="ContactCard"/>
+				<SampleItem ID="1" name="Larry Hansen" orgName="California Office of Emergency Services"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ViewField name="ContactCard" parentField="RecipientID"/>
+			<CodeRadioField name="ReceivingPreferenceID" orientation="vertical">
+				<SampleItem ID="2" name="Active Agenda Notification"/>
+				<SampleItem ID="5" name="Company Currier"/>
+				<SampleItem ID="1" name="Email (direct)"/>
+				<SampleItem ID="3" name="Fax"/>
+				<SampleItem ID="4" name="Postal Mail"/>
+			</CodeRadioField>
+			<EditField name="SubImmediacyValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="SubImmediacyUnitCategoryID">
+					<UpdateFieldRef name="SubImmediacyID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SubImmediacyID" parentField="SubImmediacyUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="ImmediacyDescription" rows="10" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid name="Recipients" moduleID="docr" phrase="Recipients">
+			<InvisibleField name="DocumentationRecID"/>
+			<ViewField name="Organization" sample="Organization"/>
+			<ViewField name="Recipient" sample="Mattias Thorslund"/>
+			<ViewField name="ContactCard" sample="1122 Boogie, Boogie Ave., Clovis, CA 93611"/>
+			<ViewField name="ReceivingPreference" sample="Notification"/>
+			<ViewField name="SubmissionImmediacy" sample="24 Hour(s)"/>
+			<ViewField name="ImmediacyDescription" sample="Mattias needs to know everything asap"/>
+		</ViewGrid>
+		<EditGrid name="Recipients" moduleID="docr" phrase="Recipients">
+			<GridForm>
+				<InvisibleField name="DocumentationRecID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+					<SampleItem ID="2" name="Active Agenda, Inc."/>
+					<SampleItem ID="3" name="Good Ideas Consulting"/>
+				</OrgComboField>
+				<PersonComboField name="RecipientID" findMode="alpha" sample="Mattias Thorslund">
+					<UpdateFieldRef name="ContactCard"/>
+					<SampleItem ID="1" name="Larry Hansen" orgName="California Office of Emergency Services"/>
+					<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<ViewField name="ContactCard" parentField="RecipientID"/>
+				<CodeRadioField name="ReceivingPreferenceID" orientation="vertical">
+					<SampleItem ID="2" name="Active Agenda Notification"/>
+					<SampleItem ID="5" name="Company Currier"/>
+					<SampleItem ID="1" name="Email (direct)"/>
+					<SampleItem ID="3" name="Fax"/>
+					<SampleItem ID="4" name="Postal Mail"/>
+				</CodeRadioField>
+				<EditField name="SubImmediacyValue" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="SubImmediacyUnitCategoryID">
+						<UpdateFieldRef name="SubImmediacyID"/>
+						<SampleItem ID="1" name="Time"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="3" name="Distance"/>
+						<SampleItem ID="4" name="Packaging"/>
+						<SampleItem ID="5" name="Volume"/>
+						<SampleItem ID="6" name="Weight"/>
+					</ComboField>
+					<ComboField name="SubImmediacyID" parentField="SubImmediacyUnitCategoryID">
+						<SampleItem ID="1" name="Second"/>
+						<SampleItem ID="2" name="Minute"/>
+						<SampleItem ID="3" name="Hour"/>
+						<SampleItem ID="4" name="Day"/>
+					</ComboField>
+				</EditField>
+				<MemoField name="ImmediacyDescription" rows="10" cols="75" sample="The California Office of Emergency Services requires all companies to report all releases of Extremely Dangerous chemicals immediatley upon release discovery. Failure to report immediately can result in penalties exceeding $15,000 per day for each day a company fails to report"/>
+			</GridForm>
+			<ViewField name="Organization" sample="Organization"/>
+			<ViewField name="Recipient" sample="Mattias Thorslund"/>
+			<ViewField name="ContactCard" sample="1122 Boogie, Boogie Ave., Clovis, CA 93611"/>
+			<ViewField name="ReceivingPreference" sample="Notification"/>
+			<ViewField name="SubmissionImmediacy" sample="24 Hour(s)"/>
+			<ViewField name="ImmediacyDescription" sample="Mattias needs to know everything asap"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Document Recipients By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Document Recipients By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Document Recipients By Document Type">
+			<GroupByField name="DocumentType"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Document Recipients By Document Type">
+			<GroupByField name="DocumentType"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Document Recipients By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Document Recipients By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Document Recipients By Document">
+			<GroupByField name="Document"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Document Recipients By Document">
+			<GroupByField name="Document"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Document Recipients By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Document Recipients By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Document Recipients By Recipient">
+			<GroupByField name="Recipient"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Document Recipients By Recipient">
+			<GroupByField name="Recipient"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Document Recipients By Receiving Preference">
+			<GroupByField name="ReceivingPreference"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Document Recipients By Receiving Preference">
+			<GroupByField name="ReceivingPreference"/>
+			<SummaryField name="DocumentationRecID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

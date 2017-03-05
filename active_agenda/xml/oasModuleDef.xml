@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Other Assets" moduleID="oas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Other Asset" pluralRecordName="Other Assets" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="OtherAssetID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track assets other than chemicals, vehicals, buildings or equipment" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for the asset item" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for the asset item" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="67" phrase="Person Accountable|The individual assigned primary accountability for managing the asset" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the asset" sample="Mattias Thorslund"/>
+		<TableField name="OtherAssetTitle" type="varchar(128)" validate="notEmpty" phrase="Asset Title|The name of the asset to be protected" sample="Active Agenda Source Code"/>
+		<TableField name="OtherAssetTypeID" type="int" validate="RequireSelection" phrase="Asset Type|A method of classifying and tracking assets of different types. Asset types are assigned by the parent organization" sample="1"/>
+		<CodeField name="OtherAssetType" key="OtherAssetTypeID" phrase="Asset Type|A method of classifying and tracking assets of different types. Asset types are assigned by the parent organization" sample="Intellectual Property" codeTypeID="23"/>
+		<TableField name="OtherAssetDesc" type="text" validate="notEmpty" phrase="Asset Description|A detailed description of the asset" sample="Active Agenda source code exists in three programming language levels: XML, PHP and Microsoft .Net. All code is stored and controlled using SourceSafe and it is not allowed off premises."/>
+		<TableField name="BaseUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="BaseUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="BaseUnitID" joinType="left" phrase="Base Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="BaseUnitCategory" key="BaseUnitCategoryID" phrase="Base Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="BaseUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="BaseUnitID" joinType="left" phrase="Base Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'oas'" localKey="OtherAssetID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OtherAssetType"/>;_<CombinedFieldRef name="OtherAssetTitle"/></CombinedField>
+		<CombinedField name="OtherAsset" phrase="Asset|A combined field used to describe this asset when associating it with other records" sample="Intellectual Property, Active Agenda Source Code"><CombinedFieldRef name="OtherAssetTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="OtherAssetID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="OtherAsset"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="oasin" name="Other Asset Inventory" parentKey="OtherAssetID" localKey="OtherAssetID"/>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<SubModule moduleID="pkg" name="Packaging Units and Equivalents" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="OtherAssetID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oas"/>
+		</SubModule>
+		<!--Required for the summary field-->
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List assets">
+			<ListField name="OtherAssetID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+			<ListField name="OtherAssetType" phrase="Type"/>
+			<ListField name="OtherAssetTitle" phrase="Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search assets">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="OtherAssetTypeID" findMode="alpha">
+				<SampleItem ID="1" name="Intellectual Property"/>
+				<SampleItem ID="3" name="Cash"/>
+				<SampleItem ID="5" name="People"/>
+				<SampleItem ID="7" name="Knowledge"/>
+				<SampleItem ID="9" name="Investment"/>
+			</CodeComboField>
+			<EditField name="OtherAssetTitle" size="50"/>
+			<ComboField name="BaseUnitCategoryID">
+				<UpdateFieldRef name="BaseUnitID"/>
+				<SampleItem ID="1" name="Weight"/>
+				<SampleItem ID="2" name="Area"/>
+				<SampleItem ID="6" name="Distance"/>
+				<SampleItem ID="3" name="Packaging"/>
+				<SampleItem ID="4" name="Time"/>
+				<SampleItem ID="5" name="Volume"/>
+			</ComboField>
+			<ComboField name="BaseUnitID" parentField="BaseUnitCategoryID">
+				<SampleItem ID="1" name="Milligram"/>
+				<SampleItem ID="2" name="Centigram"/>
+				<SampleItem ID="3" name="Decigram"/>
+				<SampleItem ID="4" name="Gram"/>
+			</ComboField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the asset">
+			<ViewField name="OtherAssetID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="OtherAssetType"/>
+			<ViewField name="OtherAssetTitle"/>
+			<ViewField name="OtherAssetDesc"/>
+			<ViewField name="BaseUnit"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="oasin"/>
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="pkg"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit basic information about the asset">
+			<ViewField name="OtherAssetID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="OtherAssetTypeID" findMode="alpha">
+				<SampleItem ID="1" name="Intellectual Property"/>
+				<SampleItem ID="3" name="Cash"/>
+				<SampleItem ID="5" name="People"/>
+				<SampleItem ID="7" name="Knowledge"/>
+				<SampleItem ID="9" name="Investment"/>
+			</CodeComboField>
+			<EditField name="OtherAssetTitle" size="50"/>
+			<MemoField name="OtherAssetDesc" rows="5" cols="75"/>
+			<ComboField name="BaseUnitCategoryID">
+				<UpdateFieldRef name="BaseUnitID"/>
+				<SampleItem ID="1" name="Weight"/>
+				<SampleItem ID="2" name="Area"/>
+				<SampleItem ID="6" name="Distance"/>
+				<SampleItem ID="3" name="Packaging"/>
+				<SampleItem ID="4" name="Time"/>
+				<SampleItem ID="5" name="Volume"/>
+			</ComboField>
+			<ComboField name="BaseUnitID" parentField="BaseUnitCategoryID">
+				<SampleItem ID="1" name="Milligram"/>
+				<SampleItem ID="2" name="Centigram"/>
+				<SampleItem ID="3" name="Decigram"/>
+				<SampleItem ID="4" name="Gram"/>
+			</ComboField>
+		</EditScreen>
+		<EditScreen name="Inventory" phrase="Inventory|Associate an asset with organizations and location inventories">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oasin"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the asset">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="PackagingEquivalents" phrase="Equivalents|Associate an asset with equivalent packaging units">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="pkg"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the asset">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the asset">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the asset">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="OtherAssetID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="OtherAssetType"/>
+		<ViewField name="OtherAssetTitle"/>
+		<ViewField name="OtherAssetDesc"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Other Assets By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Other Assets By Type">
+			<GroupByField name="OtherAssetType"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Other Assets By Type">
+			<GroupByField name="OtherAssetType"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Other Assets By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Other Assets By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Other Assets By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Other Assets By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OtherAssetID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permit Chemicals Affected" moduleID="oppca" parentModule="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Affected By Permit" pluralRecordName="Chemicals Affected By Permit" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PermitChemicalID" type="int" dbFlags="unsigned auto_increment not null" phrase="Permit Chemical ID|A unique number assigned to a chemical so that multiple chemicals can be associated with a single operating permit" sample="1"/>
+		<TableField name="OppPermitID" type="int" validate="noValidation" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="11"/>
+		<ForeignField name="OppPermit" foreignTable="opp" foreignKey="OppPermitID" foreignField="OppPermit" key="OppPermitID" joinType="left" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+		<TableField name="ChemicalInventoryID" type="int" validate="RequireSelection" phrase="Inventory Chemical|An automatically assigned number used to track chemical inventory and storage practices" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants internalNonParticipants" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="OrganizationID" key="ChemicalInventoryID" joinType="left" phrase="Organization|The organization with primary responsibility for this chemical." sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this chemical." sample="Active Agenda, HQ"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the chemical is stored or used" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the chemical is stored or used" sample="Packaging Area"/>
+		<ForeignField name="ChemicalInventory" foreignTable="chmin" foreignKey="ChemicalInventoryID" foreignField="ChemicalInventory" key="ChemicalInventoryID" joinType="left" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+		<TableField name="PermitChemicalAffect" type="varchar(255)" validate="notEmpty" phrase="Affect of Permit|A detailed description of how the operating permit affects the status and use of the chemical" sample="The stormwater discharge permit prohibits any and all use of hydrogen dioxide in the packaging area. If hydrogen dioxide is found with the packaging area, the permit will be revoked and penalties will be levied against the organization."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="ChemicalInventory"/></CombinedField>
+		<CombinedField name="PermitChemical" phrase="Permit Chemical|A combined field used to describe this permit chemical when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="ChemicalInventory"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PermitChemicalID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="PermitChemical"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemicals affected by operating permits">
+			<ListField name="PermitChemicalID" phrase="Chemical ID"/>
+			<ListField name="OppPermit" phrase="Permit"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="ChemicalInventory" phrase="Chemical"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemicals affected by operating permits">
+			<ComboField name="OppPermitID" findMode="text">
+				<SampleItem ID="1" name="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Discharge, Storm Water Discharge - 003; U.S. Environmental Protection Agency; Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Discharge, Storm Water Discharge - 004; U.S. Environmental Protection Agency; Active Agenda, Latvia"/>
+				<SampleItem ID="4" name="Discharge, Storm Water Discharge - 005; U.S. Environmental Protection Agency; Active Agenda, Norway"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ChemicalInventoryID" findMode="text">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+				<SampleItem ID="2" name="Guey Slime; Methyl Ethyl Goo; 1348-19-2; Active; Active Agenda, HQ; Packaging Area"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a chemical affected by a operating permit">
+			<ViewField name="PermitChemicalID"/>
+			<ViewField name="OppPermit"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="ChemicalInventory"/>
+			<ViewField name="PermitChemicalAffect"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a chemical affected by a operating permit">
+			<ViewField name="PermitChemicalID"/>
+			<ViewField name="OppPermit"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="ChemicalInventoryID"/>
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ChemicalInventoryID" findMode="text" parentField="LocationID">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+				<SampleItem ID="2" name="Guey Slime; Methyl Ethyl Goo; 1348-19-2; Active; Active Agenda, HQ; Packaging Area"/>
+			</ComboField>
+			<MemoField name="PermitChemicalAffect" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="oppca" phrase="Chemicals Affected">
+			<InvisibleField name="PermitChemicalID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<!-- Note: ChemicalInventory field already includes Location so this seems redundant. Besides, I got a SQL problem with joins being ordered wrong, something I should make a fix for. MJT 1/19/2005
+			<ViewField name="Location" phrase="Location|Specific location within the facility where the chemical is stored or used" sample="Packaging Area"/> -->
+			<ViewField name="ChemicalInventory" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+		</ViewGrid>
+		<EditGrid moduleID="oppca" phrase="Chemicals Affected">
+			<GridForm>
+				<InvisibleField name="PermitChemicalID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" parentField="OrganizationID" sample="Packaging Area">
+					<UpdateFieldRef name="ChemicalInventoryID"/>
+					<SampleItem ID="1" name="Chemical Storage Area"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Office"/>
+					<SampleItem ID="7" name="Production Line #1"/>
+				</ComboField>
+				<ComboField name="ChemicalInventoryID" findMode="text" parentField="LocationID" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area">
+					<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+					<SampleItem ID="2" name="Guey Slime; Methyl Ethyl Goo; 1348-19-2; Active; Active Agenda, HQ; Packaging Area"/>
+				</ComboField>
+				<MemoField name="PermitChemicalAffect" rows="5" cols="75" sample="The stormwater discharge permit prohibits any and all use of hydrogen dioxide in the packaging area. If hydrogen dioxide is found with the packaging area, the permit will be revoked and penalties will be levied against the organization."/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Packaging Area"/>
+			<ViewField name="ChemicalInventory" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"/>
+			<ViewField name="PermitChemicalAffect" sample="The stormwater discharge permit prohibits any and all use of hydrogen dioxide in the packaging area. If hydrogen dioxide is found with the packaging area, the permit will be revoked and penalties will be levied against the organization."/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Chemicals Affected By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemicals Affected By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Chemicals Affected By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Chemicals Affected By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Chemicals Affected By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Chemicals Affected By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="PermitChemicalID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

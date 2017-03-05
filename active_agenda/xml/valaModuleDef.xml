@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Values Associations" moduleID="vala" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Values Association" pluralRecordName="Values Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ValuesAssociationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate a mission, value, or belief with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the value" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the value" sample="Tasks"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Sugar Coating Raisins"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Affected Organization|The name of the organization affected by the values association" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Affected Organization|The name of the organization affected by the values association" sample="Active Agenda, Inc."/>
+		<TableField name="SharedValueID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Value|A combined field used to describe this shared value when associating it with other records" sample="1"/>
+		<ForeignField name="ValueID" foreignTable="vals" foreignKey="SharedValueID" foreignField="ValueID" key="SharedValueID" joinType="left" phrase="Value|A combined field used to describe this value when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" defaultValue="[*OwnerOrganizationID*]" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharingOrganizationID" key="SharedValueID" joinType="left" phrase="Values Organization|The name of the organization at risk of sustaining a values threat" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Values Organization|The name of the organization at risk of sustaining a values threat" sample="Active Agenda, Inc."/>
+		<ForeignField name="SharedValue" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharedValue" key="SharedValueID" joinType="left" phrase="Value|A combined field used to describe this shared value when associating it with other records" sample="Respect for the Individual; Active Agenda, Inc."/>
+		<ForeignField name="ValueDesc" foreignTable="vals" foreignKey="SharedValueID" foreignField="ValueDesc" key="SharedValueID" joinType="left" phrase="Value Description|A detailed description of the organizational mission, value, and/or belief" sample="Respect for the Individual is the unifying concept of the cultural mission. It is about demonstrating trust and respect for the unique talents and character of each employee. Even when we disagree, we must be able to express ourselves and handle the situation respectfully. People who feel respected and valued enjoy their work and are motivated to do their very best. Valuing our differences in the interest of greater success is everyone's responsibility."/>
+		<ForeignField name="SharingPersonAccountable" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharingPersonAccountable" key="SharedValueID" joinType="left" phrase="Local Values Champion|The individual assigned primary accountability for communicating, celebrating, reinforcing, and defending the organizational mission, value, or belief at the sharing organization" sample="Mattias Thorslund"/>
+		<TableField name="ValuesAssociationTitle" type="varchar(128)" validate="notEmpty" phrase="Association Title|A short title or phrase used to describe the values association with the related record" sample="Employee self-inspections incentive award"/>
+		<TableField name="Manner" type="text" validate="noValidation" phrase="Manner|A detailed description of the manner in which the related record impacts the guiding mission, value, or belief" sample="Allowing employees to participate in self-inspections reinforces trust and resduces the impression that their work is being inspected for fault"/>
+		<TableField name="ImpactTypeID" type="int" validate="RequireSelection" phrase="Impact Type|A method of grouping cultural impacts so that inferences may be drawn based on a predominance of impact types" sample="1"/>
+		<CodeField name="ImpactType" key="ImpactTypeID" phrase="Impact Type|A method of grouping cultural impacts so that inferences may be drawn based on a predominance of impact types" sample="Constructive" codeTypeID="21"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, Inc. | Incentives | Respect for the individual | Employee self-inspections incentive award"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="ValuesAssociationTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="ValuesAssociation" phrase="Values Association|A combined field used to describe the values association when associating it with other records" sample="Active Agenda, Inc. | Incentives | Respect for the individual | Employee self-inspections incentive award"><CombinedFieldRef name="ValuesAssociationTitle"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ValuesAssociationID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="ValuesAssociation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List values associations">
+			<ListField name="ValuesAssociationID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="SharedValue" phrase="Value"/>
+			<ListField name="ImpactType" phrase="Impact"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search values associations">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SharedValueID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="ImpactTypeID">
+				<SampleItem ID="1" name="Harmful"/>
+				<SampleItem ID="2" name="Reinforcing"/>
+			</CodeRadioField>
+			<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+				<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+				<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+				<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+				<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+				<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+				<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+				<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+			</ComboField>
+			<EditField name="ValuesAssociationTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the values association">
+			<ViewField name="ValuesAssociationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="SharedValue"/>
+			<ViewField name="ValueDesc"/>
+			<ViewField name="ValuesAssociationTitle"/>
+			<ViewField name="ImpactType"/>
+			<ViewField name="Manner"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the values association">
+			<ViewField name="ValuesAssociationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<InvisibleField name="OwnerOrganizationID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SharedValueID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="ValueDesc"/>
+				<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+				<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+				<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+				<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+				<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+				<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+				<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+				<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+			</ComboField>
+			<ViewField name="ValueDesc" parentField="SharedValueID"/>
+			<EditField name="ValuesAssociationTitle" size="75" maxLength="128"/>
+			<MemoField name="Manner" rows="5" cols="75"/>
+			<CodeRadioField name="ImpactTypeID">
+				<SampleItem ID="1" name="Harmful"/>
+				<SampleItem ID="2" name="Reinforcing"/>
+			</CodeRadioField>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ValuesAssociationID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="OwnerOrganization"/>
+		<ViewField name="SharedValue"/>
+		<ViewField name="ValueDesc"/>
+		<ViewField name="ValuesAssociationTitle"/>
+		<ViewField name="Manner"/>
+		<ViewField name="ImpactType"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="vala" phrase="Cultural Values">
+			<InvisibleField name="ValuesAssociationID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="SharedValue" sample="Respect the Individual"/>
+			<ViewField name="ImpactType" sample="Harmful"/>
+			<ViewField name="ValuesAssociationTitle" sample="Title"/>
+		</ViewGrid>
+		<EditGrid moduleID="vala" phrase="Cultural Values">
+			<GridForm>
+				<InvisibleField name="ValuesAssociationID"/>
+				<InvisibleField name="OwnerOrganizationID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="SharedValueID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+					<UpdateFieldRef name="ValueDesc"/>
+					<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+					<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+					<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+					<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+					<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+					<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+					<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+					<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+					<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+					<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+				</ComboField>
+				<ViewField name="ValueDesc" parentField="SharedValueID"/>
+				<EditField name="ValuesAssociationTitle" size="75" maxLength="128"/>
+				<CodeRadioField name="ImpactTypeID">
+					<SampleItem ID="1" name="Harmful"/>
+					<SampleItem ID="2" name="Reinforcing"/>
+				</CodeRadioField>
+				<MemoField name="Manner" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="ValuesAssociationID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="SharedValue" sample="Respect the Individual"/>
+			<ViewField name="ImpactType" sample="Harmful"/>
+			<ViewField name="ValuesAssociationTitle" sample="Title"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Values Associations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Values Associations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Values Associations By Values Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Values Associations By Values Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Values Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Values Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Values Associations By Value">
+			<GroupByField name="SharedValue"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Values Associations By Value">
+			<GroupByField name="SharedValue"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Values Associations By Impact Type">
+			<GroupByField name="ImpactType"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Values Associations By Impact Type">
+			<GroupByField name="ImpactType"/>
+			<SummaryField name="ValuesAssociationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Strategic Capabilities" moduleID="ksasc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Strategic Capability" pluralRecordName="Strategic Capabilities" addNewName="Capability" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="CapabilityID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track strategic capabilities" sample="1"/>
+        <TableField name="AreaID" type="int" dbFlags="unsigned not null" phrase="Area|A combined field used to describe this area of excellence when associating it with other records" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="ksaae" foreignKey="AreaID" foreignField="OrganizationID" key="AreaID" joinType="left" phrase="Organization|The organization emphasizing the strategic capability" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization emphasizing the strategic capability" sample="Active Agenda, HQ"/>
+        <ForeignField name="AreaTitle" foreignTable="ksaae" foreignKey="AreaID" foreignField="AreaTitle" key="AreaID" joinType="left" phrase="Area Title|A short title used to describe the strategic capability" sample="Building Alliances"/>
+        <ForeignField name="AreaDesc" foreignTable="ksaae" foreignKey="AreaID" foreignField="AreaDesc" key="AreaID" joinType="left" phrase="Area Description|A brief phrase used to describe the strategic capability" sample="Forging relationships that promote a whole of business focus"/>
+        <ForeignField name="AreaAbbr" foreignTable="ksaae" foreignKey="AreaID" foreignField="AreaAbbr" key="AreaID" joinType="left" phrase="Area Abbreviation|An abbreviation used to describe the strategic capability in a condensed format" sample="BA"/>
+        <ForeignField name="Area" foreignTable="ksaae" foreignKey="AreaID" foreignField="Area" key="AreaID" joinType="left" phrase="Area|A combined field used to describe this area of excellence when associating it with other records" sample="Building Alliances (BA)"/>
+        <TableField name="CapabilityTitle" type="varchar(128)" validate="notEmpty" phrase="Capability Title|A short title used to describe the strategic capability" sample="Engagement"/>
+        <TableField name="CapabilityDesc" type="text" validate="notEmpty" phrase="Capability Description|A brief phrase used to describe the strategic capability" sample="Builds and maintains internal and external relationships to the company, both nationally and internationally"/>
+        <TableField name="CapabilityAbbr" type="varchar(5)" validate="notEmpty" phrase="Capability Abbreviation|An abbreviation used to describe the strategic capability" sample="ENG"/>
+        <CombinedField name="GroupAbbr" phrase="Abbreviation|A grouping of area and capability abbreviations for reporting purposes" sample="BA:ENG"><CombinedFieldRef name="AreaAbbr"/>:<CombinedFieldRef name="CapabilityAbbr"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Engagement | Builds and maintains internal and external relationships to the company, both nationally and internationally"><CombinedFieldRef name="CapabilityTitle"/>;_<CombinedFieldRef name="CapabilityDesc"/></CombinedField>
+        <CombinedField name="Capability" phrase="Capability|A combined field used to describe this strategic capability when associating it with other records" sample="Engagement (ENG)"><CombinedFieldRef name="CapabilityTitle"/> (<CombinedFieldRef name="CapabilityAbbr"/>)</CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="CapabilityID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Capability"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="ksa" name="Knowledge, Skills and Abilities" parentKey="CapabilityID" localKey="CapabilityID"/>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="CapabilityID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ksasc"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="CapabilityID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ksasc"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="CapabilityID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ksasc"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List strategic capabilities">
+            <ListField name="CapabilityID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="AreaTitle" phrase="Area Title"/>
+            <ListField name="CapabilityTitle" phrase="Capability Title"/>
+            <ListField name="CapabilityAbbr" phrase="Abbreviation" align="center"/>
+            <ListField name="GroupAbbr" phrase="Group Abbreviation" align="center"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search strategic capabilities">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <EditField name="AreaTitle" size="25" maxLength="30"/>
+            <EditField name="AreaDesc" size="75" maxLength="128"/>
+            <EditField name="AreaAbbr" size="5" maxLength="5"/>
+            <EditField name="CapabilityTitle" size="50" maxLength="75"/>
+            <EditField name="CapabilityAbbr" size="5" maxLength="5"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the strategic capability">
+            <ViewField name="CapabilityID"/>
+            <ViewField name="Area"/>
+            <ViewField name="AreaDesc"/>
+            <ViewField name="Capability"/>
+            <ViewField name="CapabilityDesc"/>
+            <ViewField name="GroupAbbr"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="ksa"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the strategic capability">
+            <ViewField name="CapabilityID"/>
+            <ViewField name="Area"/>
+            <ViewField name="AreaDesc"/>
+            <EditField name="CapabilityTitle" size="25" maxLength="30"/>
+            <MemoField name="CapabilityDesc" rows="5" cols="75"/>
+            <EditField name="CapabilityAbbr" size="5" maxLength="5"/>
+        </EditScreen>
+        <EditScreen name="KSAs" phrase="KSAs|Associate knowledge, skills, and abilities with the strategic capability">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="ksa"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with the strategic capability">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the strategic capability">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the strategic capability">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="CapabilityID"/>
+        <ViewField name="Area"/>
+        <ViewField name="AreaDesc"/>
+        <ViewField name="Capability"/>
+        <ViewField name="CapabilityDesc"/>
+        <ViewField name="GroupAbbr"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Strategic Capabilities By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CapabilityID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Strategic Capabilities By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="CapabilityID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Strategic Capabilities By Area of Excellence">
+            <GroupByField name="AreaTitle"/>
+            <SummaryField name="CapabilityID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Strategic Capabilities By Area of Excellence">
+            <GroupByField name="AreaTitle"/>
+            <SummaryField name="CapabilityID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Exports>
+        <ViewGrid moduleID="ksasc" phrase="Strategic Capabilities">
+            <InvisibleField name="CapabilityID"/>
+            <ViewField name="Capability" sample="Engagement (ENG)"/>
+            <ViewField name="CapabilityDesc" sample="Builds and maintains internal and external relationships to the company, both nationally and internationally"/>
+            <ViewField name="GroupAbbr" sample="BA:ENG" align="center"/>
+        </ViewGrid>
+        <EditGrid moduleID="ksasc" phrase="Strategic Capabilities">
+            <GridForm>
+                <InvisibleField name="CapabilityID"/>
+                <EditField name="CapabilityTitle" size="50" maxLength="75"/>
+                <MemoField name="CapabilityDesc" rows="5" cols="75"/>
+                <EditField name="CapabilityAbbr" size="5" maxLength="5"/>
+            </GridForm>
+            <InvisibleField name="CapabilityID"/>
+            <ViewField name="Capability" sample="Engagement (ENG)"/>
+            <ViewField name="CapabilityDesc" sample="Builds and maintains internal and external relationships to the company, both nationally and internationally"/>
+            <ViewField name="GroupAbbr" sample="BA:ENG" align="center"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

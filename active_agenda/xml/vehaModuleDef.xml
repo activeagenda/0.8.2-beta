@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Vehicle Assignments" moduleID="veha" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Vehicle Assignment" pluralRecordName="Vehicle Assignments" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="VehAssignmentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track vehicle assignments" sample="1"/>
+		<TableField name="VehicleID" type="int" validate="noValidation" phrase="Vehicle ID|An automatically assigned number used to track vehicles of all types" sample="1"/>
+		<ForeignField name="Vehicle" foreignTable="veh" foreignKey="VehicleID" foreignField="Vehicle" key="VehicleID" joinType="left" phrase="Vehicle|A combined field used to describe this vehicle when associating it with other records" sample="Landrover, Discovery; 9FSE187"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Organization|Name of the organization assuming responsibility for the vehicle being assigned" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|Name of the organization assuming responsibility for the vehicle being assigned" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="115" phrase="Person Accountable|The name of the person accepting temporary responsibility for the vehicle being assigned" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person accepting temporary responsibility for the vehicle being assigned" sample="Mattias Thorslund"/>
+		<RemoteField name="AssignDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="2" phrase="Assignment Date|The date and time the vehicle was assigned to the individual" sample="01/01/2004"/>
+		<TableField name="EstReturnDate" type="datetime" validate="noValidation" phrase="Estimated Return Date|The date and time the vehicle is estimated to be returned by the individual" sample="09-21-2003"/>
+		<TableField name="Returned" type="bool" validate="noValidation" dbFlags="default 0" phrase="Returned?|Whether or not the vehicle has been returned to the organization responsible for the vehicle" sample="Yes"/>
+		<TableField name="ActReturnDate" type="datetime" validate="noValidation" phrase="Actual Return Date|The date and time the vehicle was actually returned by the individual" sample="09-21-2003"/>
+		<CalculatedField name="ReturnDelay" type="int" calcFunction="timediff" params="ActReturnDate EstReturnDate" validate="" phrase="Return Delay|A calculated field based on the amount of time between the date the vehicle was returned and the date the vehicle expected to be returned" sample="30"/>
+		<TableField name="IssueDesc" type="text" validate="noValidation" phrase="Issue Description|Any issues that were identified by the person assigned to the vehicle during the assignment period" sample="The left rear tire is failing to hold air. I had to refill the tire every 100 miles in order to continue operating it. I suspect the tire needs a patch or plug."/>
+		<CombinedField name="ReturnDelayCalc" phrase="Return Delay|A calculated field based on the amount of time between the date the vehicle was returned and the date the vehicle expected to be returned" sample="30 Hours"><CombinedFieldRef name="ReturnDelay"/>_Hours</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Vehicle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="PersonAccountable"/>;_Assigned:_<CombinedFieldRef name="AssignDate"/></CombinedField>
+		<CombinedField name="VehAssignment" phrase="Vehicle Assignment|A combined field used to describe this vehicle assignment when associating it with other records" sample="Landrover, Discovery; 9FSE187 | Active Agenda, HQ | Mattias Thorslund | Assigned: 09-21-2003"><CombinedFieldRef name="Vehicle"/>;_<CombinedFieldRef name="PersonAccountable"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="VehAssignmentID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="VehAssignment"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List vehicle assignments">
+			<ListField name="VehAssignmentID" phrase="Record ID"/>
+			<ListField name="Vehicle" phrase="Vehicle"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Assigned"/>
+			<ListField name="AssignDate" phrase="Assignment Date"/>
+			<ListField name="Returned" phrase="Returned?"/>
+			<ListField name="ReturnDelayCalc" phrase="Return Delay"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search vehicle assignments">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="AssignDate"/>
+			<DateField name="EstReturnDate"/>
+			<CheckBoxField name="Returned"/>
+			<DateField name="ActReturnDate"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a vehicle assignment">
+			<ViewField name="VehAssignmentID"/>
+			<ViewField name="VehicleID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="AssignDate"/>
+			<ViewField name="EstReturnDate"/>
+			<ViewField name="Returned"/>
+			<ViewField name="ActReturnDate"/>
+			<ViewField name="ReturnDelayCalc"/>
+			<ViewField name="IssueDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a vehicle assignment">
+			<ViewField name="VehAssignmentID"/>
+			<ViewField name="Vehicle"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="AssignDate"/>
+			<DateField name="EstReturnDate"/>
+			<CheckBoxField name="Returned"/>
+			<DateField name="ActReturnDate"/>
+			<MemoField name="IssueDesc" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="veha" phrase="Assignments">
+			<InvisibleField name="VehAssignmentID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="AssignDate" sample="09-21-2003"/>
+			<ViewField name="EstReturnDate" sample="09-21-2003"/>
+			<ViewField name="Returned" sample="Yes"/>
+			<ViewField name="ActReturnDate" sample="09-21-2003"/>
+			<ViewField name="ReturnDelayCalc" sample="30 Hours"/>
+		</ViewGrid>
+		<EditGrid moduleID="veha" phrase="Assignments">
+			<GridForm>
+				<InvisibleField name="VehAssignmentID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="3" name="Active Agenda, New York"/>
+					<SampleItem ID="4" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+				</PersonComboField>
+				<DateField name="AssignDate" sample="09-21-2003"/>
+				<DateField name="EstReturnDate" sample="09-21-2003"/>
+				<CheckBoxField name="Returned" sample="Yes"/>
+				<DateField name="ActReturnDate" sample="09-21-2003"/>
+				<MemoField name="IssueDesc" rows="5" cols="75" sample="The left rear tire is failing to hold air. I had to refill the tire every 100 miles in order to continue operating it. I suspect the tire needs a patch or plug."/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="AssignDate" sample="09-21-2003"/>
+			<ViewField name="EstReturnDate" sample="09-21-2003"/>
+			<ViewField name="Returned" sample="Yes"/>
+			<ViewField name="ActReturnDate" sample="09-21-2003"/>
+			<ViewField name="ReturnDelayCalc" sample="30 Hours"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Vehicle Assignments By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Vehicle Assignments By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Vehicle Assignments By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Vehicle Assignments By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Vehicle Assignments By Vehicle">
+			<GroupByField name="Vehicle"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Vehicle Assignments By Vehicle">
+			<GroupByField name="Vehicle"/>
+			<SummaryField name="VehAssignmentID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

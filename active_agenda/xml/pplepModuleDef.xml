@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Prior Employers" moduleID="pplep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Prior Employer" pluralRecordName="Prior Employers" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PriorEmployerID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number used to associate and track prior employers" sample="1"/>
+		<TableField name="PersonID" type="int" dbFlags="unsigned" phrase="Person|The name of the person associated with the prior employment" sample="3"/>
+		<ForeignField name="Person" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonID" joinType="left" phrase="Person|The name of the person associated with the prior employment" sample="Dan Zahlis"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="PersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Emprise, HQ"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignKey="PersonID" foreignField="LastName" key="PersonID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignKey="PersonID" foreignField="FirstName" key="PersonID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="EmployeeNo" foreignTable="pple" foreignKey="PersonID" foreignField="EmployeeNo" key="PersonID" joinType="left" phrase="Employee Number|A uniques number assigned by the organization to each employee for tracking purposes" sample="2710"/>
+		<TableField name="EmployerName" type="varchar(128)" dbFlags="" phrase="Prior Employer|The name of the organization providing prior employment" sample="JJ Plumbing"/>
+		<TableField name="JobTitle" type="varchar(128)" dbFlags="" phrase="Job Title|The job title of the person while working for the prior employer" sample="King of the World"/>
+		<TableField name="EmploymentDescription" type="text" dbFlags="" phrase="Employment Description|A detailed description of the work performed by the person during the prior employment" sample="As King of the World, Dan was responsible for making sure everyone had food in their belly and clothes on their back"/>
+		<TableField name="YearsofService" type="float" dbFlags="" phrase="Years of Service|The number of years the person worked for the prior employer" sample="4"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="LastName"/>,_<CombinedFieldRef name="FirstName"/>;_<CombinedFieldRef name="EmployerName"/>;_<CombinedFieldRef name="JobTitle"/></CombinedField>
+		<CombinedField name="PriorEmployer" phrase="Prior Employer|A combined field used to describe this prior employment relationhsip when associating it with other records" sample="Zahlis, Daniel, 2710 | Cheryl Zahlis | Spouse"><CombinedFieldRef name="LastName"/>,_<CombinedFieldRef name="FirstName"/>;_<CombinedFieldRef name="EmployerName"/>;_<CombinedFieldRef name="JobTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PriorEmployerID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="PriorEmployer"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List prior employers">
+            <ListField name="PriorEmployerID"/>
+			<ListField name="LastName" phrase="Last Name"/>
+			<ListField name="FirstName" phrase="First Name"/>
+			<ListField name="EmployerName" phrase="Prior Employer"/>
+			<ListField name="JobTitle" phrase="Job Title"/>
+			<ListField name="YearsofService" phrase="Years" align="center"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search prior employers">
+			<EditField name="EmployerName" size="75" maxLength="128"/>
+			<EditField name="JobTitle" size="75" maxLength="128"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise, HQ"/>
+				<SampleItem ID="2" name="Emprise, Sweden."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<EditField name="YearsofService" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a prior employer">
+			<ViewField name="PriorEmployerID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="EmployeeNo"/>
+			<ViewField name="EmployerName"/>
+			<ViewField name="JobTitle"/>
+			<ViewField name="EmploymentDescription"/>
+			<ViewField name="YearsofService"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a prior employer">
+			<ViewField name="PriorEmployerID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="EmployeeNo"/>
+			<EditField name="EmployerName" size="75" maxLength="128"/>
+			<EditField name="JobTitle" size="75" maxLength="128"/>
+			<MemoField name="EmploymentDescription" rows="5" cols="75"/>
+			<EditField name="YearsofService" size="5" maxLength="5"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="pplep" phrase="Prior Employment">
+			<InvisibleField name="PriorEmployerID"/>
+			<ViewField name="EmployerName"/>
+			<ViewField name="JobTitle"/>
+			<ViewField name="YearsofService" align="center"/>
+		</ViewGrid>
+		<EditGrid moduleID="pplep" phrase="Prior Employment">
+			<GridForm>
+				<InvisibleField name="PriorEmployerID"/>
+                <EditField name="EmployerName" size="75" maxLength="128"/>
+                <EditField name="JobTitle" size="75" maxLength="128"/>
+                <MemoField name="EmploymentDescription" rows="5" cols="75"/>
+                <EditField name="YearsofService" size="5" maxLength="5"/>
+			</GridForm>
+			<InvisibleField name="PriorEmployerID"/>
+			<ViewField name="EmployerName"/>
+			<ViewField name="JobTitle"/>
+			<ViewField name="YearsofService"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

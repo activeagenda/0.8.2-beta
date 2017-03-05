@@ -1,0 +1,475 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!--
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Cost Expenditures" moduleID="cose" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Expenditure" pluralRecordName="Expenditures" addNewName="Expense" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="ExpenditureID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track expenditures" sample="1"/>
+        <TableField name="CostID" type="int" dbFlags="unsigned not null" phrase="Cost ID|An automatically assigned number used to track costs throughout the enterprise" sample="1"/>
+        <ForeignField name="RelatedModuleRecord" foreignTable="cos" foreignKey="CostID" foreignField="RelatedModuleRecord" key="CostID" joinType="left" phrase="Cost Record|The module and record associated with the cost" sample="Incident Reporting | ID: 3"/>
+        <ForeignField name="CostType" foreignTable="cos" foreignKey="CostID" foreignField="CostType" key="CostID" joinType="left" phrase="Cost Type|A combined field used to describe this cost type when associating it with other records" sample="Incident Reporting | Active Agenda, HQ | 04-29-2004 | External Consultant | 10,000.00"/>
+        <ForeignField name="Title" foreignTable="cos" foreignKey="CostID" foreignField="Title" key="CostID" joinType="left" phrase="Cost Title|A concise title that describes the cost" sample="Labor law consulting fees"/>
+        <ForeignField name="CostDesc" foreignTable="cos" foreignKey="CostID" foreignField="CostDesc" key="CostID" joinType="left" phrase="Cost Description|A detailed description of the cost being tracked" sample="Labor law consultanting fees. This consulting firm was utilized to assist with the agency response."/>
+        <ForeignField name="CostDate" foreignTable="cos" foreignKey="CostID" foreignField="CostDate" key="CostID" joinType="left" phrase="Cost Date|The date this cost amount was incurred by the organization"/>
+        <ForeignField name="Incurred" foreignTable="cos" foreignKey="CostID" foreignField="Incurred" key="CostID" joinType="left" phrase="Total Cost|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software" sample="10,000.00"/>
+        <ForeignField name="PONumber" foreignTable="cos" foreignKey="CostID" foreignField="PONumber" key="CostID" joinType="left" phrase="P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose" sample="9948848"/>
+        <ForeignField name="Cost" foreignTable="cos" foreignKey="CostID" foreignField="Cost" key="CostID" joinType="left" phrase="Cost|A combined field used to describe this cost when associating it with other records" sample="Incident Reporting | Active Agenda, HQ | 04-29-2004 | External Consultant | 10,000.00"/>
+        <TableField name="ExpenseDate" type="date" validate="notEmpty" phrase="Expense Date|The specific date the expense occurred" sample="01/01/2004"/>
+        <TableField name="ExpenseAmount" type="money" validate="Money notEmpty notNegative" phrase="Paid Amount|The amount of the expense, stated in the currency assigned to this installation of the software" sample="1,000.00"/>
+        <TableField name="AccountID" type="int" dbFlags="unsigned not null" phrase="Account|A combined field used to describe the budget account when associating it with other records" sample="1"/>
+        <ForeignField name="BudgetID" foreignTable="buda" foreignKey="AccountID" foreignField="BudgetID" key="AccountID" joinType="left" phrase="Budget|A combined field used to describe the budget when associating it with other records" sample="1"/>
+        <ForeignField name="AccountOrganizationID" foreignTable="buda" foreignKey="AccountID" foreignField="AccountOrganizationID" key="AccountID" joinType="left" phrase="Account Organization|The organization responsible for managing the budget account" sample="1"/>
+        <ForeignField name="AccountOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AccountOrganizationID" joinType="left" phrase="Account Organization|The organization responsible for managing the budget account" sample="Active Agenda, Sweden"/>
+        <ForeignField name="AccountTypeID" foreignTable="buda" foreignKey="AccountID" foreignField="AccountTypeID" key="AccountID" joinType="left" phrase="Account Type|A combined field used to describe this account type when associating it with other records" sample="1"/>
+        <ForeignField name="AccountCategoryID" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountCategoryID" key="AccountTypeID" joinType="left" phrase="Account Category|A broad categoy used to group accounts of similar types" sample="1"/>
+        <CodeField name="AccountCategory" key="AccountCategoryID" phrase="Account Category|A broad categoy used to group accounts of similar types" sample="Employee" codeTypeID="31"/>
+        <ForeignField name="AccountType" foreignTable="budat" foreignKey="AccountTypeID" foreignField="AccountType" key="AccountTypeID" joinType="left" phrase="Account Type|A combined field used to describe this account type when associating it with other records" sample="Employee | Trust Account"/>
+        <ForeignField name="AccountDesc" foreignTable="buda" foreignKey="AccountID" foreignField="AccountDesc" key="AccountID" joinType="left" phrase="Account Description|A detailed description of the budget account" sample="This account is utilized by the employee as a discretionary fund to improve business methods, processes or conditions"/>
+        <ForeignField name="Account" foreignTable="buda" foreignKey="AccountID" foreignField="Account" key="AccountID" joinType="left" phrase="Account|A combined field used to describe the budget account when associating it with other records" sample="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+        <TableField name="PayeeOrgID" type="int" listType="internalAll externalAll" validate="noValidation" phrase="Payee Organization|The organization receiving payment" sample="1"/>
+        <ForeignField name="PayeeOrg" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PayeeOrgID" joinType="left" phrase="Payee Organization|The organization receiving payment" sample="Calaveras Floor Coating Service"/>
+        <RemoteField name="PayeePersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="1" phrase="Payee Person|The name of the individual receiving payment" sample="1"/>
+        <ForeignField name="PayeePerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PayeePersonID" joinType="left" phrase="Payee Person|The name of the individual receiving payment" sample="Jane Doe"/>
+        <TableField name="ExpenseTitle" type="varchar(128)" validate="notEmpty" phrase="Expense Title|A brief title used to describe the expense paid from the trust distribution account" sample="Replacement of 40 degree room floor"/>
+        <TableField name="ExpenseDesc" type="text" validate="notEmpty" phrase="Expense Description|A detailed description of the expense paid from the trust distribution account" sample="The vendor replaced the floor coating within the 40 Degree Room to prevent slips and falls."/>
+        <TableField name="ExpensePaymentMethodID" type="int" validate="RequireSelection" phrase="Payment Method|The method used to pay the expense" sample="1"/>
+        <CodeField name="ExpensePaymentMethod" key="ExpensePaymentMethodID" phrase="Payment Method|The method used to pay the expense" sample="USD" codeTypeID="227"/>
+        <TableField name="TransactionDocNumber" type="varchar(128)" validate="noValidation" phrase="Payment Document Number|The type and number associated with the payment document (e.g. Personal Check (562)" sample="Personal Check (1247)"/>
+        <CombinedField name="RecordLabel" phrase="Record Description|A combined field used to describe the payment when associating it with other records" sample="Active Agenda, Sweden | Mattias Thorslund Risk Control Account | 01-02-2004 | 1,000.00"><CombinedFieldRef name="Cost"/>;_<CombinedFieldRef name="ExpenseDate"/>;_<CombinedFieldRef name="ExpenseAmount"/></CombinedField>
+        <CombinedField name="Expenditure" phrase="Expenditure|A combined field used to describe the payment when associating it with other records" sample="Active Agenda, Sweden | Mattias Thorslund Risk Control Account | 01-02-2004 | 1,000.00"><CombinedFieldRef name="Cost"/>;_<CombinedFieldRef name="ExpenseDate"/>;_<CombinedFieldRef name="ExpenseAmount"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="ExpenditureID"/>
+        </PrimaryKey>
+        <OwnerField name="AccountOrganizationID"/>
+        <RecordDescriptionField name="Expenditure"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="cose"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="cose"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="cose"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="cose"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List trust account expenditures">
+            <ListField name="ExpenditureID" phrase="Record ID"/>
+            <ListField name="AccountOrganization" phrase="Organization"/>
+            <ListField name="ExpenseDate" phrase="Date"/>
+            <ListField name="ExpenseTitle" phrase="Expense Title"/>
+            <ListField name="ExpensePaymentMethod" phrase="Method"/>
+            <ListField name="ExpenseAmount" phrase="Amount"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search trust account expenditures">
+            <DateField name="ExpenseDate"/>
+            <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+            <MoneyField name="ExpenseAmount"/>
+            <OrgComboField name="PayeeOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="PayeePersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                <SampleItem ID="1" name="Personal Check"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="Company Check"/>
+                <SampleItem ID="4" name="Purchase Order"/>
+            </CodeComboField>
+            <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+            <OrgComboField name="AccountOrganizationID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <CodeComboField name="AccountCategoryID" findMode="text">
+                <UpdateFieldRef name="AccountTypeID" listParentField="AccountCategoryID"/>
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </CodeComboField>
+            <ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+                <UpdateFieldRef name="AccountID"/>
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </ComboField>
+            <ComboField name="AccountID" findMode="text" parentField="AccountTypeID">
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </ComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the trust account expenditure">
+            <ViewField name="ExpenditureID"/>
+            <ViewField name="RelatedModuleRecord"/>
+            <ViewField name="Title"/>
+            <ViewField name="CostDesc"/>
+            <ViewField name="CostDate"/>
+            <ViewField name="Incurred"/>
+            <ViewField name="PONumber"/>
+            <ViewField name="ExpenseDate"/>
+            <ViewField name="ExpenseTitle"/>
+            <ViewField name="ExpenseDesc"/>
+            <ViewField name="ExpenseAmount"/>
+            <ViewField name="PayeeOrg"/>
+            <ViewField name="PayeePerson"/>
+            <ViewField name="ExpensePaymentMethod"/>
+            <ViewField name="TransactionDocNumber"/>
+            <ViewField name="AccountOrganization"/>
+            <ViewField name="AccountCategory"/>
+            <ViewField name="AccountType"/>
+            <ViewField name="Account"/>
+            <ViewField name="AccountDesc"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the trust account expenditure">
+            <ViewField name="ExpenditureID"/>
+            <ViewField name="RelatedModuleRecord"/>
+            <ViewField name="Title"/>
+            <ViewField name="CostDesc"/>
+            <ViewField name="CostDate"/>
+            <ViewField name="Incurred"/>
+            <ViewField name="PONumber"/>
+            <DateField name="ExpenseDate"/>
+            <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+            <MemoField name="ExpenseDesc" rows="5" cols="75"/>
+            <MoneyField name="ExpenseAmount"/>
+            <OrgComboField name="PayeeOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="PayeePersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                <SampleItem ID="1" name="Personal Check"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="Company Check"/>
+                <SampleItem ID="4" name="Purchase Order"/>
+            </CodeComboField>
+            <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+            <CodeComboField name="AccountCategoryID" findMode="text">
+                <UpdateFieldRef name="AccountTypeID" listParentField="AccountCategoryID"/>
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </CodeComboField>
+            <ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+                <UpdateFieldRef name="AccountID"/>
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </ComboField>
+            <ComboField name="AccountID" findMode="text" parentField="AccountTypeID">
+                <UpdateFieldRef name="AccountOrganization"/>
+                <UpdateFieldRef name="AccountDesc"/>
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </ComboField>
+            <ViewField name="AccountOrganization" parentField="AccountID"/>
+            <ViewField name="AccountDesc" parentField="AccountID"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the trust account expenditure" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc" phrase="Best Practices|Associate best practices with the trust account expenditure"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="ExpenditureID"/>
+        <ViewField name="RelatedModuleRecord"/>
+        <ViewField name="Title"/>
+        <ViewField name="CostDesc"/>
+        <ViewField name="CostDate"/>
+        <ViewField name="Incurred"/>
+        <ViewField name="PONumber"/>
+        <ViewField name="ExpenseDate"/>
+        <ViewField name="ExpenseTitle"/>
+        <ViewField name="ExpenseDesc"/>
+        <ViewField name="ExpenseAmount"/>
+        <ViewField name="PayeeOrg"/>
+        <ViewField name="PayeePerson"/>
+        <ViewField name="ExpensePaymentMethod"/>
+        <ViewField name="TransactionDocNumber"/>
+        <ViewField name="AccountOrganization"/>
+        <ViewField name="AccountCategory"/>
+        <ViewField name="AccountType"/>
+        <ViewField name="Account"/>
+        <ViewField name="AccountDesc"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="cose" phrase="Expenditures">
+            <InvisibleField name="ExpenditureID"/>
+            <ViewField name="ExpenseDate" sample="07-04-2006"/>
+            <ViewField name="ExpenseTitle" sample="Replace floor mat in the forty degree room"/>
+            <ViewField name="ExpenseAmount" sample="USD $50.00"/>
+            <ViewField name="ExpensePaymentMethod" sample="Personal Check - 8837"/>
+        </ViewGrid>
+        <EditGrid moduleID="cose" phrase="Expenditures">
+            <GridForm>
+                <InvisibleField name="ExpenditureID"/>
+                <DateField name="ExpenseDate"/>
+                <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+                <MemoField name="ExpenseDesc" rows="5" cols="75"/>
+                <MoneyField name="ExpenseAmount"/>
+                <OrgComboField name="PayeeOrgID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </OrgComboField>
+                <PersonComboField name="PayeePersonID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                    <SampleItem ID="1" name="Personal Check"/>
+                    <SampleItem ID="2" name="Cash"/>
+                    <SampleItem ID="3" name="Company Check"/>
+                    <SampleItem ID="4" name="Purchase Order"/>
+                </CodeComboField>
+                <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+                <CodeComboField name="AccountCategoryID" findMode="text">
+                    <UpdateFieldRef name="AccountTypeID" listParentField="AccountCategoryID"/>
+                    <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                    <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                    <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                    <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+                </CodeComboField>
+                <ComboField name="AccountTypeID" findMode="text" parentField="AccountCategoryID">
+                    <UpdateFieldRef name="AccountID"/>
+                    <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                    <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                    <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                    <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+                </ComboField>
+                <ComboField name="AccountID" findMode="text" parentField="AccountTypeID">
+                    <UpdateFieldRef name="AccountOrganization"/>
+                    <UpdateFieldRef name="AccountDesc"/>
+                    <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                    <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                    <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                    <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+                </ComboField>
+                <ViewField name="AccountOrganization" parentField="AccountID"/>
+                <ViewField name="AccountDesc" parentField="AccountID"/>
+            </GridForm>
+            <InvisibleField name="ExpenditureID"/>
+            <ViewField name="ExpenseDate" sample="07-04-2006"/>
+            <ViewField name="ExpenseTitle" sample="Replace floor mat in the forty degree room"/>
+            <ViewField name="ExpenseAmount" sample="USD $50.00"/>
+            <ViewField name="ExpensePaymentMethod" sample="Personal Check - 8837"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Expenditures By Organization">
+            <GroupByField name="AccountOrganization"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Expenditures By Organization">
+            <GroupByField name="AccountOrganization"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Expenditures By Account Category">
+            <GroupByField name="AccountCategory"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Expenditures By Account Category">
+            <GroupByField name="AccountCategory"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Expenditures By Payment Method">
+            <GroupByField name="ExpensePaymentMethod"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Expenditures By Payment Method">
+            <GroupByField name="ExpensePaymentMethod"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Expenditures By Payee">
+            <GroupByField name="PayeePerson"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Expenditures By Payee">
+            <GroupByField name="PayeePerson"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Expenditures By Account">
+            <GroupByField name="Account"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Expenditures By Account">
+            <GroupByField name="Account"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Expenditures By Account Type">
+            <GroupByField name="AccountType"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Expenditures By Account Type">
+            <GroupByField name="AccountType"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Expenditures By Payee Organization">
+            <GroupByField name="PayeeOrg"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Expenditures By Payee Organization">
+            <GroupByField name="PayeeOrg"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

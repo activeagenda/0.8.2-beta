@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Packaging Unit Equivalents" moduleID="pkg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Packaging Unit Equivalent" pluralRecordName="Packaging Unit Equivalents" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PackagingUnitEquivalentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate packaging unit equivalents with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the packaging unit" sample="eqp"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the packaging unit" sample="Equipment"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		<TableField name="FirstUnitValue" type="float" validate="Number notZero notEmpty notNegative" phrase="First Equivalent|The value associate with the first packaging unit to be normalized with the second value and packaging unit" sample="25"/>
+		<TableField name="FirstUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="FirstUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="FirstUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="FirstUnitCategory" key="FirstUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="FirstUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="FirstUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="SecondUnitValue" type="float" validate="Number notZero notEmpty notNegative" phrase="Second Equivalent|The value associate with the second packaging unit to be normalized with the first value and unit" sample="1"/>
+		<TableField name="SecondUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="SecondUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SecondUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="SecondUnitCategory" key="SecondUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="SecondUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SecondUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="FirstUnitEquivalent" phrase="First Unit Equivalent|A combined field used to describe this packaging unit equivalent when associating it with other records" sample="25 boxes"><CombinedFieldRef name="FirstUnitValue"/>_<CombinedFieldRef name="FirstUnit"/></CombinedField>
+		<CombinedField name="SecondUnitEquivalent" phrase="Second Unit Equivalent|A combined field used to describe this packaging unit equivalent when associating it with other records" sample="eqp | ID: 1 "><CombinedFieldRef name="SecondUnitValue"/>_<CombinedFieldRef name="SecondUnit"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RelatedModule"/>;_ID:_<CombinedFieldRef name="RelatedRecordDescription"/>;_<CombinedFieldRef name="FirstUnitValue"/>_<CombinedFieldRef name="FirstUnit"/>_=_<CombinedFieldRef name="SecondUnitValue"/>_<CombinedFieldRef name="SecondUnit"/></CombinedField>
+		<CombinedField name="PackagingUnitEquivalent" phrase="Packaging Unit Equivalent|A combined field used to describe this packaging unit equivalent when associating it with other records" sample="eqp | ID: 1 "><CombinedFieldRef name="RelatedModule"/>;_ID:_<CombinedFieldRef name="RelatedRecordDescription"/>;_<CombinedFieldRef name="FirstUnitValue"/>_<CombinedFieldRef name="FirstUnit"/>_=_<CombinedFieldRef name="SecondUnitValue"/>_<CombinedFieldRef name="SecondUnit"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PackagingUnitEquivalentID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="PackagingUnitEquivalent"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List weight and measure equivalencies associated with related records">
+			<ListField name="PackagingUnitEquivalentID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="FirstUnitEquivalent" phrase="First Unit"/>
+			<ListField name="SecondUnitEquivalent" phrase="Second Unit"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search weight and measure equivalencies associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Equipment"/>
+				<SampleItem ID="2" name="Chemicals"/>
+				<SampleItem ID="2" name="Waste"/>
+			</ComboField>
+			<EditField name="FirstUnitValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="FirstUnitCategoryID">
+					<UpdateFieldRef name="FirstUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="FirstUnitID" parentField="FirstUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="SecondUnitValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="SecondUnitCategoryID">
+					<UpdateFieldRef name="SecondUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="SecondUnitID" parentField="SecondUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a weight and measure equivalency associated with a related record">
+			<ViewField name="PackagingUnitEquivalentID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordID"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="FirstUnitEquivalent"/>
+			<ViewField name="SecondUnitEquivalent"/>
+			<!--<ViewField name="FirstUnitValue">
+				<ViewField name="FirstUnit"/>
+			</ViewField>
+			<ViewField name="SecondUnitValue">
+				<ViewField name="SecondUnit"/>
+			</ViewField>-->
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a weight and measure equivalency associated with a related record">
+			<ViewField name="PackagingUnitEquivalentID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<EditField name="FirstUnitValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="FirstUnitCategoryID">
+					<UpdateFieldRef name="FirstUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="FirstUnitID" parentField="FirstUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="SecondUnitValue" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="SecondUnitCategoryID">
+					<UpdateFieldRef name="SecondUnitID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="SecondUnitID" parentField="SecondUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="pkg" phrase="Unit Equivalents">
+			<InvisibleField name="PackagingUnitEquivalentID"/>
+			<ViewField name="FirstUnitEquivalent" sample="12 Each"/>
+			<ViewField name="SecondUnitEquivalent" sample="1 Dozen"/>
+			<!--<ViewField name="FirstUnitValue" sample="12">
+				<ViewField name="FirstUnit" sample="Each"/>
+			</ViewField>
+			<ViewField name="SecondUnitValue" sample="1">
+				<ViewField name="SecondUnit" sample="Dozen"/>
+			</ViewField>-->
+		</ViewGrid>
+		<EditGrid moduleID="pkg" phrase="Unit Equivalents">
+			<GridForm>
+				<InvisibleField name="PackagingUnitEquivalentID"/>
+				<EditField name="FirstUnitValue" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="FirstUnitCategoryID">
+						<UpdateFieldRef name="FirstUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="FirstUnitID" parentField="FirstUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<EditField name="SecondUnitValue" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="SecondUnitCategoryID">
+						<UpdateFieldRef name="SecondUnitID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="SecondUnitID" parentField="SecondUnitCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+			</GridForm>
+			<ViewField name="FirstUnitEquivalent" sample="12 Each"/>
+			<ViewField name="SecondUnitEquivalent" sample="1 Dozen"/>
+			<!--<ViewField name="FirstUnitValue" sample="12">
+				<ViewField name="FirstUnit" sample="Each"/>
+			</ViewField>
+			<ViewField name="SecondUnitValue" sample="1">
+				<ViewField name="SecondUnit" sample="Dozen"/>
+			</ViewField>-->
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

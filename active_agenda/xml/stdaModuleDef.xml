@@ -1,0 +1,340 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Standard Associations" moduleID="stda" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Standard Association" pluralRecordName="Standard Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="StandardAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate standards with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module ID|The name or title of the module which is associated with the standard" sample="par"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the standard" sample="Partnerships"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A description of the related record based on a combination of field values assigned from within the related module" sample="Hearing Conservation, Active Agenda, HQ, Complete"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization affected by the standard" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization affected by the standard" sample="Active Agenda, Inc."/>
+		<TableField name="StandardID" type="int" validate="RequireSelection" phrase="Standard|A description of the standard based on a combination of field values assigned from within the Standards module" sample="1"/>
+		<TableField name="MannerAffected" type="text" phrase="Manner Affected|A detailed description of the manner in which the related record is affected by the standard" sample="The facility is required to develop a written program which illustrates the specific methods used to comply with the standard"/>
+		<ForeignField name="CountryID" foreignTable="std" foreignKey="StandardID" foreignField="CountryID" key="StandardID" joinType="left" phrase="Country|The country from which the standard emanates" sample="1"/>
+		<ForeignField name="Country" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="CountryID" joinType="left" phrase="Country|The country from which the standard emanates" sample="United States of America (USA)"/>
+		<ForeignField name="StandardLevelID" foreignTable="std" foreignKey="StandardID" foreignField="StandardLevelID" key="StandardID" joinType="left" phrase="Standard Level|The heirarchial level of the standard from an international perspective" sample="1"/>
+		<CodeField name="StandardLevel" key="StandardLevelID" phrase="Standard Level|The heirarchial level of the standard from an international perspective" sample="Federal" codeTypeID="7"/>
+		<ForeignField name="StandardsOrganizationID" foreignTable="std" foreignKey="StandardID" foreignField="StandardsOrganizationID" key="StandardID" joinType="left" phrase="Standards Organization|Name of the organization, association, or body responsible for development and maintenance of the standard" sample="1"/>
+		<ForeignField name="StandardsOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="StandardsOrganizationID" joinType="left" phrase="Standards Organization|Name of the organization, association, or body responsible for development and maintenance of the standard" sample="U.S. Occupational Safety and Health Administration"/>
+		<ForeignField name="StandardsOrganizationAbbreviation" foreignTable="std" foreignKey="StandardID" foreignField="StandardsOrganizationAbbreviation" key="StandardID" joinType="left" phrase="Abbreviation|The official abbreviation of the standards organization" sample="ILO"/>
+		<ForeignField name="StandardDescription" foreignTable="std" foreignKey="StandardID" foreignField="StandardDescription" key="StandardID" joinType="left" phrase="Description|A detailed description of the standard" sample="The International Labour Organization's Guidelines on Occupational Health and Safety Systems"/>
+		<ForeignField name="Standard" foreignTable="std" foreignKey="StandardID" foreignField="Standard" key="StandardID" joinType="left" phrase="Regulation|A description of the regulation based on a combination of field values assigned from within the Standards module" sample="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95"/>
+		<ForeignField name="StandardURL" foreignTable="std" foreignKey="StandardID" foreignField="StandardURL" key="StandardID" joinType="left" phrase="Uniform Resource Locator|The official Internet address of the standard" sample="http://www.ilo.org"/>
+		<TableField name="ComplianceStatusID" type="int" validate="noValidation" phrase="Compliance Status|Current compliance status" sample="2"/>
+		<CodeField name="ComplianceStatus" key="ComplianceStatusID" phrase="Compliance Status|Current compliance status" sample="Within Compliance" codeTypeID="94"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="Standard"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="StandardAssoc" phrase="Standard Association|A combined field used to describe the standard association when associating it with other records" sample="Partnerships; U.S. Occupational Safety and Health Administration; Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95; Mattias Thorslund"><CombinedFieldRef name="Standard"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="StandardAssocID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="StandardAssoc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List regulations associated with related records">
+			<ListField name="StandardAssocID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="Standard" phrase="Standard"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search regulations associated with related records">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Partnerships"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Injury Loss"/>
+				<SampleItem ID="4" name="Hazard Reports"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<ComboField name="CountryID" findMode="text">
+				<SampleItem ID="1" name="United States of America"/>
+				<SampleItem ID="2" name="Sweden"/>
+				<SampleItem ID="3" name="Latvia"/>
+				<SampleItem ID="4" name="Brazil"/>
+				<SampleItem ID="5" name="Germany"/>
+			</ComboField>
+			<ComboField name="StandardLevelID">
+				<SampleItem ID="1" name="Federal"/>
+				<SampleItem ID="2" name="International"/>
+				<SampleItem ID="3" name="State"/>
+				<SampleItem ID="4" name="County"/>
+				<SampleItem ID="5" name="City"/>
+			</ComboField>
+			<OrgComboField name="StandardsOrganizationID" findMode="text">
+				<UpdateFieldRef name="StandardID"/>
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Health Department"/>
+			</OrgComboField>
+			<ComboField name="StandardID" findMode="text" parentField="StandardsOrganizationID">
+				<SampleItem ID="1" name="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95"/>
+				<SampleItem ID="2" name="Environmental Protection Agency; 40 Code of Federal Regulations; 1940.95"/>
+				<SampleItem ID="3" name="Federal; OSHA; U.S. Respiratory Protection Standard; 29 Code of Federal Regulations; 1910.113"/>
+			</ComboField>
+			<CodeComboField name="ComplianceStatusID" findMode="text">
+				<SampleItem ID="1" name="Within Compliance"/>
+				<SampleItem ID="2" name="In Dispute"/>
+				<SampleItem ID="3" name="Out of Compliance"/>
+				<SampleItem ID="4" name="Under Evaluation"/>
+				<SampleItem ID="5" name="Unknown"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a regulation associated with a related record">
+			<ViewField name="StandardAssocID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Country"/>
+			<ViewField name="StandardLevel"/>
+			<ViewField name="StandardsOrganization"/>
+			<ViewField name="Standard"/>
+			<ViewField name="StandardDescription"/>
+			<ViewField name="StandardURL" link="StandardURL"/>
+			<ViewField name="MannerAffected"/>
+			<ViewField name="ComplianceStatus"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a regulation associated with a related record">
+			<ViewField name="StandardAssocID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Country"/>
+			<ViewField name="StandardLevel"/>
+			<ViewField name="StandardsOrganization"/>
+			<ViewField name="Standard"/>
+			<ViewField name="StandardDescription"/>
+			<ViewField name="StandardURL" link="StandardURL"/>
+			<MemoField name="MannerAffected" rows="5" cols="75"/>
+			<CodeComboField name="ComplianceStatusID" findMode="text">
+				<SampleItem ID="1" name="Within Compliance"/>
+				<SampleItem ID="2" name="In Dispute"/>
+				<SampleItem ID="3" name="Out of Compliance"/>
+				<SampleItem ID="4" name="Under Evaluation"/>
+				<SampleItem ID="5" name="Unknown"/>
+			</CodeComboField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="stda" phrase="Standards">
+			<InvisibleField name="StandardAssocID"/>
+			<ViewField name="StandardsOrganizationAbbreviation" sample="ILO"/>
+			<ViewField name="Standard" sample="Guidelines on Occupational Health and Safety Management Systems"/>
+			<ViewField name="MannerAffected" sample="All changes to ammonia piping require compliance with ILO OSH 2001"/>
+			<ViewField name="ComplianceStatus" sample="Within Compliance"/>
+		</ViewGrid>
+		<EditGrid moduleID="stda" phrase="Standards">
+			<GridForm>
+				<InvisibleField name="StandardAssocID"/>
+				<OrgComboField name="StandardsOrganizationID" findMode="text" sample="U.S. Occupational Safety and Health Administration">
+					<UpdateFieldRef name="StandardID"/>
+					<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+					<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+					<SampleItem ID="3" name="International Standards Organization"/>
+					<SampleItem ID="4" name="Fresno County Health Department"/>
+				</OrgComboField>
+				<ComboField name="StandardID" findMode="text" parentField="StandardsOrganizationID" sample="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95">
+					<UpdateFieldRef name="StandardDescription"/>
+					<UpdateFieldRef name="StandardURL"/>
+					<SampleItem ID="1" name="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95"/>
+					<SampleItem ID="2" name="Environmental Protection Agency; 40 Code of Federal Regulations; 1940.95"/>
+					<SampleItem ID="3" name="Federal; OSHA; U.S. Respiratory Protection Standard; 29 Code of Federal Regulations; 1910.113"/>
+				</ComboField>
+				<ViewField name="StandardDescription" parentField="StandardID"/>
+				<ViewField name="StandardURL" link="StandardURL" parentField="StandardID"/>
+				<MemoField name="MannerAffected" rows="5" cols="75" sample="The facility is required to develop a written program which illustrates the specific methods used to comply with the regulation"/>
+				<CodeComboField name="ComplianceStatusID" findMode="text" sample="Within Compliance">
+					<SampleItem ID="1" name="Within Compliance"/>
+					<SampleItem ID="2" name="In Dispute"/>
+					<SampleItem ID="3" name="Out of Compliance"/>
+					<SampleItem ID="4" name="Under Evaluation"/>
+					<SampleItem ID="5" name="Unknown"/>
+				</CodeComboField>
+			</GridForm>
+			<InvisibleField name="StandardAssocID"/>
+			<ViewField name="StandardsOrganizationAbbreviation" sample="ILO"/>
+			<ViewField name="Standard" sample="Guidelines on Occupational Health and Safety Management Systems"/>
+			<ViewField name="MannerAffected" sample="All changes to ammonia piping require compliance with ILO OSH 2001"/>
+			<ViewField name="ComplianceStatus" sample="Within Compliance"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Standards By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Standards By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Standards By Country">
+			<GroupByField name="Country"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Standards By Country">
+			<GroupByField name="Country"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Standards By Standard Level">
+			<GroupByField name="StandardLevel"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Standards By Standard Level">
+			<GroupByField name="StandardLevel"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Standards By Standards Organization">
+			<GroupByField name="StandardsOrganization"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Standards By Standards Organization">
+			<GroupByField name="StandardsOrganization"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Standards By Standards Organization (abr)">
+			<GroupByField name="StandardsOrganizationAbbreviation"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Standards By Standards Organization (abr)">
+			<GroupByField name="StandardsOrganizationAbbreviation"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Standards By Compliance Status">
+			<GroupByField name="ComplianceStatus"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Standards By Compliance Status">
+			<GroupByField name="ComplianceStatus"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Standards By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Standards By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="StandardAssocID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

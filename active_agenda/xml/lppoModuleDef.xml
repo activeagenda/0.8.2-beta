@@ -1,0 +1,902 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Other Asset Loss" moduleID="lppo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Other Asset Loss" pluralRecordName="Other Asset Losses" allowAddRecord="no" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="LossOtherAssetID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track property losses" sample="11"/>
+        <ForeignField name="EventDate" type="datetime" foreignTable="ire" foreignKey="IncidentReportID" foreignField="EventDate" key="IncidentReportID" joinType="left" phrase="Event Date|Date the situation or incident occurred" sample="01/01/2004"/>
+        <ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Reported|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="Clovis; 10-28-2003; Stormwater Release to Dry Creek Irrigation Canal"/>
+        <!-- LOSS SPECIFIC FIELDS (BEGIN) -->
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization responsible for the location where this asset loss occurred" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for the location where this asset loss occurred" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="29" phrase="Person Accountable|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this incident and mitigating the associated loss" sample="Mattias Thorslund"/>
+<TableField name="OtherAssetInventoryID" type="int" validate="RequireSelection" phrase="Asset Inventory Item|The name of the asset inventory item that was involved in the loss" sample="1"/>
+<ForeignField name="OtherAssetInventory" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="OtherAssetInventory" key="OtherAssetInventoryID" joinType="left" phrase="Asset Inventory Item|The name of the asset inventory item that was involved in the loss" sample="1"/>
+        <ForeignField name="OtherAssetID" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="OtherAssetID" key="OtherAssetInventoryID" joinType="left" phrase="Asset|The name of the asset to be protected" sample="1"/>
+        <ForeignField name="OtherAsset" foreignTable="oas" foreignKey="OtherAssetID" foreignField="OtherAsset" key="OtherAssetID" joinType="left" phrase="Asset|The name of the asset to be protected" sample="Active Agenda Source Code"/>
+        <ForeignField name="OtherAssetTypeID" foreignTable="oas" foreignKey="OtherAssetID" foreignField="OtherAssetTypeID" key="OtherAssetID" joinType="left" phrase="Asset Type|A method of classifying and tracking assets of different types. Asset types are assigned by the parent organization" sample="1"/>
+        <CodeField name="OtherAssetType" key="OtherAssetTypeID" phrase="Asset Type|A method of classifying and tracking assets of different types. Asset types are assigned by the parent organization" sample="Intellectual Property" codeTypeID="23"/>
+<ForeignField name="AssetOrganizationID" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="OrganizationID" key="OtherAssetInventoryID" joinType="left" phrase="Asset Organization|The name of the organization responsible for the asset" sample="1"/>
+<ForeignField name="AssetOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AssetOrganizationID" joinType="left" phrase="Asset Organization|The name of the organization responsible for the asset" sample="Active Agenda, HQ"/>
+        <ForeignField name="TrackingNumber" foreignTable="oasin" foreignKey="OtherAssetInventoryID" foreignField="TrackingNumber" key="OtherAssetInventoryID" joinType="left" phrase="Tracking Number|A unique number used by the organization to track specific assets" sample="SC-AA-2003-04"/>
+        <TableField name="PropOwnershipID" type="int" validate="RequireSelection" phrase="Ownership|Whether the property associated with the loss is owned by the company, a private entity or both the company and a private entity" sample="1"/>
+        <CodeField name="PropOwnership" key="PropOwnershipID" phrase="Ownership|Whether the property associated with the loss is owned by the company, a private entity or both the company and a private entity" sample="Private" codeTypeID="24"/>
+        <TableField name="PropertyLossTypeID" type="int" validate="RequireSelection" phrase="Property Loss Type|A general category of loss which applies to this property loss event" sample="1"/>
+        <CodeField name="PropertyLossType" key="PropertyLossTypeID" phrase="Property Loss Type|A general category of loss which applies to this property loss event" sample="Vandalism" codeTypeID="40"/>
+        <TableField name="PropertyLossDesc" type="text" validate="notEmpty" phrase="Loss Description|A detailed description of the property loss" sample="The digital video camera was found smashed behind boxes in the Packaging Area"/>
+        <TableField name="AssetAvailable" type="bool" validate="noValidation" dbFlags="default 0" phrase="Asset Available|Whether the asset associated with the incurred loss is available for viewing" sample="Yes"/>
+        <TableField name="PresentDesc" type="varchar(255)" validate="noValidation" phrase="Present Location|A detailed description of the location of where the asset associated with the incurred loss can be viewed" sample="The customer has transported the damaged product to US Cold Storage for hold until the matter can be resolved."/>
+        <TableField name="PresentAddress1" type="varchar(50)" validate="noValidation" phrase="Present Address|First physical street address of the location where the asset associated with the incurred loss can be viewed" sample="836 Cherry Lane"/>
+        <TableField name="PresentAddress2" type="varchar(50)" validate="noValidation" phrase="Present Address|Second physical street address of the location where the asset associated with the incurred loss can be viewed; such as, suite number or p.o. box" sample="Suite 101"/>
+        <TableField name="PresentCountyID" type="int" validate="noValidation" phrase="Present County|The name of the county where the asset associated with the incurred loss can be viewed" sample="1"/>
+        <ForeignField name="PresentCountryID" foreignTable="sta" foreignKey="StateID" foreignField="CountryID" key="PresentStateID" joinType="left" phrase="Present Country|The name of the country where the asset associated with the incurred loss can be viewed" sample="1"/>
+        <ForeignField name="PresentCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="PresentCountryID" joinType="left" phrase="Present Country|The name of the country where the asset associated with the incurred loss can be viewed" sample="United States of America (USA)"/>
+        <ForeignField name="PresentStateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="PresentCountyID" joinType="left" phrase="Present State|The name of the state where the asset associated with the incurred loss can be viewed" sample="1"/>
+        <ForeignField name="PresentState" foreignTable="sta" foreignKey="StateID" foreignField="State" key="PresentStateID" joinType="left" phrase="Present State|The name of the state where the asset associated with the incurred loss can be viewed" sample="California (CA)"/>
+        <ForeignField name="PresentCounty" foreignTable="cti" foreignKey="CountyID" foreignField="County" key="PresentCountyID" joinType="left" phrase="Present County|The name of the county where the asset associated with the incurred loss can be viewed" sample="Fresno"/>
+        <TableField name="PresentCity" type="varchar(50)" validate="noValidation" phrase="Present City|The name of the city where the asset associated with the incurred loss can be viewed" sample="Clovis"/>
+        <TableField name="PresentPostalCode" type="varchar(50)" validate="noValidation" phrase="Present Postal Code|The postal code of the address where the asset associated with the incurred loss can be viewed" sample="93612"/>
+        <!-- LOSS SPECIFIC FIELDS (END) -->
+        <!-- CLAIM DATA (BEGIN)-->
+        <RemoteFields remoteModuleID="clm" remoteModuleIDField="RelatedModuleID" remoteRecordIDField="RelatedRecordID">
+            <!-- picks up ClaimID from clm. Do not use an editable field -->
+            <RemoteField name="IncidentReportID" type="int" remoteField="IncidentReportID" phrase="Incident Report|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="11"/>
+            <RemoteField name="ClaimID" type="int" remoteField="ClaimID" phrase="Claim ID|The record ID field of the Claims module" sample="01/01/2004"/>
+            <!-- REMOTE REMOTEFIELDS IN clm (Begin)-->
+            <RemoteField name="ReportDate" type="datetime" remoteField="ReportDate" phrase="Report Date|Date the loss was reported" sample="01/01/2004"/>
+            <RemoteField name="ClaimDate" type="date" remoteField="ClaimDate" phrase="Claim Date|Date the claim was officially submitted to an insurance carrier or third party administrator" sample="01/01/2004"/>
+            <RemoteField name="ClosureDate" type="date" remoteField="ClosureDate" phrase="Claim Closure Date|The date the claim was closed" sample="01/01/2004"/>
+            <RemoteField name="TimeDeterminable" type="bool" validate="RequireSelection" remoteField="TimeDeterminable" phrase="Time Determinable?|Whether the time the loss occurred is determinable" sample="Yes"/>
+            <RemoteField name="IncurredTime" type="datetime" validate="RequireSelection" remoteField="IncurredTime" phrase="Incurred Date|Date the asset loss was incurred" sample="01/01/2004"/>
+            <RemoteField name="LocationID" type="int" remoteField="LocationID" phrase="Location|Specific location within the facility where the asset loss occurred" sample="1"/>
+            <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the asset loss occurred" sample="Packaging Area"/>
+            <RemoteField name="LossLegitimacyTypeID" type="int" remoteField="LossLegitimacyTypeID" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="1"/>
+            <ForeignField name="LegitimacyCategoryID" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyCategoryID" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="1"/>
+            <CodeField name="LegitimacyCategory" key="LegitimacyCategoryID" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="Legitimate" codeTypeID="191"/>
+            <ForeignField name="LegitimacyDesc" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyDesc" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Description|A brief, but detailed, description of the legitimacy type" sample="Any loss claim that results from an indisputable, work-related, injury and the injured person is actively engaged in proactive treatment towards revovery."/>
+            <ForeignField name="LossLegitimacyType" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LossLegitimacyType" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="Legitimate | Clear Liability; Active Treatment"/>
+            <!-- REMOTE REMOTEFIELDS IN clm (End)-->
+            <!-- REMOTE TABLEFIELDS IN clm (Begin)-->
+            <RemoteField name="PersonReportingID" type="int" remoteField="PersonReportingID" phrase="Person Reporting|The name of the individual that reported the asset loss" sample="1"/>
+            <ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the asset loss" sample="Jane Doe"/>
+            <RemoteField name="EntryDate" remoteField="EntryDate" type="datetime" validate="" phrase="Entry Date|Date the loss was first entered into the system" sample="01/01/2004"/>
+            <RemoteField name="SubmittedByID" remoteField="SubmittedByID" type="int" validate="" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="1"/>
+            <ForeignField name="SubmittedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SubmittedByID" joinType="left" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="Jane Doe"/>
+            <RemoteField name="PolicyID" remoteField="PolicyID" validate="RequireSelection" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="1"/>
+            <ForeignField name="InsuranceTypeID" foreignTable="ins" foreignKey="PolicyID" foreignField="InsuranceTypeID" key="PolicyID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="1"/>
+            <ForeignField name="InsuranceCategoryID" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceCategoryID" key="InsuranceTypeID" joinType="left" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="1"/>
+            <CodeField name="InsuranceCategory" key="InsuranceCategoryID" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="Property" codeTypeID="3"/>
+            <ForeignField name="InsuranceType" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceType" key="InsuranceTypeID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="Active Agenda, HQ"/>
+            <ForeignField name="IntegrationKey" foreignTable="ins" foreignKey="PolicyID" foreignField="IntegrationKey" key="PolicyID" joinType="left" phrase="Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization" sample="DFC2004DFN001"/>
+            <ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+            <RemoteField name="ClaimNumber" remoteField="ClaimNumber" type="varchar(50)" validate="noValidation" phrase="Claim Number|A unique number assigned by an insurance company or third party administrator responsible for managing the claim" sample="03-001-6717"/>
+            <RemoteField name="ClaimsAdjusterID" type="int" remoteField="ClaimsAdjusterID" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="1"/>
+            <ForeignField name="ClaimsAdjuster" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ClaimsAdjusterID" joinType="left" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+            <RemoteField name="LossStatusTypeID" remoteField="LossStatusTypeID" type="int" validate="RequireSelection" phrase="Status Type|A combined field used to describe this loss status type when associating it with other records" sample="1"/>
+            <ForeignField name="LossStatusCategoryID" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusCategoryID" key="LossStatusTypeID" joinType="left" phrase="Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="1"/>
+            <CodeField name="LossStatusCategory" key="LossStatusCategoryID" phrase="Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="Open" codeTypeID="9"/>
+            <ForeignField name="LossStatusType" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusType" key="LossStatusTypeID" joinType="left" phrase="Status Type|A combined field used to describe this loss status type when associating it with other records" sample="Open: Active"/>
+            <ForeignField name="GeneralLossStatusDescription" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusDescription" key="LossStatusTypeID" joinType="left" phrase="General Status Description|A detailed description of the loss status type" sample="Claims of loss that are open and the claimant is actively seeking treatment and/or engaging the adjuster towards a resolution"/>
+            <RemoteField name="SpecificLossStatusDescription" remoteField="SpecificLossStatusDescription" type="text" validate="noValidation" phrase="Specific Status Description|A detailed description of the status of the specific claim of loss" sample="The settlement offer is under consideration by the claimant. We offer a settlement every six months and the claimant has indicated a desire to settle the claim this time."/>
+            <RemoteField name="OnCoPropID" remoteField="OnCoPropID" type="int" validate="noValidation" phrase="On Company Property|This box should be checked if the loss occurred on company property" sample="1"/>
+            <CodeField name="OnCoProp" key="OnCoPropID" phrase="On Company Property|This box should be checked if the loss occurred on company property" sample="Yes" codeTypeID="8"/>
+            <RemoteField name="LocalClaimManagerID" type="int" remoteField="LocalClaimManagerID" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="1"/>
+            <ForeignField name="LocalClaimManager" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LocalClaimManagerID" joinType="left" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+            <RemoteField name="IncurredLocationDesc" remoteField="IncurredLocationDesc" type="text" validate="noValidation" phrase="Location Description|A detailed description of the location where the loss occurred" sample="7-Eleven retail establishment. Backstock freezer"/>
+            <RemoteField name="IncurredAddress1" remoteField="IncurredAddress1" type="varchar(50)" validate="noValidation" phrase="Incurred Address|First physical street address of the location where the asset loss occurred" sample="836 Cherry Lane"/>
+            <RemoteField name="IncurredAddress2" remoteField="IncurredAddress2" type="varchar(50)" validate="noValidation" phrase="Incurred Address|Second physical street address of the location where the asset loss occurred; such as, suite number or p.o. box" sample="Suite 101"/>
+            <RemoteField name="IncurredCountyID" remoteField="IncurredCountyID" type="int" validate="noValidation" phrase="Incurred County|A combined field used to track and associate counties" sample="1"/>
+            <ForeignField name="IncurredCountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="IncurredStateID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="1"/>
+            <ForeignField name="IncurredCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="CountryName" key="IncurredCountryID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="United States of America (USA)"/>
+            <ForeignField name="IncurredStateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="IncurredCountyID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="1"/>
+            <ForeignField name="IncurredState" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="StateName" key="IncurredStateID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="California (CA)"/>
+            <ForeignField name="IncurredCounty" foreignTable="cti" foreignKey="CountyID" foreignField="CountyName" key="IncurredCountyID" joinType="left" phrase="Incurred County|A combined field used to track and associate counties" sample="Fresno"/>
+            <RemoteField name="IncurredCity" remoteField="IncurredCity" type="varchar(50)" validate="noValidation" phrase="Incurred City|City where the loss occurred" sample="Clovis"/>
+            <RemoteField name="IncurredPostalCode" remoteField="IncurredPostalCode" type="varchar(50)" validate="noValidation" phrase="Incurred Postal Code|Postal code used to direct mail to the physical street address where the loss occurred" sample="93612"/>
+            <RemoteField name="LossStatusTypeID" remoteField="LossStatusTypeID" type="int" validate="noValidation" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="1"/>
+            <ForeignField name="LossStatusCategoryID" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusCategoryID" key="LossStatusTypeID" joinType="left" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="1"/>
+            <CodeField name="LossStatusCategory" key="LossStatusCategoryID" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="Open" codeTypeID="9"/>
+            <ForeignField name="LossStatusType" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusType" key="LossStatusTypeID" joinType="left" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="Open: Active"/>
+            <ForeignField name="GeneralLossStatusDescription" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusDescription" key="LossStatusTypeID" joinType="left" phrase="General Status Description|A detailed description of the loss status type" sample="Claims of loss that are open and the claimant is actively seeking treatment and/or engaging the adjuster towards a resolution"/>
+            <RemoteField name="SpecificLossStatusDescription" remoteField="SpecificLossStatusDescription" type="text" validate="noValidation" phrase="Specific Status Description|A detailed description of the status of the specific claim of loss" sample="The settlement offer is under consideration by the claimant. We offer a settlement every six months and the claimant has indicated a desire to settle the claim this time."/>
+            <!-- REMOTE TABLEFIELDS IN clm (End)-->
+        </RemoteFields>
+        <!-- CLAIM DATA (END)-->
+        <!--COSTS AND SEVERITY SECTION (BEGIN)-->
+        <!-- These fields should ideally NOT be used on screens in the module itself. They are part of the calculation of TotalCost and CostSeverity, and add (quite) a bit of overhead to the SQL that retrieves a record. Rather, use the "cached" counterparts below, which are updated whenever the cost changes.-->
+        <SummaryField name="ClaimCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="TotalIncurred" localKey="LossOtherAssetID" summaryKey="RelatedRecordID" summaryModuleID="clm" phrase="Claim Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+        <SummaryField name="RollupCosts" type="money" validate="noValidation" summaryFunction="cos_rollup_sum" summaryField="Incurred" localKey="LossOtherAssetID" summaryKey="RecordID" summaryModuleID="cos" summaryCondition="ModuleID = 'len'" isGlobal="yes" phrase="Rollup Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+        <SummaryField name="LocalCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="Incurred" localKey="LossOtherAssetID" summaryKey="RelatedRecordID" summaryModuleID="cos" summaryCondition="RelatedModuleID = 'len'" isGlobal="yes" phrase="Local Costs|The estimated amount of costs attached directly to this record" sample="702.00"/>
+        <CalculatedField name="TotalCost" type="money" calcFunction="sum" params="ClaimCosts RollupCosts LocalCosts" phrase="Total Cost|The automatically calculated cost associated with this incident. Costs are derived by compiling all claim costs and those costs associated with managing this incident and tracked within the Costs module" sample="702.00"/>
+        <RangeField name="CostSeverityID" foreignTable="rsks" foreignKey="SeverityLowCost" foreignField="SeverityID" key="TotalCost" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <ForeignField name="CostSeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <ForeignField name="CostSeverity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <!-- The CachedTotalCost and CachedSeverityValue fields should replace their counterparts in ViewFields on the screens below. Their "non-cached" counterparts  -->
+        <RemoteField name="CachedTotalCost" type="money" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="TotalCost" phrase="Total Cost|The total cost of this incident" sample="1.00"/>
+        <RemoteField name="CachedSeverityValue" type="int" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="SeverityValue" phrase="Cost Severity|The severity this incident" sample="1.00"/>
+        <!-- now uses the cached cost severity value -->
+        <CalculatedField name="CalculatedSeverityValue" type="int" calcFunction="max" params="CachedSeverityValue SeverityValue" phrase="Calculated Severity Value|The greater of the User-assigned severity value and the acutomaticlly assigned Cost Severity value" sample="3"/>
+        <RemoteField name="LikelihoodID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodID" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="1"/>
+        <ForeignField name="LikelihoodValue" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="LikelihoodValue" key="LikelihoodID" joinType="left" phrase="Likelihood Value|A numerical value assigned to the likelihood of risk occurrence. The likelihood value is used in combination with the severity value to calculate a risk index score and an associated recommendation to mitigate the risk" sample="3"/>
+        <ForeignField name="RiskLikelihoodTerm" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="RiskLikelihoodTerm" key="LikelihoodID" joinType="left" phrase="Risk Likelihood Term|A one word description of the risk likelihood level" sample="Remote"/>
+        <ForeignField name="Likelihood" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="Likelihood" key="LikelihoodID" joinType="left" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="REMOTE: Extremely unlikely to occur"/>
+        <RemoteField name="LikelihoodStatusID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="1"/>
+        <CodeField name="LikelihoodStatus" key="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="Resolved" codeTypeID="112"/>
+        <RemoteField name="LikelihoodFactors" validate="notEmpty" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodFactors" phrase="Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat" sample="SCBAs were purchased for all First Responders and all responders have been trained by the Fire Department"/>
+        <RemoteField name="SeverityID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="SeverityID" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="1"/>
+        <ForeignField name="SeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="SeverityID" joinType="left" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="6"/>
+        <ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+        <ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+        <CalculatedField name="IndexValue" type="int" calcFunction="multiply" params="LikelihoodValue CalculatedSeverityValue" validate="" phrase="Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed" sample="15"/>
+        <RangeField name="RiskRecommendation" foreignTable="rskx" foreignKey="IndexValue" foreignField="RiskRecommendation" key="IndexValue" phrase="Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity" sample="Take action if and when appropriate"/>
+        <!--COSTS AND SEVERITY SECTION (END)-->
+        <!-- COMBINED FIELDS (BEGIN)-->
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OtherAsset"/>_incurred_a_loss_at_<CombinedFieldRef name="Organization"/>_on_<CombinedFieldRef name="IncurredTime"/></CombinedField>
+        <CombinedField name="LossOtherAsset" phrase="Asset Loss|A combined field used to describe this asset loss when associating it with other records" sample="Active Agenda Source Code; Active Agenda, HQ; Server Room; Administration Building; 023; 01-01-2004"><CombinedFieldRef name="OtherAsset"/>;_<CombinedFieldRef name="IncurredTime"/></CombinedField>
+        <!-- COMBINED FIELDS (END)-->
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="LossOtherAssetID"/>
+        </PrimaryKey>
+        <OwnerField name="AssetOrganizationID"/>
+        <RecordDescriptionField name="LossOtherAsset"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="clm" name="Claims" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="lco" name="Loss Costs" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="docs" name="Document Status" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="evt" name="Events" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="LossOtherAssetID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lppo"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List asset losses">
+            <ListField name="LossOtherAssetID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="PropertyLossType" phrase="Loss Type"/>
+            <ListField name="OtherAssetType" phrase="Asset Type"/>
+            <ListField name="OtherAsset" phrase="Asset"/>
+            <ListField name="IncurredTime" phrase="Incurred"/>
+            <ListField name="LossStatusType" phrase="Status"/>
+            <ListField name="IndexValue" phrase="Risk Index"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search asset losses">
+            <ComboField name="IncidentReportID" findMode="text">
+                <SampleItem ID="1" name="Clovis; 10-28-2003; Discrimination Claim"/>
+                <SampleItem ID="2" name="Clovis; 10-18-2004; Ammonia Release"/>
+                <SampleItem ID="3" name="Latvia; 10-08-2003; Severe Injury from Forklift"/>
+                <SampleItem ID="4" name="Sweden; 10-12-2002; Hostile Workplace Claim"/>
+                <SampleItem ID="5" name="Sweden; 10-24-2001; Theft of LCD Projector"/>
+            </ComboField>
+            <DateField name="EventDate"/>
+            <DateField name="IncurredTime"/>
+            <MoneyField name="TotalCost"/>
+            <CodeRadioField name="OnCoPropID" orientation="vertical">
+                <SampleItem ID="1" name="Yes"/>
+                <SampleItem ID="2" name="No"/>
+                <SampleItem ID="3" name="Both On and Off Company Property"/>
+            </CodeRadioField>
+            <CodeComboField name="OtherAssetTypeID" findMode="text">
+                <SampleItem ID="1" name="Intellectual Property"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="People"/>
+                <SampleItem ID="4" name="Knowledge"/>
+                <SampleItem ID="5" name="Investment"/>
+            </CodeComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Office"/>
+                <SampleItem ID="4" name="Production Line #1"/>
+            </ComboField>
+            <OrgComboField name="AssetOrganizationID" findMode="text">
+                <UpdateFieldRef name="OtherAssetID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <ComboField name="OtherAssetID" findMode="text" parentField="AssetOrganizationID">
+                <SampleItem ID="1" name="Active Agenda Source Code"/>
+                <SampleItem ID="2" name="Active Agenda User Documentation"/>
+                <SampleItem ID="3" name="Active Agenda User Training Slides"/>
+            </ComboField>
+            <EditField name="TrackingNumber" size="50" maxLength="50"/>
+            <EditField name="IncurredAddress1" size="50" maxLength="50"/>
+            <EditField name="IncurredAddress2" size="50" maxLength="50"/>
+            <ComboField name="IncurredCountryID" findMode="text">
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="IncurredStateID" findMode="text">
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="IncurredCountyID" findMode="text">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="IncurredCity" size="50" maxLength="50"/>
+            <EditField name="IncurredPostalCode" size="50" maxLength="50"/>
+            <CodeRadioField name="PropOwnershipID" orientation="vertical">
+                <SampleItem ID="1" name="Company"/>
+                <SampleItem ID="2" name="Private"/>
+                <SampleItem ID="3" name="Both Company and Private"/>
+            </CodeRadioField>
+            <CodeComboField name="PropertyLossTypeID" findMode="text">
+                <SampleItem ID="1" name="Arson"/>
+                <SampleItem ID="2" name="Burglary"/>
+                <SampleItem ID="3" name="Damage"/>
+                <SampleItem ID="4" name="Theft"/>
+                <SampleItem ID="5" name="Vandalism"/>
+            </CodeComboField>
+            <CheckBoxField name="AssetAvailable"/>
+            <EditField name="PresentAddress1" size="30" maxLength="50"/>
+            <EditField name="PresentAddress2" size="30" maxLength="50"/>
+            <ComboField name="PresentCountryID" findMode="text">
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="PresentStateID" findMode="text">
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="PresentCountyID" findMode="text">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="PresentCity" size="30" maxLength="50"/>
+            <EditField name="PresentPostalCode" size="30" maxLength="50"/>
+            <PersonComboField name="PersonReportingID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <DateField name="ReportDate"/>
+            <PersonComboField name="SubmittedByID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="LikelihoodID" findMode="text">
+                <SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+                <SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+                <SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+                <SampleItem ID="4" name="HIGH: Likely to occur"/>
+                <SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+            </ComboField>
+            <CodeComboField name="LikelihoodStatusID" findMode="text">
+                <SampleItem ID="1" name="Resolved"/>
+                <SampleItem ID="2" name="Seeking Resolution"/>
+                <SampleItem ID="3" name="Unresolved"/>
+            </CodeComboField>
+            <ComboField name="SeverityID" findMode="text">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <EditField name="IndexValue" size="5" maxLength="5"/>
+            <EditField name="RiskRecommendation" size="75" maxLength="128"/>
+            <CodeComboField name="LegitimacyCategoryID" findMode="text">
+                <UpdateFieldRef name="LossLegitimacyTypeID"/>
+                <SampleItem ID="1" name="Legitimate"/>
+                <SampleItem ID="2" name="Questionable"/>
+                <SampleItem ID="3" name="Abusive"/>
+                <SampleItem ID="4" name="Fraudulent"/>
+            </CodeComboField>
+            <ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+                <SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+                <SampleItem ID="2" name="Clear Liability; Malingering"/>
+            </ComboField>
+            <CodeComboField name="LossStatusCategoryID" findMode="text">
+                <UpdateFieldRef name="LossStatusTypeID"/>
+                <SampleItem ID="1" name="Open"/>
+                <SampleItem ID="2" name="Closed"/>
+                <SampleItem ID="3" name="Under Consideration"/>
+                <SampleItem ID="4" name="Denied"/>
+            </CodeComboField>
+            <ComboField name="LossStatusTypeID" findMode="text" parentField="LossStatusCategoryID">
+                <SampleItem ID="1" name="Open: Active"/>
+                <SampleItem ID="2" name="Open: Inactive"/>
+                <SampleItem ID="3" name="Open: Awaiting Subrogation"/>
+            </ComboField>
+            <CodeComboField name="InsuranceCategoryID" findMode="text">
+                <UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+                <SampleItem ID="1" name="Subrogation (claim made)"/>
+                <SampleItem ID="2" name="Subrogation (claim received)"/>
+                <SampleItem ID="3" name="Coverage"/>
+                <SampleItem ID="4" name="Denial"/>
+            </CodeComboField>
+            <ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+                <UpdateFieldRef name="PolicyID"/>
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </ComboField>
+            <ComboField name="PolicyID" findMode="text" parentField="InsuranceTypeID">
+                <SampleItem ID="1" name="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+                <SampleItem ID="2" name="General Liability; Zurich; GL-193-03; Active Agenda, HQ; 03-02-2002, 03-02-2003"/>
+                <SampleItem ID="3" name="General Liability; AIG; GL-39-2003; Active Agenda, HQ; 03-02-2001, 03-02-2002"/>
+                <SampleItem ID="4" name="General Liability; Fireman's Fund; GL-2003-837; Active Agenda, HQ; 03-02-2000, 03-02-2001"/>
+            </ComboField>
+            <DateField name="ClaimDate"/>
+            <DateField name="ClosureDate"/>
+            <EditField name="ClaimNumber" size="50" maxLength="50"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the asset loss">
+            <ViewField name="LossOtherAssetID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentReport"/>
+            <ViewField name="EventDate"/>
+            <ViewField name="IncurredTime"/>
+            <ViewField name="ReportDate"/>
+            <ViewField name="PersonReporting"/>
+            <ViewField name="SubmittedBy"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="OnCoProp"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OtherAssetType"/>
+            <ViewField name="Location"/>
+            <ViewField name="OtherAsset"/>
+            <ViewField name="OtherAssetInventory"/>
+            <ViewField name="TrackingNumber"/>
+            <ViewField name="IncurredLocationDesc"/>
+            <ViewField name="IncurredAddress1"/>
+            <ViewField name="IncurredAddress2"/>
+            <ViewField name="IncurredCity"/>
+            <ViewField name="IncurredState"/>
+            <ViewField name="IncurredPostalCode"/>
+            <ViewField name="IncurredCountry"/>
+            <ViewField name="PropOwnership"/>
+            <ViewField name="PropertyLossType"/>
+            <ViewField name="PropertyLossDesc"/>
+            <ViewField name="CachedTotalCost"/>
+            <ViewScreenSection name="Claim" phrase="Claim">
+                <ViewField name="Policy"/>
+                <ViewField name="IntegrationKey"/>
+                <ViewField name="ClaimDate"/>
+                <ViewField name="ClaimNumber"/>
+                <ViewField name="LossStatusType"/>
+                <ViewField name="GeneralLossStatusDescription"/>
+                <ViewField name="SpecificLossStatusDescription"/>
+                <ViewField name="LegitimacyCategory"/>
+                <ViewField name="LossLegitimacyType"/>
+                <ViewField name="LegitimacyDesc"/>
+                <ViewField name="ClosureDate"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="RiskMatrix" phrase="Risk Matrix">
+                <ViewField name="CachedTotalCost"/>
+                <ViewField name="Likelihood"/>
+                <ViewField name="LikelihoodStatus"/>
+                <ViewField name="LikelihoodFactors"/>
+                <ViewField name="Severity"/>
+                <ViewField name="CachedSeverityValue"/>
+                <ViewField name="IndexValue"/>
+                <ViewField name="RiskRecommendation"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="clm"/>
+                <ViewGrid moduleID="lco"/>
+                <ViewGrid moduleID="evt"/>
+                <ViewGrid moduleID="docs"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about an asset loss">
+            <ViewField name="LossOtherAssetID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentReport"/>
+            <ViewField name="EventDate"/>
+            <CheckBoxField name="TimeDeterminable"/>
+            <DateField name="IncurredTime"/>
+            <DateField name="ReportDate"/>
+            <ViewField name="EntryDate"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <OrgComboField name="AssetOrganizationID" findMode="text">
+                <UpdateFieldRef name="OtherAssetTypeID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <CodeComboField name="OtherAssetTypeID" findMode="text">
+                <UpdateFieldRef name="OtherAssetID"/>
+                <SampleItem ID="1" name="Intellectual Property"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="People"/>
+                <SampleItem ID="4" name="Knowledge"/>
+                <SampleItem ID="5" name="Investment"/>
+            </CodeComboField>
+            <ComboField name="OtherAssetID" findMode="text" parentField="OtherAssetTypeID">
+                <UpdateFieldRef name="OtherAssetInventoryID"/>
+                <SampleItem ID="1" name="Active Agenda Source Code"/>
+                <SampleItem ID="2" name="Active Agenda User Documentation"/>
+                <SampleItem ID="3" name="Active Agenda User Training Slides"/>
+            </ComboField>
+            <ComboField name="OtherAssetInventoryID" findMode="text" parentField="OtherAssetID">
+                <SampleItem ID="1" name="Active Agenda Source Code"/>
+                <SampleItem ID="2" name="Active Agenda User Documentation"/>
+                <SampleItem ID="3" name="Active Agenda User Training Slides"/>
+            </ComboField>
+            <ViewField name="TrackingNumber"/>
+            <CodeRadioField name="PropOwnershipID" orientation="vertical">
+                <SampleItem ID="1" name="Company"/>
+                <SampleItem ID="2" name="Private"/>
+                <SampleItem ID="3" name="Both Company and Private"/>
+            </CodeRadioField>
+            <CodeComboField name="PropertyLossTypeID" findMode="text">
+                <SampleItem ID="1" name="Arson"/>
+                <SampleItem ID="2" name="Burglary"/>
+                <SampleItem ID="3" name="Damage"/>
+                <SampleItem ID="4" name="Theft"/>
+                <SampleItem ID="5" name="Vandalism"/>
+            </CodeComboField>
+            <MemoField name="PropertyLossDesc" rows="5" cols="75"/>
+        </EditScreen>
+        <EditScreen name="AssetReview" phrase="Review|Edit asset review details associated with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <CheckBoxField name="AssetAvailable"/>
+            <MemoField name="PresentDesc" cols="75" rows="5"/>
+            <EditField name="PresentAddress1" size="30" maxLength="50"/>
+            <EditField name="PresentAddress2" size="30" maxLength="50"/>
+            <ComboField name="PresentCountryID" findMode="text">
+                <UpdateFieldRef name="PresentStateID"/>
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="PresentStateID" findMode="text" parentField="PresentCountryID">
+                <UpdateFieldRef name="PresentCountyID"/>
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="PresentCountyID" findMode="text" parentField="PresentStateID">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="PresentCity" size="30" maxLength="50"/>
+            <EditField name="PresentPostalCode" size="30" maxLength="50"/>
+        </EditScreen>
+        <EditScreen name="Claim" phrase="Claim|Edit summary information about the asset loss">
+            <RecordSummaryFieldsRef/>
+            <DateField name="ClaimDate"/>
+            <PersonComboField name="PersonReportingID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <CodeComboField name="InsuranceCategoryID" findMode="text">
+                <UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+                <SampleItem ID="1" name="Subrogation (claim made)"/>
+                <SampleItem ID="2" name="Subrogation (claim received)"/>
+                <SampleItem ID="3" name="Coverage"/>
+                <SampleItem ID="4" name="Denial"/>
+            </CodeComboField>
+            <ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+                <UpdateFieldRef name="PolicyID"/>
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </ComboField>
+            <ComboField name="PolicyID" findMode="text" parentField="InsuranceTypeID">
+                <UpdateFieldRef name="IntegrationKey"/>
+                <SampleItem ID="1" name="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+                <SampleItem ID="2" name="General Liability; Zurich; GL-193-03; Active Agenda, HQ; 03-02-2002, 03-02-2003"/>
+                <SampleItem ID="3" name="General Liability; AIG; GL-39-2003; Active Agenda, HQ; 03-02-2001, 03-02-2002"/>
+                <SampleItem ID="4" name="General Liability; Fireman's Fund; GL-2003-837; Active Agenda, HQ; 03-02-2000, 03-02-2001"/>
+            </ComboField>
+            <ViewField name="IntegrationKey" parentField="PolicyID"/>
+            <EditField name="ClaimNumber" size="50" maxLength="50"/>
+            <PersonComboField name="ClaimsAdjusterID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+        </EditScreen>
+        <EditScreen name="LossLocation" phrase="Location|Edit summary information about the location of the asset loss">
+            <RecordSummaryFieldsRef/>
+            <CodeRadioField name="OnCoPropID" orientation="vertical">
+                <SampleItem ID="1" name="Yes"/>
+                <SampleItem ID="2" name="No"/>
+                <SampleItem ID="3" name="On and Off Company Property"/>
+            </CodeRadioField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Document Storage Room"/>
+                <SampleItem ID="3" name="Shipping Office"/>
+                <SampleItem ID="5" name="Administration Break Room"/>
+                <SampleItem ID="7" name="Dry Warehouse"/>
+            </ComboField>
+            <PersonComboField name="LocalClaimManagerID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <MemoField name="IncurredLocationDesc" cols="75" rows="5"/>
+            <EditField name="IncurredAddress1" size="30" maxLength="50"/>
+            <EditField name="IncurredAddress2" size="30" maxLength="50"/>
+            <ComboField name="IncurredCountryID" findMode="text">
+                <UpdateFieldRef name="IncurredStateID"/>
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="IncurredStateID" findMode="text" parentField="IncurredCountryID">
+                <UpdateFieldRef name="IncurredCountyID"/>
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="IncurredCountyID" findMode="text" parentField="IncurredStateID">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="IncurredCity" size="30" maxLength="50"/>
+            <EditField name="IncurredPostalCode" size="30" maxLength="50"/>
+        </EditScreen>
+        <EditScreen name="LossStatus" phrase="Status|Edit summary information about the status of the asset loss">
+            <RecordSummaryFieldsRef/>
+            <ComboField name="LossStatusCategoryID" findMode="text">
+                <UpdateFieldRef name="LossStatusTypeID"/>
+                <SampleItem ID="1" name="Open"/>
+                <SampleItem ID="2" name="Closed"/>
+                <SampleItem ID="3" name="Under Consideration"/>
+                <SampleItem ID="4" name="Denied"/>
+            </ComboField>
+            <ComboField name="LossStatusTypeID" findMode="text" parentField="LossStatusCategoryID">
+                <UpdateFieldRef name="GeneralLossStatusDescription"/>
+                <SampleItem ID="1" name="Open: Active"/>
+                <SampleItem ID="2" name="Open: Inactive"/>
+                <SampleItem ID="3" name="Open: Awaiting Subrogation"/>
+            </ComboField>
+            <ViewField name="GeneralLossStatusDescription" parentField="LossStatusTypeID"/>
+            <MemoField name="SpecificLossStatusDescription" rows="5" cols="75"/>
+            <DateField name="ClosureDate"/>
+        </EditScreen>
+        <EditScreen name="LossLegitimacy" phrase="Legitimacy|Edit summary information about the legitimacy of the asset loss">
+            <RecordSummaryFieldsRef/>
+            <CodeComboField name="LegitimacyCategoryID" findMode="text">
+                <UpdateFieldRef name="LossLegitimacyTypeID"/>
+                <SampleItem ID="1" name="Legitimate"/>
+                <SampleItem ID="2" name="Questionable"/>
+                <SampleItem ID="3" name="Abusive"/>
+                <SampleItem ID="4" name="Fraudulent"/>
+            </CodeComboField>
+            <ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+                <UpdateFieldRef name="LegitimacyDesc"/>
+                <SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+                <SampleItem ID="2" name="Clear Liability; Malingering"/>
+            </ComboField>
+            <ViewField name="LegitimacyDesc" parentField="LossLegitimacyTypeID"/>
+        </EditScreen>
+        <EditScreen name="RiskMatrix" phrase="Risk Matrix|Edit risk matrix values associated with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <ComboField name="LikelihoodID" findMode="text">
+                <SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+                <SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+                <SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+                <SampleItem ID="4" name="HIGH: Likely to occur"/>
+                <SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+            </ComboField>
+            <CodeComboField name="LikelihoodStatusID" findMode="text">
+                <SampleItem ID="1" name="Resolved"/>
+                <SampleItem ID="2" name="Seeking Resolution"/>
+                <SampleItem ID="3" name="Unresolved"/>
+            </CodeComboField>
+            <MemoField name="LikelihoodFactors" cols="75" rows="5"/>
+            <ComboField name="SeverityID" findMode="text">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <ViewField name="CachedSeverityValue"/>
+            <ViewField name="IndexValue"/>
+            <ViewField name="RiskRecommendation"/>
+        </EditScreen>
+        <EditScreen name="EventLog" phrase="Events|Associate ongoing events with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="evt"/>
+        </EditScreen>
+        <EditScreen name="Documentation" phrase="Documentation|Track the status of documentation delivery requirements associated with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="docs"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the asset loss">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the asset loss">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the asset loss" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="LossOtherAssetID"/>
+        <ViewField name="IncidentReportID"/>
+        <ViewField name="IncidentReport"/>
+        <ViewField name="EventDate"/>
+        <ViewField name="IncurredTime"/>
+        <ViewField name="Organization"/>
+        <ViewField name="OtherAssetType"/>
+        <ViewField name="Location"/>
+        <ViewField name="OtherAsset"/>
+        <ViewField name="TrackingNumber"/>
+        <ViewField name="PropertyLossType"/>
+        <ViewField name="PropertyLossDesc"/>
+        <ViewField name="Likelihood"/>
+        <ViewField name="Severity"/>
+        <ViewField name="RiskRecommendation"/>
+        <ViewField name="CachedTotalCost"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="lppo" phrase="Other Asset Losses">
+            <InvisibleField name="LossOtherAssetID"/>
+            <ViewField name="IncurredTime" sample="10:22 a.m."/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="OtherAssetType" sample="Intellectual Property"/>
+            <ViewField name="Location" sample="Server Room; Administration Building; 023"/>
+            <ViewField name="OtherAsset" sample="Active Agenda Source Code"/>
+            <ViewField name="TrackingNumber" sample="SC-AA-2003-04"/>
+        </ViewGrid>
+        <EditGrid moduleID="lppo" phrase="Other Asset Losses">
+            <GridForm>
+                <InvisibleField name="LossOtherAssetID"/>
+                <DateField name="IncurredTime" sample="10:22 a.m."/>
+                <OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <UpdateFieldRef name="LocationID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </OrgComboField>
+                <ComboField name="LocationID" findMode="text" parentField="OrganizationID" sample="Server Room; Administration Building; 023">
+                    <SampleItem ID="1" name="Server Room; Administration Building; 023"/>
+                    <SampleItem ID="2" name="Shipping Bay #1"/>
+                    <SampleItem ID="3" name="Administrative Office"/>
+                    <SampleItem ID="4" name="Production Line #1"/>
+                </ComboField>
+                <OrgComboField name="AssetOrganizationID" findMode="text">
+                    <UpdateFieldRef name="OtherAssetTypeID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </OrgComboField>
+                <CodeComboField name="OtherAssetTypeID" findMode="text" sample="Intellectual Property" parentField="AssetOrganizationID" parentListModuleField="OrganizationID">
+                    <UpdateFieldRef name="OtherAssetID" listParentField="OtherAssetTypeID"/>
+                    <SampleItem ID="1" name="Intellectual Property"/>
+                    <SampleItem ID="2" name="Cash"/>
+                    <SampleItem ID="3" name="People"/>
+                    <SampleItem ID="4" name="Knowledge"/>
+                    <SampleItem ID="5" name="Investment"/>
+                </CodeComboField>
+                <ComboField name="OtherAssetID" findMode="text" parentField="OtherAssetTypeID" sample="Active Agenda Source Code">
+                    <UpdateFieldRef name="OtherAssetInventoryID"/>
+                    <SampleItem ID="1" name="Active Agenda Source Code"/>
+                    <SampleItem ID="2" name="Active Agenda User Documentation"/>
+                    <SampleItem ID="3" name="Active Agenda User Training Slides"/>
+                </ComboField>
+                <ComboField name="OtherAssetInventoryID" findMode="text" parentField="OtherAssetID" sample="Active Agenda Source Code">
+                    <SampleItem ID="1" name="Active Agenda Source Code"/>
+                    <SampleItem ID="2" name="Active Agenda User Documentation"/>
+                    <SampleItem ID="3" name="Active Agenda User Training Slides"/>
+                </ComboField>
+                <ViewField name="TrackingNumber" sample="SC-AA-2003-04"/>
+            </GridForm>
+            <ViewField name="IncurredTime" sample="10:22 a.m."/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="OtherAssetType" sample="Intellectual Property"/>
+            <ViewField name="Location" sample="Server Room; Administration Building; 023"/>
+            <ViewField name="OtherAsset" sample="Active Agenda Source Code"/>
+            <ViewField name="TrackingNumber" sample="SC-AA-2003-04"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

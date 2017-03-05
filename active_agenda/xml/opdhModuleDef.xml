@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Hours Worked" moduleID="opdh" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Work Period" pluralRecordName="Work Periods" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="HoursWorkedID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|NumericalNumerical ID used to track periods of hours worked" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization for which the hours were worked" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization for which the hours were worked" sample="Active Agenda, HQ"/>
+		<TableField name="PayrollClassTypeID" type="int" validate="RequireSelection" phrase="Payroll Class Type|The class of payroll which the hours worked are attributed to" sample="1"/>
+		<CodeField name="PayrollClassType" key="PayrollClassTypeID" phrase="Payroll Class Type|The class of payroll which the hours worked are attributed to" sample="Salaried" codeTypeID="202"/>
+		<TableField name="BeginDate" type="date" validate="notEmpty" phrase="Begin Date|The beginning date of the payroll period" sample="09-07-2003"/>
+		<TableField name="EndDate" type="date" validate="notEmpty" phrase="End Date|The ending date of the payroll period" sample="09-21-2003"/>
+		<CalculatedField name="Days" type="int" calcFunction="datediff" params="EndDate BeginDate" validate="" phrase="Days|A calculated field based on the number of days worked during the work period" sample="30"/>
+		<CalculatedField name="AverageHoursPerDay" calcFunction="divide" params="Hours Days" phrase="Hours Per Day|A calculated field based on the average number of hours worked per day during the work period" sample="23"/>
+		<TableField name="Hours" type="float" validate="Number notEmpty notNegative" phrase="Hours Worked|The number of hours worked during the pay period" sample="3200"/>
+		<TableField name="People" type="float" validate="Number notEmpty notNegative" phrase="People Paid|The number of people, of the payroll class, that were paid during the pay period" sample="25"/>
+		<CalculatedField name="HoursPerPerson" calcFunction="divide" params="Hours People" validate="" phrase="Hours Per Person|A calculated field based on the average number of hours worked per person during the pay period" sample="23"/>
+		<TableField name="Comment" type="text" validate="" phrase="Comment|A brief comment to describe this entry" sample="Sue's numbers"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Hours"/></CombinedField>
+		<CombinedField name="HoursWorked" phrase="Hours Worked|A combined field used to describe the number of hours worked when associating them with other records" sample="Active Agenda, HQ | Salaried | 3200"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="PayrollClassType"/>;_<CombinedFieldRef name="Hours"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="HoursWorkedID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="HoursWorked"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List hours worked during a payroll period">
+			<ListField name="HoursWorkedID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PayrollClassType" phrase="Payroll Class"/>
+			<ListField name="BeginDate" phrase="Begin Date"/>
+			<ListField name="EndDate" phrase="End Date"/>
+			<ListField name="Days" phrase="Days Worked"/>
+			<ListField name="Hours" phrase="Hours Worked"/>
+			<ListField name="AverageHoursPerDay" displayDecimals="2" phrase="Average"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search hours worked during a payroll period">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeRadioField name="PayrollClassTypeID">
+				<SampleItem ID="1" name="Salaried"/>
+				<SampleItem ID="2" name="Hourly"/>
+				<SampleItem ID="3" name="Temporary"/>
+			</CodeRadioField>
+			<DateField name="BeginDate"/>
+			<DateField name="EndDate"/>
+			<EditField name="Hours" size="15" maxLength="15"/>
+			<EditField name="People" size="5" maxLength="10"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View hours worked during a payroll period">
+			<ViewField name="HoursWorkedID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PayrollClassType"/>
+			<ViewField name="BeginDate"/>
+			<ViewField name="EndDate"/>
+			<ViewField name="Days"/>
+			<ViewField name="Hours"/>
+			<ViewField name="AverageHoursPerDay" displayDecimals="2" roundingMethod="floor"/>
+			<ViewField name="People"/>
+			<ViewField name="HoursPerPerson" displayDecimals="2" roundingMethod="floor"/>
+			<ViewField name="Comment"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit hours worked during a payroll period">
+			<ViewField name="HoursWorkedID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeRadioField name="PayrollClassTypeID">
+				<SampleItem ID="1" name="Salaried"/>
+				<SampleItem ID="2" name="Hourly"/>
+				<SampleItem ID="3" name="Temporary"/>
+			</CodeRadioField>
+			<DateField name="BeginDate"/>
+			<DateField name="EndDate"/>
+			<ViewField name="Days"/>
+			<EditField name="Hours" size="15" maxLength="15"/>
+			<EditField name="People" size="5" maxLength="10"/>
+			<MemoField name="Comment" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="opdh" phrase="Hours Worked">
+			<InvisibleField name="HoursWorkedID"/>
+			<ViewField name="PayrollClassType" sample="Salaried"/>
+			<ViewField name="BeginDate" sample="09-07-2003"/>
+			<ViewField name="EndDate" sample="09-21-2003"/>
+			<ViewField name="Days" sample="30"/>
+			<ViewField name="Hours" sample="3200"/>
+			<ViewField name="People" sample="312"/>
+		</ViewGrid>
+		<EditGrid moduleID="opdh" phrase="Hours Worked">
+			<GridForm>
+				<InvisibleField name="HoursWorkedID"/>
+				<CodeComboField name="PayrollClassTypeID" sample="Salaried">
+					<SampleItem ID="1" name="Salaried"/>
+					<SampleItem ID="2" name="Hourly"/>
+					<SampleItem ID="3" name="Temporary"/>
+				</CodeComboField>
+				<DateField name="BeginDate" sample="09-07-2003"/>
+				<DateField name="EndDate" sample="09-21-2003"/>
+				<ViewField name="Days" sample="30"/>
+				<EditField name="Hours" sample="3200"/>
+				<EditField name="People" sample="312"/>
+				<MemoField name="Comment" rows="5" cols="75" sample="These hours were provided by Joe in Payroll."/>
+			</GridForm>
+			<InvisibleField name="HoursWorkedID"/>
+			<ViewField name="PayrollClassType" sample="Salaried"/>
+			<ViewField name="BeginDate" sample="09-07-2003"/>
+			<ViewField name="EndDate" sample="09-21-2003"/>
+			<ViewField name="Days" sample="30"/>
+			<ViewField name="Hours" sample="3200"/>
+			<ViewField name="People" sample="312"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Hours Worked By Payroll Class Type" mode="categorize">
+			<GroupByField name="PayrollClassType"/>
+			<SummaryField name="HoursWorkedID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Hours Worked By Payroll Class Type">
+			<GroupByField name="PayrollClassType"/>
+			<SummaryField name="HoursWorkedID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Hours Worked By Payroll Class Type">
+			<GroupByField name="PayrollClassType"/>
+			<SummaryField name="HoursWorkedID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

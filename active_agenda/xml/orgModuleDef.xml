@@ -1,0 +1,823 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Organizations" moduleID="org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Organization" pluralRecordName="Organizations" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="OrganizationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|Numerical ID to identify the organization within this application" sample="1"/>
+        <TableField name="ParentOrganizationID" type="int" dbFlags="unsigned null" phrase="Parent Organization|The next higher level of an organization on a heirachy" sample="1"/>
+        <ForeignField name="ParentOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ParentOrganizationID" joinType="left" listCondition="" phrase="Parent Organization|The next higher level of an organization on a heirachy" sample="Active Agenda, HQ"/>
+        <TableField name="DirectionOrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned null" phrase="Direction Organization|The organization providing direction to the organization. The organization selected will automatically filter module specific direction provided throughout the application" sample="1"/>
+        <ForeignField name="DirectionOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="DirectionOrganizationID" joinType="left" listCondition="" phrase="Direction Organization|The organization providing direction to the organization. The organization selected will automatically filter module specific direction provided throughout the application" sample="Active Agenda, HQ"/>
+        <TableField name="PolicyOrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned null" phrase="Policy Organization|The organization responsible for issuing policy expectations to the organization. The organization selected will automatically populate the Policy Organization field within modules which rely on the sharing of policy expectations" sample="1"/>
+        <ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" listCondition="" phrase="Policy Organization|The organization responsible for issuing policy expectations to the organization. The organization selected will automatically populate the Policy Organization field within modules which rely on the sharing of policy expectations" sample="Active Agenda, HQ"/>
+        <TableField name="Name" type="varchar(128)" validate="notEmpty" dbFlags="" phrase="Name|Name used to identify the organization" sample="Active Agenda, Sweden"/>
+        <TableField name="ShortName" type="varchar(20)" validate="notEmpty" phrase="Short Name|A short name used to identify the organization" sample="AASWE"/>
+        <TableField name="Description" type="text" dbFlags="" phrase="Description|Text description of the organization" sample="Software Development company and risk services provider"/>
+        <TableField name="IndustryCodeID" type="int" dbFlags="unsigned" phrase="Industry Code|Numerical code used to identify the organization's industrial classification. If multiple codes apply, choose the most relevent one."/>
+        <ForeignField name="IndustryCode" foreignTable="naic" foreignKey="IndustryCodeID" foreignField="IndustryCode" key="IndustryCodeID" joinType="left" phrase="Industry Code|Numerical code used to identify the organization's industrial classification. If multiple codes apply, choose the most relevant one."/>
+        <ForeignField name="IndustryDescription" foreignTable="naic" foreignKey="IndustryCodeID" foreignField="Title" key="IndustryCodeID" joinType="left" phrase="Industry Description|Describes the applicable industry code."/>
+        <ForeignField name="IndustryGroupID" foreignTable="naic" foreignKey="IndustryCodeID" foreignField="IndustryGroupID" key="IndustryCodeID" joinType="left" phrase="Industry Group|Third level of a hirearchy to identify the organization's industrial classification."/>
+        <ForeignField name="IndustryGroup" foreignTable="naig" foreignKey="IndustryGroupID" foreignField="IndustryGroup" key="IndustryGroupID" joinType="left" phrase="Industry Group|Third level of a hirearchy to identify the organization's industrial classification."/>
+        <ForeignField name="IndustrySubSectorID" foreignTable="naig" foreignKey="IndustryGroupID" foreignField="IndustrySubSectorID" key="IndustryGroupID" joinType="left" phrase="Industry Subsector|Second level of a hirearchy to identify the organization's industrial classification."/>
+        <ForeignField name="IndustrySubSector" foreignTable="naiss" foreignKey="IndustrySubSectorID" foreignField="IndustrySubSector" key="IndustrySubSectorID" joinType="left" phrase="Industry Subsector|Second level of a hirearchy to identify the organization's industrial classification."/>
+        <ForeignField name="IndustrySectorID" foreignTable="naiss" foreignKey="IndustrySubSectorID" foreignField="IndustrySectorID" key="IndustrySubSectorID" joinType="left" phrase="Industry Sector|First level of a hirearchy to identify the organization's industrial classification."/>
+        <ForeignField name="IndustrySector" foreignTable="nais" foreignKey="IndustrySectorID" foreignField="IndustrySector" key="IndustrySectorID" joinType="left" phrase="Industry Sector|First level of a hirearchy to identify the organization's industrial classification."/>
+        <TableField name="SIC" type="varchar(20)" validate="noValidation" dbFlags="" phrase="S.I.C.|The Standard Industry Classification assigned to the organization by the US Census Bureau" sample="4911"/>
+        <TableField name="OrganizationTypeID" type="int" dbFlags="unsigned not null default 0" phrase="Organization Type|A combined field used to describe this organization type when associating it with other records" sample="1"/>
+        <ForeignField name="OrganizationCategoryID" foreignTable="orgt" foreignKey="OrganizationTypeID" foreignField="OrganizationCategoryID" key="OrganizationTypeID" joinType="left" phrase="Organization Category|A short term used to identify organizations with similar characteristics" sample="1"/>
+        <CodeField name="OrganizationCategory" key="OrganizationCategoryID" phrase="Organization Category|A short term used to identify organizations with similar characteristics" sample="Manufacturer" codeTypeID="38"/>
+        <ForeignField name="OrganizationTypeTitle" foreignTable="orgt" foreignKey="OrganizationTypeID" foreignField="OrganizationTypeTitle" key="OrganizationTypeID" joinType="left" phrase="Title|A short title or phrase used to describe the type of organization" sample="Ice Cream Production Facility"/>
+        <ForeignField name="OrganizationTypeDesc" foreignTable="orgt" foreignKey="OrganizationTypeID" foreignField="OrganizationTypeDesc" key="OrganizationTypeID" joinType="left" phrase="Organization Type|A detailed description of the organization type" sample="An facility designed to produce and ship ice cream products"/>
+        <ForeignField name="OrganizationType" foreignTable="orgt" foreignKey="OrganizationTypeID" foreignField="OrganizationType" key="OrganizationTypeID" joinType="left" phrase="Organization Type|A detailed description of the organization type" sample="Manufacturing | Ice Cream Production Facility"/>
+        <TableField name="URL" type="varchar(128)" dbFlags="" phrase="URL|Uniform resource locator of the organization which is usually the organization's home page" sample="www.activeagenda.net"/>
+        <TableField name="GuidanceLogoName" type="varchar(50)" dbFlags="" phrase="Guidance Logo Filename|The name of an image file used in the Guidance feature. This field only needs to be filled in if this organization provides guidance through the Guidance feature." sample="active_agenda_mini.png"/>
+        <CalculatedField name="GuidanceLogoNameIfNull" calcFunction="ifnull" params="GuidanceLogoName +transparent.gif" phrase="Guidance Logo Filename (IfNulled)|The name of an image file used in the Guidance feature. This field only needs to be filled in if this organization provides guidance through the Guidance feature. This field substitutes a generic field name if none exists in the record." sample="active_agenda_mini.png"/>
+        <RemoteField name="PersonAccountableID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="61" phrase="Person Accountable|The individual with organizational oversight responisibilites. This is the highest ranking person at the local organization" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual with organizational oversight responisibilites. This is the highest ranking person at the local organization" sample="Mattias Thorslund"/>
+        <RemoteField name="PrimaryContactPersonID" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="64" phrase="Primary Contact Person|The person acting as the primary contact for the organization" sample="1"/>
+        <ForeignField name="PrimaryContactPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PrimaryContactPersonID" joinType="left" phrase="Primary Contact Person|The person acting as the primary contact for the organization" sample="Larry Hansen"/>
+        <TableField name="Address1" type="text" dbFlags="" phrase="Address|Physical street address of the organization" sample="937 N. Adler Ave."/>
+        <!--<TableField name="Address2" type="varchar(128)" dbFlags="" phrase="Address|Second physical street address of the organization" sample="Suite 1234 B"/>
+        -->
+        <ForeignField name="CountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="StateID" joinType="left" phrase="Country|The internationally recognized name of the country" sample="United States of America (USA)"/>
+        <ForeignField name="Country" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="CountryID" joinType="left" phrase="Country|A combined field used to associate this country with another record" sample="United States of America (USA)"/>
+        <ForeignField name="StateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="CountyID" joinType="left" phrase="State|A combined field used to associate this state with another record" sample="1"/>
+        <ForeignField name="State" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="State" key="StateID" joinType="left" phrase="State|A combined field used to associate this state with another record" sample="California (CA)"/>
+        <ForeignField name="StateAbbreviation" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="StateAbbreviation" key="StateID" joinType="left" phrase="State|A combined field used to associate this state with another record" sample="CA"/>
+        <ForeignField name="County" foreignTable="cti" foreignKey="CountyID" foreignField="CountyName" key="CountyID" joinType="left" phrase="County|A combined field used to associate this county with another record" sample="Fresno"/>
+        <TableField name="CountyID" type="int" dbFlags="unsigned" phrase="County|A combined field used to associate this county with another record" sample="1"/>
+        <TableField name="City" type="varchar(50)" dbFlags="" phrase="City|The name of the city where this organization is located" sample="Fresno"/>
+        <TableField name="PostalCode" type="varchar(50)" dbFlags="" phrase="Postal Code|Numerical postal code used to direct physical mail" sample="93612"/>
+        <TableField name="Phone" type="varchar(50)" dbFlags="" phrase="Phone|Main telephone number of the organization" sample="(559) 299-8054"/>
+        <TableField name="Fax" type="varchar(50)" dbFlags="" phrase="Fax|Main fax telephone number of the organization" sample="(877) 471-8332"/>
+        <TableField name="Email" type="varchar(128)" dbFlags="" phrase="Email|Main organizational Email address used by the organization to correspond with those outside the organization" sample="info@Active Agendasoftware.com"/>
+        <TableField name="RegionID" type="int" dbFlags="unsigned" phrase="Region|The geographical region this organization belongs to. (Regions are defined in the topmost parent organization.)" sample="1"/>
+        <ForeignField name="Region" foreignTable="orgrg" foreignKey="RegionID" foreignField="Region" key="RegionID" joinType="left" phrase="Region|The geographical region this organization belongs to. (Regions are defined in the topmost parent organization.)" sample="Central"/>
+        <!--Regions are assigned to 'child' organizations on a 1:1 basis. Parent organizations (parent organization = null) have a 1org:many regions relationship DFZ 10-17-2003-->
+        <TableField name="DivisionID" type="int" dbFlags="unsigned" phrase="Division|The functional division this organization belongs to. (Divisions are defined in the topmost parent organization.)" sample="5"/>
+        <ForeignField name="Division" foreignTable="orgdv" foreignKey="DivisionID" foreignField="DivisionName" key="DivisionID" joinType="left" phrase="Division|The functional division this organization belongs to. (Divisions are defined in the topmost parent organization.)" sample="Consulting"/>
+        <!--Divisions are assigned to 'child' organizations on a 1:1 basis. Parent organizations (parent organization = null) have a 1org:many division relationship DFZ 10-17-2003-->
+        <TableField name="Participant" type="bool" dbFlags="" phrase="Participant|Whether this organization is a participant in this installation of Active Agenda.  If this box is checked, the organization will be available within all drop down lists where the organization field listType='allParticipants'. Users of the application can add organizations to the lists by checking this box but listTypes can only be modified from within the specification file for the application prior to the application being parsed. In other words, listTypes are determined by programmers while the list of participants is controlled by this field, by application users" sample="Yes"/>
+        <TableField name="Manufacturer" type="bool" dbFlags="" phrase="Manufacturer|Check this box if this organization is categorized as a manufacturer. Identifying this organization as a manufacturer will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="Contractor" type="bool" dbFlags="" phrase="Contractor|Check this box if this organization is categorized as a Contractor. Identifying this organization as a contractor will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="InsuranceCarrier" type="bool" dbFlags="" phrase="Insurance Carrier|Check this box if this organization is categorized as a insurance carrier. Identifying this organization as an insurance carrier will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="InsuranceBroker" type="bool" dbFlags="" phrase="Insurance Broker|Check this box if this organization is categorized as a insurance broker. Identifying this organization as an insurance broker will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="LawFirm" type="bool" dbFlags="" phrase="Law Firm|Check this box if this organization is categorized as a law firm. Identifying this organization as a law firm will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="GovAgency" type="bool" dbFlags="" phrase="Government Agency|Check this box if this organization is a government agency. Identifying this organization as a government agency will result in the organization being listed in list boxes throughout this software application" sample="Yes"/>
+        <TableField name="Public" type="bool" dbFlags="" phrase="Public Group|Check this box if this organization is a grouping of private citizens. Identifying this organization as a public group will result in the organization being listed in list boxes within the loss modules" sample="Yes"/>
+        <TableField name="Customer" type="bool" dbFlags="" phrase="Customer|Check this box if this organization is a customer of the company.  Identifying this organization as a customer will result in the organization being listed in list boxes within the loss modules" sample="Yes"/>
+        <TableField name="AgencyLevelID" type="int" dbFlags="unsigned" phrase="Agency Level|The heirarchial level of the agency from an international perspective" sample="4"/>
+        <CodeField name="AgencyLevel" key="AgencyLevelID" phrase="Agency Level|The heirarchial level of the agency from an international perspective" sample="County" codeTypeID="7"/>
+        <SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="OrganizationID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'org'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the organization" sample="702.00"/>
+        <SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="OrganizationID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'org'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the organization" sample="702.00"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">
+            <CombinedFieldRef name="Name"/>
+        </CombinedField>
+        <CombinedField name="Address" phrase="Address|A combined field used to describe the organization address when associating it with other records" sample="836 Cherry Lane, Clovis, CA 93612, USA"><CombinedFieldRef name="Address1"/><br/><CombinedFieldRef name="City"/>,_<CombinedFieldRef name="State"/>_ <CombinedFieldRef name="PostalCode"/><br/><CombinedFieldRef name="Country"/></CombinedField>
+        <CombinedField name="GuidanceLogoImage" phrase="Guidance Logo Image|Displays a mini-logo that is intended for display with the Guidance feature" sample="not provided">
+            <![CDATA[<img src="org/]]>
+            <CombinedFieldRef name="GuidanceLogoNameIfNull"/>
+            <![CDATA[" alt="logo" />]]>
+        </CombinedField>
+        <CombinedField name="Organization" phrase="Organization|A combined field used to describe this organization when associating it with other records" sample="Active Agenda, Sweden; Software Developer">
+            <CombinedFieldRef name="Name"/>
+        </CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="OrganizationID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Organization"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="lin" name="Recordable Injuries" parentKey="OrganizationID" localKey="OrganizationID">
+            <SubModuleCondition field="RegulatoryRecordable" value="1"/>
+        </SubModule>
+        <SubModule moduleID="orgdp" name="Departments" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgl" name="Locations" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgjt" name="Job Titles" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="opdh" name="Operations Data Hours Worked" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgwa" name="Work Availability" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <!--<SubModule moduleID="opdr" name="Operations Data Revenue Generated" parentKey="OrganizationID" localKey="OrganizationID"/>-->
+        <SubModule moduleID="opdps" name="Operations Data - Products and Services" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgci" name="Certificates of Insurance" parentKey="OrganizationID" localKey="NamedOrgID"/>
+        <SubModule moduleID="orgca" name="Certificates of Insurance" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgj" name="Organization Jobs" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="ppl" name="People" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="orgr" name="Requirement Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="orgra" name="Requirement Accountabilities" parentKey="OrganizationID" localKey="OrganizationID"/>
+        <SubModule moduleID="valt" name="Values Threats">
+            <SubModuleCondition field="OrganizationID" value="[*OrganizationID*]"/>
+        </SubModule>
+        <SubModule moduleID="busc" name="Business Continuity Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="busa" name="Business Continuation" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="agrc" name="Agreement Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="agr" name="Agreements" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="cosc" name="Cost Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="cosex" name="Cost Exposures" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="oppc" name="Operating Permit Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="oppa" name="Operating Permits" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="optc" name="Opportunity Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="opt" name="Opportunities" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="supc" name="Supplier Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="sup" name="Suppliers" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="stdc" name="Standards Considerations" parentKey="OrganizationTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgt"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="wrk" name="Work Orders" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="OrganizationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="org"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List organizations">
+            <ListField name="OrganizationID" phrase="Record ID"/>
+            <ListField name="Name" phrase="Name"/>
+            <ListField name="IndustryCode" phrase="Industry Code"/>
+            <OrderByField name="Name"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search organizations">
+            <EditField name="Name" size="75" maxLength="128"/>
+            <EditField name="ShortName" size="75" maxLength="128"/>
+            <EditField name="URL" size="75" maxLength="128"/>
+            <CodeComboField name="OrganizationCategoryID" findMode="text">
+                <UpdateFieldRef name="OrganizationTypeID" listParentField="OrganizationCategoryID"/>
+                <SampleItem ID="1" name="Warehouse"/>
+                <SampleItem ID="2" name="Residence"/>
+                <SampleItem ID="3" name="Production"/>
+                <SampleItem ID="4" name="Chemical Storage"/>
+                <SampleItem ID="5" name="Laboratory"/>
+                <SampleItem ID="6" name="Maintenance Shop"/>
+            </CodeComboField>
+            <ComboField name="OrganizationTypeID" findMode="text" parentField="OrganizationCategoryID">
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="PrimaryContactPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="IndustrySectorID" findMode="text" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustrySubSectorID"/>
+            </ComboField>
+            <ComboField name="IndustrySubSectorID" findMode="text" parentField="IndustrySectorID" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustryGroupID"/>
+            </ComboField>
+            <ComboField name="IndustryGroupID" findMode="text" parentField="IndustrySubSectorID" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustryCodeID"/>
+            </ComboField>
+            <ComboField name="IndustryCodeID" findMode="text" parentField="IndustryGroupID" suppressItemAdd="yes"/>
+            <EditField name="SIC" size="10" maxLength="20"/>
+            <CheckBoxField name="Participant"/>
+            <MemoField name="Address1" rows="5" cols="50"/>
+            <!--<EditField name="Address2" size="75" maxLength="128"/>-->
+            <ComboField name="CountryID" findMode="text">
+                <UpdateFieldRef name="StateID"/>
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="StateID" findMode="text" parentField="CountryID">
+                <UpdateFieldRef name="CountyID"/>
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="CountyID" findMode="text" parentField="StateID">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="City" size="50" maxLength="128"/>
+            <EditField name="PostalCode" size="50" maxLength="50"/>
+            <EditField name="Email" size="50" maxLength="128"/>
+            <EditField name="Phone" size="50" maxLength="50"/>
+            <EditField name="Fax" size="50" maxLength="50"/>
+            <CheckBoxField name="Contractor"/>
+            <CheckBoxField name="Manufacturer"/>
+            <CheckBoxField name="InsuranceCarrier"/>
+            <CheckBoxField name="InsuranceBroker"/>
+            <CheckBoxField name="LawFirm"/>
+            <CheckBoxField name="Public"/>
+            <CheckBoxField name="Customer"/>
+            <CheckBoxField name="GovAgency"/>
+            <CodeComboField name="AgencyLevelID">
+                <SampleItem ID="2" name="International"/>
+                <SampleItem ID="4" name="National"/>
+                <SampleItem ID="5" name="State"/>
+                <SampleItem ID="4" name="County"/>
+                <SampleItem ID="5" name="City"/>
+            </CodeComboField>
+            <OrgComboField name="PolicyOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <OrgComboField name="DirectionOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="ParentOrganizationID" findMode="text">
+                <UpdateFieldRef name="DivisionID"/>
+                <UpdateFieldRef name="RegionID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Norway"/>
+                <SampleItem ID="4" name="Active Agenda, Latvia"/>
+            </ComboField>
+            <ComboField name="DivisionID" findMode="text" parentField="ParentOrganizationID" parentListModuleField="OrganizationID">
+                <SampleItem ID="1" name="Widgetmaking"/>
+                <SampleItem ID="2" name="Sprocket Science"/>
+                <SampleItem ID="3" name="Superconductor Manufacturing"/>
+            </ComboField>
+            <ComboField name="RegionID" findMode="text" parentField="ParentOrganizationID" parentListModuleField="OrganizationID">
+                <SampleItem ID="1" name="North"/>
+                <SampleItem ID="2" name="South"/>
+                <SampleItem ID="3" name="Central"/>
+            </ComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about an organization">
+            <ViewField name="OrganizationID"/>
+            <ViewField name="OrganizationCategory"/>
+            <ViewField name="OrganizationType"/>
+            <ViewField name="Name"/>
+            <ViewField name="ShortName"/>
+            <ViewField name="Description"/>
+            <ViewField name="URL" link="URL"/>
+            <ViewField name="ParentOrganization"/>
+            <ViewField name="Division"/>
+            <ViewField name="Region"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="PrimaryContactPerson"/>
+            <ViewField name="Address"/>
+            <ViewField name="Phone"/>
+            <ViewField name="Fax"/>
+            <ViewField name="Email" link="Email"/>
+            <ViewField name="IndustryCode"/>
+            <ViewField name="SIC"/>
+            <ViewField name="TotalEstOpp"/>
+            <ViewField name="TotalEstExp"/>
+            <ViewField name="Participant"/>
+            <ViewField name="PolicyOrganization"/>
+            <ViewField name="DirectionOrganization"/>
+            <ViewField name="GuidanceLogoImage"/>
+            <ViewGrid moduleID="lin"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="ppl" import="yes">
+                    <Conditions>
+                        <Condition field="StillEmployed" value="yes"/>
+                    </Conditions>
+                </ViewGrid>
+                <ViewGrid moduleID="orgdp"/>
+                <ViewGrid moduleID="orgl"/>
+                <ViewGrid moduleID="orgjt"/>
+                <ViewGrid moduleID="opdh"/>
+                <ViewGrid moduleID="orgwa"/>
+                <ViewGrid moduleID="opdps"/>
+                <ViewGrid moduleID="orgci"/>
+                <ViewGrid moduleID="orgca"/>
+                <!--<ViewGrid moduleID="opdr"/>-->
+                <ViewGrid moduleID="valt"/>
+                <ViewGrid moduleID="busa"/>
+                <ViewGrid moduleID="cosex"/>
+                <ViewGrid moduleID="oppa"/>
+                <ViewGrid moduleID="opt"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="wrk"/>
+                <ViewGrid moduleID="agr"/>
+                <ViewGrid moduleID="sup"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+                <ViewGrid moduleID="orgra"/>
+                <ViewGrid moduleID="orgj"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about an organization">
+            <ViewField name="OrganizationID"/>
+            <CodeComboField name="OrganizationCategoryID" findMode="text">
+                <UpdateFieldRef name="OrganizationTypeID" listParentField="OrganizationCategoryID"/>
+                <SampleItem ID="1" name="Warehouse"/>
+                <SampleItem ID="2" name="Residence"/>
+                <SampleItem ID="3" name="Production"/>
+                <SampleItem ID="4" name="Chemical Storage"/>
+                <SampleItem ID="5" name="Laboratory"/>
+                <SampleItem ID="6" name="Maintenance Shop"/>
+            </CodeComboField>
+            <ComboField name="OrganizationTypeID" findMode="text" parentField="OrganizationCategoryID">
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <EditField name="Name" size="75" maxLength="128"/>
+            <EditField name="ShortName" size="20" maxLength="20"/>
+            <EditField name="GuidanceLogoName" size="50" maxLength="50"/>
+            <MemoField name="Description" rows="5" cols="75"/>
+            <EditField name="URL" size="75" maxLength="128"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="PrimaryContactPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="IndustrySectorID" findMode="text" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustrySubSectorID"/>
+            </ComboField>
+            <ComboField name="IndustrySubSectorID" findMode="text" parentField="IndustrySectorID" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustryGroupID"/>
+            </ComboField>
+            <ComboField name="IndustryGroupID" findMode="text" parentField="IndustrySubSectorID" suppressItemAdd="yes">
+                <UpdateFieldRef name="IndustryCodeID"/>
+            </ComboField>
+            <ComboField name="IndustryCodeID" findMode="text" parentField="IndustryGroupID" suppressItemAdd="yes"/>
+            <EditField name="SIC" size="10" maxLength="20"/>
+            <CheckBoxField name="Participant"/>
+        </EditScreen>
+        <EditScreen name="Address" phrase="Address|Edit address information for an organization">
+            <RecordSummaryFieldsRef/>
+            <MemoField name="Address1" rows="3" cols="50"/>
+            <!--<EditField name="Address2" size="30" maxLength="128"/>-->
+            <ComboField name="CountryID" findMode="text">
+                <UpdateFieldRef name="StateID"/>
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="StateID" findMode="text" parentField="CountryID">
+                <UpdateFieldRef name="CountyID"/>
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="CountyID" findMode="text" parentField="StateID">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="City" size="30" maxLength="128"/>
+            <EditField name="PostalCode" size="20" maxLength="50"/>
+            <EditField name="Email" size="30" maxLength="128"/>
+            <EditField name="Phone" size="30" maxLength="50"/>
+            <EditField name="Fax" size="30" maxLength="50"/>
+        </EditScreen>
+        <EditScreen name="Hierarchy" phrase="Hierarchy|Associate application defaults with an organization">
+            <RecordSummaryFieldsRef/>
+            <OrgComboField name="PolicyOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <OrgComboField name="DirectionOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="ParentOrganizationID" findMode="text">
+                <UpdateFieldRef name="DivisionID"/>
+                <UpdateFieldRef name="RegionID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Norway"/>
+                <SampleItem ID="4" name="Active Agenda, Latvia"/>
+            </ComboField>
+            <ComboField name="DivisionID" findMode="text" parentField="ParentOrganizationID" parentListModuleField="OrganizationID">
+                <SampleItem ID="1" name="Widgetmaking"/>
+                <SampleItem ID="2" name="Sprocket Science"/>
+                <SampleItem ID="3" name="Superconductor Manufacturing"/>
+            </ComboField>
+            <ComboField name="RegionID" findMode="text" parentField="ParentOrganizationID" parentListModuleField="OrganizationID">
+                <SampleItem ID="1" name="North"/>
+                <SampleItem ID="2" name="South"/>
+                <SampleItem ID="3" name="Central"/>
+            </ComboField>
+        </EditScreen>
+        <EditScreen name="People" phrase="People|Associate people with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="ppl" import="yes">
+                <Conditions>
+                    <Condition field="StillEmployed" value="yes"/>
+                </Conditions>
+            </EditGrid>
+        </EditScreen>
+        <EditScreen name="Departments" phrase="Departments|Associate departments with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgdp"/>
+        </EditScreen>
+        <EditScreen name="JobTitles" phrase="Job Titles|Associate job titles with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgjt"/>
+        </EditScreen>
+        <EditScreen name="Locations" phrase="Locations|Associate physical locations with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgl"/>
+        </EditScreen>
+        <EditScreen name="HoursWorked" phrase="Hours|Associate hours worked for an organization, by a specific payroll class, during a stated period of time">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="opdh"/>
+        </EditScreen>
+        <EditScreen name="Availability" phrase="Availability|Associate work unavailability reasons with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgwa"/>
+        </EditScreen>
+        <EditScreen name="ProductsServices" phrase="Products|Associate products and/or services with an organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="opdps"/>
+        </EditScreen>
+        <!--<EditScreen name="Revenue" phrase="Revenue|Associate product and-or service revenues generated by an organization during a stated period of time">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="opdr"/>
+        </EditScreen>-->
+        <EditScreen name="SpecialCharacteristics" phrase="Characteristics|Associate special characteristics with an organization">
+            <RecordSummaryFieldsRef/>
+            <CheckBoxField name="Contractor"/>
+            <CheckBoxField name="Manufacturer"/>
+            <CheckBoxField name="InsuranceCarrier"/>
+            <CheckBoxField name="InsuranceBroker"/>
+            <CheckBoxField name="LawFirm"/>
+            <CheckBoxField name="Public"/>
+            <CheckBoxField name="Customer"/>
+            <CheckBoxField name="GovAgency">
+                <CodeComboField name="AgencyLevelID">
+                    <SampleItem ID="2" name="International"/>
+                    <SampleItem ID="4" name="National"/>
+                    <SampleItem ID="5" name="State"/>
+                    <SampleItem ID="4" name="County"/>
+                    <SampleItem ID="5" name="City"/>
+                </CodeComboField>
+            </CheckBoxField>
+        </EditScreen>
+        <EditScreen name="Requirements" phrase="Requirements|Associate organizational requirements with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="orgr"/>
+            <EditGrid moduleID="orgra"/>
+        </EditScreen>
+        <EditScreen name="Jobs" phrase="Jobs|Associate jobs with the organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgj"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="regc"/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="stdc"/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="WorkOrders" phrase="Orders|Associate work orders with the organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="wrk"/>
+        </EditScreen>
+        <EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="agrc"/>
+            <EditGrid moduleID="agr"/>
+        </EditScreen>
+        <EditScreen name="BusinessContinuation" phrase="Continuity|Associate business continuation requirements with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="busc"/>
+            <EditGrid moduleID="busa"/>
+        </EditScreen>
+        <EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="cosc"/>
+            <EditGrid moduleID="cosex"/>
+        </EditScreen>
+        <EditScreen name="OperatingPermits" phrase="Permits|Associate operating permits with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="oppc"/>
+            <EditGrid moduleID="oppa"/>
+        </EditScreen>
+        <EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="optc"/>
+            <EditGrid moduleID="opt"/>
+        </EditScreen>
+        <EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the organization">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="supc"/>
+            <EditGrid moduleID="sup"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the organization">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the organization" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="OrganizationID"/>
+        <InvisibleField name="OrganizationTypeID"/>
+        <ViewField name="OrganizationCategory"/>
+        <ViewField name="OrganizationType"/>
+        <ViewField name="Name"/>
+        <ViewField name="ShortName"/>
+        <ViewField name="Description"/>
+        <ViewField name="URL" link="URL"/>
+        <ViewField name="ParentOrganization"/>
+        <ViewField name="PrimaryContactPerson"/>
+        <ViewField name="TotalEstOpp"/>
+        <ViewField name="TotalEstExp"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Organizations By Region">
+            <GroupByField name="Region"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Organizations By Region">
+            <GroupByField name="Region"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Organizations By Division">
+            <GroupByField name="Division"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Organizations By Division">
+            <GroupByField name="Division"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Organizations By Industry Code">
+            <GroupByField name="IndustryCode"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Organizations By Industry Code">
+            <GroupByField name="IndustryCode"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Organizations By Industry Group">
+            <GroupByField name="IndustryGroup"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Organizations By Industry Group">
+            <GroupByField name="IndustryGroup"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Organizations By Industry Sub Sector">
+            <GroupByField name="IndustrySubSector"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Organizations By Industry Sub Sector">
+            <GroupByField name="IndustrySubSector"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Organizations By Industry Sector">
+            <GroupByField name="IndustrySector"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Organizations By Industry Sector">
+            <GroupByField name="IndustrySector"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Organizations By Organization Type">
+            <GroupByField name="OrganizationType"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Organizations By Organization Type">
+            <GroupByField name="OrganizationType"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Organizations By State">
+            <GroupByField name="State"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Organizations By State">
+            <GroupByField name="State"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie09" title="Organizations By Parent Organization">
+            <GroupByField name="ParentOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto09" title="Organizations By Parent Organization">
+            <GroupByField name="ParentOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie10" title="Organizations By Policy Organization">
+            <GroupByField name="PolicyOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto10" title="Organizations By Policy Organization">
+            <GroupByField name="PolicyOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie11" title="Organizations By Category">
+            <GroupByField name="OrganizationCategory"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto11" title="Organizations By Category">
+            <GroupByField name="OrganizationCategory"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie12" title="Organizations By Direction Organization">
+            <GroupByField name="DirectionOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto12" title="Organizations By Direction Organization">
+            <GroupByField name="DirectionOrganization"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie13" title="Organizations By SIC">
+            <GroupByField name="SIC"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto13" title="Organizations By SIC">
+            <GroupByField name="SIC"/>
+            <SummaryField name="OrganizationID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 502 $" date="$Date: 2007-02-17 01:03:38 -0800 (Sat, 17 Feb 2007) $"/>
+</Module>

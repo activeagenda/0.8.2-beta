@@ -1,0 +1,312 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Situation Response Procedures" moduleID="sitrp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Situation Response Procedure" pluralRecordName="Situation Response Procedures" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="SituationResponseID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate response steps with organization specific situations" sample="1"/>
+		<TableField name="SituationID" type="int" validate="RequireSelection" phrase="Situation|A combined field used to describe this situation when associating it with other records" sample="1"/>
+		<ForeignField name="SituationTypeID" foreignTable="sit" foreignKey="SituationID" foreignField="SituationTypeID" key="SituationID" joinType="left" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="1"/>
+		<ForeignField name="SituationCategoryID" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationCategoryID" key="SituationTypeID" joinType="left" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="1"/>
+		<CodeField name="SituationCategory" key="SituationCategoryID" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="Disease" codeTypeID="26"/>
+		<ForeignField name="SituationType" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationType" key="SituationTypeID" joinType="left" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="Injury (employee)"/>
+		<ForeignField name="Situation" foreignTable="sit" foreignKey="SituationID" foreignField="Situation" key="SituationID" joinType="left" phrase="Situation|A combined field used to describe this situation when associating it with other records" sample="Employee injury requiring medical treatment"/>
+		<ForeignField name="LocalDescription" foreignTable="sit" foreignKey="SituationID" foreignField="LocalDescription" key="SituationID" joinType="left" phrase="Situation Description|An detailed description of the local situation requiring action, communication, or response" sample="Injuries involving medical treatment are those which require the treatment of a trained physician. Injuries resulting in a visit to the industrial medical provider are not included if those injuries can be addressed by a non-physician."/>
+		<ForeignField name="OrganizationID" foreignTable="sit" foreignKey="SituationID" foreignField="OrganizationID" key="SituationID" joinType="left" phrase="Organization|The name of the organization associated with the situation" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization assigning the human resource to local situations" sample="Active Agenda, HQ"/>
+		<TableField name="ResourceTypeID" type="int" phrase="Resource Type|A combined field used to describe this resource type when associating it with other records" sample="1"/>
+		<ForeignField name="ResourcePurposeID" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationPurposeID" key="ResourceTypeID" joinType="left" phrase="Resource Purpose|A word or short phrase used to describe the purpose for this resource type" sample="1"/>
+		<CodeField name="ResourcePurpose" key="ResourcePurposeID" phrase="Resource Purpose|A word or short phrase used to describe the purpose for this resource type" sample="Claims Administration" codeTypeID="42"/>
+		<ForeignField name="ResourceType" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationType" key="ResourceTypeID" joinType="left" phrase="Resource Type|A combined field used to describe this resource type when associating it with other records" sample="Claims Administration - Claims Adjuster"/>
+		<ForeignField name="ParticipationTitle" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationTitle" key="ResourceTypeID" joinType="left" phrase="Resource Title|A word or short phrase used to describe the specific title of this risk control participation type" sample="Claims Adjuster"/>
+		<ForeignField name="ResourceTypeDesc" foreignTable="prtt" foreignKey="ParticipationTypeID" foreignField="ParticipationTypeDesc" key="ResourceTypeID" joinType="left" phrase="Resource Type Description|A detailed description of the scope and requirements of this resource type" sample="Claims adjusters are assigned by the company's third party administrator, and in some cases, by outside insurance companies. Claims adjusters are responsible for managing claims made against companies and they have the authority to issue checks against a reserve account towards the resolution of the respective claims they are assigned to manage"/>
+		<TableField name="LocalRoleDescription" type="text" validate="notEmpty" phrase="Local Description|An detailed description of the local situation response role and requirements" sample="Injuries involving medical treatment are those which require the treatment of a trained physician. Injuries resulting in a visit to the industrial medical provider are not included if those injuries can be addressed by a non-physician."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Situation"/>;_<CombinedFieldRef name="ResourceType"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="SituationResponse" phrase="Situation Response|A combined field used to describe this situation response procedure when associating it with other records" sample="Employee injury requiring medical treatment; Claims Adjuster; Active Agenda, HQ"><CombinedFieldRef name="Situation"/>;_<CombinedFieldRef name="ResourceType"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SituationResponseID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="SituationResponse"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="sitrs" name="Situation Response Steps" parentKey="SituationResponseID" localKey="SituationResponseID"/>
+        <SubModule moduleID="res" name="Resources">
+            <SubModuleCondition field="ResourceTypeID" value="[*ResourceTypeID*]"/>
+        </SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SituationResponseID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sitrp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List local situation response procedures">
+			<ListField name="SituationResponseID" phrase="Record ID"/>
+			<ListField name="Situation" phrase="Situation"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="ResourceType" phrase="Resource Type"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search local situation response procedures">
+			<ComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</ComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+			<ComboField name="SituationID" findMode="text">
+				<SampleItem ID="1" name="Injury (employee); Employee injury requiring medical treatment"/>
+				<SampleItem ID="3" name="Fire; Structure fire"/>
+				<SampleItem ID="5" name="Fire; vehicle fire"/>
+				<SampleItem ID="7" name="Injury (Customer); Consumer injury from product"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="ResourcePurposeID" findMode="text">
+				<UpdateFieldRef name="ResourceTypeID"/>
+				<SampleItem ID="1" name="Claims Administration"/>
+				<SampleItem ID="2" name="Legal Representation"/>
+				<SampleItem ID="3" name="Translation"/>
+				<SampleItem ID="4" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="ResourceTypeID" findMode="text" parentField="ResourcePurposeID">
+				<SampleItem ID="1" name="Claims Adjuster"/>
+				<SampleItem ID="2" name="Defense Attorney"/>
+				<SampleItem ID="3" name="Plaintiff Attorney"/>
+				<SampleItem ID="4" name="Investigator"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a local situation response procedure">
+			<ViewField name="SituationResponseID"/>
+			<ViewField name="SituationID"/>
+			<ViewField name="SituationCategory"/>
+			<ViewField name="SituationType"/>
+			<ViewField name="Situation"/>
+			<ViewField name="LocalDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="ResourcePurpose"/>
+			<ViewField name="ResourceType"/>
+			<ViewField name="ResourceTypeDesc"/>
+			<ViewField name="LocalRoleDescription"/>
+			<ViewGrid moduleID="sitrs"/>
+			<ViewGrid moduleID="res" phrase="Resources Assigned">
+                <InvisibleField name="ResourceTypeID"/>
+                <ViewField name="Organization"/>
+                <ViewField name="PersonAccountable"/>
+                <ViewField name="ResourceDesc"/>
+                <ViewField name="FullWorkPhone"/>
+                <ViewField name="MobilePhone"/>
+                <ViewField name="WorkEmail" link="WorkEmail"/>
+			</ViewGrid>
+			<ViewGrid moduleID="bpc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a local situation response procedure">
+			<ViewField name="SituationResponseID"/>
+			<ViewField name="SituationID"/>
+			<ViewField name="SituationCategory"/>
+			<ViewField name="SituationType"/>
+			<ViewField name="Situation"/>
+			<ViewField name="LocalDescription"/>
+			<CodeComboField name="ResourcePurposeID" findMode="text">
+				<UpdateFieldRef name="ResourceTypeID"/>
+				<SampleItem ID="1" name="Claims Administration"/>
+				<SampleItem ID="2" name="Legal Representation"/>
+				<SampleItem ID="3" name="Translation"/>
+				<SampleItem ID="4" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="ResourceTypeID" findMode="text" parentField="ResourcePurposeID">
+				<UpdateFieldRef name="ResourceTypeDesc"/>
+				<SampleItem ID="1" name="Claims Adjuster"/>
+				<SampleItem ID="2" name="Defense Attorney"/>
+				<SampleItem ID="3" name="Plaintiff Attorney"/>
+				<SampleItem ID="4" name="Investigator"/>
+			</ComboField>
+			<ViewField name="ResourceTypeDesc" parentField="ResourceTypeID"/>
+			<MemoField name="LocalRoleDescription" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Steps" phrase="Steps|Associate response steps with the local situation response procedure">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sitrs"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the local situation response procedure" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SituationResponseID"/>
+		<ViewField name="SituationID"/>
+		<ViewField name="SituationCategory"/>
+		<ViewField name="SituationType"/>
+		<ViewField name="Situation"/>
+		<ViewField name="LocalDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="ResourcePurpose"/>
+		<ViewField name="ResourceType"/>
+		<ViewField name="LocalRoleDescription"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="sitrp" phrase="Response Roles">
+			<InvisibleField name="SituationResponseID"/>
+			<ViewField name="ResourcePurpose" sample="Claims Administration"/>
+			<ViewField name="ResourceType" sample="Claims Administration - Claims Adjuster"/>
+			<ViewField name="LocalRoleDescription" sample="Claims adjusters are assigned by the company's third party administrator, and in some cases, by outside insurance companies. Claims adjusters are responsible for managing claims made against companies and they have the authority to issue checks against a reserve account towards the resolution of the respective claims they are assigned to manage"/>
+		</ViewGrid>
+		<EditGrid moduleID="sitrp" phrase="Response Roles">
+			<GridForm>
+				<InvisibleField name="SituationResponseID"/>
+				<CodeComboField name="ResourcePurposeID" findMode="text">
+					<UpdateFieldRef name="ResourceTypeID"/>
+					<SampleItem ID="1" name="Claims Administration"/>
+					<SampleItem ID="2" name="Legal Representation"/>
+					<SampleItem ID="3" name="Translation"/>
+					<SampleItem ID="4" name="Investigation"/>
+				</CodeComboField>
+				<ComboField name="ResourceTypeID" findMode="text" parentField="ResourcePurposeID">
+					<UpdateFieldRef name="ResourceTypeDesc"/>
+					<SampleItem ID="1" name="Claims Administration - Claims Adjuster"/>
+					<SampleItem ID="2" name="Legal Representation - Defense Attorney"/>
+					<SampleItem ID="3" name="Legal Representation - Plaintiff Attorney"/>
+					<SampleItem ID="4" name="Investigation - Investigator"/>
+				</ComboField>
+				<ViewField name="ResourceTypeDesc"/>
+				<MemoField name="LocalRoleDescription" rows="5" cols="75"/>
+			</GridForm>
+			<ViewField name="ResourcePurpose" sample="Claims Administration"/>
+			<ViewField name="ResourceType" sample="Claims Adjuster"/>
+			<ViewField name="LocalRoleDescription" sample="Claims adjusters are assigned by the company's third party administrator, and in some cases, by outside insurance companies. Claims adjusters are responsible for managing claims made against companies and they have the authority to issue checks against a reserve account towards the resolution of the respective claims they are assigned to manage"/>
+		</EditGrid>
+		<SearchSelectGrid moduleID="sitrp" phrase="Response Roles" primaryListField="ResourceType">
+			<SearchForm>
+				<CodeComboField name="ResourcePurposeID" findMode="text">
+					<SampleItem ID="1" name="Claims Administration"/>
+					<SampleItem ID="2" name="Legal Representation"/>
+					<SampleItem ID="3" name="Translation"/>
+					<SampleItem ID="4" name="Investigation"/>
+				</CodeComboField>
+			</SearchForm>
+		</SearchSelectGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

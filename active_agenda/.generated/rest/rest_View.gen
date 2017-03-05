@@ -1,0 +1,149 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    /**CUSTOM_CODE|init**/
+
+    //list of objects containing the field information
+    $fields = unserialize('a:5:{s:14:"ResourceTypeID";O:9:"viewfield":16:{s:4:"name";s:14:"ResourceTypeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:86:"Resource ID|An automatically assigned number used to track risk control resource types";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"ResourcePurpose";O:9:"viewfield":16:{s:4:"name";s:15:"ResourcePurpose";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:96:"Participation Purpose|A word or short phrase used to describe the purpose for this participation";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"ResourceTitle";O:9:"viewfield":16:{s:4:"name";s:13:"ResourceTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Resource Title|A word or short phrase used to describe the specific title of this risk control resource";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:148:"Person Accountable|The name of the person accountable for developing, directing, and/or managing this type of human resource across the organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ResourceTypeDesc";O:9:"viewfield":16:{s:4:"name";s:16:"ResourceTypeDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:100:"Resource Type Description|A detailed description of the scope and requirements of this resource type";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}');
+
+
+    //list of grids
+    /**grids**/
+
+    //phrases for field names, in field order
+    $phrases = array(
+   'ResourceTypeID' => gettext("Resource ID|An automatically assigned number used to track risk control resource types"),
+   'ResourcePurpose' => gettext("Participation Purpose|A word or short phrase used to describe the purpose for this participation"),
+   'ResourceTitle' => gettext("Resource Title|A word or short phrase used to describe the specific title of this risk control resource"),
+   'PersonAccountable' => gettext("Person Accountable|The name of the person accountable for developing, directing, and/or managing this type of human resource across the organization"),
+   'ResourceTypeDesc' => gettext("Resource Type Description|A detailed description of the scope and requirements of this resource type")
+   );
+
+
+    $ownerField = '';
+
+    
+    /**disbleGlobalModules**/
+    /**useBestPractices**/
+
+    //retrieve record
+    $data = array();
+    
+    /**SQL|GET_BEGIN**/
+    $SQL = "SELECT 
+   `rest`.ResourceTypeID,
+   `cod1`.Description AS ResourcePurpose,
+   `rest`.ResourceTitle,
+   `ppl1`.DisplayName AS PersonAccountable,
+   `rest`.ResourceTypeDesc,
+   NULLIF(CONCAT(IFNULL(`rest`.ResourceTitle,'')),'') AS RecordLabel
+FROM `rest`
+   
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rest`.ResourcePurposeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = '42')
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`rest`.ResourceTypeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = 'rest'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = '40')
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE
+   rest.ResourceTypeID='/**RecordID**/'";
+
+    /**CUSTOM_CODE|before_get**/
+
+    //get data
+    $r = $dbh->getAll(str_replace('/**RecordID**/', $recordID, $SQL), DB_FETCHMODE_ASSOC);
+    dbErrorCheck($r);
+
+    
+    /**SQL|GET_END**/
+    //need to repeat for each getSQL........
+    $data = array_merge($data, $r[0]); //assign first (only) row
+    
+    /**CUSTOM_CODE|get**/
+    
+    //check if user has permission to view or edit record - will redirect if no permission at all
+    $allowEdit = $User->CheckViewScreenPermission();
+    //$allowEdit = true;
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //List tab
+    $tabs['List'] = Array("list.php?$qs", gettext("List|View the list of Resource Types"));
+
+    if ($allowEdit){
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Resource Type") );
+      $tempTabs['Form'] = array( "edit.php?scr=Form&$tabsQS", gettext("Form|The screen used to edit summary information about risk control resources") );
+$tabs = array_merge($tabs, $tempTabs);
+    } else {
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Resource Type") );
+      $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Resource Type") );
+$tabs = array_merge($tabs, $tempTabs);
+    }
+    
+    $recordLabelField = $data['RecordLabel'];
+
+    $content = '';
+    foreach($fields as $key => $field){
+        if (!$field->isSubField()){
+            $content .= $field->render($data, $phrases);
+        }
+    }
+
+    $pageTitle = gettext("Resource Type");
+    $screenPhrase = gettext("View|The screen used to view summary information about risk control resources");
+
+    $backlink = "list.php?$qs";
+
+    $nextScreen = "Form";
+    $editlink = "edit.php?$tabsQS&scr=$nextScreen";
+    $content = renderViewTable($content, $allowEdit, $backlink, $editlink);
+
+    //add byline info on record modification info
+    $content .= "<div class=\"recinfo\">{$phrases['_ModDate']} {$data['_ModDate']}";
+    if ($User->IsAdmin) {
+        $content .= '&nbsp; &nbsp; <a href="audit.php?mdl='.$ModuleID.'&rid='.$recordID.'">'.gettext("Audit Trail").'</a> ';
+    }
+    $content .= "</div>";
+
+    //display view grids here
+
+
+//View Screen Sections here
+/**VIEWSCREENSECTIONS**/
+?>

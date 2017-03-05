@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Documentation Status" moduleID="docs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Documentation Status" pluralRecordName="Documentation Status'" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="DocumentStatusID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track the status of documentation delivery requirements" sample="1"/>
+        <TableField name="DocumentationRecID" type="int" validate="noValidation" phrase="Recipient|The individual assigned by the designated organization to receive the document" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name of the module associated with the documentation requirement" sample="lin"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name of the module associated with the documentation requirement" sample="Injury Loss"/>
+        <TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the record in the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A description of the document recipient based on a combination of field values assigned from within the documentation recipients module" sample="Jane Doe; Active Agenda, HQ; Packaging Area; 01-01-2004"/>
+        <ForeignField name="DocumentID" foreignTable="docr" foreignKey="DocumentationRecID" foreignField="DocumentID" key="DocumentationRecID" joinType="left" phrase="Document|A description of the document based on a combination of field values assigned from within the documentation module" sample="1"/>
+        <ForeignField name="Document" foreignTable="doc" foreignKey="DocumentID" foreignField="Document" key="DocumentID" joinType="left" phrase="Document|A description of the document based on a combination of field values assigned from within the documentation module" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+        <ForeignField name="OrganizationID" listType="internalAll externalAll" foreignTable="docr" foreignKey="DocumentationRecID" foreignField="OrganizationID" key="DocumentationRecID" joinType="left" phrase="Organization|The organization designated to receive this document" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization designated to receive this document" sample="Active Agenda, HQ"/>
+        <ForeignField name="RecipientID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" foreignTable="inv" foreignKey="SourceRecordID SourceModuleID" foreignField="PersonInvolvedID" key="RelatedRecordID RelatedModuleID" joinType="left" phrase="Recipient|The individual assigned by the designated organization to receive the document" sample="1"/>
+        <ForeignField name="Recipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="RecipientID" joinType="left" phrase="Recipient|The individual assigned by the designated organization to receive the document" sample="Mattias Thorslund"/>
+        <ForeignField name="SubmissionImmediacy" foreignTable="docr" foreignKey="DocumentationRecID" foreignField="SubmissionImmediacy" key="DocumentationRecID" joinType="left" phrase="Submission Immediacy|The level of immediacy assigned to this document in association with this specific recipient or designated organization" sample="Immediately"/>
+        <ForeignField name="SubmissionImmediacyID" foreignTable="docr" foreignKey="DocumentationRecID" foreignField="SubImmediacyID" key="DocumentationRecID" joinType="left" phrase="Submission Immediacy|The level of immediacy assigned to this document in association with this specific recipient or designated organization" sample="1"/>
+        <ForeignField name="ImmediacyDescription" foreignTable="docr" foreignKey="DocumentationRecID" foreignField="ImmediacyDescription" key="DocumentationRecID" joinType="left" phrase="Recipient Status|Status of the documentation submission to the required recipient" sample="Received"/>
+        <RemoteField name="NotificationDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="48" phrase="Notification Date|The date and time the contact was notified" sample="12:30 pm"/>
+        <TableField name="NotificationDetails" type="text" validate="noValidation" phrase="Notification Details|Details about the notification provided and additional details that may be pertinent to the notification" sample="I spoke directly with the Department Head of OES and he said 'okie dokie, many thankie''"/>
+        <TableField name="RecipientStatusID" type="int" validate="RequireSelection" phrase="Recipient Status|Status of the documentation submission to the required recipient" sample="1"/>
+        <CodeField name="RecipientStatus" key="RecipientStatusID" phrase="Recipient Status|Status of the documentation submission to the required recipient" sample="Sent and Received" codeTypeID="224"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Injury Loss | Mattias Thorslund | Sent and Received"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="Recipient"/>;_<CombinedFieldRef name="RecipientStatus"/></CombinedField>
+        <CombinedField name="DocumentStatus" phrase="Document Status|A combined field used to describe this documentation distribution status when associating it with other records" sample="Injury Loss; Active Agenda, HQ; Mattias Thorslund; Sent and Received"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Recipient"/>;_<CombinedFieldRef name="RecipientStatus"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="DocumentStatusID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="DocumentStatus"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List assigned dates">
+            <ListField name="DocumentStatusID" phrase="Record ID"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="Document" phrase="Document"/>
+            <ListField name="Recipient" phrase="Recipient"/>
+            <ListField name="RecipientStatus" phrase="Recipient Status"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search the status of documentation sent to assigned recipients">
+            <CodeComboField name="RecipientStatusID" findMode="text">
+                <SampleItem ID="1" name="Sent and Received"/>
+                <SampleItem ID="2" name="Lost in Transit"/>
+                <SampleItem ID="3" name="Not Sent"/>
+            </CodeComboField>
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Loss Injury"/>
+                <SampleItem ID="2" name="Vehicles"/>
+                <SampleItem ID="3" name="Equipment"/>
+            </ComboField>
+            <ComboField name="DocumentID" findMode="text">
+                <SampleItem ID="1" name="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+                <SampleItem ID="2" name="Employee's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+                <SampleItem ID="3" name="Doctor's' First Report of Injury or Illness (CA); Mattias Thorslund"/>
+                <SampleItem ID="4" name="Employee Claim of Injury Form (CA)"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="California Office of Emergency Services"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="RecipientID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="California Office of Emergency Services"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="SubmissionImmediacyID" findMode="text">
+                <SampleItem ID="1" name="Immediate"/>
+                <SampleItem ID="2" name="Within 24 Hours"/>
+                <SampleItem ID="3" name="As soon as is practical"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View the status of documentation sent to an assigned recipient">
+            <ViewField name="DocumentStatusID"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="Document"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Recipient"/>
+            <ViewField name="SubmissionImmediacy"/>
+            <ViewField name="ImmediacyDescription"/>
+            <ViewField name="NotificationDate"/>
+            <ViewField name="NotificationDetails"/>
+            <ViewField name="RecipientStatus"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit the status of documentation sent to an assigned recipient">
+            <ViewField name="DocumentStatusID"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="Document"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Recipient"/>
+            <ViewField name="SubmissionImmediacy"/>
+            <ViewField name="ImmediacyDescription"/>
+            <DateField name="NotificationDate"/>
+            <MemoField name="NotificationDetails" rows="5" cols="75"/>
+            <CodeComboField name="RecipientStatusID" findMode="text">
+                <SampleItem ID="1" name="Sent and Received"/>
+                <SampleItem ID="2" name="Lost in Transit"/>
+                <SampleItem ID="3" name="Not Sent"/>
+            </CodeComboField>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="docs" phrase="Documentation Status'">
+            <InvisibleField name="DocumentStatusID"/>
+            <ViewField name="Document" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="Recipient" sample="Mattias Thorslund"/>
+            <ViewField name="SubmissionImmediacy" sample="Immediate"/>
+            <ViewField name="RecipientStatus" sample="Sent and Received"/>
+        </ViewGrid>
+        <EditGrid moduleID="docs" phrase="Documentation Status'">
+            <GridForm>
+                <InvisibleField name="DocumentStatusID"/>
+                <ViewField name="Document" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+                <ViewField name="Organization" sample="Active Agenda, HQ"/>
+                <ViewField name="Recipient" sample="Mattias Thorslund"/>
+                <ViewField name="SubmissionImmediacy" sample="Immediate"/>
+                <DateField name="NotificationDate"/>
+                <MemoField name="NotificationDetails" rows="5" cols="75"/>
+                <CodeComboField name="RecipientStatusID" findMode="text" sample="Sent and Received">
+                    <SampleItem ID="1" name="Sent and Received"/>
+                    <SampleItem ID="2" name="Lost in Transit"/>
+                    <SampleItem ID="3" name="Not Sent"/>
+                </CodeComboField>
+            </GridForm>
+            <ViewField name="Document" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="Recipient" sample="Mattias Thorslund"/>
+            <ViewField name="SubmissionImmediacy" sample="Immediate"/>
+            <ViewField name="RecipientStatus" sample="Sent and Received"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

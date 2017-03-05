@@ -1,0 +1,95 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:1375:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'resm\' AS ModuleID,
+   resm.ModuleResourceID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`cod1`.Description,\'\'),\' - \',IFNULL(NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\'),\' | \',IFNULL(`cod2`.Description,\'\')),\' |  -  |  | \') AS Value,
+`ppl1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `resm`
+LEFT OUTER JOIN `rdc` ON (resm.ModuleResourceID = rdc.RecordID AND rdc.ModuleID = \'resm\')
+   
+   LEFT OUTER JOIN `res` AS res1 
+   ON (`resm`.ResourceID = `res1`.ResourceID )
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`resm`.ModuleID = `mod1`.ModuleID )
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`res1`.ResourceID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'res\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'39\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`res1`.ResourceStatusID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'233\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`res1`.ResourceTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`prtt1`.ParticipationPurposeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'42\')
+WHERE resm.ModuleResourceID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:1280:"UPDATE rdc
+INNER JOIN resm ON (rdc.RecordID = resm.ModuleResourceID AND rdc.ModuleID = \'resm\')
+   
+   LEFT OUTER JOIN `res` AS res1 
+   ON (`resm`.ResourceID = `res1`.ResourceID )
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`resm`.ModuleID = `mod1`.ModuleID )
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`res1`.ResourceID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'res\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'39\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`res1`.ResourceStatusID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'233\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`res1`.ResourceTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`prtt1`.ParticipationPurposeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'42\')
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | \',IFNULL(`cod1`.Description,\'\'),\' - \',IFNULL(NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\'),\' | \',IFNULL(`cod2`.Description,\'\')),\' |  -  |  | \'),
+rdc.OrganizationID = `ppl1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'resm\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

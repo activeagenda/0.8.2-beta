@@ -1,0 +1,149 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'CostID' => gettext("Cost ID|An automatically assigned number used to track costs throughout the enterprise"),
+   'RelatedModule' => gettext("Related Module|The name or title of the module which is associated with the record"),
+   'RelatedRecordDescription' => gettext("Record Description|A description of the related record based on a combination of field values assigned from within the related module"),
+   'CostDate' => gettext("Cost Date|The date this cost amount was incurred by the organization"),
+   'Organization' => gettext("Organization|The organization responsible for the cost or expense"),
+   'PersonAccountable' => gettext("Person Accountable|The individual assigned primary accountability for the cost"),
+   'CostCategory' => gettext("Cost of Risk Category|A cost of risk categorization which enables a Total Cost of Risk analysis"),
+   'CostType' => gettext("Cost Type|A combined field used to describe this cost type when associating it with other records"),
+   'Title' => gettext("Title|A concise title that describes the cost"),
+   'CostDesc' => gettext("Cost Description|A detailed description of the cost being tracked"),
+   'Incurred' => gettext("Incurred|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software"),
+   'Payments' => gettext("Payments|A calculated field representing the total value of all expenditures associated with the incurred cost"),
+   'Outstanding' => gettext("Outstanding|The outstanding amount to be paid to satisfy the unpaid portion of the incurred cost"),
+   'BudgetConsideration' => gettext("Budget Consideration?|Whether the cost incurred should be considered for future budget planning"),
+   'PONumber' => gettext("P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose"),
+   'ModifiedBy' => gettext("Modified By|The name of the person that last modified the cost record"),
+   'LastModifiedDate' => gettext("Last Modified|The date the cost record was last modified"),
+   'RiskImperatives' => gettext("Risk Imperatives|A list of associated Risk Imperatives")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:4:{s:6:"phrase";s:12:"Cost of Risk";s:3:"sql";s:2702:"SELECT 
+   `cos`.CostID,
+   `mod1`.Name AS RelatedModule,
+   `rdc1`.Value AS RelatedRecordDescription,
+   `dat1`.RelatedDate AS CostDate,
+   `org1`.Name AS Organization,
+   `ppl1`.DisplayName AS PersonAccountable,
+   `cod1`.Description AS CostCategory,
+   NULLIF(CONCAT(IFNULL(`cost1`.CostTitle,\'\')),\'\') AS CostType,
+   `cos`.Title,
+   `cos`.CostDesc,
+   `cos`.Incurred,
+   `cose1`.Payments AS Payments,
+   IFNULL(ROUND(`cos`.Incurred, 2),0) - IFNULL(ROUND(`cose1`.Payments, 2),0) AS Outstanding,
+   `cos`.BudgetConsideration,
+   `cos`.PONumber,
+   `ppl2`.DisplayName AS ModifiedBy,
+   `cos`._ModDate AS LastModifiedDate,
+   `rsk1`.RiskImperatives AS RiskImperatives,
+   NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' incurred a \',IFNULL(NULLIF(CONCAT(IFNULL(`cost1`.CostTitle,\'\')),\'\'),\'\'),\' cost of \',IFNULL(ROUND(`cos`.Incurred, 2),\'\'),\' on \',IFNULL(`dat1`.RelatedDate,\'\')),\' incurred a  cost of  on \') AS RecordLabel,
+   `cos`.OrganizationID
+FROM `cos`
+   
+     LEFT OUTER JOIN `mod` AS mod1 
+   ON (`cos`.RelatedModuleID = `mod1`.ModuleID )
+     LEFT OUTER JOIN `rdc` AS rdc1 ON (`cos`.RelatedRecordID = rdc1.RecordID AND `cos`.RelatedModuleID = rdc1.ModuleID)
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`cos`.CostID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'cos\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'18\')
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`cos`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`cos`.CostID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'cos\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'137\')
+     LEFT OUTER JOIN `cost` AS cost1 
+   ON (`cos`.CostTypeID = `cost1`.CostTypeID )
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`cose`.ExpenseAmount, 2)) AS Payments,
+`cose`.CostID FROM `cose` 
+ WHERE `cose`._Deleted = 0 
+GROUP BY `cose`.CostID 
+) AS cose1 
+ON (`cos`.CostID = cose1.CostID) 
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`cos`._ModBy = `ppl2`.PersonID )
+     LEFT OUTER JOIN (SELECT 
+GROUP_CONCAT(`cod1`.Description ORDER BY `cod1`.Description SEPARATOR \', \') AS RiskImperatives,
+`rsk`.RelatedRecordID FROM `rsk` 
+
+LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsk`.RiskImperativeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'234\')
+ WHERE `rsk`._Deleted = 0 
+ AND RelatedModuleID = \'cos\' 
+ AND \'cos\' = `rsk`.RelatedModuleID
+GROUP BY `rsk`.RelatedRecordID 
+) AS rsk1 
+ON (`cos`.CostID = rsk1.RelatedRecordID) 
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`cost1`.CostCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'124\')
+WHERE
+   cos.CostID=\'/**RecordID**/\'";s:6:"fields";a:18:{s:6:"CostID";O:9:"viewfield":16:{s:4:"name";s:6:"CostID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:86:"Cost ID|An automatically assigned number used to track costs throughout the enterprise";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"RelatedModule";O:9:"viewfield":16:{s:4:"name";s:13:"RelatedModule";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Related Module|The name or title of the module which is associated with the record";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"RelatedRecordDescription";O:9:"viewfield":16:{s:4:"name";s:24:"RelatedRecordDescription";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Record Description|A description of the related record based on a combination of field values assigned from within the related module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostDate";O:9:"viewfield":16:{s:4:"name";s:8:"CostDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Cost Date|The date this cost amount was incurred by the organization";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:65:"Organization|The organization responsible for the cost or expense";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:78:"Person Accountable|The individual assigned primary accountability for the cost";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"CostCategory";O:9:"viewfield":16:{s:4:"name";s:12:"CostCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Cost of Risk Category|A cost of risk categorization which enables a Total Cost of Risk analysis";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostType";O:9:"viewfield":16:{s:4:"name";s:8:"CostType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Cost Type|A combined field used to describe this cost type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:5:"Title";O:9:"viewfield":16:{s:4:"name";s:5:"Title";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:45:"Title|A concise title that describes the cost";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostDesc";O:9:"viewfield":16:{s:4:"name";s:8:"CostDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:65:"Cost Description|A detailed description of the cost being tracked";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Incurred";O:9:"viewfield":16:{s:4:"name";s:8:"Incurred";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:132:"Incurred|The total estimated amount of the cost to be incurred, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Payments";O:9:"viewfield":16:{s:4:"name";s:8:"Payments";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:110:"Payments|A calculated field representing the total value of all expenditures associated with the incurred cost";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:11:"Outstanding";O:9:"viewfield":16:{s:4:"name";s:11:"Outstanding";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:96:"Outstanding|The outstanding amount to be paid to satisfy the unpaid portion of the incurred cost";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:19:"BudgetConsideration";O:9:"viewfield":16:{s:4:"name";s:19:"BudgetConsideration";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Budget Consideration?|Whether the cost incurred should be considered for future budget planning";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"PONumber";O:9:"viewfield":16:{s:4:"name";s:8:"PONumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:124:"P.O. Number|A purchase order number assigned by an accounting department to allocate funds for a stated and approved purpose";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"ModifiedBy";O:9:"viewfield":16:{s:4:"name";s:10:"ModifiedBy";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Modified By|The name of the person that last modified the cost record";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"LastModifiedDate";O:9:"viewfield":16:{s:4:"name";s:16:"LastModifiedDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"Last Modified|The date the cost record was last modified";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:15:"RiskImperatives";O:9:"viewfield":16:{s:4:"name";s:15:"RiskImperatives";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Risk Imperatives|A list of associated Risk Imperatives";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}s:5:"grids";a:1:{s:13:"viewgrid_cose";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"cose";s:6:"phrase";s:12:"Expenditures";s:6:"number";N;s:6:"Fields";a:5:{s:13:"ExpenditureID";O:14:"invisiblefield":11:{s:4:"name";s:13:"ExpenditureID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Record ID|An automatically assigned number used to track expenditures";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"cose";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:11:"ExpenseDate";O:9:"viewfield":16:{s:4:"name";s:11:"ExpenseDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:51:"Expense Date|The specific date the expense occurred";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"cose";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ExpenseTitle";O:9:"viewfield":16:{s:4:"name";s:12:"ExpenseTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Expense Title|A brief title used to describe the expense paid from the trust distribution account";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"cose";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"ExpenseAmount";O:9:"viewfield":16:{s:4:"name";s:13:"ExpenseAmount";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Paid Amount|The amount of the expense, stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"cose";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"ExpensePaymentMethod";O:9:"viewfield":16:{s:4:"name";s:20:"ExpensePaymentMethod";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Payment Method|The method used to pay the expense";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"cose";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:102:"SELECT 
+    count(*) 
+FROM `cose`
+   
+WHERE cose._Deleted = 0
+   AND `cose`.CostID = \'/**RecordID**/\'
+";s:7:"listSQL";s:476:"SELECT 
+   `cose`.ExpenditureID,
+`buda1`.AccountOrganizationID AS AccountOrganizationID,
+`cose`.ExpenseDate,
+`cose`.ExpenseTitle,
+`cose`.ExpenseAmount,
+`cod1`.Description AS ExpensePaymentMethod
+FROM `cose`
+
+   LEFT OUTER JOIN `buda` AS buda1 
+   ON (`cose`.AccountID = `buda1`.AccountID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`cose`.ExpensePaymentMethodID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'227\')
+WHERE cose._Deleted = 0
+AND `cose`.CostID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:6:"CostID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:13:"ExpenditureID";s:3:"int";s:11:"ExpenseDate";s:4:"date";s:12:"ExpenseTitle";s:12:"varchar(128)";s:13:"ExpenseAmount";s:5:"money";s:20:"ExpensePaymentMethod";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:13:"ExpenditureID";s:5:"right";s:11:"ExpenseDate";s:6:"center";s:12:"ExpenseTitle";s:4:"left";s:13:"ExpenseAmount";s:5:"right";s:20:"ExpensePaymentMethod";s:4:"left";}}}}}');
+
+?>

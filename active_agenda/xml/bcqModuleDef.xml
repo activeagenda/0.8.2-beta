@@ -1,0 +1,372 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Business Consequences" moduleID="bcq" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Business Consequence" pluralRecordName="Business Consequences" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="BusinessConsequenceID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate business consequences with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module ID|The name or title of the module which is associated with the business consequence" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the business consequence" sample="Tasks"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Sugar Coating Raisins"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The primary organization affected by the business consequence" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The primary organization affected by the business consequence" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="141" phrase="Person Accountable|The individual assigned primary accountability for guarding against or achieving the business consequence" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for guarding against or achieving the business consequence" sample="Mattias Thorslund"/>
+		<TableField name="BusinessConsequenceTypeID" type="int" validate="RequireSelection" phrase="Business Consequence Type|The specific type of business consequence" sample="1"/>
+		<ForeignField name="ConsequenceCategoryID" foreignTable="bcqt" foreignKey="BusinessConsequenceTypeID" foreignField="ConsequenceCategoryID" key="BusinessConsequenceTypeID" joinType="left" phrase="Consequence Category|A broadly defined title or phrase used to group similar business consequences" sample="1"/>
+		<CodeField name="ConsequenceCategory" key="ConsequenceCategoryID" phrase="Consequence Category|A broadly defined title or phrase used to group similar business consequences" sample="Increased" codeTypeID="190"/>
+		<ForeignField name="BusinessConsequenceType" foreignTable="bcqt" foreignKey="BusinessConsequenceTypeID" foreignField="BusinessConsequenceType" key="BusinessConsequenceTypeID" joinType="left" phrase="Business Consequence Type|The specific type of business consequence" sample="Increased Productivity"/>
+		<TableField name="NatureofConsequenceID" type="int" validate="RequireSelection" phrase="Nature of Consequence|Whether the business consequence will have a beneficial or detrimental impact on the business" sample="1"/>
+		<CodeField name="NatureofConsequence" key="NatureofConsequenceID" phrase="Nature of Consequence|Whether the business consequence will have a beneficial or detrimental impact on the business" sample="Beneficial" codeTypeID="204"/>
+		<TableField name="ConsequenceTitle" type="varchar(128)" validate="notEmpty" phrase="Consequence Title|A short title used to specifically describe the business consequence" sample="Potential food contamination from metal shovels"/>
+		<TableField name="ConsequenceDesc" type="text" validate="noValidation" phrase="Consequence Description|A detailed description of the potential or actual business consequence" sample="Failure to utilize plastic utility tools around food products has and will result food product contamination."/>
+		<TableField name="ConsequenceStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the business consequence" sample="1"/>
+		<CodeField name="ConsequenceStatus" key="ConsequenceStatusID" phrase="Status|The present status of the business consequence" sample="Unfounded" codeTypeID="119"/>
+		<RemoteField name="ConsequenceStatusDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="15" phrase="Status Date|The specific date of the business consequence status" sample="01/01/2004"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="ConsequenceTitle"/>;_<CombinedFieldRef name="BusinessConsequenceType"/>;_<CombinedFieldRef name="NatureofConsequence"/></CombinedField>
+		<CombinedField name="BusinessConsequence" phrase="Business Consequence|A combined field used to describe this business consequence when associating it with other records" sample="Tasks; Active Agenda, Sweden; Administrative; Under Evaluation"><CombinedFieldRef name="ConsequenceTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="BusinessConsequenceID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="BusinessConsequence"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List business consequences">
+			<ListField name="BusinessConsequenceID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="ConsequenceTitle" phrase="Consequence Title"/>
+			<ListField name="BusinessConsequenceType" phrase="Consequence Type"/>
+			<ListField name="NatureofConsequence" phrase="Nature"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search business consequences associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Partnerships"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Injury Loss"/>
+				<SampleItem ID="4" name="Hazard Reports"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Active Agenda, HQ"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ConsequenceCategoryID" findMode="text">
+				<UpdateFieldRef name="BusinessConsequenceTypeID"/>
+				<SampleItem ID="1" name="Potentially Increased"/>
+				<SampleItem ID="2" name="Actually Increased"/>
+				<SampleItem ID="3" name="Potentially Increased"/>
+				<SampleItem ID="4" name="Potentially Decreased"/>
+			</CodeComboField>
+			<ComboField name="BusinessConsequenceTypeID" findMode="text" parentField="ConsequenceCategoryID">
+				<SampleItem ID="1" name="Productivity"/>
+				<SampleItem ID="2" name="Efficiency"/>
+				<SampleItem ID="3" name="Sales"/>
+				<SampleItem ID="4" name="Profit"/>
+				<SampleItem ID="5" name="Morale"/>
+			</ComboField>
+			<CodeRadioField name="NatureofConsequenceID">
+				<SampleItem ID="1" name="Beneficial"/>
+				<SampleItem ID="2" name="Detrimental"/>
+			</CodeRadioField>
+			<CodeComboField name="ConsequenceStatusID">
+				<SampleItem ID="1" name="Under Evaluation"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="2" name="Disapproved"/>
+			</CodeComboField>
+			<DateField name="ConsequenceStatusDate"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a business consequence associated with a related record">
+			<ViewField name="BusinessConsequenceID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="BusinessConsequenceType"/>
+			<ViewField name="ConsequenceTitle"/>
+			<ViewField name="ConsequenceDesc"/>
+			<ViewField name="NatureofConsequence"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ConsequenceStatus"/>
+			<ViewField name="ConsequenceStatusDate"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a business consequence associated with a related record">
+			<ViewField name="BusinessConsequenceID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<CodeComboField name="ConsequenceCategoryID" findMode="text">
+				<UpdateFieldRef name="BusinessConsequenceTypeID"/>
+				<SampleItem ID="1" name="Potentially Increased"/>
+				<SampleItem ID="2" name="Actually Increased"/>
+				<SampleItem ID="3" name="Potentially Increased"/>
+				<SampleItem ID="4" name="Potentially Decreased"/>
+			</CodeComboField>
+			<ComboField name="BusinessConsequenceTypeID" findMode="text" parentField="ConsequenceCategoryID">
+				<SampleItem ID="1" name="Productivity"/>
+				<SampleItem ID="2" name="Efficiency"/>
+				<SampleItem ID="3" name="Sales"/>
+				<SampleItem ID="4" name="Profit"/>
+				<SampleItem ID="5" name="Morale"/>
+			</ComboField>
+			<EditField name="ConsequenceTitle" size="75" maxLength="128"/>
+			<MemoField name="ConsequenceDesc" rows="5" cols="75"/>
+			<CodeRadioField name="NatureofConsequenceID">
+				<SampleItem ID="1" name="Beneficial"/>
+				<SampleItem ID="2" name="Detrimental"/>
+			</CodeRadioField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Active Agenda, HQ"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ConsequenceStatusID">
+				<SampleItem ID="1" name="Under Evaluation"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="2" name="Disapproved"/>
+			</CodeComboField>
+			<DateField name="ConsequenceStatusDate"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="bcq" phrase="Business Consequences">
+			<InvisibleField name="BusinessConsequenceID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="ConsequenceTitle" sample="Employee line comfort will reduce breaks"/>
+			<ViewField name="BusinessConsequenceType" sample="Increased Productivity"/>
+			<ViewField name="NatureofConsequence" sample="Beneficial"/>
+		</ViewGrid>
+		<EditGrid moduleID="bcq" phrase="Business Consequences">
+			<GridForm>
+				<InvisibleField name="BusinessConsequenceID"/>
+				<CodeComboField name="ConsequenceCategoryID" findMode="text">
+					<UpdateFieldRef name="BusinessConsequenceTypeID"/>
+					<SampleItem ID="1" name="Potentially Increased"/>
+					<SampleItem ID="2" name="Actually Increased"/>
+					<SampleItem ID="3" name="Potentially Increased"/>
+					<SampleItem ID="4" name="Potentially Decreased"/>
+				</CodeComboField>
+				<ComboField name="BusinessConsequenceTypeID" findMode="text" parentField="ConsequenceCategoryID">
+					<SampleItem ID="1" name="Productivity"/>
+					<SampleItem ID="2" name="Efficiency"/>
+					<SampleItem ID="3" name="Sales"/>
+					<SampleItem ID="4" name="Profit"/>
+					<SampleItem ID="5" name="Morale"/>
+				</ComboField>
+				<EditField name="ConsequenceTitle" size="75" maxLength="128"/>
+				<MemoField name="ConsequenceDesc" rows="5" cols="75"/>
+				<CodeRadioField name="NatureofConsequenceID">
+					<SampleItem ID="1" name="Beneficial"/>
+					<SampleItem ID="2" name="Detrimental"/>
+				</CodeRadioField>
+                <OrgComboField name="OrganizationID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="2" name="Active Agenda, HQ"/>
+                </OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="ConsequenceStatusID" sample="Under Evaluation">
+					<SampleItem ID="1" name="Under Evaluation"/>
+					<SampleItem ID="2" name="Approved"/>
+					<SampleItem ID="2" name="Disapproved"/>
+				</CodeComboField>
+				<DateField name="ConsequenceStatusDate" sample="09-21-1999"/>
+			</GridForm>
+			<InvisibleField name="BusinessConsequenceID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="ConsequenceTitle" sample="Employee line comfort will reduce breaks"/>
+			<ViewField name="BusinessConsequenceType" sample="Increased Productivity"/>
+			<ViewField name="NatureofConsequence" sample="Beneficial"/>
+		</EditGrid>
+	</Exports>
+    <!--<RecordSummaryFields>
+        <ViewField name="BusinessConsequenceID"/>
+        <InvisableField name="BusinessConsequenceTypeID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="RelatedRecordDescription"/>
+        <ViewField name="BusinessConsequenceType"/>
+        <ViewField name="ConsequenceTitle"/>
+        <ViewField name="ConsequenceDesc"/>
+        <ViewField name="NatureofConsequence"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="ConsequenceStatus"/>
+        <ViewField name="ConsequenceStatusDate"/>
+    </RecordSummaryFields>-->
+	<Charts>
+		<PieChart name="Pie01" title="Business Consequences By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Business Consequences By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Business Consequences By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Business Consequences By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Business Consequences By Status">
+			<GroupByField name="ConsequenceStatus"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Business Consequences By Status">
+			<GroupByField name="ConsequenceStatus"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Business Consequences By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Business Consequences By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Business Consequences By Category">
+			<GroupByField name="ConsequenceCategory"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Business Consequences By Category">
+			<GroupByField name="ConsequenceCategory"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Business Consequences By Type">
+			<GroupByField name="BusinessConsequenceType"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Business Consequences By Type">
+			<GroupByField name="BusinessConsequenceType"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Business Consequences By Nature">
+			<GroupByField name="NatureofConsequence"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Business Consequences By Nature">
+			<GroupByField name="NatureofConsequence"/>
+			<SummaryField name="BusinessConsequenceID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 520 $" date="$Date: 2007-02-21 18:23:19 -0800 (Wed, 21 Feb 2007) $"/>
+</Module>

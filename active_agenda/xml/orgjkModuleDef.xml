@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Key Relationships" moduleID="orgjk" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Key Relationship" pluralRecordName="Key Relationships" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="KeyRelationshipID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number used to track the key relationships between job titles" sample="1"/>
+		<TableField name="OrgJobTitleID" type="int" dbFlags="unsigned not null" phrase="Job Title|The job title associated with the job responsibility" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrganizationID" key="OrgJobTitleID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="Active Agenda, Inc."/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="Active Agenda, Inc."/>
+		<ForeignField name="FunctionID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="FunctionID" key="OrgJobTitleID" joinType="left" phrase="Function|The functional purpose of the job title" sample="1"/>
+		<CodeField name="Function" key="FunctionID" phrase="Function|The functional purpose of the job title" sample="Human Resources" codeTypeID="4"/>
+		<ForeignField name="OrgJobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrgJobTitle" key="OrgJobTitleID" joinType="left" phrase="Job Title|The job title associated with the job responsibility" sample="Maintenance Supervisor"/>
+		<TableField name="RelatedJobTitleID" type="int" validate="RequireSelection" phrase="Related Title|A description of the job title based on a combination of field values assigned from within the Job Titles module" sample="1"/>
+		<ForeignField name="RelatedOrganizationID" listType="allParticipants" defaultValue="defaultorgID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrganizationID" key="RelatedJobTitleID" joinType="left" phrase="Related Organization|The organization where this job title is utilized" sample="1"/>
+		<ForeignField name="RelatedOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="RelatedOrganizationID" joinType="left" phrase="Related Organization|The organization where this job title is utilized" sample="Active Agenda, HQ"/>
+		<ForeignField name="RelatedFunctionID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="FunctionID" key="RelatedJobTitleID" joinType="left" phrase="Related Function|The functional purpose of the job title" sample="1"/>
+		<CodeField name="RelatedFunction" key="RelatedFunctionID" phrase="Related Function|The functional purpose of the job title" sample="Human Resources" codeTypeID="4"/>
+		<ForeignField name="RelatedJobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrgJobTitle" key="RelatedJobTitleID" joinType="left" phrase="Related Title|A description of the job title based on a combination of field values assigned from within the Job Titles module" sample="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+		<TableField name="RelationshipDescription" type="text" phrase="Description|A detailed description of the relationship between the two job titles" sample="Maintains all lines of insurance commensurate with protecting the financial assets of the corporation. Ensures that all locations of the corporation are in compliance with state and local operational risk management regulations."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">
+            <CombinedFieldRef name="OrgJobTitle"/>_is_key_to_
+            <CombinedFieldRef name="RelatedJobTitle"/>
+		</CombinedField>
+		<CombinedField name="KeyRelationship" phrase="Key Relationship|A combined field used to describe the relationship between the job titles when associating it with other records" sample="Risk Manager | Driving cars, trucks, forklifts and other equipment">
+            <CombinedFieldRef name="OrgJobTitle"/>_is_key_to_
+            <CombinedFieldRef name="RelatedJobTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="KeyRelationshipID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="KeyRelationship"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List key job title relationships">
+			<ListField name="KeyRelationshipID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="OrgJobTitle" phrase="Job Title"/>
+			<ListField name="RelatedOrganization" phrase="Related Organization"/>
+			<ListField name="RelatedJobTitle" phrase="Related Job Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search key job title relationships">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="FunctionID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="FunctionID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="OrgJobTitleID" listParentField="FunctionID"/>
+				<SampleItem ID="1" name="Human Resources"/>
+				<SampleItem ID="2" name="Operations (Raisin)"/>
+				<SampleItem ID="3" name="Sales and Marketing"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<ComboField name="OrgJobTitleID" findMode="text" parentField="FunctionID">
+				<SampleItem ID="1" name="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+				<SampleItem ID="2" name="Plant Manager, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="3" name="Cost Accountant, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="4" name="Operator, Active Agenda, HQ, Approved"/>
+			</ComboField>
+			<OrgComboField name="RelatedOrganizationID" findMode="text">
+				<UpdateFieldRef name="RelatedFunctionID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="RelatedFunctionID" findMode="text" parentField="RelatedOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="RelatedJobTitleID" listParentField="FunctionID"/>
+				<SampleItem ID="1" name="Human Resources"/>
+				<SampleItem ID="2" name="Operations (Raisin)"/>
+				<SampleItem ID="3" name="Sales and Marketing"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<ComboField name="RelatedJobTitleID" findMode="text" parentField="RelatedFunctionID">
+				<SampleItem ID="1" name="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+				<SampleItem ID="2" name="Plant Manager, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="3" name="Cost Accountant, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="4" name="Operator, Active Agenda, HQ, Approved"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a key job title relationship">
+			<ViewField name="KeyRelationshipID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Function"/>
+			<ViewField name="OrgJobTitle"/>
+			<ViewField name="RelatedOrganization"/>
+			<ViewField name="RelatedFunction"/>
+			<ViewField name="RelatedJobTitle"/>
+			<ViewField name="RelationshipDescription"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a key job title relationship">
+			<ViewField name="KeyRelationshipID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Function"/>
+			<ViewField name="OrgJobTitle"/>
+			<OrgComboField name="RelatedOrganizationID" findMode="text">
+				<UpdateFieldRef name="RelatedFunctionID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeComboField name="RelatedFunctionID" findMode="text" parentField="RelatedOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="RelatedJobTitleID" listParentField="FunctionID"/>
+				<SampleItem ID="1" name="Human Resources"/>
+				<SampleItem ID="2" name="Operations (Raisin)"/>
+				<SampleItem ID="3" name="Sales and Marketing"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<ComboField name="RelatedJobTitleID" findMode="text" parentField="RelatedFunctionID">
+				<SampleItem ID="1" name="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+				<SampleItem ID="2" name="Plant Manager, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="3" name="Cost Accountant, Active Agenda, HQ, Approved"/>
+				<SampleItem ID="4" name="Operator, Active Agenda, HQ, Approved"/>
+			</ComboField>
+			<MemoField name="RelationshipDescription" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="orgjk" phrase="Key Relationships">
+			<InvisibleField name="KeyRelationshipID"/>
+			<ViewField name="RelatedOrganization" sample="Active Agenda, Inc."/>
+			<ViewField name="RelatedJobTitle" sample="Risk Coordinator"/>
+			<ViewField name="RelationshipDescription" sample="The Risk Manager is responsible for providing weekly reports to the CEO"/>
+		</ViewGrid>
+		<EditGrid moduleID="orgjk" phrase="Key Relationships">
+			<GridForm>
+				<InvisibleField name="KeyRelationshipID"/>
+                <OrgComboField name="RelatedOrganizationID" findMode="text">
+                    <UpdateFieldRef name="RelatedFunctionID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                </OrgComboField>
+                <CodeComboField name="RelatedFunctionID" findMode="text" parentField="RelatedOrganizationID" parentListModuleField="OrganizationID">
+                    <UpdateFieldRef name="RelatedJobTitleID" listParentField="FunctionID"/>
+                    <SampleItem ID="1" name="Human Resources"/>
+                    <SampleItem ID="2" name="Operations (Raisin)"/>
+                    <SampleItem ID="3" name="Sales and Marketing"/>
+                    <SampleItem ID="4" name="Accounting"/>
+                </CodeComboField>
+                <ComboField name="RelatedJobTitleID" findMode="text" parentField="RelatedFunctionID">
+                    <SampleItem ID="1" name="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+                    <SampleItem ID="2" name="Plant Manager, Active Agenda, HQ, Approved"/>
+                    <SampleItem ID="3" name="Cost Accountant, Active Agenda, HQ, Approved"/>
+                    <SampleItem ID="4" name="Operator, Active Agenda, HQ, Approved"/>
+                </ComboField>
+                <MemoField name="RelationshipDescription" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="KeyRelationshipID"/>
+			<ViewField name="RelatedOrganization" sample="Active Agenda, Inc."/>
+			<ViewField name="RelatedJobTitle" sample="Risk Coordinator"/>
+			<ViewField name="RelationshipDescription" sample="The Risk Manager is responsible for providing weekly reports to the CEO"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Key Relationships By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Key Relationships By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Key Relationships By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Key Relationships By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Key Relationships By Job Title">
+			<GroupByField name="OrgJobTitle"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Key Relationships By Job Title">
+			<GroupByField name="OrgJobTitle"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Key Relationships By Related Organization">
+			<GroupByField name="RelatedOrganization"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Key Relationships By Related Organization">
+			<GroupByField name="RelatedOrganization"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Key Relationships By Related Function">
+			<GroupByField name="RelatedFunction"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Key Relationships By Related Function">
+			<GroupByField name="RelatedFunction"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Key Relationships By Related Job Title">
+			<GroupByField name="RelatedJobTitle"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Key Relationships By Related Job Title">
+			<GroupByField name="RelatedJobTitle"/>
+			<SummaryField name="KeyRelationshipID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

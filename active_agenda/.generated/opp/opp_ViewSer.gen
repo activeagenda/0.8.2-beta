@@ -1,0 +1,853 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'OppPermitID' => gettext("Record ID|An automatically assigned number used to operating permits"),
+   'PermitName' => gettext("Permit Name|The name of the operational permit"),
+   'Organization' => gettext("Organization|The name of the organization responsible for application for, and maintenance of, the operating permit"),
+   'PersonAccountable' => gettext("Person Accountable|The individual assigned primary accountability for managing this permit"),
+   'PermitType' => gettext("Permit Type|A combined field used to describe this permit type when associating it with other records"),
+   'PermitTypeDesc' => gettext("Permit Type Description|A detailed description of the operating permit type"),
+   'PermitDesc' => gettext("Permit Description|A brief description of the scope, purpose and conditions of the permit and any other pertinent information"),
+   'AgencyLevel' => gettext("Agency Level|The heirarchial level of the agency issuing this permit from an international perspective"),
+   'Agency' => gettext("Agency|Name of the government agency or internal entity issuing this permit"),
+   'CriticalPermit' => gettext("Critical Permit|Check this box if this permit is required to operate the facility or enables a significant function at the facility which would result in significant financial imact if the permit were not current"),
+   'ActivePermit' => gettext("Active|Check this box if this permit is presently active and in force"),
+   'TransferRestrict' => gettext("Transfer Restrictions|Check this box if transfer restrictions have been placed on this permit"),
+   'ModifyRestrict' => gettext("Modification Restrictions|Check this box if modification restrictions have been placed on this permit"),
+   'EffectiveDate' => gettext("Effective Date|The date the operating permit first went into into effect"),
+   'ExpirationDate' => gettext("Expiration Date|The date the operating permit is scheduled to expire if it is not renewed"),
+   'TotalEstOpp' => gettext("Estimated Opportunity|The total estimated financial opportunity associated with the operating permit"),
+   'TotalEstExp' => gettext("Estimated Exposure|The total estimated cost exposure associated with the operating permit"),
+   'RiskImperatives' => gettext("Risk Imperatives|A list of associated Risk Imperatives")
+   );
+
+
+    $sections = unserialize('a:2:{i:0;a:3:{s:6:"phrase";s:16:"Operating Permit";s:3:"sql";s:2974:"SELECT 
+   `opp`.OppPermitID,
+   `opp`.PermitName,
+   `org1`.Name AS Organization,
+   `ppl1`.DisplayName AS PersonAccountable,
+   NULLIF(CONCAT(IFNULL(`oppt1`.PermitTypeName,\'\')),\'\') AS PermitType,
+   `oppt1`.PermitTypeDesc AS PermitTypeDesc,
+   `opp`.PermitDesc,
+   `cod2`.Description AS AgencyLevel,
+   `org2`.Name AS Agency,
+   `opp`.CriticalPermit,
+   `opp`.ActivePermit,
+   `opp`.TransferRestrict,
+   `opp`.ModifyRestrict,
+   `dat1`.RelatedDate AS EffectiveDate,
+   `dat2`.RelatedDate AS ExpirationDate,
+   `opt1`.TotalEstOpp AS TotalEstOpp,
+   `cosex1`.TotalEstExp AS TotalEstExp,
+   `rsk1`.RiskImperatives AS RiskImperatives,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`oppt1`.PermitTypeName,\'\')),\'\'),\'\'),\' | \',IFNULL(`opp`.PermitName,\'\')),\' | \') AS RecordLabel,
+   `opp`.OrganizationID
+FROM `opp`
+   
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`opp`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`opp`.OppPermitID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'opp\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'59\')
+     LEFT OUTER JOIN `oppt` AS oppt1 
+   ON (`opp`.PermitTypeID = `oppt1`.PermitTypeID )
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`opp`.AgencyLevelID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'7\')
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`opp`.AgencyID = `org2`.OrganizationID )
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`opp`.OppPermitID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'opp\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'17\')
+     LEFT OUTER JOIN `dat` AS dat2 
+    ON (`opp`.OppPermitID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'opp\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'10\')
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`opt`.Estimate, 2)) AS TotalEstOpp,
+`opt`.RelatedRecordID FROM `opt` 
+ WHERE `opt`._Deleted = 0 
+ AND RelatedModuleID = \'opp\' 
+ AND \'opp\' = `opt`.RelatedModuleID
+GROUP BY `opt`.RelatedRecordID 
+) AS opt1 
+ON (`opp`.OppPermitID = opt1.RelatedRecordID) 
+     LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`cosex`.Estimate, 2)) AS TotalEstExp,
+`cosex`.RelatedRecordID FROM `cosex` 
+ WHERE `cosex`._Deleted = 0 
+ AND RelatedModuleID = \'opp\' 
+ AND \'opp\' = `cosex`.RelatedModuleID
+GROUP BY `cosex`.RelatedRecordID 
+) AS cosex1 
+ON (`opp`.OppPermitID = cosex1.RelatedRecordID) 
+     LEFT OUTER JOIN (SELECT 
+GROUP_CONCAT(`cod1`.Description ORDER BY `cod1`.Description SEPARATOR \', \') AS RiskImperatives,
+`rsk`.RelatedRecordID FROM `rsk` 
+
+LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsk`.RiskImperativeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'234\')
+ WHERE `rsk`._Deleted = 0 
+ AND RelatedModuleID = \'opp\' 
+ AND \'opp\' = `rsk`.RelatedModuleID
+GROUP BY `rsk`.RelatedRecordID 
+) AS rsk1 
+ON (`opp`.OppPermitID = rsk1.RelatedRecordID) 
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE
+   opp.OppPermitID=\'/**RecordID**/\'";s:6:"fields";a:18:{s:11:"OppPermitID";O:9:"viewfield":16:{s:4:"name";s:11:"OppPermitID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Record ID|An automatically assigned number used to operating permits";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"PermitName";O:9:"viewfield":16:{s:4:"name";s:10:"PermitName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:46:"Permit Name|The name of the operational permit";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"Organization|The name of the organization responsible for application for, and maintenance of, the operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:90:"Person Accountable|The individual assigned primary accountability for managing this permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"PermitType";O:9:"viewfield":16:{s:4:"name";s:10:"PermitType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Permit Type|A combined field used to describe this permit type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"PermitTypeDesc";O:9:"viewfield":16:{s:4:"name";s:14:"PermitTypeDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:75:"Permit Type Description|A detailed description of the operating permit type";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"PermitDesc";O:9:"viewfield":16:{s:4:"name";s:10:"PermitDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:125:"Permit Description|A brief description of the scope, purpose and conditions of the permit and any other pertinent information";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"AgencyLevel";O:9:"viewfield":16:{s:4:"name";s:11:"AgencyLevel";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:102:"Agency Level|The heirarchial level of the agency issuing this permit from an international perspective";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Agency";O:9:"viewfield":16:{s:4:"name";s:6:"Agency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:75:"Agency|Name of the government agency or internal entity issuing this permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"CriticalPermit";O:9:"viewfield":16:{s:4:"name";s:14:"CriticalPermit";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:212:"Critical Permit|Check this box if this permit is required to operate the facility or enables a significant function at the facility which would result in significant financial imact if the permit were not current";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"ActivePermit";O:9:"viewfield":16:{s:4:"name";s:12:"ActivePermit";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Active|Check this box if this permit is presently active and in force";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"TransferRestrict";O:9:"viewfield":16:{s:4:"name";s:16:"TransferRestrict";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:93:"Transfer Restrictions|Check this box if transfer restrictions have been placed on this permit";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ModifyRestrict";O:9:"viewfield":16:{s:4:"name";s:14:"ModifyRestrict";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Modification Restrictions|Check this box if modification restrictions have been placed on this permit";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"EffectiveDate";O:9:"viewfield":16:{s:4:"name";s:13:"EffectiveDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Effective Date|The date the operating permit first went into into effect";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ExpirationDate";O:9:"viewfield":16:{s:4:"name";s:14:"ExpirationDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:89:"Expiration Date|The date the operating permit is scheduled to expire if it is not renewed";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"TotalEstOpp";O:9:"viewfield":16:{s:4:"name";s:11:"TotalEstOpp";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:100:"Estimated Opportunity|The total estimated financial opportunity associated with the operating permit";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:11:"TotalEstExp";O:9:"viewfield":16:{s:4:"name";s:11:"TotalEstExp";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:89:"Estimated Exposure|The total estimated cost exposure associated with the operating permit";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:15:"RiskImperatives";O:9:"viewfield":16:{s:4:"name";s:15:"RiskImperatives";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Risk Imperatives|A list of associated Risk Imperatives";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:1;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:25:{s:14:"viewgrid_oppap";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppap";s:6:"phrase";s:12:"Applications";s:6:"number";N;s:6:"Fields";a:7:{s:11:"PermitAppID";O:14:"invisiblefield":11:{s:4:"name";s:11:"PermitAppID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:89:"Permit Application ID|A unique number automatically assigned to track permit applications";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:7:"AppDate";O:9:"viewfield":16:{s:4:"name";s:7:"AppDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Application Date|Date the application was submitted to the agency responsible for issuing operating permits";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"AppType";O:9:"viewfield":16:{s:4:"name";s:7:"AppType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:137:"Application Type|A method of categorizing types of applications so that multiple application types can be associated with a single permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"ApplicationDetails";O:9:"viewfield":16:{s:4:"name";s:18:"ApplicationDetails";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Application Details|A brief description of the details associated with the operating permit application";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"AppAppr";O:9:"viewfield":16:{s:4:"name";s:7:"AppAppr";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Application Approved|Whether the application was approved by the issuing agency";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"AppExp";O:9:"viewfield":16:{s:4:"name";s:6:"AppExp";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:74:"Expiration Date|Date the issuing agency has scheduled the permit to expire";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"ReAppDate";O:9:"viewfield":16:{s:4:"name";s:9:"ReAppDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:104:"Reapplication Date|Deadline for submitting a new application to extend the expiration date of the permit";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppap";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppap`
+   
+WHERE oppap._Deleted = 0
+   AND `oppap`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:705:"SELECT 
+   `oppap`.PermitAppID,
+`opp1`.OrganizationID AS OrganizationID,
+`dat1`.RelatedDate AS AppDate,
+`cod1`.Description AS AppType,
+`oppap`.ApplicationDetails,
+`oppap`.AppAppr,
+`oppap`.AppExp,
+`dat1`.RelatedDate AS ReAppDate
+FROM `oppap`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`oppap`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`oppap`.PermitAppID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'oppap\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'39\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`oppap`.AppTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'100\')
+WHERE oppap._Deleted = 0
+AND `oppap`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:7:{s:11:"PermitAppID";s:3:"int";s:7:"AppDate";s:4:"date";s:7:"AppType";N;s:18:"ApplicationDetails";s:4:"text";s:7:"AppAppr";s:4:"bool";s:6:"AppExp";s:4:"date";s:9:"ReAppDate";s:4:"date";}s:4:"name";N;s:10:"fieldAlign";a:7:{s:11:"PermitAppID";s:5:"right";s:7:"AppDate";s:6:"center";s:7:"AppType";s:4:"left";s:18:"ApplicationDetails";s:7:"justify";s:7:"AppAppr";s:6:"center";s:6:"AppExp";s:6:"center";s:9:"ReAppDate";s:6:"center";}}s:14:"viewgrid_opppf";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"opppf";s:6:"phrase";s:11:"Permit Fees";s:6:"number";N;s:6:"Fields";a:4:{s:11:"PermitFeeID";O:14:"invisiblefield":11:{s:4:"name";s:11:"PermitFeeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"Permit Fee ID|A unique number assigned to permit fees so that permit costs may be associated with operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppf";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:13:"PermitFeeType";O:9:"viewfield":16:{s:4:"name";s:13:"PermitFeeType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Permit Fee Type|A method of categorizing types of permit fees so that permit costs can be tracked";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppf";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Amount";O:9:"viewfield":16:{s:4:"name";s:6:"Amount";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:144:"Amount|The automatically calculated amount of the fee associated with this permit application stated in the currency choosen for the application";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppf";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"FeeExplan";O:9:"viewfield":16:{s:4:"name";s:9:"FeeExplan";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Explanation|A detailed explanation of the fee associated with the permit";s:8:"dataType";s:12:"varchar(255)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppf";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `opppf`
+   
+WHERE opppf._Deleted = 0
+   AND `opppf`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:429:"SELECT 
+   `opppf`.PermitFeeID,
+`opp1`.OrganizationID AS OrganizationID,
+`cod1`.Description AS PermitFeeType,
+`opppf`.Amount,
+`opppf`.FeeExplan
+FROM `opppf`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`opppf`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`opppf`.PermitFeeTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'206\')
+WHERE opppf._Deleted = 0
+AND `opppf`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:11:"PermitFeeID";s:3:"int";s:13:"PermitFeeType";N;s:6:"Amount";s:5:"money";s:9:"FeeExplan";s:12:"varchar(255)";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:11:"PermitFeeID";s:5:"right";s:13:"PermitFeeType";s:4:"left";s:6:"Amount";s:5:"right";s:9:"FeeExplan";s:4:"left";}}s:13:"viewgrid_oppp";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"oppp";s:6:"phrase";s:9:"Penalties";s:6:"number";N;s:6:"Fields";a:4:{s:15:"PermitPenaltyID";O:14:"invisiblefield":11:{s:4:"name";s:15:"PermitPenaltyID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:132:"Permit Penalty ID|A unique number assigned to penalties so that multiple penalties can be associated with a single opperating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"oppp";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:11:"PenaltyType";O:9:"viewfield":16:{s:4:"name";s:11:"PenaltyType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:65:"Penalty Type|Types of penalties associated with operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"oppp";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"PenaltyDesc";O:9:"viewfield":16:{s:4:"name";s:11:"PenaltyDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:100:"Penalty Description|A brief description of the penalty and conditions leading to penalty assignments";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"oppp";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"PermitPenaltyAmount";O:9:"viewfield":16:{s:4:"name";s:19:"PermitPenaltyAmount";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:120:"Permit Penalty Amount|A combined field used to describe the permit penalty amount when associating it with other records";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"oppp";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:107:"SELECT 
+    count(*) 
+FROM `oppp`
+   
+WHERE oppp._Deleted = 0
+   AND `oppp`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:643:"SELECT 
+   `oppp`.PermitPenaltyID,
+`opp1`.OrganizationID AS OrganizationID,
+`cod1`.Description AS PenaltyType,
+`oppp`.PenaltyDesc,
+NULLIF(CONCAT(IFNULL(ROUND(`oppp`.PenaltyAmount, 2),\'\'),\' per \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' per \') AS PermitPenaltyAmount
+FROM `oppp`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`oppp`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`oppp`.PenaltyTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'203\')
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`oppp`.PenaltyUnitID = `uts1`.UnitID )
+WHERE oppp._Deleted = 0
+AND `oppp`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:15:"PermitPenaltyID";s:3:"int";s:11:"PenaltyType";N;s:11:"PenaltyDesc";s:4:"text";s:19:"PermitPenaltyAmount";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:15:"PermitPenaltyID";s:5:"right";s:11:"PenaltyType";s:4:"left";s:11:"PenaltyDesc";s:7:"justify";s:19:"PermitPenaltyAmount";s:7:"justify";}}s:14:"viewgrid_oppoa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppoa";s:6:"phrase";s:22:"Organizations Affected";s:6:"number";N;s:6:"Fields";a:4:{s:12:"PermitOrgsID";O:14:"invisiblefield":11:{s:4:"name";s:12:"PermitOrgsID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:129:"Permit Organization ID|A unique number assigned to a single organizations which may be associated with multiple operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppoa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:75:"Organization|The name of the organization impacted by this operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppoa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:136:"Person Accountable|The individual assigned primary accountability for managing permit condition compliance at this specific organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppoa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Manner";O:9:"viewfield":16:{s:4:"name";s:6:"Manner";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:114:"Manner Affected|A brief explanation of the manner in which the organization is affected by this operational permit";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppoa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppoa`
+   
+WHERE oppoa._Deleted = 0
+   AND `oppoa`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:612:"SELECT 
+   `oppoa`.PermitOrgsID,
+`oppoa`.OrganizationID,
+`org1`.Name AS Organization,
+`ppl1`.DisplayName AS PersonAccountable,
+`oppoa`.Manner
+FROM `oppoa`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`oppoa`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`oppoa`.PermitOrgsID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'oppoa\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'60\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE oppoa._Deleted = 0
+AND `oppoa`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:12:"PermitOrgsID";s:3:"int";s:12:"Organization";N;s:17:"PersonAccountable";N;s:6:"Manner";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:12:"PermitOrgsID";s:5:"right";s:12:"Organization";s:4:"left";s:17:"PersonAccountable";s:4:"left";s:6:"Manner";s:7:"justify";}}s:14:"viewgrid_oppno";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppno";s:6:"phrase";s:14:"Permit Numbers";s:6:"number";N;s:6:"Fields";a:5:{s:7:"OppNoID";O:14:"invisiblefield":11:{s:4:"name";s:7:"OppNoID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:149:"Operating Permit Number ID|A unique number assigned to permit number, numbers, so that the multiple numbers can be associated with opperating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppno";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:11:"AgencyLevel";O:9:"viewfield":16:{s:4:"name";s:11:"AgencyLevel";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Agency Level|The heirarchial level of the agency from an international perspective";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppno";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Agency";O:9:"viewfield":16:{s:4:"name";s:6:"Agency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:81:"Agency|Name of the government agency or internal entity issuing the permit number";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppno";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"NumberType";O:9:"viewfield":16:{s:4:"name";s:10:"NumberType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:78:"Number Type|A method of categorizing numbers associated with operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppno";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Number";O:9:"viewfield":16:{s:4:"name";s:6:"Number";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:124:"Number|A unique number assigned by the organization or issuing agency which is assigned for purposes of tracking this permit";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppno";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppno`
+   
+WHERE oppno._Deleted = 0
+   AND `oppno`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:654:"SELECT 
+   `oppno`.OppNoID,
+`opp1`.OrganizationID AS OrganizationID,
+`cod1`.Description AS AgencyLevel,
+`org1`.Name AS Agency,
+`cod2`.Description AS NumberType,
+`oppno`.Number
+FROM `oppno`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`oppno`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`oppno`.AgencyID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`oppno`.NumberTypeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'74\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`org1`.AgencyLevelID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'7\')
+WHERE oppno._Deleted = 0
+AND `oppno`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:7:"OppNoID";s:3:"int";s:11:"AgencyLevel";N;s:6:"Agency";N;s:10:"NumberType";N;s:6:"Number";s:11:"varchar(50)";}s:4:"name";N;s:10:"fieldAlign";a:5:{s:7:"OppNoID";s:5:"right";s:11:"AgencyLevel";s:4:"left";s:6:"Agency";s:4:"left";s:10:"NumberType";s:4:"left";s:6:"Number";s:4:"left";}}s:14:"viewgrid_oppcr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppcr";s:6:"phrase";s:27:"Conditions and Requirements";s:6:"number";N;s:6:"Fields";a:4:{s:12:"PermitCondID";O:14:"invisiblefield":11:{s:4:"name";s:12:"PermitCondID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:161:"Permit Conditions ID|A unique number assigned to permit conditions so that the many conditions and requirements can be associated with a single opperating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppcr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"PermitRuleNo";O:9:"viewfield":16:{s:4:"name";s:12:"PermitRuleNo";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:90:"Permit Rule Number|A unique number assigned by the issuing agency to each permit condition";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppcr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"CondReq";O:9:"viewfield":16:{s:4:"name";s:7:"CondReq";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Condition Requirement|A word-for-word description of the respective permit condition or requirement";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppcr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:5:"RefNo";O:9:"viewfield":16:{s:4:"name";s:5:"RefNo";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:153:"Reference Number|A number associated with a permit condition which references the regulatory rule and section giving rise to the condition or requirement";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppcr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppcr`
+   
+WHERE oppcr._Deleted = 0
+   AND `oppcr`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:294:"SELECT 
+   `oppcr`.PermitCondID,
+`opp1`.OrganizationID AS OrganizationID,
+`oppcr`.PermitRuleNo,
+`oppcr`.CondReq,
+`oppcr`.RefNo
+FROM `oppcr`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`oppcr`.OppPermitID = `opp1`.OppPermitID )
+WHERE oppcr._Deleted = 0
+AND `oppcr`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:12:"PermitCondID";s:3:"int";s:12:"PermitRuleNo";s:11:"varchar(50)";s:7:"CondReq";s:4:"text";s:5:"RefNo";s:12:"varchar(128)";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:12:"PermitCondID";s:5:"right";s:12:"PermitRuleNo";s:4:"left";s:7:"CondReq";s:7:"justify";s:5:"RefNo";s:4:"left";}}s:14:"viewgrid_opppc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"opppc";s:6:"phrase";s:20:"Permitted Categories";s:6:"number";N;s:6:"Fields";a:4:{s:19:"OppPermitCategoryID";O:14:"invisiblefield":11:{s:4:"name";s:19:"OppPermitCategoryID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Category ID|A unique number assigned to permit categories so that permit categories can be associated with multiple operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PermitCategory";O:9:"viewfield":16:{s:4:"name";s:14:"PermitCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:80:"Permit Category|The category of permitted activities associated with this permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"PermitCategoryName";O:9:"viewfield":16:{s:4:"name";s:18:"PermitCategoryName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:81:"Category Name|A permitted activity name assigned by the agency issuing the permit";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"PermitCategoryDesc";O:9:"viewfield":16:{s:4:"name";s:18:"PermitCategoryDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Category Description|A brief description of the permitted activity";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opppc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `opppc`
+   
+WHERE opppc._Deleted = 0
+   AND `opppc`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:460:"SELECT 
+   `opppc`.OppPermitCategoryID,
+`opp1`.OrganizationID AS OrganizationID,
+`cod1`.Description AS PermitCategory,
+`opppc`.PermitCategoryName,
+`opppc`.PermitCategoryDesc
+FROM `opppc`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`opppc`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`opppc`.PermitCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'205\')
+WHERE opppc._Deleted = 0
+AND `opppc`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:19:"OppPermitCategoryID";s:3:"int";s:14:"PermitCategory";N;s:18:"PermitCategoryName";s:12:"varchar(128)";s:18:"PermitCategoryDesc";s:11:"varchar(50)";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:19:"OppPermitCategoryID";s:5:"right";s:14:"PermitCategory";s:4:"left";s:18:"PermitCategoryName";s:4:"left";s:18:"PermitCategoryDesc";s:4:"left";}}s:14:"viewgrid_opprr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"opprr";s:6:"phrase";s:22:"Reporting Requirements";s:6:"number";N;s:6:"Fields";a:2:{s:9:"ReportReq";O:9:"viewfield":16:{s:4:"name";s:9:"ReportReq";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Reporting Requirement|Reporting requirements assigned by the issuing agency and associated with this operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opprr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Requirement";O:9:"viewfield":16:{s:4:"name";s:11:"Requirement";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Requirement|A brief description of the reporting requirement associated with this operating permit";s:8:"dataType";s:12:"varchar(255)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"opprr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `opprr`
+   
+WHERE opprr._Deleted = 0
+   AND `opprr`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:410:"SELECT 
+   `opprr`.PermitRptReqID,
+`opp1`.OrganizationID AS OrganizationID,
+`cod1`.Description AS ReportReq,
+`opprr`.Requirement
+FROM `opprr`
+
+   LEFT OUTER JOIN `opp` AS opp1 
+   ON (`opprr`.OppPermitID = `opp1`.OppPermitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`opprr`.ReportReqID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'229\')
+WHERE opprr._Deleted = 0
+AND `opprr`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:2:{s:9:"ReportReq";N;s:11:"Requirement";s:12:"varchar(255)";}s:4:"name";N;s:10:"fieldAlign";a:2:{s:9:"ReportReq";s:4:"left";s:11:"Requirement";s:4:"left";}}s:14:"viewgrid_oppba";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppba";s:6:"phrase";s:18:"Buildings Affected";s:6:"number";N;s:6:"Fields";a:4:{s:13:"PermitBuildID";O:14:"invisiblefield":11:{s:4:"name";s:13:"PermitBuildID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:132:"Permit Building ID|A unique number assigned to buildings so that multiple buildings can be associated with a single operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppba";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:113:"Organization|The name of the organization responsible for the building which is affected by this operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppba";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Building";O:9:"viewfield":16:{s:4:"name";s:8:"Building";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:67:"Building|The name of the building affected by this operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppba";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PermitBuildAffect";O:9:"viewfield":16:{s:4:"name";s:17:"PermitBuildAffect";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:15:"Manner Affected";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppba";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppba`
+   
+WHERE oppba._Deleted = 0
+   AND `oppba`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:401:"SELECT 
+   `oppba`.PermitBuildID,
+`oppba`.OrganizationID,
+`org1`.Name AS Organization,
+`bui1`.BuildingName AS Building,
+`oppba`.PermitBuildAffect
+FROM `oppba`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`oppba`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`oppba`.BuildingID = `bui1`.BuildingID )
+WHERE oppba._Deleted = 0
+AND `oppba`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:13:"PermitBuildID";s:3:"int";s:12:"Organization";N;s:8:"Building";N;s:17:"PermitBuildAffect";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:13:"PermitBuildID";s:5:"right";s:12:"Organization";s:4:"left";s:8:"Building";s:4:"left";s:17:"PermitBuildAffect";s:7:"justify";}}s:14:"viewgrid_oppca";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppca";s:6:"phrase";s:18:"Chemicals Affected";s:6:"number";N;s:6:"Fields";a:3:{s:16:"PermitChemicalID";O:14:"invisiblefield":11:{s:4:"name";s:16:"PermitChemicalID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Permit Chemical ID|A unique number assigned to a chemical so that multiple chemicals can be associated with a single operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppca";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:76:"Organization|The organization with primary responsibility for this chemical.";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppca";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"ChemicalInventory";O:9:"viewfield":16:{s:4:"name";s:17:"ChemicalInventory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Chemical|A combined field used to describe this chemical when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppca";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppca`
+   
+WHERE oppca._Deleted = 0
+   AND `oppca`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1068:"SELECT 
+   `oppca`.PermitChemicalID,
+`chmin1`.OrganizationID AS OrganizationID,
+`org1`.Name AS Organization,
+NULLIF(CONCAT(IFNULL(`chm1`.CommonName,\'\'),\' | \',IFNULL(NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\'),\'\')),\' | \') AS ChemicalInventory
+FROM `oppca`
+
+   LEFT OUTER JOIN `chmin` AS chmin1 
+   ON (`oppca`.ChemicalInventoryID = `chmin1`.ChemicalInventoryID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`chmin1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`chmin1`.ChemicalInventoryID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'chmin\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `chm` AS chm1 
+   ON (`chmin1`.ChemicalID = `chm1`.ChemicalID )
+   LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE oppca._Deleted = 0
+AND `oppca`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:3:{s:16:"PermitChemicalID";s:3:"int";s:12:"Organization";N;s:17:"ChemicalInventory";N;}s:4:"name";N;s:10:"fieldAlign";a:3:{s:16:"PermitChemicalID";s:5:"right";s:12:"Organization";s:4:"left";s:17:"ChemicalInventory";s:7:"justify";}}s:14:"viewgrid_oppea";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppea";s:6:"phrase";s:18:"Equipment Affected";s:6:"number";N;s:6:"Fields";a:5:{s:12:"PermitEqptID";O:14:"invisiblefield":11:{s:4:"name";s:12:"PermitEqptID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:144:"Permit Equipment ID|A unique number assigned to equipment so that multiple pieces of equipment can be associated with a single operating permits";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppea";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Organization|The name of the organization where the equipment is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppea";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"EquipmentType";O:9:"viewfield":16:{s:4:"name";s:13:"EquipmentType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:146:"Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppea";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:77:"Location|Specific location within the facility where the equipment is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppea";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"EquipmentInventory";O:9:"viewfield":16:{s:4:"name";s:18:"EquipmentInventory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:112:"Equipment|A combined field used to describe this equipment inventory item when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppea";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppea`
+   
+WHERE oppea._Deleted = 0
+   AND `oppea`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1534:"SELECT 
+   `oppea`.PermitEqptID,
+`eqpin1`.OrganizationID AS OrganizationID,
+`org1`.Name AS Organization,
+NULLIF(CONCAT(IFNULL(`eqpt1`.EquipmentTypeTitle,\'\')),\'\') AS EquipmentType,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`eqpt2`.EquipmentTypeTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`eqp2`.EquipmentName,\'\'),\' | No: \',IFNULL(`eqpin1`.TrackingNumber,\'\')),\' |  | No: \') AS EquipmentInventory
+FROM `oppea`
+
+   LEFT OUTER JOIN `eqpin` AS eqpin1 
+   ON (`oppea`.EquipmentInventoryID = `eqpin1`.EquipmentInventoryID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`oppea`.PermitEqptID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'oppea\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`eqpin1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `eqp` AS eqp1 
+   ON (`eqpin1`.EquipmentID = `eqp1`.EquipmentID )
+   LEFT OUTER JOIN `eqp` AS eqp2 
+   ON (`eqpin1`.EquipmentID = `eqp2`.EquipmentID )
+   LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `eqpt` AS eqpt1 
+   ON (`eqp1`.EquipmentTypeID = `eqpt1`.EquipmentTypeID )
+   LEFT OUTER JOIN `eqpt` AS eqpt2 
+   ON (`eqp2`.EquipmentTypeID = `eqpt2`.EquipmentTypeID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE oppea._Deleted = 0
+AND `oppea`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:12:"PermitEqptID";s:3:"int";s:12:"Organization";N;s:13:"EquipmentType";N;s:8:"Location";N;s:18:"EquipmentInventory";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:12:"PermitEqptID";s:5:"right";s:12:"Organization";s:4:"left";s:13:"EquipmentType";s:7:"justify";s:8:"Location";s:7:"justify";s:18:"EquipmentInventory";s:7:"justify";}}s:14:"viewgrid_oppsa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppsa";s:6:"phrase";s:16:"Systems Affected";s:6:"number";N;s:6:"Fields";a:5:{s:14:"PermitSystemID";O:14:"invisiblefield":11:{s:4:"name";s:14:"PermitSystemID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:126:"Permit System ID|A unique number assigned to systems so that multiple systems can be associated with a single operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppsa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:76:"Organization|The name of the organization where the system or process exists";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppsa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:74:"Location|Specific location within the facility where the system is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppsa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"System";O:9:"viewfield":16:{s:4:"name";s:6:"System";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"System|A combined field used to describe this system when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppsa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"PermitSystemEffect";O:9:"viewfield":16:{s:4:"name";s:18:"PermitSystemEffect";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:108:"Effect of Permit|A detailed description of how the operating permit affects the status and use of the system";s:8:"dataType";s:12:"varchar(255)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppsa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppsa`
+   
+WHERE oppsa._Deleted = 0
+   AND `oppsa`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:955:"SELECT 
+   `oppsa`.PermitSystemID,
+`sys1`.OrganizationID AS OrganizationID,
+`org1`.Name AS Organization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+NULLIF(CONCAT(IFNULL(`sys1`.SystemName,\'\')),\'\') AS System,
+`oppsa`.PermitSystemEffect
+FROM `oppsa`
+
+   LEFT OUTER JOIN `sys` AS sys1 
+   ON (`oppsa`.SystemID = `sys1`.SystemID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`oppsa`.PermitSystemID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'oppsa\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`sys1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE oppsa._Deleted = 0
+AND `oppsa`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:14:"PermitSystemID";s:3:"int";s:12:"Organization";N;s:8:"Location";N;s:6:"System";N;s:18:"PermitSystemEffect";s:12:"varchar(255)";}s:4:"name";N;s:10:"fieldAlign";a:5:{s:14:"PermitSystemID";s:5:"right";s:12:"Organization";s:4:"left";s:8:"Location";s:7:"justify";s:6:"System";s:7:"justify";s:18:"PermitSystemEffect";s:4:"left";}}s:14:"viewgrid_oppwa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"oppwa";s:6:"phrase";s:14:"Waste Affected";s:6:"number";N;s:6:"Fields";a:4:{s:13:"PermitWasteID";O:14:"invisiblefield":11:{s:4:"name";s:13:"PermitWasteID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:137:"Permit Waste ID|A unique number assigned to waste streams so that multiple waste streams can be associated with a single operating permit";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppwa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:77:"Organization|The name of the organization where the waste stream is generated";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppwa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"WasteType";O:9:"viewfield":16:{s:4:"name";s:9:"WasteType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:73:"Waste Type|A method of classifying and tracking wastes of different types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppwa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:5:"Waste";O:9:"viewfield":16:{s:4:"name";s:5:"Waste";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:89:"Waste|A combined field used to describe this waste when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"oppwa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:110:"SELECT 
+    count(*) 
+FROM `oppwa`
+   
+WHERE oppwa._Deleted = 0
+   AND `oppwa`.OppPermitID = \'/**RecordID**/\'
+";s:7:"listSQL";s:635:"SELECT 
+   `oppwa`.PermitWasteID,
+`was1`.OrganizationID AS OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS WasteType,
+NULLIF(CONCAT(IFNULL(`was2`.WasteName,\'\')),\'\') AS Waste
+FROM `oppwa`
+
+   LEFT OUTER JOIN `was` AS was1 
+   ON (`oppwa`.WasteID = `was1`.WasteID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`was1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `was` AS was2 
+   ON (`was1`.OrganizationID = `was2`.WasteID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`was2`.WasteTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'11\')
+WHERE oppwa._Deleted = 0
+AND `oppwa`.OppPermitID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:11:"OppPermitID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:13:"PermitWasteID";s:3:"int";s:12:"Organization";N;s:9:"WasteType";N;s:5:"Waste";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:13:"PermitWasteID";s:5:"right";s:12:"Organization";s:4:"left";s:9:"WasteType";s:4:"left";s:5:"Waste";s:7:"justify";}}s:12:"viewgrid_apr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"apr";s:6:"phrase";s:25:"Asset Protection Measures";s:6:"number";N;s:6:"Fields";a:6:{s:14:"AssetProtectID";O:14:"invisiblefield":11:{s:4:"name";s:14:"AssetProtectID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Record ID|An automatically assigned number used to track asset protection methods and criteria";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"AssetProtectTitle";O:9:"viewfield":16:{s:4:"name";s:17:"AssetProtectTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:209:"Title|A short title used to describe the item to be reviewed or audited. This title should be concise, but descriptive enough for the person performing the asset protection activity to easily identify the item";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AssetProtectCategory";O:9:"viewfield":16:{s:4:"name";s:20:"AssetProtectCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:120:"Category|A general category used to catgorize asset protection measures for greater flexibility in developing checklists";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"AssetProtectPurpose";O:9:"viewfield":16:{s:4:"name";s:19:"AssetProtectPurpose";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:61:"Purpose|The purpose of the asset protection method or measure";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ReviewLocation";O:9:"viewfield":16:{s:4:"name";s:14:"ReviewLocation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Review Location|Specific location within the facility where the item is located and can be reviewed";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"ScheduleFrequency";O:9:"viewfield":16:{s:4:"name";s:17:"ScheduleFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:131:"Schedule Frequency|A combined field used to describe the asset protection schedule frequency when associating it with other records";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `apr`
+   
+WHERE apr._Deleted = 0
+   AND `apr`.RelatedModuleID = \'opp\'
+AND `apr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1259:"SELECT 
+   `apr`.AssetProtectID,
+`apr`.ReviewOrganizationID,
+`apr`.AssetProtectTitle,
+`cod1`.Description AS AssetProtectCategory,
+`cod2`.Description AS AssetProtectPurpose,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS ReviewLocation,
+NULLIF(CONCAT(IFNULL(`apr`.SchedFreq,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' \') AS ScheduleFrequency
+FROM `apr`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`apr`.AssetProtectCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'50\')
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`apr`.AssetProtectPurposeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'101\')
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`apr`.AssetProtectID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'apr\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`apr`.SchedFreqUnitsID = `uts1`.UnitID )
+   LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE apr._Deleted = 0
+AND `apr`.RelatedModuleID = \'opp\'
+AND `apr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:14:"AssetProtectID";s:3:"int";s:17:"AssetProtectTitle";s:12:"varchar(128)";s:20:"AssetProtectCategory";N;s:19:"AssetProtectPurpose";N;s:14:"ReviewLocation";N;s:17:"ScheduleFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:6:{s:14:"AssetProtectID";s:5:"right";s:17:"AssetProtectTitle";s:4:"left";s:20:"AssetProtectCategory";s:4:"left";s:19:"AssetProtectPurpose";s:4:"left";s:14:"ReviewLocation";s:7:"justify";s:17:"ScheduleFrequency";s:7:"justify";}}s:13:"viewgrid_busa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"busa";s:6:"phrase";s:23:"Continuity Requirements";s:6:"number";N;s:6:"Fields";a:5:{s:14:"BusinessContID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BusinessContID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:142:"Record ID|An automatically assigned number used to associate people, equipment and others assets with business continuation or recovery events";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:110:"Organization|The organization with primary responsibility for enforcing this business continuation requirement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"BusinessProcessType";O:9:"viewfield":16:{s:4:"name";s:19:"BusinessProcessType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Process Type|The specific type of business process to be protected against a business interruption";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"BusRecoveryTitle";O:9:"viewfield":16:{s:4:"name";s:16:"BusRecoveryTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:130:"Recovery Title|A short title used to describe the business recovery business continuation responsibility of the person accountable";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Criticality";O:9:"viewfield":16:{s:4:"name";s:11:"Criticality";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:123:"Criticality|A way of categorizing the critical nature of securing a resource and prioritizing business continuation efforts";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `busa`
+   
+WHERE busa._Deleted = 0
+   AND `busa`.RelatedModuleID = \'opp\'
+AND `busa`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:739:"SELECT 
+   `busa`.BusinessContID,
+`busa`.OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS BusinessProcessType,
+`busa`.BusRecoveryTitle,
+`cod2`.Description AS Criticality
+FROM `busa`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`busa`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `bus` AS bus1 
+   ON (`busa`.BusinessContinuationID = `bus1`.BusinessContinuationID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`busa`.CriticalityID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'130\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bus1`.BusinessProcessTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'283\')
+WHERE busa._Deleted = 0
+AND `busa`.RelatedModuleID = \'opp\'
+AND `busa`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:14:"BusinessContID";s:3:"int";s:12:"Organization";N;s:19:"BusinessProcessType";N;s:16:"BusRecoveryTitle";s:12:"varchar(128)";s:11:"Criticality";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:14:"BusinessContID";s:5:"right";s:12:"Organization";s:4:"left";s:19:"BusinessProcessType";s:4:"left";s:16:"BusRecoveryTitle";s:4:"left";s:11:"Criticality";s:4:"left";}}s:14:"viewgrid_cosex";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"cosex";s:6:"phrase";s:18:"Exposure Estimates";s:6:"number";N;s:6:"Fields";a:7:{s:14:"CostExposureID";O:14:"invisiblefield":11:{s:4:"name";s:14:"CostExposureID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:130:"Record ID|An automatically assigned number used to track the association of cost exposures with records throughout the application";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:67:"Organization|The primary organization affected by the cost exposure";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"CostCategory";O:9:"viewfield":16:{s:4:"name";s:12:"CostCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Category|A cost of risk categorization which enables an organization to characterize cost of risk exposures";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"CostType";O:9:"viewfield":16:{s:4:"name";s:8:"CostType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:49:"Cost Type|The specific cost of risk exposure type";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"CostExposureTitle";O:9:"viewfield":16:{s:4:"name";s:17:"CostExposureTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Title|A concise title that describes the cost exposure";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Estimate";O:9:"viewfield":16:{s:4:"name";s:8:"Estimate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:56:"Estimate|The total estimated amount of the cost exposure";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"DetrimentFrequency";O:9:"viewfield":16:{s:4:"name";s:18:"DetrimentFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:76:"Detriment Frequency|A combined field used to display the detriment frequency";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"cosex";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:150:"SELECT 
+    count(*) 
+FROM `cosex`
+   
+WHERE cosex._Deleted = 0
+   AND `cosex`.RelatedModuleID = \'opp\'
+AND `cosex`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:904:"SELECT 
+   `cosex`.CostExposureID,
+`cosex`.OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS CostCategory,
+NULLIF(CONCAT(IFNULL(`cost1`.CostTitle,\'\')),\'\') AS CostType,
+`cosex`.CostExposureTitle,
+`cosex`.Estimate,
+NULLIF(CONCAT(IFNULL(`cosex`.FinancialDetrimentFrequency,\'\'),\' per \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' per \') AS DetrimentFrequency
+FROM `cosex`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`cosex`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `cost` AS cost1 
+   ON (`cosex`.CostTypeID = `cost1`.CostTypeID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`cosex`.FinancialDetrimentFrequencyUnitID = `uts1`.UnitID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`cost1`.CostCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'124\')
+WHERE cosex._Deleted = 0
+AND `cosex`.RelatedModuleID = \'opp\'
+AND `cosex`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:7:{s:14:"CostExposureID";s:3:"int";s:12:"Organization";N;s:12:"CostCategory";N;s:8:"CostType";N;s:17:"CostExposureTitle";s:12:"varchar(128)";s:8:"Estimate";s:5:"money";s:18:"DetrimentFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:7:{s:14:"CostExposureID";s:5:"right";s:12:"Organization";s:4:"left";s:12:"CostCategory";s:4:"left";s:8:"CostType";s:7:"justify";s:17:"CostExposureTitle";s:4:"left";s:8:"Estimate";s:5:"right";s:18:"DetrimentFrequency";s:7:"justify";}}s:12:"viewgrid_opt";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"opt";s:6:"phrase";s:21:"Opportunity Estimates";s:6:"number";N;s:6:"Fields";a:5:{s:21:"OpportunityEstimateID";O:14:"invisiblefield":11:{s:4:"name";s:21:"OpportunityEstimateID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:133:"Record ID|An automatically assigned number used to track the association of cost Opportunitys with records throughout the application";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"OwnerOrganization";O:9:"viewfield":16:{s:4:"name";s:17:"OwnerOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"Organization|The name of the organization associated with the estimated opportunity";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:24:"OpportunityEstimateTitle";O:9:"viewfield":16:{s:4:"name";s:24:"OpportunityEstimateTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:62:"Title|A concise title that describes the estimated opportunity";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Estimate";O:9:"viewfield":16:{s:4:"name";s:8:"Estimate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:40:"Estimate|The total estimated opportunity";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"BenefitFrequency";O:9:"viewfield":16:{s:4:"name";s:16:"BenefitFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Benefit Frequency|A combined field used to display the benefit frequency";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"opt";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `opt`
+   
+WHERE opt._Deleted = 0
+   AND `opt`.RelatedModuleID = \'opp\'
+AND `opt`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:606:"SELECT 
+   `opt`.OpportunityEstimateID,
+`opt`.OwnerOrganizationID,
+`org1`.Name AS OwnerOrganization,
+`opt`.OpportunityEstimateTitle,
+`opt`.Estimate,
+NULLIF(CONCAT(IFNULL(`opt`.FinancialBenefitFrequency,\'\'),\' per \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' per \') AS BenefitFrequency
+FROM `opt`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`opt`.OwnerOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`opt`.FinancialBenefitFrequencyUnitID = `uts1`.UnitID )
+WHERE opt._Deleted = 0
+AND `opt`.RelatedModuleID = \'opp\'
+AND `opt`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:21:"OpportunityEstimateID";s:3:"int";s:17:"OwnerOrganization";N;s:24:"OpportunityEstimateTitle";s:12:"varchar(128)";s:8:"Estimate";s:5:"money";s:16:"BenefitFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:5:{s:21:"OpportunityEstimateID";s:5:"right";s:17:"OwnerOrganization";s:4:"left";s:24:"OpportunityEstimateTitle";s:4:"left";s:8:"Estimate";s:5:"right";s:16:"BenefitFrequency";s:7:"justify";}}s:12:"viewgrid_agr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"agr";s:6:"phrase";s:10:"Agreements";s:6:"number";N;s:6:"Fields";a:5:{s:11:"AgreementID";O:14:"invisiblefield":11:{s:4:"name";s:11:"AgreementID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:142:"Record ID|An automatically assigned number used to associate agreements and contracts with related organizations, people, property, and events";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"agr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:9:"AgmtTitle";O:9:"viewfield":16:{s:4:"name";s:9:"AgmtTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:87:"Agreement Title|A brief phrase used to describe the title of this contract or agreement";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"agr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"AgreementDate";O:9:"viewfield":16:{s:4:"name";s:13:"AgreementDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"Effective Date|Date the agreement or contract was entered into and became effective";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"agr";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ExpirationDate";O:9:"viewfield":16:{s:4:"name";s:14:"ExpirationDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Expiration Date|Date the agreement or contract expires";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"agr";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"AgmtStatus";O:9:"viewfield":16:{s:4:"name";s:10:"AgmtStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:50:"Status|Current status of the agreement or contract";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"agr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `agr`
+   
+WHERE agr._Deleted = 0
+   AND `agr`.RelatedModuleID = \'opp\'
+AND `agr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:792:"SELECT 
+   `agr`.AgreementID,
+`agr`.OrganizationID,
+`agr`.AgmtTitle,
+`dat1`.RelatedDate AS AgreementDate,
+`dat2`.RelatedDate AS ExpirationDate,
+`cod1`.Description AS AgmtStatus
+FROM `agr`
+
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`agr`.AgreementID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'agr\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'17\')
+   LEFT OUTER JOIN `dat` AS dat2 
+    ON (`agr`.AgreementID = `dat2`.SourceRecordID 
+     AND `dat2`.SourceModuleID = \'agr\'
+     AND `dat2`._Deleted = 0
+     AND `dat2`.DateDescriptorID = \'10\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`agr`.AgmtStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'86\')
+WHERE agr._Deleted = 0
+AND `agr`.RelatedModuleID = \'opp\'
+AND `agr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:11:"AgreementID";s:3:"int";s:9:"AgmtTitle";s:12:"varchar(128)";s:13:"AgreementDate";s:4:"date";s:14:"ExpirationDate";s:4:"date";s:10:"AgmtStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:11:"AgreementID";s:5:"right";s:9:"AgmtTitle";s:4:"left";s:13:"AgreementDate";s:6:"center";s:14:"ExpirationDate";s:6:"center";s:10:"AgmtStatus";s:4:"left";}}s:13:"viewgrid_rega";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"rega";s:6:"phrase";s:11:"Regulations";s:6:"number";N;s:6:"Fields";a:3:{s:17:"RegulationAssocID";O:14:"invisiblefield":11:{s:4:"name";s:17:"RegulationAssocID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:106:"Record ID|An automatically assigned number used to associate governmental regulations with related records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"rega";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:6:"Agency";O:9:"viewfield":16:{s:4:"name";s:6:"Agency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Agency|Name of the government agency or internal entity";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"rega";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"Regulation";O:9:"viewfield":16:{s:4:"name";s:10:"Regulation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:125:"Regulation|A description of the regulation based on a combination of field values assigned from within the Regulations module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"rega";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `rega`
+   
+WHERE rega._Deleted = 0
+   AND `rega`.RelatedModuleID = \'opp\'
+AND `rega`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:646:"SELECT 
+   `rega`.RegulationAssocID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`org1`.Name AS Agency,
+NULLIF(CONCAT(IFNULL(`reg1`.RegTitle,\'\'),\' | \',IFNULL(`reg1`.RegCode,\'\'),\' | \',IFNULL(`reg1`.RegSection,\'\')),\' |  | \') AS Regulation
+FROM `rega`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rega`.RelatedRecordID = rdc1.RecordID AND `rega`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `reg` AS reg1 
+   ON (`rega`.RegulationID = `reg1`.RegulationID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`reg1`.AgencyID = `org1`.OrganizationID )
+WHERE rega._Deleted = 0
+AND `rega`.RelatedModuleID = \'opp\'
+AND `rega`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:3:{s:17:"RegulationAssocID";s:3:"int";s:6:"Agency";N;s:10:"Regulation";N;}s:4:"name";N;s:10:"fieldAlign";a:3:{s:17:"RegulationAssocID";s:5:"right";s:6:"Agency";s:4:"left";s:10:"Regulation";s:7:"justify";}}s:13:"viewgrid_stda";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"stda";s:6:"phrase";s:9:"Standards";s:6:"number";N;s:6:"Fields";a:5:{s:15:"StandardAssocID";O:14:"invisiblefield":11:{s:4:"name";s:15:"StandardAssocID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"Record ID|An automatically assigned number used to associate standards with related records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"stda";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:33:"StandardsOrganizationAbbreviation";O:9:"viewfield":16:{s:4:"name";s:33:"StandardsOrganizationAbbreviation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Abbreviation|The official abbreviation of the standards organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"stda";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Standard";O:9:"viewfield":16:{s:4:"name";s:8:"Standard";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:123:"Regulation|A description of the regulation based on a combination of field values assigned from within the Standards module";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"stda";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"MannerAffected";O:9:"viewfield":16:{s:4:"name";s:14:"MannerAffected";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:108:"Manner Affected|A detailed description of the manner in which the related record is affected by the standard";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"stda";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ComplianceStatus";O:9:"viewfield":16:{s:4:"name";s:16:"ComplianceStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:43:"Compliance Status|Current compliance status";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"stda";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `stda`
+   
+WHERE stda._Deleted = 0
+   AND `stda`.RelatedModuleID = \'opp\'
+AND `stda`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:824:"SELECT 
+   `stda`.StandardAssocID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`std1`.StandardsOrganizationAbbreviation AS StandardsOrganizationAbbreviation,
+NULLIF(CONCAT(IFNULL(`std1`.StandardsOrganizationAbbreviation,\'\'),\' | \',IFNULL(`std1`.StandardCode,\'\'),\' \',IFNULL(`std1`.StandardSection,\'\')),\' |  \') AS Standard,
+`stda`.MannerAffected,
+`cod1`.Description AS ComplianceStatus
+FROM `stda`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`stda`.RelatedRecordID = rdc1.RecordID AND `stda`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `std` AS std1 
+   ON (`stda`.StandardID = `std1`.StandardID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`stda`.ComplianceStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'94\')
+WHERE stda._Deleted = 0
+AND `stda`.RelatedModuleID = \'opp\'
+AND `stda`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:15:"StandardAssocID";s:3:"int";s:33:"StandardsOrganizationAbbreviation";N;s:8:"Standard";N;s:14:"MannerAffected";s:4:"text";s:16:"ComplianceStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:15:"StandardAssocID";s:5:"right";s:33:"StandardsOrganizationAbbreviation";s:4:"left";s:8:"Standard";s:7:"justify";s:14:"MannerAffected";s:7:"justify";s:16:"ComplianceStatus";s:4:"left";}}s:12:"viewgrid_hza";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"hza";s:6:"phrase";s:7:"Hazards";s:6:"number";N;s:6:"Fields";a:5:{s:8:"HazardID";O:14:"invisiblefield":11:{s:4:"name";s:8:"HazardID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Record ID|An automatically assigned number used to track general hazards";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:11:"HazCategory";O:9:"viewfield":16:{s:4:"name";s:11:"HazCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:93:"Hazard Category|A broadly defined title or phrase used to group similar categories of hazards";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"HazardType";O:9:"viewfield":16:{s:4:"name";s:10:"HazardType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Hazard Type|A combined field used to describe this hazard type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"HazardTitle";O:9:"viewfield":16:{s:4:"name";s:11:"HazardTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Title|A short phrase or title used to describe the hazard";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"HazardStatus";O:9:"viewfield":16:{s:4:"name";s:12:"HazardStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:46:"Status|Current status of the identified hazard";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"hza";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `hza`
+   
+WHERE hza._Deleted = 0
+   AND `hza`.RelatedModuleID = \'opp\'
+AND `hza`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:638:"SELECT 
+   `hza`.HazardID,
+`hza`.LocationOrganizationID,
+`cod1`.Description AS HazCategory,
+NULLIF(CONCAT(IFNULL(`hazt1`.HazType,\'\')),\'\') AS HazardType,
+`hza`.HazardTitle,
+`cod2`.Description AS HazardStatus
+FROM `hza`
+
+   LEFT OUTER JOIN `hazt` AS hazt1 
+   ON (`hza`.HazardTypeID = `hazt1`.HazardTypeID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`hza`.HazardStatusID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'43\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`hazt1`.HazCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'62\')
+WHERE hza._Deleted = 0
+AND `hza`.RelatedModuleID = \'opp\'
+AND `hza`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:8:"HazardID";s:3:"int";s:11:"HazCategory";N;s:10:"HazardType";N;s:11:"HazardTitle";s:12:"varchar(128)";s:12:"HazardStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:8:"HazardID";s:5:"right";s:11:"HazCategory";s:4:"left";s:10:"HazardType";s:7:"justify";s:11:"HazardTitle";s:4:"left";s:12:"HazardStatus";s:4:"left";}}s:13:"viewgrid_prta";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prta";s:6:"phrase";s:16:"Accountabilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantAccID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantAccID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Person Accountable|The name of the person accountable";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"AccountabilityType";O:9:"viewfield":16:{s:4:"name";s:18:"AccountabilityType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Accountability Type|The participant\'s specific type of accountability";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AccountabilityStatus";O:9:"viewfield":16:{s:4:"name";s:20:"AccountabilityStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Accountability Status|The present status of this participant\'s ongoing involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prta`
+   
+WHERE prta._Deleted = 0
+   AND `prta`.RelatedModuleID = \'opp\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1172:"SELECT 
+   `prta`.ParticipantAccID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonAccountable,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS AccountabilityType,
+`cod1`.Description AS AccountabilityStatus
+FROM `prta`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prta`.RelatedRecordID = rdc1.RecordID AND `prta`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`prta`.ParticipantAccID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'prta\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'70\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prta`.AccountabilityTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `acc` AS acc2 
+    ON (`prta`.ParticipantAccID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'prta\'
+     AND `acc2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`acc2`.AccountabilityStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prta._Deleted = 0
+AND `prta`.RelatedModuleID = \'opp\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantAccID";s:3:"int";s:17:"PersonAccountable";N;s:18:"AccountabilityType";N;s:20:"AccountabilityStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantAccID";s:5:"right";s:17:"PersonAccountable";s:4:"left";s:18:"AccountabilityType";s:7:"justify";s:20:"AccountabilityStatus";s:4:"left";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'opp\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1151:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'opp\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:13:"viewgrid_filr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"filr";s:6:"phrase";s:14:"Physical Files";s:6:"number";N;s:6:"Fields";a:6:{s:12:"FileRecordID";O:14:"invisiblefield":11:{s:4:"name";s:12:"FileRecordID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Record ID|An automatically assigned number used to associate records with physical files";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `filr`
+   
+WHERE filr._Deleted = 0
+   AND `filr`.RelatedModuleID = \'opp\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1267:"SELECT 
+   `filr`.FileRecordID,
+`filph1`.FilingOrganizationID AS FilingOrganizationID,
+`org1`.Name AS FilingOrganization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+`filph1`.FileName AS FileName,
+`filph1`.FileNumber AS FileNumber,
+NULLIF(CONCAT(IFNULL(`filph1`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph1`.FileRetentionID,\'\')),\'\') AS SystemNumber
+FROM `filr`
+
+   LEFT OUTER JOIN `filph` AS filph1 
+   ON (`filr`.FileRetentionID = `filph1`.FileRetentionID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`filph1`.FilingOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph1`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph1`.FileReqID = `fil1`.FileReqID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE filr._Deleted = 0
+AND `filr`.RelatedModuleID = \'opp\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:12:"FileRecordID";s:3:"int";s:18:"FilingOrganization";N;s:8:"Location";N;s:8:"FileName";N;s:10:"FileNumber";N;s:12:"SystemNumber";N;}s:4:"name";N;s:10:"fieldAlign";a:6:{s:12:"FileRecordID";s:5:"right";s:18:"FilingOrganization";s:4:"left";s:8:"Location";s:7:"justify";s:8:"FileName";s:4:"left";s:10:"FileNumber";s:4:"left";s:12:"SystemNumber";s:7:"justify";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'opp\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:676:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'opp\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

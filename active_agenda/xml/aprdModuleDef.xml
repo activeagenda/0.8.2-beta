@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Audit Considerations" moduleID="aprd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="C:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Audit Consideration" pluralRecordName="Audit Considerations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="AssetProtectDefaultID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track asset protection methods and criteria" sample="1"/>
+		<TableField name="GuidanceOrganizationID" type="int" dbFlags="unsigned not null" phrase="Guidance Organization|A combined field used to describe the guidance organization when associating it with other records" sample="1"/>
+		<ForeignField name="RelatedModuleID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedModuleID" key="GuidanceOrganizationID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the guidance" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the guidance" sample="Task Types"/>
+		<ForeignField name="RelatedRecordID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedRecordID" key="GuidanceOrganizationID" joinType="left" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<ForeignField name="RelatedRecordDescription" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedRecordDescription" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Type|A short phrase used to describe the type of guidance being provided by the guidance organization" sample="Cleaning Floors"/>
+		<ForeignField name="OrganizationID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="OrganizationID" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Organization|The name of the organization providing guidance" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Guidance Organization|The name of the organization providing guidance" sample="Active Agenda, HQ"/>
+		<ForeignField name="OrganizationLogo" foreignTable="org" foreignKey="OrganizationID" foreignField="GuidanceLogoImage" key="OrganizationID" joinType="left" phrase="Organization Logo|Displays the logo of the guidance organization" sample="Active Agenda, HQ"/>
+		<ForeignField name="Description" foreignTable="org" foreignKey="OrganizationID" foreignField="Description" key="OrganizationID" joinType="left" phrase="Description|Text description of the organization" sample="Software Development company and risk services provider"/>
+		<ForeignField name="OrganizationType" foreignTable="org" foreignKey="OrganizationID" foreignField="OrganizationType" key="OrganizationID" joinType="left" phrase="Organization Type|A detailed description of the organization type" sample="Manufacturing | Ice Cream Production Facility"/>
+		<ForeignField name="RelatedModuleRecord" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="RelatedModuleRecord" key="GuidanceOrganizationID" joinType="left" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"/>
+		<ForeignField name="GuidanceOrganization" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="GuidanceOrganization" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Provided By|A combined field used to describe the guidance organization when associating it with guidance types" sample="Task Types | Cleaning Floors | Active Agenda, Inc."/>
+		<ForeignField name="GuidancePersonID" foreignTable="gui" foreignKey="GuidanceOrganizationID" foreignField="GuidancePersonID" key="GuidanceOrganizationID" joinType="left" phrase="Guidance Person|The individual providing guidance for consideration" sample="1"/>
+		<ForeignField name="GuidancePerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="GuidancePersonID" joinType="left" phrase="Guidance Person|The individual providing guidance for consideration" sample="Mattias Thorslund"/>
+		<TableField name="AssetProtectCategoryID" type="int" validate="RequireSelection" phrase="Category|A general category used to group asset protection measures for greater flexibility in developing checklists" sample="3"/>
+		<CodeField name="AssetProtectCategory" key="AssetProtectCategoryID" phrase="Category|A general category used to catgorize asset protection measures for greater flexibility in developing checklists" sample="Audit" codeTypeID="50"/>
+		<TableField name="AssetProtectPurposeID" type="int" validate="RequireSelection" phrase="Purpose|The purpose of the asset protection method or measure" sample="1"/>
+		<CodeField name="AssetProtectPurpose" key="AssetProtectPurposeID" phrase="Purpose|The purpose of the asset protection method or measure" sample="Inventory" codeTypeID="101"/>
+		<TableField name="SchedFreq" type="varchar(10)" validate="Integer notNegative notZero notEmpty" phrase="Frequency|The frequency at which the protection measure shall be applied" sample="1"/>
+		<TableField name="SchedFreqUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="SchedFreqUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SchedFreqUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="SchedFreqUnitCategory" key="SchedFreqUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="SchedFreqUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SchedFreqUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="AssetProtectTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A short title used to describe the item to be reviewed or audited. This title should be concise, but descriptive enough for the person performing the asset protection activity to easily identify the item" sample="Count the number of respirators."/>
+		<TableField name="AssetProtectInstruct" type="text" validate="notEmpty" phrase="Instructions|Brief instructions for the person performing the asset protection activity" sample="Perform an inventory count, record the results, and update the inventory balance within the equipment inventory module. If the count does not balance, the Accounting Deaprtment should be apprised of all discrepencies."/>
+		<TableField name="AcceptableCriteria" type="text" validate="notEmpty" phrase="Acceptable Criteria|A brief description of the acceptable criteria for this asset or item" sample="Inventory counts should balance with the existing inventory level entered into the equipment inventory module."/>
+		<CombinedField name="GuidanceTitle" phrase="Guidance Title|A combined field used to combine the asset protection category and purpose for display within the guidance view grids" sample="Audit - Behavior | Frequency: 1 month(s)"><CombinedFieldRef name="AssetProtectCategory"/>_-_<CombinedFieldRef name="AssetProtectPurpose"/>;_Frequency:_<CombinedFieldRef name="SchedFreq"/>_<CombinedFieldRef name="SchedFreqUnits"/></CombinedField>
+		<CombinedField name="ScheduleFrequency" phrase="Schedule Frequency|A combined field used to describe the asset protection schedule frequency when associating it with other records" sample="1 Day(s)"><CombinedFieldRef name="SchedFreq"/>_<CombinedFieldRef name="SchedFreqUnits"/></CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related module record associated with the guidance"/>
+		<CombinedField name="RelatedModuleRecord" phrase="Guidance Type|The related module name and specific type of guidance" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>:_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+        <LinkField name="RelatedGuidanceRecordLink" foreignModuleID="gui" recordIDField="GuidanceOrganizationID" phrase="Guidance Record Link|An internal link to the related guidance record"/>
+		<CombinedField name="RelatedGuidanceRecord" phrase="Related Guidance|The name of the person and organization providing the guidance" sample="Provided by Dan Zahlis of Active Agenda, Inc."><CombinedFieldRef name="GuidancePerson"/>_of_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Inventory of Respirator, 3M 3710 Air Purifying Respirator"><CombinedFieldRef name="GuidanceOrganization"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/>;_<CombinedFieldRef name="AssetProtectTitle"/></CombinedField>
+		<CombinedField name="AssetProtectDefault" phrase="Asset Protect|A combined field used to describe this asset protection default when associating it with other records" sample="Equipment; Active Agenda HQ; 3M 3710 Air Purifying Respirator"><CombinedFieldRef name="AssetProtectTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AssetProtectDefaultID"/>
+		</PrimaryKey>
+		<OwnerField name="GuidanceOrganizationID"/>
+		<RecordDescriptionField name="AssetProtectDefault"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List asset protection measures">
+			<ListField name="AssetProtectDefaultID" phrase="Record  ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="AssetProtectTitle" phrase="Item"/>
+            <ListField name="GuidancePerson" link="RelatedGuidanceRecordLink" phrase="Guidance By"/>
+            <InvisibleField name="RelatedGuidanceRecordLink"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search asset protection measures">
+			<OrgComboField name="GuidanceOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="GuidancePersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<CodeComboField name="AssetProtectCategoryID">
+				<SampleItem ID="1" name="Audit"/>
+				<SampleItem ID="2" name="Calibration"/>
+				<SampleItem ID="3" name="Inspection"/>
+				<SampleItem ID="4" name="Maintenance"/>
+				<SampleItem ID="5" name="Testing"/>
+			</CodeComboField>
+			<CodeComboField name="AssetProtectPurposeID">
+				<SampleItem ID="1" name="Inventory"/>
+				<SampleItem ID="2" name="Availability"/>
+				<SampleItem ID="3" name="Condition"/>
+				<SampleItem ID="4" name="Security"/>
+			</CodeComboField>
+			<EditField name="SchedFreq" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="SchedFreqUnitCategoryID">
+					<UpdateFieldRef name="SchedFreqUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an asset protection method and related criteria">
+			<ViewField name="AssetProtectDefaultID"/>
+            <ViewField name="RelatedGuidanceRecord" link="RelatedGuidanceRecordLink"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="AssetProtectCategory"/>
+			<ViewField name="AssetProtectPurpose"/>
+			<ViewField name="ScheduleFrequency"/>
+			<ViewField name="AssetProtectTitle"/>
+			<ViewField name="AssetProtectInstruct"/>
+			<ViewField name="AcceptableCriteria"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an asset protection method and related criteria">
+			<ViewField name="AssetProtectDefaultID"/>
+            <ViewField name="RelatedGuidanceRecord" link="RelatedGuidanceRecordLink"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<CodeComboField name="AssetProtectCategoryID" findMode="text">
+				<SampleItem ID="1" name="Audit"/>
+				<SampleItem ID="2" name="Calibration"/>
+				<SampleItem ID="3" name="Inspection"/>
+				<SampleItem ID="4" name="Maintenance"/>
+				<SampleItem ID="5" name="Testing"/>
+			</CodeComboField>
+			<CodeComboField name="AssetProtectPurposeID" findMode="text">
+				<SampleItem ID="1" name="Inventory"/>
+				<SampleItem ID="2" name="Availability"/>
+				<SampleItem ID="3" name="Condition"/>
+				<SampleItem ID="4" name="Security"/>
+			</CodeComboField>
+			<EditField name="SchedFreq" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="SchedFreqUnitCategoryID">
+					<UpdateFieldRef name="SchedFreqUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<EditField name="AssetProtectTitle" size="75" maxLength="128"/>
+			<MemoField name="AssetProtectInstruct" rows="5" cols="75"/>
+			<MemoField name="AcceptableCriteria" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="aprd" phrase="Audit Guidance" isGuidance="yes" verticalDisplay="yes">
+			<InvisibleField name="AssetProtectDefaultID"/>
+			<ViewField name="OrganizationLogo"/>
+			<ViewField name="AssetProtectTitle" sample="Count the respirators"/>
+			<ViewField name="GuidanceTitle" sample="Inspect Condition"/>
+			<ViewField name="AssetProtectInstruct" sample="Observe the bahaviors of the maintenance employees and measure compliance with the Maintenance Mechanic Job Analyses"/>
+			<ViewField name="AcceptableCriteria" sample="Inventory counts should balance with the existing inventory level entered into the equipment inventory module."/>
+			<ViewField name="GuidanceOrganization" sample="Active Agenda, inc."/>
+			<ViewField name="GuidancePerson" sample="Dan Zahlis"/>
+			<OrderByField name="GuidanceOrganization"/>
+			<VerticalFormat>
+				<LogoField name="OrganizationLogo"/>
+				<TitleField name="GuidanceTitle"/>
+				<TitleField name="AssetProtectTitle"/>
+				<FeatureField name="AssetProtectInstruct"/>
+				<FeatureField name="AcceptableCriteria"/>
+			</VerticalFormat>
+		</ViewGrid>
+		<EditGrid moduleID="aprd" phrase="Audit Guidance">
+			<GridForm>
+				<InvisibleField name="AssetProtectDefaultID"/>
+				<CodeComboField name="AssetProtectCategoryID">
+					<SampleItem ID="1" name="Audit"/>
+					<SampleItem ID="2" name="Calibration"/>
+					<SampleItem ID="3" name="Inspection"/>
+					<SampleItem ID="4" name="Maintenance"/>
+					<SampleItem ID="5" name="Testing"/>
+				</CodeComboField>
+				<CodeComboField name="AssetProtectPurposeID">
+					<SampleItem ID="1" name="Inventory"/>
+					<SampleItem ID="2" name="Availability"/>
+					<SampleItem ID="3" name="Condition"/>
+					<SampleItem ID="4" name="Security"/>
+				</CodeComboField>
+				<EditField name="SchedFreq" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="SchedFreqUnitCategoryID">
+						<UpdateFieldRef name="SchedFreqUnitsID"/>
+						<SampleItem ID="1" name="Time"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="3" name="Distance"/>
+						<SampleItem ID="4" name="Packaging"/>
+						<SampleItem ID="5" name="Volume"/>
+						<SampleItem ID="6" name="Weight"/>
+					</ComboField>
+					<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+						<SampleItem ID="1" name="Second"/>
+						<SampleItem ID="2" name="Minute"/>
+						<SampleItem ID="3" name="Hour"/>
+						<SampleItem ID="4" name="Day"/>
+					</ComboField>
+				</EditField>
+				<EditField name="AssetProtectTitle" size="75" maxLength="128" sample="Count the respirators"/>
+				<MemoField name="AssetProtectInstruct" rows="5" cols="75" sample="Evaluate and record the amount of water in inventory."/>
+				<MemoField name="AcceptableCriteria" rows="5" cols="75" sample="The water level should not drop below 3000 gallons. If the level is below 4500 gallons, radio Mattias Thorslund immediately and request a water order."/>
+			</GridForm>
+			<InvisibleField name="AssetProtectDefaultID"/>
+			<ViewField name="GuidanceOrganization" sample="Active Agenda, inc."/>
+			<ViewField name="AssetProtectTitle" sample="Count the respirators"/>
+			<ViewField name="AssetProtectCategory" sample="Audit"/>
+			<ViewField name="AssetProtectPurpose" sample="Behavior"/>
+			<ViewField name="ScheduleFrequency" sample="1 month(s)"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Audit Considerations By Guidance Organization">
+			<GroupByField name="GuidanceOrganization"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Audit Considerations By Guidance Organization">
+			<GroupByField name="GuidanceOrganization"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Audit Considerations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Audit Considerations By Related Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Audit Considerations By Category">
+			<GroupByField name="AssetProtectCategory"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Audit Considerations By Category">
+			<GroupByField name="AssetProtectCategory"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Audit Considerations By Purpose">
+			<GroupByField name="AssetProtectPurpose"/>
+			<SummaryField name="AssetProtectDefaultID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Audit Considerations By Purpose">
+			<GroupByField name="AssetProtectPurpose"/>
+			<SummaryField name="RegulatoryConsiderationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 520 $" date="$Date: 2007-02-21 18:23:19 -0800 (Wed, 21 Feb 2007) $"/>
+</Module>

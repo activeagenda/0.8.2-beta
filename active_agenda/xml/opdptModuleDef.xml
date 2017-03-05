@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Product or Service Types" moduleID="opdpt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Product or Service Type" pluralRecordName="Product or Service Types" allowAddRecord="yes" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="ProductServiceTypeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track product or service types encountered throughout the enterprise" sample="1"/>
+		<TableField name="ProductorServiceID" type="int" validate="RequireSelection" phrase="Product or Service|Whether this is a product or service" sample="1"/>
+		<CodeField name="ProductorService" key="ProductorServiceID" phrase="Product or Service|Whether this is a product or service" sample="Product" codeTypeID="5"/>
+		<TableField name="ProductServiceCategoryID" type="int" validate="RequireSelection" phrase="Category|A broad categoy used to group products or services of similar types" sample="1"/>
+		<CodeField name="ProductServiceCategory" key="ProductServiceCategoryID" phrase="Category|A broad categoy used to group products or services of similar types" sample="Bulk Retail" codeTypeID="6"/>
+		<TableField name="ProductServiceTypeTitle" type="varchar(128)" validate="notEmpty" phrase="Type|A title or phrase used to describe the specific product or service type" sample="Bulk Skinless Almonds"/>
+		<TableField name="ProductServiceTypeDesc" type="text" validate="notEmpty" phrase="Description|A brief but thorough description of the specific type of product or service" sample="Bulk skinless almonds are shipped in a pallet box weighing 1200 pounds."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Employment | Last Chance product or service"><CombinedFieldRef name="ProductorService"/>;_<CombinedFieldRef name="ProductServiceCategory"/>;_<CombinedFieldRef name="ProductServiceTypeTitle"/></CombinedField>
+		<CombinedField name="ProductServiceType" phrase="Product or Service Type|A combined field used to describe this product or service type when associating it with other records" sample="Bulk Skinless Almonds">
+			<CombinedFieldRef name="ProductServiceTypeTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ProductServiceTypeID"/>
+		</PrimaryKey>
+		<!--<OwnerField name=""/> none required-->
+		<RecordDescriptionField name="ProductServiceType"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List product or service types">
+			<ListField name="ProductServiceTypeID" phrase="Record ID"/>
+			<ListField name="ProductorService" phrase="Product or Service"/>
+			<ListField name="ProductServiceCategory" phrase="Category"/>
+			<ListField name="ProductServiceTypeTitle" phrase="Type"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search product or service types">
+			<CodeRadioField name="ProductorServiceID" findMode="text">
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+			</CodeRadioField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text">
+				<SampleItem ID="1" name="Bulk Retail"/>
+				<SampleItem ID="2" name="Bulk Wholesale"/>
+				<SampleItem ID="3" name="Consumer"/>
+			</CodeComboField>
+			<EditField name="ProductServiceTypeTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the product or service type">
+			<ViewField name="ProductServiceTypeID"/>
+			<ViewField name="ProductorService"/>
+			<ViewField name="ProductServiceCategory"/>
+			<ViewField name="ProductServiceTypeTitle"/>
+			<ViewField name="ProductServiceTypeDesc"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the product or service type">
+			<ViewField name="ProductServiceTypeID"/>
+			<CodeRadioField name="ProductorServiceID" findMode="text">
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+			</CodeRadioField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text">
+				<SampleItem ID="1" name="Bulk Retail"/>
+				<SampleItem ID="2" name="Bulk Wholesale"/>
+				<SampleItem ID="3" name="Consumer"/>
+			</CodeComboField>
+			<EditField name="ProductServiceTypeTitle" size="75" maxLength="128"/>
+			<MemoField name="ProductServiceTypeDesc" rows="10" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the product or service type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the product or service type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the product or service type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the product or service type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ProductServiceTypeID"/>
+		<ViewField name="ProductorService"/>
+		<ViewField name="ProductServiceCategory"/>
+		<ViewField name="ProductServiceTypeTitle"/>
+		<ViewField name="ProductServiceTypeDesc"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Product or Service Types By Category">
+			<GroupByField name="ProductServiceCategory"/>
+			<SummaryField name="ProductServiceTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Product or Service Types By Category">
+			<GroupByField name="ProductServiceCategory"/>
+			<SummaryField name="ProductServiceTypeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Product or Service Types By Classification">
+			<GroupByField name="ProductorService"/>
+			<SummaryField name="ProductServiceTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Product or Service Types By Classification">
+			<GroupByField name="ProductorService"/>
+			<SummaryField name="ProductServiceTypeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

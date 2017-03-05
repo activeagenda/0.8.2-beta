@@ -1,0 +1,731 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Agreements" moduleID="agr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Agreement" pluralRecordName="Agreements" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="AgreementID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate agreements and contracts with related organizations, people, property, and events" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the agreement" sample="cor"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the agreement" sample="Corrective Actions"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Dan Zahlis | 11-14-2005 | Written Warning"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the primary organization associated with the agreement" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the primary organization associated with the agreement" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="7" phrase="Party Accountable|The name of the person with accountability for the agreement" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Party Accountable|The name of the person with accountability for the agreement" sample="Mattias Thorslund"/>
+		<TableField name="SecondOrganizationID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Second Organization|The name of the second organization associated with the agreement" sample="1"/>
+		<ForeignField name="SecondOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="SecondOrganizationID" joinType="left" phrase="Second Organization|The name of the second organization associated with the agreement" sample="Active Agenda, HQ"/>
+		<RemoteField name="SecondPersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="7" phrase="Second Party Accountable|The name of the second person with accountability for the agreement" sample="1"/>
+		<ForeignField name="SecondPersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SecondPersonAccountableID" joinType="left" phrase="Second Party Accountable|The name of the second person with accountability for the agreement" sample="Mattias Thorslund"/>
+		<TableField name="AgreementTypeID" type="int" dbFlags="unsigned not null" phrase="Agreement Type|A combined field used to describe this agreement type when associating it with other records" sample="1"/>
+		<ForeignField name="AgreementCategoryID" foreignTable="agrt" foreignKey="AgreementTypeID" foreignField="AgreementCategoryID" key="AgreementTypeID" joinType="left" phrase="Category|A broad categoy used to group agreements of similar types" sample="1"/>
+		<CodeField name="AgreementCategory" key="AgreementCategoryID" phrase="Category|A broad categoy used to group agreements of similar types" sample="Employment" codeTypeID="125"/>
+		<ForeignField name="AgreementTitleGuide" foreignTable="agrt" foreignKey="AgreementTypeID" foreignField="AgreementTypeTitle" key="AgreementTypeID" joinType="left" phrase="Guidance Type|A title or phrase used to describe a agreement type" sample="Last Chance Agreement"/>
+		<ForeignField name="AgreementDescGuide" foreignTable="agrt" foreignKey="AgreementTypeID" foreignField="AgreementTypeDesc" key="AgreementTypeID" joinType="left" phrase="Guidance Description|A brief but thorough description of the agreement type" sample="An agreement between an employee and an employer that establishes criteria for an employee to retain employee. This type of agreement is typically the last step in the behavior correction process."/>
+		<ForeignField name="AgreementType" foreignTable="agrt" foreignKey="AgreementTypeID" foreignField="AgreementType" key="AgreementTypeID" joinType="left" phrase="Agreement Type|A combined field used to describe this agreement type when associating it with other records" sample="Employment | Last Chance Agreement"/>
+		<TableField name="AgmtTitle" type="varchar(128)" validate="notEmpty" phrase="Agreement Title|A brief phrase used to describe the title of this contract or agreement" sample="Thorslund Last Chance Agreement"/>
+		<TableField name="AgmtSummary" type="text" validate="noValidation" phrase="Agreement Summary|A brief summary of the scope and purpose of the business continuation contract or agreement" sample="Mattias has promised to do something to prevent termination."/>
+		<TableField name="TerminationFactors" type="text" validate="noValidation" phrase="Termination Factors|A brief summary of any factors which may lead to the termination of the agreement" sample="Failure to maintain normal maintenance will terminate the obligations of the parties."/>
+		<RemoteField name="AgreementDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="17" phrase="Effective Date|Date the agreement or contract was entered into and became effective" sample="01/01/2003"/>
+		<RemoteField name="ExpirationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|Date the agreement or contract expires" sample="01/01/2004"/>
+		<TableField name="AgmtStatusID" type="int" validate="RequireSelection" phrase="Status|Current status of the agreement or contract" sample="1"/>
+		<CodeField name="AgmtStatus" key="AgmtStatusID" phrase="Status|Current status of the agreement or contract" sample="Expired" codeTypeID="86"/>
+		<TableField name="AgmtAttached" type="bool" validate="noValidation" dbFlags="default 0" phrase="Agreement Attached|Whether a digital copy of the agreement or contract has been attached to this record" sample="Yes"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="AgreementID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'agr'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the agreement" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="AgreementID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'agr'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the agreement" sample="702.00"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, HQ: Warehouse"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="AgmtTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Agreement" phrase="Agreement|A combined field used to describe this agreement when associating it with other records" sample="XYZ Vehicle Leasing Contract Guarantee; Expired; 01/01/2004"><CombinedFieldRef name="AgmtTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AgreementID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Agreement"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<!--<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="agrt"/>
+        </SubModule>
+        <SubModule moduleID="agr" name="Agreements" parentKey="AgreementID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="agr"/>
+        </SubModule>-->
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Conitinuity" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<!--<SubModule moduleID="eqpc" name="Equipment Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="eqpa" name="Equipment Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>-->
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="orgtc" name="Job Title Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="orgja" name="Job Title Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Permit Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Permit Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibility Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="rskcl" name="Risk Classifications" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="traca" name="Training Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="AgreementTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agrt"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="AgreementID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="agr"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List agreements">
+			<ListField name="AgreementID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="AgmtTitle" phrase="Title"/>
+			<ListField name="ExpirationDate" phrase="Expiration Date"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search business agreements">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="SecondOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="SecondPersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="AgreementCategoryID" findMode="text">
+				<UpdateFieldRef name="AgreementTypeID"/>
+				<SampleItem ID="1" name="Employment"/>
+				<SampleItem ID="2" name="Services"/>
+				<SampleItem ID="3" name="Purchase"/>
+				<SampleItem ID="4" name="Lease"/>
+				<SampleItem ID="5" name="Software"/>
+			</CodeComboField>
+			<ComboField name="AgreementTypeID" findMode="text" parentField="AgreementCategoryID">
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<EditField name="AgmtTitle" size="75" maxLength="128"/>
+			<DateField name="AgreementDate"/>
+			<DateField name="ExpirationDate"/>
+			<CodeComboField name="AgmtStatusID">
+				<SampleItem ID="1" name="Expired"/>
+				<SampleItem ID="3" name="Legal Review"/>
+				<SampleItem ID="5" name="Domain Review"/>
+				<SampleItem ID="7" name="Approved and Current"/>
+			</CodeComboField>
+			<CheckBoxField name="AgmtAttached"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about business agreements and contracts">
+			<ViewField name="AgreementID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="AgreementType"/>
+			<ViewField name="AgmtTitle"/>
+			<ViewField name="AgmtSummary"/>
+			<ViewField name="TerminationFactors"/>
+			<ViewField name="AgreementDate"/>
+			<ViewField name="ExpirationDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="SecondOrganization"/>
+			<ViewField name="SecondPersonAccountable"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="AgmtStatus"/>
+			<ViewField name="AgmtAttached"/>
+			<InvisibleField name="AgreementTypeID"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<!--<ViewGrid moduleID="agr"/>-->
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<!--<ViewGrid moduleID="eqpa"/>-->
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="orgja"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="pub"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="rskcl"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="traca"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about agreements and contracts">
+			<ViewField name="AgreementID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<CodeComboField name="AgreementCategoryID" findMode="text">
+				<UpdateFieldRef name="AgreementTypeID"/>
+				<SampleItem ID="1" name="Employment"/>
+				<SampleItem ID="2" name="Services"/>
+				<SampleItem ID="3" name="Purchase"/>
+				<SampleItem ID="4" name="Lease"/>
+				<SampleItem ID="5" name="Software"/>
+			</CodeComboField>
+			<ComboField name="AgreementTypeID" findMode="text" parentField="AgreementCategoryID">
+				<UpdateFieldRef name="AgreementDescGuide"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<EditField name="AgmtTitle" size="75" maxLength="128"/>
+			<ViewField name="AgreementDescGuide" parentField="AgreementTypeID"/>
+			<MemoField name="AgmtSummary" rows="5" cols="75"/>
+			<MemoField name="TerminationFactors" rows="10" cols="75"/>
+			<DateField name="AgreementDate"/>
+			<DateField name="ExpirationDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="SecondOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="SecondPersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="AgmtStatusID">
+				<SampleItem ID="1" name="Expired"/>
+				<SampleItem ID="3" name="Legal Review"/>
+				<SampleItem ID="5" name="Domain Review"/>
+				<SampleItem ID="7" name="Approved and Current"/>
+			</CodeComboField>
+			<CheckBoxField name="AgmtAttached"/>
+		</EditScreen>
+		<!--<EditScreen name="Agreements" phrase="Agreements|Associate agreements with the agreement">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="agrc"/>
+            <EditGrid moduleID="agr"/>
+        </EditScreen>-->
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuity" phrase="Continuity|Associate business continuity requirements with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<!--<EditScreen name="Equipment" phrase="Equipment|Associate equipment with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="eqpc"/>
+			<EditGrid moduleID="eqp"/>
+		</EditScreen>-->
+		<EditScreen name="Culture" phrase="Culture|Associate values with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance consequences with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="JobTitles" phrase="Job Titles|Associate job titles with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="orgtc"/>
+			<EditGrid moduleID="orgja"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="pubc"/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibilities with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Classifications" phrase="Classifications|Associate risk classifications with the agreement">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rskcl"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate training with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="tracn"/>
+			<EditGrid moduleID="traca"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the agreement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the agreement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the agreement">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the agreement" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="AgreementID"/>
+		<InvisibleField name="AgreementTypeID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="AgreementType"/>
+		<ViewField name="AgmtTitle"/>
+		<ViewField name="AgmtSummary"/>
+		<ViewField name="TerminationFactors"/>
+		<ViewField name="AgreementDate"/>
+		<ViewField name="ExpirationDate"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="SecondOrganization"/>
+		<ViewField name="SecondPersonAccountable"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+		<ViewField name="AgmtStatus"/>
+		<ViewField name="AgmtAttached"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="agr" phrase="Agreements">
+			<InvisibleField name="AgreementID"/>
+			<ViewField name="AgmtTitle" sample="Thorslund Last Chance Employment Agreement"/>
+			<ViewField name="AgreementDate" sample="01/01/2003"/>
+			<ViewField name="ExpirationDate" sample="01/01/2004"/>
+			<ViewField name="AgmtStatus" sample="Expired"/>
+		</ViewGrid>
+		<EditGrid moduleID="agr" phrase="Agreements">
+			<GridForm>
+				<InvisibleField name="AgreementID"/>
+				<CodeComboField name="AgreementCategoryID" findMode="text">
+					<UpdateFieldRef name="AgreementTypeID" findMode="text"/>
+					<SampleItem ID="1" name="Employment"/>
+					<SampleItem ID="2" name="Services"/>
+					<SampleItem ID="3" name="Purchase"/>
+					<SampleItem ID="4" name="Lease"/>
+					<SampleItem ID="5" name="Software"/>
+				</CodeComboField>
+				<ComboField name="AgreementTypeID" findMode="text" parentField="AgreementCategoryID">
+					<UpdateFieldRef name="AgreementDescGuide"/>
+					<SampleItem ID="1" name="Employee (Leadership)"/>
+					<SampleItem ID="2" name="Employee (Management)"/>
+					<SampleItem ID="3" name="Employee (Staff)"/>
+					<SampleItem ID="4" name="Employee (Line)"/>
+					<SampleItem ID="5" name="Employee (Administration)"/>
+					<SampleItem ID="6" name="Employee (Contractor)"/>
+				</ComboField>
+				<EditField name="AgmtTitle" size="75" maxLength="128"/>
+				<ViewField name="AgreementDescGuide" parentField="AgreementTypeID"/>
+				<MemoField name="AgmtSummary" rows="5" cols="75"/>
+				<MemoField name="TerminationFactors" rows="10" cols="75"/>
+				<DateField name="AgreementDate" sample="01/01/2003"/>
+				<DateField name="ExpirationDate" sample="01/01/2004"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<OrgComboField name="SecondOrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<PersonComboField name="SecondPersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<ComboField name="AgmtStatusID" sample="Expired">
+					<SampleItem ID="1" name="Expired"/>
+					<SampleItem ID="3" name="Legal Review"/>
+					<SampleItem ID="5" name="Domain Review"/>
+					<SampleItem ID="7" name="Approved and Current"/>
+				</ComboField>
+				<CheckBoxField name="AgmtAttached" sample="Yes"/>
+			</GridForm>
+			<InvisibleField name="AgreementID"/>
+			<ViewField name="AgmtTitle" sample="Thorslund Last Chance Employment"/>
+			<ViewField name="AgreementDate" sample="01/01/2003"/>
+			<ViewField name="ExpirationDate" sample="01/01/2004"/>
+			<ViewField name="AgmtStatus" sample="Expired"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Agreements By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Agreements By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Agreements By First Party">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Agreements By First Party">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Agreements By Second Party">
+			<GroupByField name="SecondOrganization"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Agreements By Second Party">
+			<GroupByField name="SecondOrganization"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Agreements By Status">
+			<GroupByField name="AgmtStatus"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Agreements By Status">
+			<GroupByField name="AgmtStatus"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Agreements By First Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Agreements By First Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Agreements By Second Person Accountable">
+			<GroupByField name="SecondPersonAccountable"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Agreements By Second Person Accountable">
+			<GroupByField name="SecondPersonAccountable"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Agreements By Type">
+			<GroupByField name="AgreementType"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Agreements By Type">
+			<GroupByField name="AgreementType"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Agreements By Status">
+			<GroupByField name="AgmtStatus"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Agreements By Status">
+			<GroupByField name="AgmtStatus"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Agreements By Category">
+			<GroupByField name="AgreementCategory"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Agreements By Category">
+			<GroupByField name="AgreementCategory"/>
+			<SummaryField name="AgreementID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 520 $" date="$Date: 2007-02-21 18:23:19 -0800 (Wed, 21 Feb 2007) $"/>
+</Module>

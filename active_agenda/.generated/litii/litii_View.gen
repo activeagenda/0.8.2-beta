@@ -1,0 +1,140 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    /**CUSTOM_CODE|init**/
+
+    //list of objects containing the field information
+    $fields = unserialize('a:4:{s:21:"ITIncidentIndicatorID";O:9:"viewfield":16:{s:4:"name";s:21:"ITIncidentIndicatorID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Record ID|An automatically assigned number used to track information technology incident indicators";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"IndicatorCategory";O:9:"viewfield":16:{s:4:"name";s:17:"IndicatorCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:117:"Indicator Category|A broadly defined title or phrase used to group similar information technology incident indicators";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"IndicatorType";O:9:"viewfield":16:{s:4:"name";s:13:"IndicatorType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:110:"Indicator Type|A title or phrase used to describe a specific type of information technology incident indicator";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"IndicatorDesc";O:9:"viewfield":16:{s:4:"name";s:13:"IndicatorDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:127:"Description|A detailed description of the types of indicators represented by the information technology incident indicator type";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}');
+
+
+    //list of grids
+    /**grids**/
+
+    //phrases for field names, in field order
+    $phrases = array(
+   'ITIncidentIndicatorID' => gettext("Record ID|An automatically assigned number used to track information technology incident indicators"),
+   'IndicatorCategory' => gettext("Indicator Category|A broadly defined title or phrase used to group similar information technology incident indicators"),
+   'IndicatorType' => gettext("Indicator Type|A title or phrase used to describe a specific type of information technology incident indicator"),
+   'IndicatorDesc' => gettext("Description|A detailed description of the types of indicators represented by the information technology incident indicator type")
+   );
+
+
+    $ownerField = '';
+
+    
+    /**disbleGlobalModules**/
+    /**useBestPractices**/
+
+    //retrieve record
+    $data = array();
+    
+    /**SQL|GET_BEGIN**/
+    $SQL = "SELECT 
+   `litii`.ITIncidentIndicatorID,
+   `cod1`.Description AS IndicatorCategory,
+   `litii`.IndicatorType,
+   `litii`.IndicatorDesc,
+   NULLIF(CONCAT(IFNULL(`cod1`.Description,''),' | ',IFNULL(`litii`.IndicatorType,'')),' | ') AS RecordLabel
+FROM `litii`
+   
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`litii`.IndicatorCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = '278')
+WHERE
+   litii.ITIncidentIndicatorID='/**RecordID**/'";
+
+    /**CUSTOM_CODE|before_get**/
+
+    //get data
+    $r = $dbh->getAll(str_replace('/**RecordID**/', $recordID, $SQL), DB_FETCHMODE_ASSOC);
+    dbErrorCheck($r);
+
+    
+    /**SQL|GET_END**/
+    //need to repeat for each getSQL........
+    $data = array_merge($data, $r[0]); //assign first (only) row
+    
+    /**CUSTOM_CODE|get**/
+    
+    //check if user has permission to view or edit record - will redirect if no permission at all
+    $allowEdit = $User->CheckViewScreenPermission();
+    //$allowEdit = true;
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //List tab
+    $tabs['List'] = Array("list.php?$qs", gettext("List|View the list of IT Incident Indicators"));
+
+    if ($allowEdit){
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("an IT Incident Indicator") );
+      $tempTabs['Form'] = array( "edit.php?scr=Form&$tabsQS", gettext("Form|Edit summary information about an information technology incident indicator") );
+$tabs = array_merge($tabs, $tempTabs);
+    } else {
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("an IT Incident Indicator") );
+      $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("an IT Incident Indicator") );
+$tabs = array_merge($tabs, $tempTabs);
+    }
+    
+    $recordLabelField = $data['RecordLabel'];
+
+    $content = '';
+    foreach($fields as $key => $field){
+        if (!$field->isSubField()){
+            $content .= $field->render($data, $phrases);
+        }
+    }
+
+    $pageTitle = gettext("IT Incident Indicator");
+    $screenPhrase = gettext("View|View summary information about an information technology incident indicator");
+
+    $backlink = "list.php?$qs";
+
+    $nextScreen = "Form";
+    $editlink = "edit.php?$tabsQS&scr=$nextScreen";
+    $content = renderViewTable($content, $allowEdit, $backlink, $editlink);
+
+    //add byline info on record modification info
+    $content .= "<div class=\"recinfo\">{$phrases['_ModDate']} {$data['_ModDate']}";
+    if ($User->IsAdmin) {
+        $content .= '&nbsp; &nbsp; <a href="audit.php?mdl='.$ModuleID.'&rid='.$recordID.'">'.gettext("Audit Trail").'</a> ';
+    }
+    $content .= "</div>";
+
+    //display view grids here
+
+
+//View Screen Sections here
+/**VIEWSCREENSECTIONS**/
+?>

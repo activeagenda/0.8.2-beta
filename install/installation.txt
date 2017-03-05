@@ -1,0 +1,186 @@
+Active Agenda installation instructions. Updated February 23, 2007.
+
+By Mattias Thorslund, Active Agenda, Inc.
+To suggest improvements to this document, or to the installation procedure in general, email mthorslund@activeagenda.net.
+
+Online, possibly more up-to-date instructions, are available here:
+http://www.activeagenda.net/documentation/index.php?title=Installation
+
+
+REQUIREMENTS:
+=============
+
+If your server isn't already running some of the required MySQL-Apache-PHP software, you might wish to look into XAMPP, an integrated installer that covers all the required software. This is especially helpful for the Windows platform, which doesn't have easy package managers like most Linux distributions.
+
+See:
+http://www.apachefriends.org/en/xampp-windows.html
+
+
+1. MySQL Database Server
+------------------------
+
+Active Agenda was developed against MySQL 4.1, and additionally tested against MySQL 5.0. MySQL versions prior to 4.1 are not supported, since Active Agenda makes use of 4.1 features like subqueries.
+
+Download and install the latest "Generally Available" version from http://dev.mysql.com/downloads/, making sure to also verify the integrity of the file.
+
+As part of the MySQL installation, you should set up a "root" password (master user password). You will need the MySQL root password when installing the Active Agenda database. (This is not the same password as the system "root" password on Linux/Unix systems).  See the MySQL documentation here:
+
+http://dev.mysql.com/doc/refman/4.1/en/default-privileges.html
+
+
+2. Web Server, such as Apache HTTP SERVER 2.0
+---------------------------------------------
+
+Any web server that works with PHP should be possible here. We've been mostly running Active Agenda on Apache 2.0, and haven't tested Apache 2.2 yet.  You can download Apache from http://httpd.apache.org/download.cgi.  Again verify the file.
+
+
+3. PHP 4, not 5
+---------------
+
+Active Agenda was written against PHP 4. The difference between PHP 4 and 5 is large enough that the code will not work under PHP 5.  You can download the latest version of PHP 4 (currently 4.4.4) from http://www.php.net/downloads.php.
+
+Make sure that the following required PHP extensions are available, and enabled in the php.ini file:
+
+* gd2
+* gettext
+* mbstring
+* mime_magic
+* mysql      (often included by default)
+
+
+4. pdftk (optional, used for some PDF reports)
+----------------------------------------------
+
+pdftk is a command-line utility that is used by Active Agenda to fill in PDF documents that have "fillable" forms (fdf) with data.  This is how our OSHA 300 log is filled in.
+
+http://www.accesspdf.com/pdftk/
+
+
+
+INSTALLATION PROCEDURE:
+=======================
+
+1. Extract contents to the file system.
+---------------------------------------
+
+Decide first where to put the files:  Do not choose a location that is automatically published to the web by your web server, such as (on Unix-like systems) /var/www/html, or public_html.
+
+Extract the contents of the active_agenda-X.X.X.zip or .tar.gz archive file to a temporary location.  This will take a little while, perhaps a couple minutes, because there are MANY files in the archive.  Navigate into the resulting new folder, and copy the "s2a" subfolder to the location you have chosen.
+
+
+2. Configuration files.
+-----------------------
+
+The next step is to make some settings in the configuration files.  Navigate from the s2a folder into the active_agenda folder. There are two sample configuration files, config-dist.php and gen-config-dist.php.  Open these with a plain-text editor (such as Notepad on Windows), modify them, and save as config.php and gen-config.php.
+
+The default values are fine in many cases, as long as the names and relative locations of the sub-folders of the s2a folder were not changed.
+
+
+The important settings in gen-config.php are:
+
+GEN_DB_USER
+GEN_DB_PASS
+These are the MySQL credentials to be used when installing the database, and also when generating or re-generating modules in the application.  This user requires more MySQL privileges than the regular MySQL user that is used when the application is used in normal operation.
+
+
+The important settings in config.php are:
+
+SITE_NAME
+Enter a name of the Active Agenda instance. This will be displayed in the application.
+
+S2A_FOLDER
+The full file path to the s2a folder.
+
+CRYPT_SEED
+A unique, random character sequence to be used as the encryption seed for passwords in Active Agenda.  This should be set before you proceed with the next step.  If you change this when there are already some users, then their passwords will no longer work and would need to be re-set.
+
+DB_NAME
+The name of the database for the installation.  If there are several Active Agenda sites on the same server, they will each need unique names.  If you only run one instance of Active Agenda on your MySQL server, the default will be fine.
+
+DB_USER
+DB_PASS
+These are the MySQL credentials to be used in production.  This user will have limited privileges in the database, and will not be able to delete data, or drop or modify tables.
+
+DB_HOST
+This should probably be 'localhost' unless you're using a dedicated MySQL server.
+
+PATH_SEPARATOR
+This can be kept as-is, but since it determines the correct value based on the operating system, it can be simplified as follows:
+
+If your OS is Windows, use:
+if(!defined(PATH_SEPARATOR)){
+    define('PATH_SEPARATOR', ';');  //Windows
+}
+
+If your OS is Linux or another Unix-like system:
+if(!defined(PATH_SEPARATOR)){
+    define('PATH_SEPARATOR', ':');  //non-Windows
+}
+
+
+3. Install the Active Agenda database
+-------------------------------------
+
+To install the supplied database, use the supplied database installation wizard, named s2a-install-db.php, located in the "install" folder in the s2a folder.
+
+This is a command-line utility, so you will need to start your command-line program, navigate to the "install" folder, and run the wizard with a command like:
+
+php s2a-install-db.php
+
+If your PHP executable is not in the default execution path, you will need to supply the actual location of the PHP executable, for instance:
+
+c:\php4\php.exe s2a-install-db.php
+
+If your MySQL client executable is not in the default execution path, the script will prompt you for the location. If you used LAMPP (on Linux) and installed it to the default location, that location would be /opt/lampp/bin/mysql.
+
+
+4. Configure your web server
+----------------------------
+
+It is very important that only the files in the folder s2a/active_agenda/web are served by the web server.  There are many ways to accomplish this in your Apache configurations.  Here are some:
+
+a) In the web root folder of your server (/var/www/html on Linux/Unix/etc.), create a soft link to the s2a/active_agenda/web folder.  (Requires that the FollowSymLinks option is enabled for the location)
+
+Or, b) Accomplish the same thing with a few lines in the httpd.conf configuration file:
+
+Alias /active_agenda "C:/s2a/active_agenda/web"
+<Directory "C:/s2a/active_agenda/web">
+   Order allow,deny
+   Allow from all
+</Directory>
+
+Or, c) If your machine is dedicated to hosting Active Agenda (just one site), you could point your DocumentRoot setting in httpd.conf to the s2a/active_agenda/web folder.
+
+Or, d) You could set up a virtual host (VHost) for the Active Agenda site.
+
+
+
+5. Log in to Active Agenda from your browser
+--------------------------------------------
+
+Start up your browser, and enter the correct address (depending on how you chose to configure the web server) for the new Active Agenda site.  Log in with the Admin user name and password that you set in step 3 above.
+
+
+6. Fine-tune file permissions
+-----------------------------
+
+The 0.8.2 release comes with a rudimentary utility to check folder/file permissions to ensure functionality: After logging in to the application as an administrator, you will see a link at the bottom of the Dashboard screen, titled "Check server configuration". This is a simple script that checks the folders and files that need to be writeable by the web server (i.e. Apache). It does not check for "overly permissive" permissions or other security risks.
+
+This is NOT a security check, so if you are using Active Agenda in a production environment, or in any way exposed to the Wild Wild Web, you should read on:
+
+Button down the file permissions so that other users or programs on your server can't tamper with them.
+
+Active Agenda was designed with the philosophy of 'least required privileges'.  This means that the one goal in the design of the application is to not impose arbitrary requirements that would necessitate less restrictive permissions.
+
+The running web server should run under a separate user account, not shared with any other programs or human users.
+
+The web server account needs writing access to only two locations in the s2a folder tree:
+
+* s2a/active_agenda/uploads (destination for file uploads from the Attachments module)
+* s2a/active_agenda/s2alog  (error log messages are saved here)
+
+It needs reading access to most folders and files in the s2a folder tree, but not:
+* s2a/active_agenda/gen-config.php (configuration settings used when generating modules)
+* s2a/active_agenda/xml            (XML module definitions used when generating modules)
+
+It is prudent to limit the access permissions to the s2a files to a small number of human users.  When generating modules with the s2a.php command-line utility, writing permission is required in s2a/active_agenda/s2alog and s2a/active_agenda/.generated.

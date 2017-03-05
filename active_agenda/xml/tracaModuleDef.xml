@@ -1,0 +1,386 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Training Course Associations" moduleID="traca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Training Course Association" pluralRecordName="Training Course Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="TrainingAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate training courses with organizations and insured risks" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the training course" sample="bui"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the training course" sample="Buildings"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A description of the related record based on a combination of field values assigned from within the related module" sample="Manufacturing; Packing House Number 3; Active Agenda, HQ"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Affected Organization|The name of the organization affected by the training course association" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Affected Organization|The name of the organization affected by the training course association" sample="Active Agenda, Inc."/>
+		<TableField name="CourseID" type="int" dbFlags="unsigned not null" phrase="Course|A combined field used to describe this course when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingTypeID" foreignTable="tra" foreignKey="CourseID" foreignField="TrainingTypeID" key="CourseID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="1"/>
+		<ForeignField name="TrainingCategoryID" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingCategoryID" key="TrainingTypeID" joinType="left" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+		<CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+		<ForeignField name="TrainingTypeDesc" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingTypeDesc" key="TrainingTypeID" joinType="left" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+		<ForeignField name="TrainingType" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingType" key="TrainingTypeID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"/>
+		<ForeignField name="OrganizationID" foreignTable="tra" foreignKey="CourseID" foreignField="OrganizationID" key="CourseID" joinType="left" phrase="Organization|The organization with primary responsibility for the design, development, and support for this course throughout the enterprise" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for the design, development, and support for this course throughout the enterprise" sample="Active Agenda, HQ"/>
+		<ForeignField name="OrgLevelID" foreignTable="tra" foreignKey="CourseID" foreignField="OrgLevelID" key="CourseID" joinType="left" phrase="Organization Level|The hierarchical level of the organization" sample="1"/>
+		<CodeField name="OrgLevel" key="OrgLevelID" phrase="Organization Level|The hierarchical level of the organization" sample="Leadership" codeTypeID="22"/>
+		<ForeignField name="CourseCode" foreignTable="tra" foreignKey="CourseID" foreignField="CourseCode" key="CourseID" joinType="left" phrase="Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods" sample="9928-021"/>
+		<ForeignField name="CourseTitle" foreignTable="tra" foreignKey="CourseID" foreignField="CourseCode" key="CourseID" joinType="left" phrase="Title|A brief name used to identify the course offering" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+		<ForeignField name="CourseDesc" foreignTable="tra" foreignKey="CourseID" foreignField="CourseDesc" key="CourseID" joinType="left" phrase="Description|A detailed description of the course" sample="The Introduction to Hazard Analysis of Critical Control Points (HACCP) course provides attendees with a working knowledge of company and regulatory product quality requirements. The course also provides attendees with a working knowledge of the company's internal policies and controls deployed to protect consumers from product quality deficiencies."/>
+		<ForeignField name="CourseObj" foreignTable="tra" foreignKey="CourseID" foreignField="CourseObj" key="CourseID" joinType="left" phrase="Objective|A detailed description of the course objective. The course objective should reflect the knowledge expected of attendees as they complete the course" sample="The objective of the Introduction to HACCP course is to provide attendees with the level of understanding required to perform operational duties within a HACCP environment. This course is designed to provide visitors to a HACCP environment with the requisite level of understanding to avoid product contamination behaviors during visitations."/>
+		<ForeignField name="Course" foreignTable="tra" foreignKey="CourseID" foreignField="Course" key="CourseID" joinType="left" phrase="Course|A combined field used to describe this course when associating it with other records" sample="Introduction to Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-101.1"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="87" phrase="Person Accountable|The individual assigned responsibility for managing the training course for the assigned organization" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned responsibility for managing the training course for the assigned organization" sample="Mattias Thorslund"/>
+		<TableField name="MannerAffected" type="text" phrase="Manner Affected|A detailed description of the manner in which the related record is affected by the training course" sample="The training course covers our operations in the event of business interruptions which are caused by unforseen circumstances"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Course"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+		<CombinedField name="TrainingAssoc" phrase="Training Association|A combined field used to describe the training course association when associating it with other records" sample="Buildings; General Liability; Subrogation (claim made)">
+			<CombinedFieldRef name="Course"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TrainingAssocID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="TrainingAssoc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training course associations">
+			<ListField name="TrainingAssocID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="CourseTitle" phrase="Course Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training course associations">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Buildings"/>
+				<SampleItem ID="2" name="Vehicles"/>
+				<SampleItem ID="3" name="Equipment"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a training course association">
+			<ViewField name="TrainingAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TrainingCategory"/>
+			<ViewField name="TrainingType"/>
+			<ViewField name="Course"/>
+			<ViewField name="MannerAffected"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a training course association">
+			<ViewField name="TrainingAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CodeComboField name="TrainingCategoryID" findMode="text">
+				<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</CodeComboField>
+			<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+				<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+				<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+				<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+				<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+			</ComboField>
+			<ViewField name="CourseCode" parentField="CourseID"/>
+			<ViewField name="CourseDesc" parentField="CourseID"/>
+			<ViewField name="CourseObj" parentField="CourseID"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<MemoField name="MannerAffected" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="traca" phrase="Course Associations">
+			<InvisibleField name="TrainingAssocID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="TrainingCategory" sample="On the Job"/>
+			<ViewField name="TrainingType" sample="Health and Safety"/>
+			<ViewField name="Course" sample="Lockout Tagout"/>
+			<ViewField name="MannerAffected" sample="The building has many hazardous energy sources and all employees should have a basic understanding of lockout/tagout"/>
+		</ViewGrid>
+		<EditGrid moduleID="traca" phrase="Course Associations">
+			<GridForm>
+				<InvisibleField name="TrainingAssocID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+					<SampleItem ID="3" name="Active Agenda, Latvia"/>
+				</OrgComboField>
+				<CodeComboField name="TrainingCategoryID" findMode="text">
+					<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+					<SampleItem ID="1" name="Disease"/>
+					<SampleItem ID="2" name="Complaint"/>
+					<SampleItem ID="3" name="Illness"/>
+					<SampleItem ID="4" name="Injury"/>
+					<SampleItem ID="5" name="Publicity"/>
+					<SampleItem ID="6" name="Theft"/>
+				</CodeComboField>
+				<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+					<UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+					<SampleItem ID="1" name="Employee (Leadership)"/>
+					<SampleItem ID="2" name="Employee (Management)"/>
+					<SampleItem ID="3" name="Employee (Staff)"/>
+					<SampleItem ID="4" name="Employee (Line)"/>
+					<SampleItem ID="5" name="Employee (Administration)"/>
+					<SampleItem ID="6" name="Employee (Contractor)"/>
+				</ComboField>
+				<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+					<UpdateFieldRef name="CourseDesc"/>
+					<UpdateFieldRef name="CourseCode"/>
+					<UpdateFieldRef name="CourseObj"/>
+					<UpdateFieldRef name="CourseStatus"/>
+					<SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+					<SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+					<SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+				</ComboField>
+				<ViewField name="CourseCode" parentField="CourseID"/>
+				<ViewField name="CourseDesc" parentField="CourseID"/>
+				<ViewField name="CourseObj" parentField="CourseID"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+				</PersonComboField>
+				<MemoField name="MannerAffected" rows="5" cols="75"/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="TrainingCategory" sample="On the Job"/>
+			<ViewField name="TrainingType" sample="Health and Safety"/>
+			<ViewField name="Course" sample="Lockout Tagout"/>
+			<ViewField name="MannerAffected" sample="The building has many hazardous energy sources and all employees should have a basic understanding of lockout/tagout"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Course Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Course Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Course Associations By Primary Covered Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Course Associations By Primary Covered Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Course Associations By Type">
+			<GroupByField name="TrainingType"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Course Associations By Type">
+			<GroupByField name="TrainingTypeID"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Course Associations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Course Associations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Course Associations By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Course Associations By Course">
+			<GroupByField name="Course"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Course Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Course Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Course Associations By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Course Associations By Category">
+			<GroupByField name="TrainingCategory"/>
+			<SummaryField name="TrainingAssocID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

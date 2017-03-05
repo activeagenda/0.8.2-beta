@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Vehicle Models" moduleID="vehmd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Vehicle Model" pluralRecordName="vehicle Models" allowAddRecord="yes">
+    <ModuleFields>
+        <TableField name="VehicleModelID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique id to identify states internally" sample="1"/>
+        <TableField name="VehMakeID" type="int" validate="noValidation" phrase="Make|The make of the vehicle which is usually the manufacturer's name" sample="1"/>
+        <CodeField name="VehMake" key="VehMakeID" phrase="Make|The make of the vehicle which is usually the manufacturer's name" sample="Landrover" codeTypeID="29"/>
+        <TableField name="VehModel" type="varchar(128)" validate="notEmpty" dbFlags="" phrase="Model|The model of the vehicle assigned by the vehicle manufacturer" sample="Discovery"/>
+        <TableField name="VehModelNo" type="varchar(20)" validate="" dbFlags="" phrase="Model Number|The model number of the vehicle assigned by the vehicle manufacturer to differentiate models of the same type with different features" sample="LSEi"/>
+        <TableField name="VehModelDesc" type="text" validate="noValidation" phrase="Model Description|A detailed description of the vehicle model" sample="The Land Rover Discovery is a sport utility used primarily for city driving purposes"/>
+        <TableField name="BestPrice" type="money" validate="Money notEmpty notNegative" phrase="Best Price|The best price available for the make and model of vehicle, stated in the currency assigned to this installation of the software" sample="10,000.00"/>
+        <SummaryField name="Suppliers" summaryFunction="list" summaryField="SupplierOrg" summaryKey="RelatedRecordID" summaryModuleID="sup" summaryCondition="RelatedModuleID = 'vehmd'" localKey="VehicleModelID" phrase="Suppliers|The suppliers offering this vehicle make and model across the global enterprise" sample="Haron Landrover and Jaguar"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="VehMake"/>_<CombinedFieldRef name="VehModel"/>_<CombinedFieldRef name="VehModelNo"/></CombinedField>
+        <CombinedField name="VehicleModel" phrase="State|A combined field used to associate this vehicle model with another record" sample="Landrover; Discovery; LSEi"><CombinedFieldRef name="VehMake"/>_<CombinedFieldRef name="VehModel"/>_<CombinedFieldRef name="VehModelNo"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="VehicleModelID"/>
+        </PrimaryKey>
+        <!--<OwnerField name="OrganizationID"/> Not required-->
+        <RecordDescriptionField name="VehicleModel"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="sup" name="Suppliers" parentKey="VehicleModelID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="vehmd"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List vehicle models">
+            <ListField name="VehicleModelID" phrase="Record ID"/>
+            <ListField name="VehMake" phrase="Make"/>
+            <ListField name="VehModel" phrase="Model"/>
+            <ListField name="VehModelNo" phrase="Model Number"/>
+            <ListField name="BestPrice" phrase="Best Price"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search vehicle models">
+            <ComboField name="VehMakeID" findMode="text">
+                <SampleItem ID="1" name="Landrover"/>
+                <SampleItem ID="2" name="Ford"/>
+                <SampleItem ID="3" name="Chevrolet"/>
+                <SampleItem ID="4" name="Saab"/>
+                <SampleItem ID="5" name="Volvo"/>
+                <SampleItem ID="6" name="Honda"/>
+            </ComboField>
+            <EditField name="VehModel" size="50" maxLength="50"/>
+            <MoneyField name="BestPrice"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a vehicle model">
+            <ViewField name="VehicleModelID"/>
+            <ViewField name="VehMake"/>
+            <ViewField name="VehModel"/>
+            <ViewField name="VehModelNo"/>
+            <ViewField name="VehModelDesc"/>
+            <ViewField name="BestPrice"/>
+            <ViewField name="Suppliers"/>
+            <ViewGrid moduleID="sup"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a vehicle model">
+            <ViewField name="VehicleModelID"/>
+            <ComboField name="VehMakeID" findMode="text">
+                <SampleItem ID="1" name="Landrover"/>
+                <SampleItem ID="2" name="Ford"/>
+                <SampleItem ID="3" name="Chevrolet"/>
+                <SampleItem ID="4" name="Saab"/>
+                <SampleItem ID="5" name="Volvo"/>
+                <SampleItem ID="6" name="Honda"/>
+            </ComboField>
+            <EditField name="VehModel" size="50" maxLength="50"/>
+            <EditField name="VehModelNo" size="10" maxLength="10"/>
+            <MemoField name="VehModelDesc" rows="5" cols="75"/>
+            <MoneyField name="BestPrice"/>
+        </EditScreen>
+    </Screens>
+    <EditScreen name="Suppliers" phrase="Suppliers|Associate vehicle suppliers with a vehicle model and organizations purchasing from the supplier">
+        <RecordSummaryFieldsRef/>
+        <EditGrid moduleID="sup"/>
+    </EditScreen>
+    <RecordSummaryFields>
+        <ViewField name="VehicleModelID"/>
+        <ViewField name="VehMake"/>
+        <ViewField name="VehModel"/>
+        <ViewField name="VehModelNo"/>
+        <ViewField name="VehModelDesc"/>
+        <ViewField name="BestPrice"/>
+        <ViewField name="Suppliers"/>
+    </RecordSummaryFields>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

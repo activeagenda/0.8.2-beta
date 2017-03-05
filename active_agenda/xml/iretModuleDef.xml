@@ -1,0 +1,314 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Telephone Contacts" moduleID="iret" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Telephone Contact" pluralRecordName="Telephone Contacts" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="TelephoneCallID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track telephone calls associated with a reported incident" sample="1"/>
+		<TableField name="IncidentReportID" type="int" validate="noValidation" phrase="Incident Report|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="11"/>
+		<ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Reported|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="Clovis; 10-28-2003; Discrimination Claim"/>
+		<TableField name="ContactTypeID" type="int" validate="RequireSelection" phrase="Contact Type|The specific type of contact related to the reported incident" sample="1"/>
+		<CodeField name="ContactType" key="ContactTypeID" phrase="Contact Type|The specific type of contact related to the reported incident" sample="Government Agency" codeTypeID="286"/>
+		<TableField name="PhoningOrganizationID" type="int" validate="RequireSelection" phrase="Phoning Organization|Name of the organization or firm initiating the phone call" sample="1"/>
+		<ForeignField name="PhoningOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PhoningOrganizationID" joinType="left" phrase="Phoning Organization|Name of the organization or firm initiating the phone call" sample="USDOL"/>
+		<RemoteField name="CallerID" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="6" phrase="Caller|The name of the person initiating the phonecall" sample="1"/>
+		<ForeignField name="Caller" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="CallerID" joinType="left" phrase="Caller|The name of the person initiating the phonecall" sample="Larry Hansen"/>
+		<RemoteField name="CallDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="5" phrase="Call Date|Date the organization received the call from the governmental agency" sample="01/01/2004"/>
+		<TableField name="CallTime" type="time" validate="notEmpty" phrase="Call Time|Time the organization received the telephone call" sample="09:31 am PST"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Organization|The name of the organization receiving the telephone call associated with a reported incident" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization receiving the telephone call associated with a reported incident" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonHandlingCallID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="5" phrase="Person Handling Call|The name of the person handling the telephone call" sample="1"/>
+		<ForeignField name="PersonHandlingCall" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonHandlingCallID" joinType="left" phrase="Person Handling Call|The name of the person handling the telephone call" sample="Larry Hansen"/>
+		<TableField name="CallSummary" type="text" validate="notEmpty" phrase="Call Summary|A detailed summary of the call, its purpose, actions required, and any other pertinent information" sample="The agency caller indicated that they would be visiting the facility tomorrow (10-31-2003) to review the allegations forwarded in an employee complaint"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PhoningOrganization"/>_called_on_<CombinedFieldRef name="CallDate"/>_at_<CombinedFieldRef name="CallTime"/></CombinedField>
+		<CombinedField name="TelephoneCall" phrase="Telephone Call|A combined field used to describe this telephone call when associating it with other records" sample="USDOL; 01/01/2004; CallTime"><CombinedFieldRef name="PhoningOrganization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="TelephoneCallID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="TelephoneCall"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="TelephoneCallID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="iret"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List telephone calls associated with reported incidents">
+			<ListField name="TelephoneCallID" phrase="Record ID"/>
+			<ListField name="IncidentReportID" phrase="Report ID" align="center"/>
+			<ListField name="PhoningOrganization" phrase="Phoning Organization"/>
+			<ListField name="CallDate" phrase="Call Date"/>
+			<ListField name="CallTime" phrase="Call Time"/>
+			<ListField name="Organization" phrase="Organization"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search telephone calls associated with reported incidents">
+			<ComboField name="IncidentReportID" findMode="text">
+				<SampleItem ID="1" name="Clovis; 10-28-2003; Discrimination Claim"/>
+				<SampleItem ID="2" name="Clovis; 10-18-2004; Ammonia Release"/>
+				<SampleItem ID="3" name="Latvia; 10-08-2003; Severe Injury from Forklift"/>
+				<SampleItem ID="4" name="Sweden; 10-12-2002; Hostile Workplace Claim"/>
+				<SampleItem ID="5" name="Sweden; 10-24-2001; Theft of LCD Projector"/>
+			</ComboField>
+			<CodeComboField name="ContactTypeID" findMode="text">
+				<SampleItem ID="1" name="Government Agency"/>
+				<SampleItem ID="2" name="Insurance Broker"/>
+				<SampleItem ID="3" name="Insurance Carrier"/>
+				<SampleItem ID="4" name="Investigator (private)"/>
+				<SampleItem ID="5" name="Law Firm (defense)"/>
+				<SampleItem ID="5" name="Law Firm (plaintiff)"/>
+			</CodeComboField>
+			<OrgComboField name="PhoningOrganizationID" findMode="text">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Health Department"/>
+			</OrgComboField>
+			<PersonComboField name="CallerID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="CallDate"/>
+			<TimeField name="CallTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sweden"/>
+				<SampleItem ID="5" name="Active Agenda, Latvia"/>
+				<SampleItem ID="7" name="Active Agenda, Norway"/>
+			</OrgComboField>
+			<PersonComboField name="PersonHandlingCallID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a telephone call associated with a reported incident">
+			<ViewField name="TelephoneCallID"/>
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="PhoningOrganization"/>
+			<ViewField name="Caller"/>
+			<ViewField name="CallDate"/>
+			<ViewField name="CallTime"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonHandlingCall"/>
+			<ViewField name="CallSummary"/>
+			<ViewGrid moduleID="bpc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a telephone call associated with a reported incident">
+			<ViewField name="TelephoneCallID"/>
+			<ViewField name="IncidentReport"/>
+			<CodeComboField name="ContactTypeID" findMode="text">
+				<SampleItem ID="1" name="Government Agency"/>
+				<SampleItem ID="2" name="Insurance Broker"/>
+				<SampleItem ID="3" name="Insurance Carrier"/>
+				<SampleItem ID="4" name="Investigator (private)"/>
+				<SampleItem ID="5" name="Law Firm (defense)"/>
+				<SampleItem ID="5" name="Law Firm (plaintiff)"/>
+			</CodeComboField>
+			<OrgComboField name="PhoningOrganizationID" findMode="text">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Health Department"/>
+			</OrgComboField>
+			<PersonComboField name="CallerID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="CallDate"/>
+			<TimeField name="CallTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sweden"/>
+				<SampleItem ID="5" name="Active Agenda, Latvia"/>
+				<SampleItem ID="7" name="Active Agenda, Norway"/>
+			</OrgComboField>
+			<PersonComboField name="PersonHandlingCallID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<MemoField name="CallSummary" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a telephone contact" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="iret" phrase="Telephone Contacts">
+			<InvisibleField name="TelephoneCallID"/>
+			<ViewField name="ContactType" sample="Government Agency"/>
+			<ViewField name="PhoningOrganization" sample="USDOL"/>
+			<ViewField name="CallDate" sample="01/01/2004"/>
+			<ViewField name="CallTime" sample="09:31 am PST"/>
+			<ViewField name="CallSummary" sample="The agency caller indicated that they would be visiting the facility tomorrow (10-31-2003) to review the allegations forwarded in an employee complaint"/>
+		</ViewGrid>
+		<EditGrid moduleID="iret" phrase="Telephone Contacts">
+			<GridForm>
+				<InvisibleField name="TelephoneCallID"/>
+				<CodeComboField name="ContactTypeID" findMode="text" sample="Government Agency">
+					<SampleItem ID="1" name="Government Agency"/>
+					<SampleItem ID="2" name="Insurance Broker"/>
+					<SampleItem ID="3" name="Insurance Carrier"/>
+					<SampleItem ID="4" name="Investigator (private)"/>
+					<SampleItem ID="5" name="Law Firm (defense)"/>
+					<SampleItem ID="6" name="Law Firm (plaintiff)"/>
+				</CodeComboField>
+				<OrgComboField name="PhoningOrganizationID" findMode="text" sample="USDOL">
+					<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+					<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+					<SampleItem ID="3" name="International Standards Organization"/>
+					<SampleItem ID="4" name="Fresno County Health Department"/>
+				</OrgComboField>
+				<PersonComboField name="CallerID" findMode="alpha" sample="Larry Hansen">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<DateField name="CallDate" sample="01/01/2004"/>
+				<TimeField name="CallTime" sample="09:31 am PST"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sweden"/>
+					<SampleItem ID="5" name="Active Agenda, Latvia"/>
+					<SampleItem ID="7" name="Active Agenda, Norway"/>
+				</OrgComboField>
+				<PersonComboField name="PersonHandlingCallID" findMode="alpha" sample="Larry Hansen">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<MemoField name="CallSummary" rows="5" cols="75" sample="The agency caller indicated that they would be visiting the facility tomorrow (10-31-2003) to review the allegations forwarded in an employee complaint"/>
+			</GridForm>
+			<InvisibleField name="TelephoneCallID"/>
+			<ViewField name="ContactType" sample="Government Agency"/>
+			<ViewField name="PhoningOrganization" sample="USDOL"/>
+			<ViewField name="CallDate" sample="01/01/2004"/>
+			<ViewField name="CallTime" sample="09:31 am PST"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="CallSummary" sample="The agency caller indicated that they would be visiting the facility tomorrow (10-31-2003) to review the allegations forwarded in an employee complaint"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

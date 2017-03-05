@@ -1,0 +1,427 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Incentive Awards" moduleID="icta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Incentive Award" pluralRecordName="Incentive Awards" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="IncentiveAwardID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track incentive awards" sample="1"/>
+        <TableField name="IncentiveAssocID" type="int" validate="RequireSelection" phrase="Incentive|The title of the incentive being awarded" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="ictas" foreignKey="IncentiveAssocID" foreignField="OrganizationID" key="IncentiveAssocID" joinType="left" phrase="Organization|The name of the organization sponsoring or supporting the incentive criteria throughout the enterprise" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization sponsoring or supporting the incentive criteria throughout the enterprise" sample="Active Agenda, HQ"/>
+        <ForeignField name="IncentiveID" foreignTable="ictas" foreignKey="IncentiveAssocID" foreignField="IncentiveID" key="IncentiveAssocID" joinType="left" phrase="Incentive|A description of the incentive criteria based on a combination of field values assigned from within the Incentives module" sample="1"/>
+        <ForeignField name="Incentive" foreignTable="ict" foreignKey="IncentiveID" foreignField="Incentive" key="IncentiveID" joinType="left" phrase="Incentive|A summarized description of the incentive." sample="."/>
+        <ForeignField name="IncentiveDescription" foreignTable="ict" foreignKey="IncentiveID" foreignField="IncentiveDescription" key="IncentiveID" joinType="left" phrase="Incentive Description|A detailed description of the incentive criteria and specific activity required to satisfy the criteria and result in an incentive award" sample="Any employee that participates in a self-inspection or audit of ANY established checklist will receive the award associated with this incentive criteria. Audit results must be turned into the person accountable for the audit checklist prior to the issuance of an award."/>
+        <ForeignField name="IncentiveAssoc" foreignTable="ictas" foreignKey="IncentiveAssocID" foreignField="IncentiveAssoc" key="IncentiveAssocID" joinType="left" phrase="Incentive|The title of the incentive being awarded" sample="Participating in a self-inspection or audit | Average Value: 10,000.00"/>
+        <TableField name="ActualValue" type="money" validate="Money" phrase="Actual Value|Actual cash value of the incentive award" sample="$200.00"/>
+        <TableField name="AwardOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Award Organization|The specific organization issuing the award" sample="1"/>
+        <ForeignField name="AwardOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Award Organization|The specific organization issuing the award" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAwardedID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="36" phrase="Award Recipient|The person receiving the award for satisfying the respective incentive criteria" sample="1"/>
+        <ForeignField name="PersonAwarded" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAwardedID" joinType="left" phrase="Award Recipient|The person receiving the award for satisfying the respective incentive criteria" sample="Mattias Thorslund"/>
+        <RemoteField name="SupervisorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="82" phrase="Supervisor|The immediate supervisor of the person receiving the incentive award at the time it was earned" sample="1"/>
+        <ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor|The immediate supervisor of the person receiving the incentive award at the time it was earned" sample="Mattias Thorslund"/>
+        <RemoteField name="AwardSponsorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="37" phrase="Award Sponsor|The person responsible for submitting the incentive award request" sample="1"/>
+        <ForeignField name="AwardSponsor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAwardedID" joinType="left" phrase="Award Sponsor|The person responsible for submitting the incentive award request" sample="Mattias Thorslund"/>
+        <TableField name="ActivityDesc" type="text" validate="notEmpty" phrase="Activity Description|A detailed description of the activity which resulted in the incentive award" sample="Joe participated in a self-inspection of the production area on behalf of the corporate quality department"/>
+        <RemoteField name="ActivityDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="7" phrase="Activity Date|The date and time the award recipient performed the activity which satisfied the award criteria" sample="01/01/2004"/>
+        <TableField name="SubmittalDate" type="datetime" validate="RequireSelection" phrase="Submittal Date|Date and time the incentive award form was submitted by the award sponsor for consideration" sample="01/01/2004"/>
+        <CalculatedField name="SubmittalDelay" type="int" calcFunction="timediff" params="SubmittalDate ActivityDate" validate="" phrase="Submittal Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the incentive award form was submitted for consideration" sample="30"/>
+        <TableField name="ReceivedDate" type="datetime" validate="RequireSelection" phrase="Received Date|The date and time the incentive award form was received by the incentive program administrator" sample="01/01/2004"/>
+        <CalculatedField name="ReceivingDelay" type="int" calcFunction="timediff" params="ReceivedDate ActivityDate" validate="" phrase="Receiving Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the incentive award form was received" sample="30"/>
+        <RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="System Entry Date|The date and time the incentive award was entered into the system" sample="01/01/2004 12:02:34"/>
+        <CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate ActivityDate" validate="" phrase="Entry Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the awarded activity was entered into the system" sample="30"/>
+        <TableField name="Awarded" type="bool" validate="noValidation" dbFlags="default 1" phrase="Awarded|Whether the proposed incentive award recipient was approved to receive the award" sample="Yes"/>
+        <TableField name="DenialReason" type="text" validate="noValidation" phrase="Reason for Denial|A detailed description of the reason for denying the incentive award" sample="The award was previously awarded to another person for the activity submitted. This award recipient was listed as involved with the prior award and the prior award recipient has been given the authority to distribute the award in a way she believes is fair."/>
+        <RemoteField name="AwardDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="19" phrase="Award Date|The date and time the award was provided to the award recipient" sample="01/01/2004"/>
+        <CalculatedField name="AwardDelay" type="int" calcFunction="timediff" params="AwardDate ActivityDate" validate="" phrase="Award Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the award was provided to the award recipient" sample="30"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="41" phrase="Person Accountable|The individual assigned primary accountability for evaluating the satisfaction of the incentive criteria, delivering the incentive award to the award recipient and communicating with all award stakeholders" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for evaluating the satisfaction of the incentive criteria, delivering the incentive award to the award recipient and communicating with all award stakeholders" sample="Larry Hansen"/>
+        <SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'icta'" localKey="IncentiveAwardID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="Labor Relations"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Participating in a self-inspection or audit | Mattias Thorslund | 09-21-2003"><CombinedFieldRef name="Incentive"/>;_<CombinedFieldRef name="PersonAwarded"/>;_<CombinedFieldRef name="AwardDate"/></CombinedField>
+        <CombinedField name="SubmittalDelayCalc" phrase="Submittal Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the incentive award form was submitted for consideration" sample="30 Hours"><CombinedFieldRef name="SubmittalDelay"/>_Hours</CombinedField>
+        <CombinedField name="ReceivingDelayCalc" phrase="Receiving Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the incentive award form was received" sample="30 Hours"><CombinedFieldRef name="ReceivingDelay"/>_Hours</CombinedField>
+        <CombinedField name="EntryDelayCalc" phrase="Entry Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the awarded activity was entered into the system" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours
+        </CombinedField>
+        <CombinedField name="AwardDelayCalc" phrase="Award Delay|A calculated field based on the amount of time between the date of the incentive awarded activity and the date the award was provided to the award recipient" sample="30 Hours"><CombinedFieldRef name="AwardDelay"/>_Hours
+        </CombinedField>
+        <CombinedField name="IncentiveAward" phrase="Incentive Award|A combined field used to describe this incentive award when associating it with other records" sample="Participating in a self-inspection or audit; Active Agenda, HQ; Active Agenda, HQ; Mattias Thorslund; 09-21-2003"><CombinedFieldRef name="Incentive"/>;_<CombinedFieldRef name="PersonAwarded"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="IncentiveAwardID"/>
+        </PrimaryKey>
+        <OwnerField name="AwardOrganizationID"/>
+        <RecordDescriptionField name="IncentiveAward"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="IncentiveAwardID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="icta"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="IncentiveAwardID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="icta"/>
+        </SubModule>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="IncentiveAwardID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="icta"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="IncentiveAwardID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="icta"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List incentive awards">
+            <ListField name="IncentiveAwardID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="PersonAwarded" phrase="Person Awarded"/>
+            <ListField name="IncentiveAssoc" phrase="Incentive"/>
+            <ListField name="Awarded" phrase="Awarded"/>
+            <ListField name="ActualValue" phrase="Value"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search incentive awards">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="IncentiveAssocID" findMode="text">
+                <SampleItem ID="1" name="Participating in a self-inspection or audit; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Participating in a non-required training; Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Participating in a quality control cutting; Active Agenda, Latvia"/>
+                <SampleItem ID="4" name="Participating on the emergency response team; Active Agenda, HQ"/>
+            </ComboField>
+            <EditField name="ActualValue" size="10" maxLength="10"/>
+            <OrgComboField name="AwardOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAwardedID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SupervisorID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <MemoField name="ActivityDesc" rows="5" cols="75"/>
+            <PersonComboField name="AwardSponsorID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CheckBoxField name="Awarded"/>
+            <DateField name="ActivityDate"/>
+            <DateField name="SubmittalDate"/>
+            <DateField name="ReceivedDate"/>
+            <DateField name="AwardDate"/>
+            <CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about an awarded incentive">
+            <ViewField name="IncentiveAwardID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="IncentiveAssoc"/>
+            <ViewField name="IncentiveDescription"/>
+            <ViewField name="ActualValue"/>
+            <ViewField name="AwardOrganization"/>
+            <ViewField name="PersonAwarded"/>
+            <ViewField name="Supervisor"/>
+            <ViewField name="ActivityDesc"/>
+            <ViewField name="ActivityDate"/>
+            <ViewField name="SubmittalDate"/>
+            <ViewField name="ReceivedDate"/>
+            <ViewField name="AwardSponsor"/>
+            <ViewField name="Awarded"/>
+            <ViewField name="AwardDate"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="RiskImperatives"/>
+            <ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+                <ViewField name="ActivityDate"/>
+                <ViewField name="SubmittalDate"/>
+                <ViewField name="SubmittalDelayCalc"/>
+                <ViewField name="ReceivedDate"/>
+                <ViewField name="ReceivingDelayCalc"/>
+                <ViewField name="EntryDate"/>
+                <ViewField name="EntryDelayCalc"/>
+                <ViewField name="AwardDate"/>
+                <ViewField name="AwardDelayCalc"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about an awarded incentive">
+            <ViewField name="IncentiveAwardID"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="IncentiveAssocID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="IncentiveAssocID" findMode="text" parentField="OrganizationID">
+                <UpdateFieldRef name="IncentiveDescription"/>
+                <SampleItem ID="1" name="Participating in a self-inspection or audit; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Participating in a non-required training; Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Participating in a quality control cutting; Active Agenda, Latvia"/>
+                <SampleItem ID="4" name="Participating on the emergency response team; Active Agenda, HQ"/>
+            </ComboField>
+            <ViewField name="IncentiveDescription" parentField="IncentiveAssocID"/>
+            <MoneyField name="ActualValue"/>
+            <OrgComboField name="AwardOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAwardedID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SupervisorID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <MemoField name="ActivityDesc" rows="5" cols="75"/>
+            <DateField name="ActivityDate"/>
+            <DateField name="SubmittalDate"/>
+            <DateField name="ReceivedDate"/>
+            <PersonComboField name="AwardSponsorID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CheckBoxField name="Awarded"/>
+            <DateField name="AwardDate"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the incentive award">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the incentive award">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with incentive awards">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="rsk"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the incentive award" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="IncentiveAwardID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="IncentiveAssoc"/>
+        <ViewField name="IncentiveDescription"/>
+        <ViewField name="ActualValue"/>
+        <ViewField name="AwardOrganization"/>
+        <ViewField name="PersonAwarded"/>
+        <ViewField name="Supervisor"/>
+        <ViewField name="ActivityDesc"/>
+        <ViewField name="ActivityDate"/>
+        <ViewField name="Awarded"/>
+        <ViewField name="AwardDate"/>
+    </RecordSummaryFields>
+    <Charts>
+        <RadarChart name="Radar01" title="Incentive Awards By Supervisor">
+            <GroupByField name="Supervisor"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </RadarChart>
+        <RadarChart name="Radar02" title="Incentive Awards By Risk Imperative" subModuleID="rsk" mode="categorize">
+            <GroupByField name="RiskImperative"/>
+            <SummaryField name="ImperativeID" type="count"/>
+        </RadarChart>
+        <PieChart name="Pie01" title="Incentive Awards By Award Sponsor">
+            <GroupByField name="AwardSponsor"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Incentive Awards By Award Sponsor">
+            <GroupByField name="AwardSponsor"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Incentive Awards By Organization">
+            <GroupByField name="AwardOrganization"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Incentive Awards By Organization">
+            <GroupByField name="AwardOrganization"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Incentive Awards By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Incentive Awards By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Incentive Awards By Whether Awarded">
+            <GroupByField name="Awarded"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Incentive Awards By Whether Awarded">
+            <GroupByField name="Awarded"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Incentive Awards By Person Awarded">
+            <GroupByField name="PersonAwarded"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Incentive Awards By Person Awarded">
+            <GroupByField name="PersonAwarded"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Incentive Awards By Incentive">
+            <GroupByField name="Incentive"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Incentive Awards By Incentive">
+            <GroupByField name="Incentive"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Incentive Awards By Supervisor Of Person Awarded">
+            <GroupByField name="Supervisor"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Incentive Awards By Supervisor Of Person Awarded">
+            <GroupByField name="Supervisor"/>
+            <SummaryField name="IncentiveAwardID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

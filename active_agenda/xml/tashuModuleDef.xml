@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Hand Use Tasks" moduleID="tashu" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Hand Use Task" pluralRecordName="Hand Use Tasks" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="HandUseID" type="int" dbFlags="unsigned auto_increment not null" phrase="Hand Use ID|An automatically assigned number used to associate hand use activities with organizational tasks" sample="45"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the task" sample="eqp"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the task" sample="Equipment"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the task is performed" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization where the task is performed" sample="Active Agenda, Inc."/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		<TableField name="HandUseTitle" type="varchar(128)" validate="notEmpty" phrase="Hand Use Title|A short phrase used to describe the hand use requirement associated with the task" sample="Grasping sugar clotts from sugar surface"/>
+		<TableField name="UseofHandsID" type="int" validate="RequireSelection" phrase="Use of Hands|The specific type of hand use associated with this task" sample="1"/>
+		<CodeField name="UseofHands" key="UseofHandsID" phrase="Use of Hands|The specific type of hand use associated with this task" sample="Simple Grasping (right hand)" codeTypeID="248"/>
+		<TableField name="HandUseDuration" type="float" validate="Number notEmpty notNegative" phrase="Duration|The duration of the hand use activity" sample="1"/>
+		<TableField name="TimeUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="TimeUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TimeUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="TimeUnitCategory" key="TimeUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="TimeUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TimeUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="Frequency" type="float" validate="Number notEmpty notNegative" phrase="Cycles Per Duration|The frequency of repetitive cycles occurring over the duration of the hand use activity" sample="3"/>
+		<TableField name="HandUseDesc" type="text" validate="notEmpty" phrase="Hand Use Description|A detailed description of the hand use associated with the task" sample="The operator must use her/his hands to operate a shovel with a two pound load approximately three times per hour."/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="CycleFrequency" phrase="Frequency|A combined field used to describe the cycle frequency of the task" sample="25 pounds"><CombinedFieldRef name="Frequency"/>_time(s)_every_<CombinedFieldRef name="HandUseDuration"/>_<CombinedFieldRef name="TimeUnit"/></CombinedField>
+		<CombinedField name="HandUseActivity" phrase="HandUseActivity|A combined field used to describe the hand use activity associated with the task" sample="25 pounds"><CombinedFieldRef name="UseofHands"/>_for_<CombinedFieldRef name="HandUseDuration"/>_<CombinedFieldRef name="TimeUnit"/>per_cycle,_<CombinedFieldRef name="Frequency"/>_cycles_per_task</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="HandUseTitle"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+		<CombinedField name="HandUse" phrase="HandUse|A combined field used to describe this hand use activity when associating it with other records" sample="Active Agenda, HQ | Sugar coating raisins on the sugar shaker | Simple Grasping (right hand)"><CombinedFieldRef name="HandUseTitle"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="HandUseID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="HandUse"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List hand use activities associated with tasks">
+			<ListField name="HandUseID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="UseofHands" phrase="Hand Use"/>
+            <ListField name="CycleFrequency" phrase="Frequency"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search hand use activities associated with tasks">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<EditField name="HandUseTitle" size="75" maxLength="128"/>
+			<CodeComboField name="UseofHandsID" findMode="text">
+				<SampleItem ID="1" name="Simple Grasping (right hand)"/>
+				<SampleItem ID="2" name="Simple Grasping (left hand)"/>
+				<SampleItem ID="3" name="Power Grasping (right hand)"/>
+				<SampleItem ID="4" name="Power Grasping (left hand)"/>
+				<SampleItem ID="5" name="Fine Manipulation (right hand)"/>
+				<SampleItem ID="6" name="Fine Manipulation (left hand)"/>
+				<SampleItem ID="7" name="Pushing and Pulling (right hand)"/>
+				<SampleItem ID="8" name="Pushing and Pulling (left hand)"/>
+				<SampleItem ID="9" name="Reaching (above shoulder)"/>
+				<SampleItem ID="10" name="Reaching (below shoulder)"/>
+			</CodeComboField>
+			<EditField name="HandUseDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TimeUnitCategoryID">
+					<UpdateFieldRef name="TimeUnitID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<EditField name="Frequency" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a hand use activity associated with an organizational task">
+			<ViewField name="HandUseID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="HandUseTitle"/>
+			<ViewField name="UseofHands"/>
+			<ViewField name="HandUseDuration">
+				<ViewField name="TimeUnit"/>
+			</ViewField>
+			<ViewField name="Frequency"/>
+			<ViewField name="HandUseDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a hand use activity associated with an organizational task">
+			<ViewField name="HandUseID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<EditField name="HandUseTitle" size="75" maxLength="128"/>
+			<CodeComboField name="UseofHandsID" findMode="text">
+				<SampleItem ID="1" name="Simple Grasping (right hand)"/>
+				<SampleItem ID="2" name="Simple Grasping (left hand)"/>
+				<SampleItem ID="3" name="Power Grasping (right hand)"/>
+				<SampleItem ID="4" name="Power Grasping (left hand)"/>
+				<SampleItem ID="5" name="Fine Manipulation (right hand)"/>
+				<SampleItem ID="6" name="Fine Manipulation (left hand)"/>
+				<SampleItem ID="7" name="Pushing and Pulling (right hand)"/>
+				<SampleItem ID="8" name="Pushing and Pulling (left hand)"/>
+				<SampleItem ID="9" name="Reaching (above shoulder)"/>
+				<SampleItem ID="10" name="Reaching (below shoulder)"/>
+			</CodeComboField>
+			<EditField name="HandUseDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="TimeUnitCategoryID">
+					<UpdateFieldRef name="TimeUnitID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<EditField name="Frequency" size="5" maxLength="5"/>
+			<MemoField name="HandUseDesc" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="tashu" phrase="Hand Use">
+			<InvisibleField name="HandUseID"/>
+			<ViewField name="HandUseTitle" sample="Grasping sugar clotts from sugar surface"/>
+			<ViewField name="UseofHands" sample="Simple Grasping (right hand)"/>
+			<ViewField name="HandUseDuration" sample="3">
+				<ViewField name="TimeUnit" sample="Hour/s"/>
+			</ViewField>
+			<ViewField name="Frequency" sample="5"/>
+		</ViewGrid>
+		<EditGrid moduleID="tashu" phrase="Hand Use">
+			<GridForm>
+				<InvisibleField name="HandUseID"/>
+				<EditField name="HandUseTitle" size="75" maxLength="128"/>
+				<CodeComboField name="UseofHandsID" findMode="text" sample="Simple Grasping (right hand)">
+					<SampleItem ID="1" name="Simple Grasping (right hand)"/>
+					<SampleItem ID="2" name="Simple Grasping (left hand)"/>
+					<SampleItem ID="3" name="Power Grasping (right hand)"/>
+					<SampleItem ID="4" name="Power Grasping (left hand)"/>
+					<SampleItem ID="5" name="Fine Manipulation (right hand)"/>
+					<SampleItem ID="6" name="Fine Manipulation (left hand)"/>
+					<SampleItem ID="7" name="Pushing and Pulling (right hand)"/>
+					<SampleItem ID="8" name="Pushing and Pulling (left hand)"/>
+					<SampleItem ID="9" name="Reaching (above shoulder)"/>
+					<SampleItem ID="10" name="Reaching (below shoulder)"/>
+				</CodeComboField>
+				<EditField name="HandUseDuration" size="5" maxLength="5">
+					<Self/>
+					<ComboField name="TimeUnitCategoryID">
+						<UpdateFieldRef name="TimeUnitID"/>
+						<SampleItem ID="1" name="Time"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="3" name="Distance"/>
+						<SampleItem ID="4" name="Packaging"/>
+						<SampleItem ID="5" name="Volume"/>
+						<SampleItem ID="6" name="Weight"/>
+					</ComboField>
+					<ComboField name="TimeUnitID" parentField="TimeUnitCategoryID">
+						<SampleItem ID="1" name="Second"/>
+						<SampleItem ID="2" name="Minute"/>
+						<SampleItem ID="3" name="Hour"/>
+						<SampleItem ID="4" name="Day"/>
+					</ComboField>
+				</EditField>
+				<EditField name="Frequency" size="5" maxLength="5" sample="5"/>
+				<MemoField name="HandUseDesc" rows="5" cols="75" sample="The operator must use her/his hands to operate a shovel with a two pound load approximately three times per hour."/>
+			</GridForm>
+			<InvisibleField name="HandUseID"/>
+			<ViewField name="HandUseTitle" sample="Grasping sugar clotts from sugar surface"/>
+			<ViewField name="UseofHands" sample="Simple Grasping (right hand)"/>
+			<ViewField name="HandUseDuration" sample="3">
+				<ViewField name="TimeUnit" sample="Day/s"/>
+			</ViewField>
+			<ViewField name="Frequency" sample="5"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,107 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:1615:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'trut\' AS ModuleID,
+   trut.TrustTransferID AS RecordID,
+   NULLIF(CONCAT(IFNULL(ROUND(`trut`.TransferAmount, 2),\'\'),\' from \',IFNULL(`ppl1`.DisplayName,\'\'),\' to \',IFNULL(`ppl3`.DisplayName,\'\'),\' on \',IFNULL(`dat1`.RelatedDate,\'\')),\' from  to  on \') AS Value,
+`tru1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `trut`
+LEFT OUTER JOIN `rdc` ON (trut.TrustTransferID = rdc.RecordID AND rdc.ModuleID = \'trut\')
+   
+   LEFT OUTER JOIN `trud` AS trud1 
+   ON (`trut`.FromDistributionID = `trud1`.TrustDistributionID )
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`trut`.TrustTransferID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'trut\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'30\')
+   LEFT OUTER JOIN `trud` AS trud2 
+   ON (`trut`.ToDistributionID = `trud2`.TrustDistributionID )
+   LEFT OUTER JOIN `tru` AS tru1 
+   ON (`trud1`.TrustAccountID = `tru1`.TrustAccountID )
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`trud1`.TrustDistributionID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'trud\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'1\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`trud2`.TrustDistributionID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'trud\'
+     AND `inv2`._Deleted = 0
+     AND `inv2`.InvolvementDescriptorID = \'1\')
+   LEFT OUTER JOIN `ppl` AS ppl3 
+ON (`inv2`.PersonInvolvedID = `ppl3`.PersonID )
+WHERE trut.TrustTransferID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:1522:"UPDATE rdc
+INNER JOIN trut ON (rdc.RecordID = trut.TrustTransferID AND rdc.ModuleID = \'trut\')
+   
+   LEFT OUTER JOIN `trud` AS trud1 
+   ON (`trut`.FromDistributionID = `trud1`.TrustDistributionID )
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`trut`.TrustTransferID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'trut\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'30\')
+   LEFT OUTER JOIN `trud` AS trud2 
+   ON (`trut`.ToDistributionID = `trud2`.TrustDistributionID )
+   LEFT OUTER JOIN `tru` AS tru1 
+   ON (`trud1`.TrustAccountID = `tru1`.TrustAccountID )
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`trud1`.TrustDistributionID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'trud\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'1\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`trud2`.TrustDistributionID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'trud\'
+     AND `inv2`._Deleted = 0
+     AND `inv2`.InvolvementDescriptorID = \'1\')
+   LEFT OUTER JOIN `ppl` AS ppl3 
+ON (`inv2`.PersonInvolvedID = `ppl3`.PersonID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(ROUND(`trut`.TransferAmount, 2),\'\'),\' from \',IFNULL(`ppl1`.DisplayName,\'\'),\' to \',IFNULL(`ppl3`.DisplayName,\'\'),\' on \',IFNULL(`dat1`.RelatedDate,\'\')),\' from  to  on \'),
+rdc.OrganizationID = `tru1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'trut\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

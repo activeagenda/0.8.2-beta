@@ -1,0 +1,279 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Risk Imperatives" moduleID="rsk" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Risk Imperative" pluralRecordName="Risk Imperatives" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ImperativeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track records within modules" sample="4"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the risk imperative" sample="opp"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the risk imperative" sample="Operating Permits"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Air Polution, Smoke Stack Emissions Permit, APCD7726-23"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the related risk imperative assignment" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the related risk imperative assignment" sample="Active Agenda, Inc."/>
+		<RecordMetaField name="OriginalAuthorID" returnType="userID" lookupType="created" phrase="Created By|The name of the person that originally authored the risk imperative assignment" sample="1"/>
+		<ForeignField name="OriginalAuthor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="OriginalAuthorID" joinType="left" phrase="Created By|The name of the person that originally authored the risk imperative assignment" sample="Mattias Thorslund"/>
+		<RecordMetaField name="OriginationDate" returnType="date" lookupType="created" phrase="Origination Date|The date the risk imperative assignment was originally created"/>
+		<RecordMetaField name="ModificationAuthorID" returnType="userID" lookupType="modified" phrase="Modified By|The name of the person that last modified the risk imperative assignment" sample="1"/>
+		<ForeignField name="ModificationAuthor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="OriginalAuthorID" joinType="left" phrase="Modified By|The name of the person that last modified the risk imperative assignment" sample="Mattias Thorslund"/>
+		<RecordMetaField name="ModificationDate" returnType="date" lookupType="modified" phrase="Modification Date|The date the risk imperative assignment was last modified"/>
+		<TableField name="RiskImperativeID" type="int" validate="RequireSelection" phrase="Risk Imperative|The risk imperative which is associated with the related record" sample="1"/>
+		<CodeField name="RiskImperative" key="RiskImperativeID" phrase="Risk Imperative|The risk imperative which is associated with the related record" sample="Operations" codeTypeID="234"/>
+		<TableField name="RiskDescription" type="text" dbFlags="" validate="notEmpty" phrase="Description|A detailed description of the manner in which the risk imperative is impacted by the related record" sample="The operating permit allows the company to conduct business. The absence of an operating permit eliminates the company's ability to generate revenue."/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="RiskImperative"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Imperative" phrase="Imperative|A combined field used to describe this risk imperative when associating it with other records" sample="Operating Permits | ID: 1 | Operations"><CombinedFieldRef name="RiskImperative"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ImperativeID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="Imperative"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List risk imperatives associated with related records">
+			<ListField name="ImperativeID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="RiskImperative" phrase="Risk Imperative"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search risk imperatives associated with related records">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Operating Permits"/>
+				<SampleItem ID="1" name="Chemicals"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<DateField name="OriginationDate"/>
+			<PersonComboField name="OriginalAuthorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="ModificationDate"/>
+			<PersonComboField name="ModificationAuthorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="RiskImperativeID" orientation="vertical">
+				<SampleItem ID="1" name="Operations"/>
+				<SampleItem ID="2" name="Human Safety"/>
+				<SampleItem ID="3" name="Product Quality"/>
+				<SampleItem ID="4" name="Labor Relations"/>
+				<SampleItem ID="5" name="Corporate Ethics"/>
+			</CodeRadioField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a risk imperative associated with a related record">
+			<ViewField name="ImperativeID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OriginationDate"/>
+			<ViewField name="OriginalAuthor"/>
+			<ViewField name="ModificationDate"/>
+			<ViewField name="ModificationAuthor"/>
+			<ViewField name="RiskImperative"/>
+			<ViewField name="RiskDescription"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a building">
+			<ViewField name="ImperativeID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OriginationDate"/>
+			<ViewField name="OriginalAuthor"/>
+			<ViewField name="ModificationDate"/>
+			<ViewField name="ModificationAuthor"/>
+			<ViewField name="RiskImperative"/>
+			<MemoField name="RiskDescription" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ImperativeID"/>
+		<ViewField name="OwnerOrganization"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="OriginationDate"/>
+		<ViewField name="OriginalAuthor"/>
+		<ViewField name="ModificationDate"/>
+		<ViewField name="ModificationAuthor"/>
+		<ViewField name="RiskImperative"/>
+		<ViewField name="RiskDescription"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="rsk" phrase="Risk Imperatives">
+			<InvisibleField name="ImperativeID"/>
+			<ViewField name="RiskImperative" sample="Human Safety"/>
+			<ViewField name="RiskDescription" sample="The operating permit allows the company to conduct business. The absence of an operating permit eliminates the company's ability to generate revenue."/>
+		</ViewGrid>
+		<EditGrid moduleID="rsk" phrase="Risk Imperatives">
+			<GridForm>
+				<InvisibleField name="ImperativeID"/>
+				<CodeRadioField name="RiskImperativeID" orientation="vertical">
+					<SampleItem ID="1" name="Operations"/>
+					<SampleItem ID="2" name="Human Safety"/>
+					<SampleItem ID="3" name="Product Quality"/>
+					<SampleItem ID="4" name="Labor Relations"/>
+					<SampleItem ID="5" name="Corporate Ethics"/>
+				</CodeRadioField>
+				<MemoField name="RiskDescription" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="ImperativeID"/>
+			<ViewField name="RiskImperative" sample="Human Safety"/>
+			<ViewField name="RiskDescription" sample="The operating permit allows the company to conduct business. The absence of an operating permit eliminates the company's ability to generate revenue."/>
+		</EditGrid>
+		<CodeCheckGrid moduleID="rsk" primaryListField="RiskImperative">
+			<InvisibleField name="ImperativeID"/>
+			<ViewField name="RiskImperative" phrase="Risk Imperatives" sample="Labor Relations"/>
+			<CheckBoxField name="Checked" phrase="Assigned" sample="Yes"/>
+		</CodeCheckGrid>
+		<SelectGrid moduleID="rsk" primaryListField="RiskImperative" phrase="Risk Imperatives"/>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Risk Imperatives By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Risk Imperatives By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Risk Imperatives By Module">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="RelatedModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Risk Imperatives By Module">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="RelatedModuleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Risk Imperatives by Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="RelatedModuleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Risk Imperatives by Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="RelatedModuleID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

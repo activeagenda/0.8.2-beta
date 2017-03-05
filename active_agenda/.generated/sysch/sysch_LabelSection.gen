@@ -1,0 +1,68 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    //label section, serialized
+    $fields = unserialize('a:5:{s:16:"SystemChemicalID";O:9:"viewfield":16:{s:4:"name";s:16:"SystemChemicalID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:113:"System Chemical ID|An automatically assigned number used to track chemicals associated with systems and processes";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"System Organization|The name of the organization where the system or process exists";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"System";O:9:"viewfield":16:{s:4:"name";s:6:"System";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"System|A combined field used to describe this system when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"ChemicalInventory";O:9:"viewfield":16:{s:4:"name";s:17:"ChemicalInventory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Chemical|A combined field used to describe this chemical when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"RecordLabel";O:14:"invisiblefield":11:{s:4:"name";s:11:"RecordLabel";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";N;s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}}');
+    $phrases = unserialize('a:4:{s:16:"SystemChemicalID";s:113:"System Chemical ID|An automatically assigned number used to track chemicals associated with systems and processes";s:12:"Organization";s:83:"System Organization|The name of the organization where the system or process exists";s:6:"System";s:91:"System|A combined field used to describe this system when associating it with other records";s:17:"ChemicalInventory";s:95:"Chemical|A combined field used to describe this chemical when associating it with other records";}');
+    $singularRecordName = 'System Chemical';
+    $labelSQL = "SELECT 
+   `sysch`.SystemChemicalID,
+   `org1`.Name AS Organization,
+   `sys1`.SystemName AS System,
+   NULLIF(CONCAT(IFNULL(`chm1`.CommonName,''),' | ',IFNULL(NULLIF(CONCAT_WS(', ',`bui2`.BuildingName,`buir2`.RoomName,`orgl2`.LocationName),''),'')),' | ') AS ChemicalInventory,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`chm1`.CommonName,''),' | ',IFNULL(NULLIF(CONCAT_WS(', ',`bui2`.BuildingName,`buir2`.RoomName,`orgl2`.LocationName),''),'')),' | '),''),' | ',IFNULL(`sys1`.SystemName,''),' | ',IFNULL(`org1`.Name,'')),' |  | ') AS RecordLabel,
+   `sys1`.OrganizationID AS OrganizationID
+FROM `sysch`
+   
+     LEFT OUTER JOIN `sys` AS sys1 
+   ON (`sysch`.SystemID = `sys1`.SystemID )
+     LEFT OUTER JOIN `chmin` AS chmin1 
+   ON (`sysch`.ChemicalInventoryID = `chmin1`.ChemicalInventoryID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`sys1`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`chmin1`.ChemicalInventoryID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = 'chmin'
+     AND `orgla1`._Deleted = 0)
+     LEFT OUTER JOIN `chm` AS chm1 
+   ON (`chmin1`.ChemicalID = `chm1`.ChemicalID )
+     LEFT OUTER JOIN `orgl` AS orgl2 
+   ON (`orgla1`.LocationID = `orgl2`.LocationID )
+     LEFT OUTER JOIN `buir` AS buir2 
+   ON (`orgl2`.RoomID = `buir2`.RoomID )
+     LEFT OUTER JOIN `bui` AS bui2 
+   ON (`buir2`.BuildingID = `bui2`.BuildingID )
+WHERE
+   sysch.SystemChemicalID='/**RecordID**/'";
+    $recordLabelField = "RecordLabel";
+?>

@@ -1,0 +1,349 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Regulations" moduleID="reg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Regulation" pluralRecordName="Regulations" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="RegulationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track regulations which may impact the organization" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization assigned primary responsibility for enterprise compliance with the respective regulation" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization assigned primary responsibility for enterprise compliance with the respective regulation" sample="Active Agenda HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="76" phrase="Person Accountable|The individual assigned primary accountability for managing regulatory compliance with this regulation throughout the enterprise" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing regulatory compliance with this regulation throughout the enterprise" sample="Mattias Thorslund"/>
+		<TableField name="CountryID" type="int" dbFlags="unsigned not null" phrase="Country|The country from which the regulation emanates" sample="1"/>
+		<ForeignField name="Country" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="CountryID" joinType="left" phrase="Country|The country from which the regulation emanates" sample="United States of America (USA)"/>
+		<TableField name="AgencyLevelID" type="int" validate="RequireSelection" phrase="Agency Level|The heirarchial level of the enforcement agency from an international perspective" sample="1"/>
+		<CodeField name="AgencyLevel" key="AgencyLevelID" phrase="Agency Level|The heirarchial level of the enforcment agency from an international perspective" sample="Federal" codeTypeID="7"/>
+		<TableField name="AgencyID" type="int" listType="special=9" validate="RequireSelection" phrase="Agency|Name of the government agency or internal entity" sample="1"/>
+		<ForeignField name="AgencyShortName" foreignTable="org" foreignKey="OrganizationID" foreignField="ShortName" key="AgencyID" joinType="left" phrase="Abbreviation|An abbreviated name used to identify the agency" sample="CalOSHA"/>
+		<ForeignField name="Agency" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AgencyID" listCondition="GovAgency=1" joinType="left" phrase="Agency|Name of the government agency or internal entity" sample="U.S. Occupational Safety and Health Administration"/>
+		<!--screened based on organizations with the Agency cb selected as "true" DFZ 1-28-2004-->
+		<TableField name="RegTitle" type="varchar(128)" validate="notEmpty" phrase="Title|The official title of the regulation assigned by the enforcement agency or legislative source" sample="U.S. Occupational Noise Exposure"/>
+		<TableField name="RegCode" type="varchar(128)" validate="noValidation" phrase="Code|The official code or body of law associated with the regulation" sample="29 Code of Federal Regulations"/>
+		<TableField name="RegSection" type="varchar(128)" validate="noValidation" phrase="Section|The specific code section associated with the regulation" sample="1910.95"/>
+		<TableField name="RegScope" type="text" validate="noValidation" phrase="Scope|The scope of the regulation. The scope should include a broad statement regarding the types of facilities affected by the regulation or a list of parent code sections that provide a method of understanding the scope of the statute" sample="All US manufacturing plants"/>
+		<TableField name="RegDescription" type="text" validate="noValidation" phrase="Description|A simple but detailed description of the regulation" sample="US Federal OSHA Standard for control of exposure to industrial noise"/>
+		<TableField name="RegURL" type="varchar(128)" validate="noValidation" phrase="Uniform Resource Locator|The internet address of the respective regulation'" sample="http://www.osha.gov"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'reg'" localKey="RegulationID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="Citing" phrase="Citing|A combined field used to describe the regulatory citing when associating it with other records" sample="29 CFR 1910.95"><CombinedFieldRef name="RegCode"/>;_<CombinedFieldRef name="RegSection"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RegTitle"/>;_<CombinedFieldRef name="RegCode"/>;_<CombinedFieldRef name="RegSection"/></CombinedField>
+		<CombinedField name="Regulation" phrase="Regulation|A combined field used to describe the regulation when associating it with other records" sample="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95"><CombinedFieldRef name="RegTitle"/>;_<CombinedFieldRef name="RegCode"/>;_<CombinedFieldRef name="RegSection"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="RegulationID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> not required-->
+		<RecordDescriptionField name="Regulation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="RegulationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="reg"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="RegulationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="reg"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="RegulationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="reg"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="RegulationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="reg"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="RegulationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="reg"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List governmental regulations">
+			<ListField name="RegulationID" phrase="Record ID"/>
+			<ListField name="AgencyShortName" phrase="Agency"/>
+			<ListField name="RegTitle" phrase="Title"/>
+			<ListField name="Citing" phrase="Citing"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search governmental regulations">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda HQ"/>
+				<SampleItem ID="2" name="Active Agenda Sweden"/>
+				<SampleItem ID="3" name="Active Agenda Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="CountryID" findMode="text">
+				<SampleItem ID="1" name="United States of America"/>
+				<SampleItem ID="2" name="Sweden"/>
+				<SampleItem ID="3" name="Latvia"/>
+				<SampleItem ID="4" name="Brazil"/>
+				<SampleItem ID="5" name="Germany"/>
+			</ComboField>
+			<CodeComboField name="AgencyLevelID" findMode="text">
+				<UpdateFieldRef name="AgencyID"/>
+				<SampleItem ID="1" name="Federal"/>
+				<SampleItem ID="2" name="International"/>
+				<SampleItem ID="3" name="State"/>
+				<SampleItem ID="4" name="County"/>
+				<SampleItem ID="5" name="City"/>
+			</CodeComboField>
+			<OrgComboField name="AgencyID" findMode="text" parentField="AgencyLevelID">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Department of Health"/>
+			</OrgComboField>
+			<EditField name="AgencyShortName" size="20" maxLength="208"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information a governmental regulation">
+			<ViewField name="RegulationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="Country"/>
+			<ViewField name="AgencyLevel"/>
+			<ViewField name="Agency"/>
+            <ViewField name="AgencyShortName"/>
+			<ViewField name="RegTitle"/>
+			<ViewField name="RegCode"/>
+			<ViewField name="RegSection"/>
+			<ViewField name="RegScope"/>
+			<ViewField name="RegDescription"/>
+			<ViewField name="RegURL" link="RegURL"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewGrid moduleID="prta"/>
+			<ViewGrid moduleID="prti"/>
+			<ViewGrid moduleID="filr"/>
+			<ViewGrid moduleID="bpc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a governmental regulation">
+			<ViewField name="RegulationID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda HQ"/>
+				<SampleItem ID="2" name="Active Agenda Sweden"/>
+				<SampleItem ID="3" name="Active Agenda Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="CountryID" findMode="text">
+				<SampleItem ID="1" name="United States of America"/>
+				<SampleItem ID="2" name="Sweden"/>
+				<SampleItem ID="3" name="Latvia"/>
+				<SampleItem ID="4" name="Brazil"/>
+				<SampleItem ID="5" name="Germany"/>
+			</ComboField>
+			<CodeComboField name="AgencyLevelID" findMode="text">
+				<UpdateFieldRef name="AgencyID"/>
+				<SampleItem ID="1" name="Federal"/>
+				<SampleItem ID="2" name="International"/>
+				<SampleItem ID="3" name="State"/>
+				<SampleItem ID="4" name="County"/>
+				<SampleItem ID="5" name="City"/>
+			</CodeComboField>
+			<OrgComboField name="AgencyID" findMode="text" parentField="AgencyLevelID">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Department of Health"/>
+			</OrgComboField>
+			<EditField name="RegTitle" size="75" maxLength="128"/>
+			<EditField name="RegCode" size="75" maxLength="128"/>
+			<EditField name="RegSection" size="75" maxLength="128"/>
+			<EditField name="RegURL" size="75" maxLength="128"/>
+			<MemoField name="RegScope" rows="5" cols="75"/>
+			<MemoField name="RegDescription" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the regulation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the regulation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a regulation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a regulation">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a regulation" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="RegulationID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="AgencyLevel"/>
+		<ViewField name="Agency"/>
+		<ViewField name="RegTitle"/>
+		<ViewField name="RegCode"/>
+		<ViewField name="RegSection"/>
+		<ViewField name="RegScope"/>
+		<ViewField name="RegDescription"/>
+		<ViewField name="RegURL" link="RegURL"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Actions By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Regulations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Regulations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Regulations By Country">
+			<GroupByField name="Country"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Regulations By Country">
+			<GroupByField name="Country"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Regulations By Agency Level">
+			<GroupByField name="AgencyLevel"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Regulations By Agency Level">
+			<GroupByField name="AgencyLevel"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Regulations By Agency">
+			<GroupByField name="Agency"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Regulations By Agency">
+			<GroupByField name="Agency"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Regulations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Regulations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="RegulationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

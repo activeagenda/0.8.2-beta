@@ -1,0 +1,413 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Qualification Levels" moduleID="ksal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Qualification Levels" pluralRecordName="Qualification Level" addNewName="Level" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LevelID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track KSA Levels" sample="1"/>
+		<TableField name="KSAID" type="int" dbFlags="unsigned not null" phrase="KSA|A combined field used to describe this KSA when associating it with other records" sample="1"/>
+		<ForeignField name="AreaID" foreignTable="ksasc" foreignKey="CapabilityID" foreignField="AreaID" key="CapabilityID" joinType="left" phrase="Area|A combined field used to describe this area of excellence when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="ksaae" foreignKey="AreaID" foreignField="OrganizationID" key="AreaID" joinType="left" phrase="Organization|The organization emphasizing the strategic capability" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization emphasizing the strategic capability" sample="Active Agenda, HQ"/>
+		<ForeignField name="CapabilityID" foreignTable="ksa" foreignKey="KSAID" foreignField="CapabilityID" key="KSAID" joinType="left" phrase="Capability|A combined field used to describe this strategic capability when associating it with other records" sample="1"/>
+		<ForeignField name="CapabilityTitle" foreignTable="ksasc" foreignKey="CapabilityID" foreignField="CapabilityTitle" key="CapabilityID" joinType="left" phrase="Capability Title|A short title used to describe the strategic capability" sample="Engagement"/>
+		<ForeignField name="CapabilityDesc" foreignTable="ksasc" foreignKey="CapabilityID" foreignField="CapabilityDesc" key="CapabilityID" joinType="left" phrase="Capability Description|A brief phrase used to describe the strategic capability" sample="Builds and maintains internal and external relationships to the company, both nationally and internationally"/>
+		<ForeignField name="CapabilityAbbr" foreignTable="ksasc" foreignKey="CapabilityID" foreignField="CapabilityAbbr" key="CapabilityID" joinType="left" phrase="Capability Abbreviation|An abbreviation used to describe the strategic capability" sample="ENG"/>
+		<ForeignField name="Capability" foreignTable="ksasc" foreignKey="CapabilityID" foreignField="Capability" key="CapabilityID" joinType="left" phrase="Capability|A combined field used to describe this strategic capability when associating it with other records" sample="ENG: Engagement"/>
+		<ForeignField name="KSATitle" foreignTable="ksa" foreignKey="KSAID" foreignField="KSATitle" key="KSAID" joinType="left" phrase="KSA Title|A short title used to describe the knowldege, skill, and or ability" sample="Alliances"/>
+		<ForeignField name="KSADesc" foreignTable="ksa" foreignKey="KSAID" foreignField="KSADesc" key="KSAID" joinType="left" phrase="KSA Description|A brief phrase used to describe the knowldege, skill, and or ability" sample="Develops, supports and strengthens alliances and partnerships with others"/>
+		<ForeignField name="KSAAbbr" foreignTable="ksa" foreignKey="KSAID" foreignField="KSAAbbr" key="KSAID" joinType="left" phrase="KSA Abbreviation|An abbreviation used to describe the knowldege, skill, and or ability" sample="ALL"/>
+		<ForeignField name="KSAGroupAbbr" foreignTable="ksa" foreignKey="KSAID" foreignField="KSAGroupAbbr" key="KSAID" joinType="left" phrase="Abbreviation|A grouping of area, capability, and KSA abbreviations for reporting purposes" sample="BA:ENG:ALL"/>
+		<ForeignField name="KSA" foreignTable="ksa" foreignKey="KSAID" foreignField="KSA" key="KSAID" joinType="left" phrase="KSA|A combined field used to describe this KSA when associating it with other records" sample="Alliances (ALL)"/>
+		<TableField name="KSALevelID" type="int" validate="noValidation" phrase="Qualification Level|A term or phrase used to distinguish qualification levels associated with required knowldege, skills, or experience" sample="1"/>
+		<CodeField name="KSALevel" key="KSALevelID" phrase="Qualification Level|A term or phrase used to distinguish qualification levels associated with required knowldege, skills, or experience" sample="L1" codeTypeID="267"/>
+		<TableField name="KSALevelDesc" type="text" validate="notEmpty" phrase="Level Description|A brief but detailed description of knowldege, skill, and/or ability level" sample="Contributes to the outcomes of a team by co-operating and working effectively with others to develop a team culture."/>
+		<TableField name="ReviewCriteria" type="text" validate="noValidation" phrase="Review Criteria|A brief description of the criteria used to assess a person's level of knowledge, skill, and/or ability" sample="Has demonstrated an ability to support and strengthen alliances and partnerships with others by quantifiable demonstration of past success"/>
+        <TableField name="TrainingQualified" type="bool" validate="noValidation" dbFlags="default 0" phrase="Training Qualified|Whether individuals are qualified by training" sample="No"/>
+        <TableField name="ExperienceQualified" type="bool" validate="noValidation" dbFlags="default 0" phrase="Experience Qualified|Whether individuals are qualified by experience" sample="No"/>
+        <TableField name="MedicallyQualified" type="bool" validate="noValidation" dbFlags="default 0" phrase="Medically Qualified|Whether individuals are qualified by medical examiniation or testing" sample="No"/>
+		<CombinedField name="KSAGroupLevelAbbr" phrase="Abbreviation|A grouping of area, capability, KSA abbreviations and the KSA level for reporting purposes" sample="BA:ENG:ALL:L1"><CombinedFieldRef name="KSAGroupAbbr"/>:<CombinedFieldRef name="KSALevel"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Alliances (ALL) - L1"><CombinedFieldRef name="KSA"/>_-_<CombinedFieldRef name="KSALevel"/></CombinedField>
+		<CombinedField name="Level" phrase="KSA Level|A combined field used to describe this KSA level when associating it with other records" sample="Alliances (ALL) - L1"><CombinedFieldRef name="KSA"/>_-_<CombinedFieldRef name="KSALevel"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LevelID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Level"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="trak" name="TrainingCourses" parentKey="LevelID" localKey="LevelID"/>
+		<SubModule moduleID="jank" name="JobAnalyses" parentKey="LevelID" localKey="LevelID"/>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="LevelID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ksal"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="LevelID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ksal"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="LevelID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ksal"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List knowldege, skill, and/or ability levels">
+			<ListField name="LevelID" phrase="Record ID"/>
+			<ListField name="CapabilityTitle" phrase="Capability"/>
+			<ListField name="KSATitle" phrase="KSA"/>
+			<ListField name="KSALevel" phrase="KSA Level"/>
+			<ListField name="TrainingQualified" phrase="Training" align="center"/>
+			<ListField name="ExperienceQualified" phrase="Experience" align="center"/>
+			<ListField name="MedicallyQualified" phrase="Medical" align="center"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search knowldege, skill, and/or ability levels">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="CapabilityID" findMode="text">
+				<SampleItem ID="1" name="ENG: Engagement"/>
+				<SampleItem ID="2" name="Research Partnering"/>
+			</ComboField>
+			<EditField name="CapabilityTitle" size="25" maxLength="30"/>
+			<EditField name="CapabilityDesc" size="75" maxLength="128"/>
+			<EditField name="CapabilityAbbr" size="5" maxLength="5"/>
+			<ComboField name="KSAID" findMode="text">
+				<SampleItem ID="1" name="Alliances (ALL)"/>
+				<SampleItem ID="2" name="Multidisciplinary Focus (MDF)"/>
+				<SampleItem ID="2" name="Promoting and Marketing (PAM)"/>
+			</ComboField>
+			<EditField name="KSATitle" size="25" maxLength="30"/>
+			<EditField name="KSAAbbr" size="5" maxLength="5"/>
+			<EditField name="KSAGroupAbbr" size="10" maxLength="10"/>
+			<CodeRadioField name="KSALevelID" findMode="text">
+				<SampleItem ID="1" name="L1"/>
+				<SampleItem ID="2" name="L2"/>
+				<SampleItem ID="3" name="L3"/>
+				<SampleItem ID="4" name="L4"/>
+				<SampleItem ID="5" name="L5"/>
+			</CodeRadioField>
+            <CheckBoxField name="TrainingQualified"/>
+            <CheckBoxField name="ExperienceQualified"/>
+            <CheckBoxField name="MedicallyQualified"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the knowldege, skill, and/or ability level">
+			<ViewField name="LevelID"/>
+			<ViewField name="KSA"/>
+			<ViewField name="KSADesc"/>
+			<ViewField name="KSAGroupAbbr"/>
+			<ViewField name="KSALevel"/>
+			<ViewField name="KSALevelDesc"/>
+			<ViewField name="ReviewCriteria"/>
+			<ViewField name="TrainingQualified"/>
+			<ViewField name="ExperienceQualified"/>
+			<ViewField name="MedicallyQualified"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="trak" phrase="Courses">
+					<InvisibleField name="TrainingKSAID"/>
+					<ViewField name="TrainingType" phrase="Course Type"/>
+					<ViewField name="CourseCode" phrase="Course Code"/>
+					<ViewField name="Course" phrase="Course" link="CourseLink"/>
+				</ViewGrid>
+				<ViewGrid moduleID="jank" phrase="Jobs">
+					<InvisibleField name="JobKSAID"/>
+					<ViewField name="JAOrganization" phrase="Organization"/>
+					<ViewField name="JobAnalysisNumber" phrase="Number"/>
+					<ViewField name="JobAnalysis" phrase="Job Analysis" link="JobAnalysisLink"/>
+				</ViewGrid>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the knowldege, skill, and/or ability level">
+			<ViewField name="LevelID"/>
+			<ViewField name="KSA"/>
+			<ViewField name="KSADesc"/>
+			<ViewField name="KSAGroupAbbr"/>
+			<CodeRadioField name="KSALevelID" findMode="text">
+				<SampleItem ID="1" name="L1"/>
+				<SampleItem ID="2" name="L2"/>
+				<SampleItem ID="3" name="L3"/>
+				<SampleItem ID="4" name="L4"/>
+				<SampleItem ID="5" name="L5"/>
+			</CodeRadioField>
+			<MemoField name="KSALevelDesc" cols="75" rows="5"/>
+			<MemoField name="ReviewCriteria" cols="75" rows="5"/>
+            <CheckBoxField name="TrainingQualified"/>
+            <CheckBoxField name="ExperienceQualified"/>
+            <CheckBoxField name="MedicallyQualified"/>
+		</EditScreen>
+		<EditScreen name="Courses" phrase="Courses|Associate training courses satisfying the job knowledge, skill, or ability level">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="trak" phrase="Training Courses">
+				<GridForm>
+					<InvisibleField name="TrainingKSAID"/>
+					<CodeComboField name="TrainingCategoryID" findMode="text">
+						<UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+						<SampleItem ID="1" name="Disease"/>
+						<SampleItem ID="2" name="Complaint"/>
+						<SampleItem ID="3" name="Illness"/>
+						<SampleItem ID="4" name="Injury"/>
+						<SampleItem ID="5" name="Publicity"/>
+						<SampleItem ID="6" name="Theft"/>
+					</CodeComboField>
+					<ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+						<UpdateFieldRef name="CourseID"/>
+						<SampleItem ID="1" name="Employee (Leadership)"/>
+						<SampleItem ID="2" name="Employee (Management)"/>
+						<SampleItem ID="3" name="Employee (Staff)"/>
+						<SampleItem ID="4" name="Employee (Line)"/>
+						<SampleItem ID="5" name="Employee (Administration)"/>
+						<SampleItem ID="6" name="Employee (Contractor)"/>
+					</ComboField>
+					<ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+						<UpdateFieldRef name="CourseCode"/>
+						<SampleItem ID="1" name="Active Agenda, HQ"/>
+						<SampleItem ID="2" name="Active Agenda, Sweden"/>
+					</ComboField>
+					<ViewField name="CourseCode" parentField="CourseID"/>
+				</GridForm>
+				<InvisibleField name="TrainingKSAID"/>
+				<ViewField name="TrainingType" phrase="Course Type"/>
+				<ViewField name="CourseCode" phrase="Course Code"/>
+				<ViewField name="Course" phrase="Course" link="CourseLink"/>
+			</EditGrid>
+		</EditScreen>
+		<EditScreen name="Jobs" phrase="Jobs|Associate job analyses with the knowledge, skill, or ability level">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="jank" phrase="Job Analyses">
+				<GridForm>
+					<InvisibleField name="JobKSAID"/>
+					<OrgComboField name="JAOrganizationID" findMode="text">
+						<UpdateFieldRef name="JobAnalysisID"/>
+						<SampleItem ID="1" name="Active Agenda, HQ"/>
+						<SampleItem ID="2" name="Active Agenda, Inc."/>
+						<SampleItem ID="3" name="Good Ideas Consulting"/>
+					</OrgComboField>
+					<ComboField name="JobAnalysisID" findMode="text" parentField="JAOrganizationID">
+						<UpdateFieldRef name="JobAnalysisNumber"/>
+						<UpdateFieldRef name="JobAnalysisDesc"/>
+						<SampleItem ID="1" name="Active Agenda, HQ"/>
+						<SampleItem ID="2" name="Active Agenda, Sweden"/>
+					</ComboField>
+					<ViewField name="JobAnalysisNumber" phrase="Number"/>
+					<ViewField name="JobAnalysisDesc" parentField="JobAnalysisID"/>
+				</GridForm>
+				<InvisibleField name="JobKSAID"/>
+				<ViewField name="JAOrganization" phrase="Organization"/>
+				<ViewField name="JobAnalysisNumber" phrase="Number"/>
+				<ViewField name="JobAnalysis" phrase="Job Analysis" link="JobAnalysisLink"/>
+			</EditGrid>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with the the knowldege, skill, and/or ability level">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the knowldege, skill, and/or ability level">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the knowldege, skill, and/or ability level">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="LevelID"/>
+		<ViewField name="KSA"/>
+		<ViewField name="KSADesc"/>
+		<ViewField name="KSAGroupAbbr"/>
+		<ViewField name="KSALevel"/>
+		<ViewField name="KSALevelDesc"/>
+		<ViewField name="ReviewCriteria"/>
+        <ViewField name="TrainingQualified"/>
+        <ViewField name="ExperienceQualified"/>
+        <ViewField name="MedicallyQualified"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Qualification Levels By KSA">
+			<GroupByField name="KSA"/>
+			<SummaryField name="LevelID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Qualification Levels By KSA">
+			<GroupByField name="KSA"/>
+			<SummaryField name="LevelID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Qualification Levels By Capability">
+			<GroupByField name="Capability"/>
+			<SummaryField name="LevelID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Qualification Levels By Capability">
+			<GroupByField name="Capability"/>
+			<SummaryField name="LevelID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Qualification Levels By Training Qualified">
+			<GroupByField name="TrainingQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Qualification Levels By Training Qualified">
+			<GroupByField name="TrainingQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Qualification Levels By Experience Qualified">
+			<GroupByField name="ExperienceQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Qualification Levels By Experience Qualified">
+			<GroupByField name="ExperienceQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Qualification Levels By Medically Qualified">
+			<GroupByField name="MedicallyQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Qualification Levels By Medically Qualified">
+			<GroupByField name="MedicallyQualified"/>
+			<SummaryField name="LevelID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Exports>
+		<ViewGrid moduleID="ksal" phrase="KSA Levels">
+			<InvisibleField name="LevelID"/>
+			<ViewField name="KSALevel" sample="L1"/>
+			<ViewField name="KSALevelDesc" sample="Contributes to the outcomes of a team by co-operating and working effectively with others to develop a team culture."/>
+			<ViewField name="TrainingQualified" align="center"/>
+			<ViewField name="ExperienceQualified" align="center"/>
+			<ViewField name="MedicallyQualified" align="center"/>
+		</ViewGrid>
+		<EditGrid moduleID="ksal" phrase="KSA Levels">
+			<GridForm>
+				<InvisibleField name="LevelID"/>
+				<CodeComboField name="KSALevelID" findMode="text">
+					<SampleItem ID="1" name="L1"/>
+					<SampleItem ID="2" name="L2"/>
+					<SampleItem ID="3" name="L3"/>
+					<SampleItem ID="4" name="L4"/>
+					<SampleItem ID="5" name="L5"/>
+				</CodeComboField>
+				<MemoField name="KSALevelDesc" cols="75" rows="5"/>
+				<MemoField name="ReviewCriteria" cols="75" rows="5"/>
+                <CheckBoxField name="TrainingQualified"/>
+                <CheckBoxField name="ExperienceQualified"/>
+                <CheckBoxField name="MedicallyQualified"/>
+			</GridForm>
+			<InvisibleField name="LevelID"/>
+			<ViewField name="KSALevel" sample="L1"/>
+			<ViewField name="KSALevelDesc" sample="Contributes to the outcomes of a team by co-operating and working effectively with others to develop a team culture."/>
+			<ViewField name="TrainingQualified" align="center"/>
+			<ViewField name="ExperienceQualified" align="center"/>
+			<ViewField name="MedicallyQualified" align="center"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

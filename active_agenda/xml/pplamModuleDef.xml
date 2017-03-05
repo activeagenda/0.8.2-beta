@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="People Availability" moduleID="pplam" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Person Availability" pluralRecordName="People Availability" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="AvailabilityModificationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track employee availability modifications" sample="1"/>
+		<TableField name="EmployeePersonID" type="int" dbFlags="unsigned" phrase="Employee|A combined field used to describe this employee when associating her/him with other records" sample="2"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="EmployeePersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Emprise, HQ"/>
+		<ForeignField name="EmployeePerson" foreignTable="pple" foreignKey="PersonID" foreignField="Employee" key="EmployeePersonID" joinType="left" phrase="Employee|A combined field used to describe this employee when associating her/him with other records" sample="Zahlis, Daniel, 2710"/>
+		<ForeignField name="DisplayName" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="EmployeePersonID" joinType="left" phrase="Display Name|Commonly used name of an individual used to identify a person. This name may vary from a person's given name" sample="Wally Walrus"/>
+		<TableField name="AvailabilityModificationTypeID" type="int" dbFlags="unsigned not null" phrase="Modification Type|A combined field used to describe this availability modification type when associating it with other records" sample="1"/>
+		<ForeignField name="ModificationCategoryID" foreignTable="pplat" foreignKey="AvailabilityModificationTypeID" foreignField="ModificationCategoryID" key="AvailabilityModificationTypeID" joinType="left" phrase="Modification Category|A broadly defined title or phrase used to group similar categories of work availability modifiers" sample="1"/>
+		<CodeField name="ModificationCategory" key="ModificationCategoryID" phrase="Modification Category|A broadly defined title or phrase used to group similar categories of work availability modifiers" sample="Absence" codeTypeID="97"/>
+		<ForeignField name="AvailabilityModificationType" foreignTable="pplat" foreignKey="AvailabilityModificationTypeID" foreignField="AvailabilityModificationType" key="AvailabilityModificationTypeID" joinType="left" phrase="Modification Type|A combined field used to describe this availability modification type when associating it with other records" sample="1"/>
+		<TableField name="Explanation" type="text" dbFlags="" phrase="Explanation|A detailed explanation of the work availability modification" sample="Dan was sick with bronchitis and he returned with a doctor's presecription for antibiotics issued the day before his absence.'"/>
+		<RemoteField name="StartDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="28" phrase="Start Date|The date this period of modified availability began" sample="01/01/2004"/>
+		<RemoteField name="EndDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="36" phrase="End Date|The date this period of modified availability ended" sample="01/01/2004"/>
+		<CalculatedField name="Days" calcFunction="datediff" params="EndDate StartDate" validate="" phrase="Days|The number of days of modified availability" sample="21"/>
+		<TableField name="DaysNotScheduled" type="float" validate="noValidation" phrase="Days Not Scheduled|The number of days the person would not have been scheduled to work and therefore did not lose time from work due to the modified availability" sample="6"/>
+		<CalculatedField name="ActualDays" calcFunction="subtract" params="Days DaysNotScheduled" validate="" phrase="Actual Days|The number of days the person would not have been scheduled to work and therefore did not lose time from work due to the modified availability" sample="15"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="EmployeePerson"/>;_<CombinedFieldRef name="AvailabilityModificationType"/>;_<CombinedFieldRef name="Days"/>_ending_<CombinedFieldRef name="EndDate"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="AvailabilityModification" phrase="Availability ModificationID|A combined field used to describe this availability modification when associating it with other records" sample="Active Agenda, HQ | Absence | Short Term (excused) | 20"><CombinedFieldRef name="DisplayName"/>;_<CombinedFieldRef name="AvailabilityModificationType"/>;_<CombinedFieldRef name="Days"/>_days</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="AvailabilityModificationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="AvailabilityModification"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List availability modifications">
+			<ListField name="AvailabilityModificationID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="EmployeePerson" phrase="Employee"/>
+			<ListField name="ModificationCategory" phrase="Category"/>
+			<ListField name="AvailabilityModificationType" phrase="Type"/>
+			<ListField name="ActualDays" phrase="Actual Days"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search availability modifications">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="EmployeePersonID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="EmployeePersonID" findMode="alpha" parentField="OrganizationID">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="AvailabilityModificationTypeID">
+				<SampleItem ID="1" name="Absence | Short Term (excused)"/>
+				<SampleItem ID="2" name="Absence | Short Term (unexcused)"/>
+				<SampleItem ID="3" name="Absence | Long Term (excused)"/>
+				<SampleItem ID="4" name="Absence | Long Term (unexcused)"/>
+			</ComboField>
+			<DateField name="StartDate"/>
+			<DateField name="EndDate"/>
+			<EditField name="Days" size="5" maxLength="5"/>
+			<EditField name="DaysNotScheduled" size="5" maxLength="5"/>
+			<EditField name="ActualDays" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an availability modification">
+			<ViewField name="AvailabilityModificationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<ViewField name="AvailabilityModificationType"/>
+			<ViewField name="Explanation"/>
+			<ViewField name="StartDate"/>
+			<ViewField name="EndDate"/>
+			<ViewField name="Days"/>
+			<ViewField name="DaysNotScheduled"/>
+			<ViewField name="ActualDays"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an availability modification">
+			<ViewField name="AvailabilityModificationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<ComboField name="AvailabilityModificationTypeID">
+				<SampleItem ID="1" name="Absence | Short Term (excused)"/>
+				<SampleItem ID="2" name="Absence | Short Term (unexcused)"/>
+				<SampleItem ID="3" name="Absence | Long Term (excused)"/>
+				<SampleItem ID="4" name="Absence | Long Term (unexcused)"/>
+			</ComboField>
+			<MemoField name="Explanation" rows="5" cols="75"/>
+			<DateField name="StartDate"/>
+			<DateField name="EndDate"/>
+			<ViewField name="Days"/>
+			<EditField name="DaysNotScheduled" size="5" maxLength="5"/>
+			<ViewField name="ActualDays" size="5" maxLength="5"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="pplam" phrase="Availability">
+			<ViewField name="AvailabilityModificationID"/>
+			<ViewField name="AvailabilityModificationType" sample="1"/>
+			<ViewField name="StartDate" sample="01/01/2004"/>
+			<ViewField name="EndDate" sample="01/21/2004"/>
+			<ViewField name="Days" sample="21"/>
+			<ViewField name="DaysNotScheduled" sample="6"/>
+			<ViewField name="ActualDays" sample="15"/>
+			<ViewField name="AvailabilityModification" sample="Active Agenda, HQ | Absence | Short Term (excused) | 20"/>
+		</ViewGrid>
+		<EditGrid moduleID="pplam" phrase="Availability">
+			<GridForm>
+				<InvisibleField name="AvailabilityModificationID"/>
+				<ComboField name="AvailabilityModificationTypeID" findMode="text" sample="Absence | Short Term (excused)">
+					<SampleItem ID="1" name="Absence | Short Term (excused)"/>
+					<SampleItem ID="2" name="Absence | Short Term (unexcused)"/>
+					<SampleItem ID="3" name="Absence | Long Term (excused)"/>
+					<SampleItem ID="4" name="Absence | Long Term (unexcused)"/>
+				</ComboField>
+				<MemoField name="Explanation" rows="5" cols="75" sample="Dan was sick with bronchitis and he returned with a doctor's presecription for antibiotics issued the day before his absence.'"/>
+				<DateField name="StartDate" sample="01/01/2004"/>
+				<DateField name="EndDate" sample="01/21/2004"/>
+				<ViewField name="Days" sample="21"/>
+				<EditField name="DaysNotScheduled" sample="6"/>
+				<ViewField name="ActualDays" sample="15"/>
+			</GridForm>
+			<ViewField name="AvailabilityModificationType" sample="1"/>
+			<ViewField name="StartDate" sample="01/01/2004"/>
+			<ViewField name="EndDate" sample="01/21/2004"/>
+			<ViewField name="Days" sample="21"/>
+			<ViewField name="DaysNotScheduled" sample="6"/>
+			<ViewField name="ActualDays" sample="15"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Work Modifications By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Work Modifications By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Work Modifications By Employee">
+			<GroupByField name="EmployeePerson"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Work Modifications By Employee">
+			<GroupByField name="EmployeePerson"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Work Modifications By Modification Category">
+			<GroupByField name="ModificationCategory"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Work Modifications By Modification Category">
+			<GroupByField name="ModificationCategory"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Work Modifications By Modification Type">
+			<GroupByField name="AvailabilityModificationType"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Work Modifications By Modification Type">
+			<GroupByField name="AvailabilityModificationType"/>
+			<SummaryField name="AvailabilityModificationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

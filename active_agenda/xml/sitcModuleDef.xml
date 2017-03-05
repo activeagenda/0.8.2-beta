@@ -1,0 +1,329 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Situation Contacts" moduleID="sitc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Situational Contact" pluralRecordName="Situational Contacts" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="SituationContactID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track contacts assigned to the occurrence of situations" sample="1"/>
+        <TableField name="SituationID" type="int" validate="RequireSelection" phrase="Situation Title|A combined field used to describe this situation when associating it with other records" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="sit" foreignKey="SituationID" foreignField="OrganizationID" key="SituationID" joinType="left" phrase="Organization|The name of the organization at risk of encountering the defined situation" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization at risk of encountering the defined situation" sample="Active Agenda, HQ"/>
+        <ForeignField name="DepartmentID" foreignTable="orgda" foreignKey="RelatedRecordID" foreignField="DepartmentID" key="PersonAccountableID" listCondition="RelatedModuleID = 'pple'" joinType="left" phrase="Department ID|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+        <ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+        <ForeignField name="SituationTypeID" foreignTable="sit" foreignKey="SituationID" foreignField="SituationTypeID" key="SituationID" joinType="left" phrase="Situation Type|A word or phrase used to categorize situtaions encountered by the organization" sample="1"/>
+        <ForeignField name="SituationType" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationType" key="SituationTypeID" joinType="left" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="Employee injury requiring medical treatment"/>
+        <ForeignField name="LocalDescription" foreignTable="sit" foreignKey="SituationID" foreignField="LocalDescription" key="SituationID" joinType="left" phrase="Local Description|An detailed description of the local situation requiring action, communication, or response" sample="Injuries involving medical treatment are those which require the treatment of a trained physician. Injuries resulting in a visit to the industrial medical provider are not included if those injuries can be addressed by a non-physician."/>
+        <ForeignField name="Situation" foreignTable="sit" foreignKey="SituationID" foreignField="Situation" key="SituationID" joinType="left" phrase="Situation Title|A combined field used to describe this situation when associating it with other records" sample="Injury (employee); Employee injury requiring medical treatment"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="79" phrase="Contact|The name of the person assigned to the incident response role at this specific location" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="SearchSelect" key="PersonAccountableID" joinType="left" phrase="Contact|The name of the person assigned to the incident response role at this specific location" sample="Mattias Thorslund"/>
+        <TableField name="ContactImmediacy" type="float" validate="noValidation" phrase="Immediacy|The amount of time which can pass before the contact is notified of the incident" sample="1"/>
+        <TableField name="ContactImmediacyUnitsID" type="int" validate="RequireSelection" phrase="Immediacy Units|The units associated with the contact immediacy" sample="1"/>
+        <ForeignField name="ContactImmediacyCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ContactImmediacyUnitsID" joinType="left" phrase="Immediacy Category|A broadly defined title or phrase used to group contact immediacy requirements" sample="1"/>
+        <CodeField name="ContactImmediacyCategory" key="ContactImmediacyCategoryID" phrase="Immediacy Category|A broadly defined title or phrase used to group contact immediacy requirements" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="ContactImmediacyUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ContactImmediacyUnitsID" joinType="left" phrase="Immediacy Units|The units associated with the contact immediacy" sample="Millimeter"/>
+        <TableField name="SeverityID" type="int" validate="RequireSelection" phrase="Risk Severity|A detailed phrase used to describe the severity of a loss or risk of a loss" sample="1"/>
+        <ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+        <ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A detailed phrase used to describe the severity of a loss or risk of a loss" sample="SLIGHT: Minor First Aid Injury"/>
+        <TableField name="SpecialFactors" type="text" validate="noValidation" phrase="Special Factors|A detailed description of any special notification requirements associated with this contact relative to this situation and associated severity" sample="Mr. Thorslund should only be contacted if the incident results in injury to employees or customers."/>
+        <TableField name="LastUpdate" type="date" validate="noValidation" phrase="Last Update|The date the incident contact was last updated" sample="09-21-2003"/>
+        <!--the last update should be automatically entered based on the internal calendar of the server at the time of a record add or modify. DFZ 8-3-2004-->
+        <CombinedField name="ContactWithin" phrase="Contact Within|A combined field used to describe the contact immediacy requirements when associating them with other records" sample="3 hour(s)"><CombinedFieldRef name="ContactImmediacy"/>_<CombinedFieldRef name="ContactImmediacyUnits"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Situation"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="PersonAccountable"/>;_<CombinedFieldRef name="Severity"/></CombinedField>
+        <CombinedField name="SituationContact" phrase="Situation Contact|A combined field used to describe this situation contact when associating him or her with other records" sample="Injury (employee); Employee injury requiring medical treatment; Active Agenda, HQ; Mattias Thorslund; Death or disabling injury OR $100,000 - $1,000,000"><CombinedFieldRef name="Situation"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="SituationContactID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="SituationContact"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List situation contacts">
+            <ListField name="SituationContactID" phrase="Record ID"/>
+            <ListField name="Situation" phrase="Situation"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="PersonAccountable" phrase="Contact"/>
+            <ListField name="RiskSeverityTerm" phrase="Risk Severity"/>
+            <ListField name="ContactWithin" phrase="Contact Within"/>
+            <ListField name="LastUpdate" phrase="Last Updated"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search situation contacts">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="SituationTypeID" findMode="text">
+                <SampleItem ID="1" name="Injury (employee)"/>
+                <SampleItem ID="2" name="Injury (customer)"/>
+                <SampleItem ID="3" name="Operational (downtime)"/>
+                <SampleItem ID="4" name="Product Recall"/>
+                <SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+                <SampleItem ID="6" name="Information Technology"/>
+            </ComboField>
+            <ComboField name="SituationID" findMode="text">
+                <SampleItem ID="1" name="Injury (employee) - First Aid Only Injury"/>
+                <SampleItem ID="2" name="Injury (employee) - Injury Requiring Minor Medical Treatment"/>
+                <SampleItem ID="3" name="Injury (employee) - Injury Requiring Major Medical Treatment"/>
+            </ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ComboField name="SeverityID" orientation="vertical">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <EditField name="ContactImmediacy" size="5" maxLength="5">
+                <ComboField name="ContactImmediacyCategoryID">
+                    <UpdateFieldRef name="ContactImmediacyUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ContactImmediacyUnitsID" parentField="ContactImmediacyCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="LastUpdate"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the situation contact">
+            <ViewField name="SituationContactID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Situation"/>
+            <ViewField name="LocalDescription"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="Severity"/>
+            <ViewField name="ContactWithin"/>
+            <ViewField name="ContactImmediacy">
+                <ViewField name="ContactImmediacyUnits"/>
+            </ViewField>
+            <ViewField name="SpecialFactors"/>
+            <ViewField name="LastUpdate"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the situation contact">
+            <ViewField name="SituationContactID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Situation"/>
+            <ViewField name="LocalDescription"/>
+            <ViewField name="PersonAccountable"/>
+            <ComboField name="SeverityID">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <EditField name="ContactImmediacy" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="ContactImmediacyCategoryID">
+                    <UpdateFieldRef name="ContactImmediacyUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ContactImmediacyUnitsID" parentField="ContactImmediacyCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <MemoField name="SpecialFactors" rows="5" cols="75"/>
+            <DateField name="LastUpdate"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="sitc" phrase="Contact Criteria">
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="Severity" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+            <ViewField name="ContactWithin" sample="1 Day(s)"/>
+            <ViewField name="LastUpdate" sample="09-21-2003"/>
+        </ViewGrid>
+        <EditGrid moduleID="sitc" phrase="Contact Criteria">
+            <GridForm>
+                <InvisibleField name="SituationContactID"/>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <ComboField name="SeverityID" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00">
+                    <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                    <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                    <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                    <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                    <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+                </ComboField>
+                <EditField name="ContactImmediacy" size="5" maxLength="5">
+                    <Self/>
+                    <ComboField name="ContactImmediacyCategoryID">
+                        <UpdateFieldRef name="ContactImmediacyUnitsID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="ContactImmediacyUnitsID" parentField="ContactImmediacyCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+                <MemoField name="SpecialFactors" rows="5" cols="75" sample="Mr. Thorslund should only be contacted if the incident results in injury to employees or customers."/>
+                <DateField name="LastUpdate" sample="09-21-2003"/>
+            </GridForm>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="Severity" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+            <ViewField name="ContactWithin" sample="1 Day(s)"/>
+            <ViewField name="LastUpdate" sample="09-21-2003"/>
+        </EditGrid>
+        <SearchSelectGrid moduleID="sitc" phrase="Situation Contacts" primaryListField="PersonAccountable">
+            <SearchForm>
+                <OrgComboField name="OrganizationID" findMode="text">
+                    <UpdateFieldRef name="DepartmentID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda Latvia"/>
+                </OrgComboField>
+                <ComboField name="DepartmentID" parentField="OrganizationID">
+                    <SampleItem ID="1" name="Packaging"/>
+                    <SampleItem ID="2" name="Processing"/>
+                    <SampleItem ID="3" name="Administration"/>
+                </ComboField>
+            </SearchForm>
+            <InvisibleField name="PersonAccountableID"/>
+            <ViewField name="PersonAccountable"/>
+        </SearchSelectGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

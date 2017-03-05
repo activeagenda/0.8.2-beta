@@ -1,0 +1,628 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Line Breaking Permits" moduleID="lbrp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Line Breaking Permit" pluralRecordName="Line Breaking Permits" addNewName="Permit" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="LineBreakPermitID" type="int" dbFlags="unsigned auto_increment not null" phrase="Work Order|The work order associated with the line break activity when applicable" sample="1"/>
+		<TableField name="JobNumber" type="varchar(50)" validate="noValidation" phrase="Job Number|The unique number assigned to the job requiring a line break. This number is typically assigned by an engineering or maintenance dapartment" sample="1123"/>
+		<TableField name="PermitNumber" type="varchar(50)" validate="noValidation" phrase="Permit Number|The unique number assigned to the permit used for line breaking and placed at the line break area during the event.  The permit ID can be used as the permit number because it is a unique, automatically generated, numbering system" sample="LBP113"/>
+        <TableField name="WorkOrderID" type="int" dbFlags="unsigned not null" phrase="Record ID|Numerical ID to identify and track work orders" sample="1"/>
+        <ForeignField name="WOOrganizationID" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="OrganizationID" key="WorkOrderID" joinType="left" phrase="W.O. Organization|The organization with primary responsibility for this work order" sample="Active Agenda, HQ"/>
+        <ForeignField name="WOOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WOOrganizationID" joinType="left" phrase="W.O. Organization|The organization with primary responsibility for this work order" sample="Active Agenda, HQ"/>
+        <ForeignField name="WorkOrderNo" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="WorkOrderNo" key="WorkOrderID" joinType="left" phrase="Work Order Number|A unique number assigned to the work order. This number is usually assigned by a maintenance and engineering department and is pre-printed on work order forms" sample="2004-77"/>
+        <ForeignField name="WorkOrder" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="WorkOrder" key="WorkOrderID" joinType="left" phrase="Work Order|The work order associated with the line break activity when applicable" sample="3413 | Repair diamond plate walkway on scanner | 02/02/2006 | In Progress"/>
+        <RemoteField name="RequestTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="50" phrase="Request Date|The date and time the hot work permit was requested" sample="01/01/2004"/>
+		<RemoteField name="LineBreakTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="7" phrase="Line Break Date|The date and time the line break is scheduled to occur" sample="01/01/2004"/>
+		<TableField name="LineBreakShiftID" type="int" validate="RequireSelection" phrase="Line Break Shift|The shift during which the line break occurred" sample="1"/>
+		<CodeField name="LineBreakShift" key="LineBreakShiftID" phrase="Line Break Shift|The shift during which the line break occurred" sample="1st - Day" codeTypeID="183"/>
+		<RemoteField name="ExpirationTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|The date and time the line break permit is scheduled to expire and no longer be valid to authorize the line breaking activities" sample="01/01/2004"/>
+		<TableField name="LineBreakID" type="int" validate="RequireSelection" phrase="Line Break|A combined field used to describe this line break when issuing line breaking permits" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="lbr" foreignKey="LineBreakID" foreignField="OrganizationID" key="LineBreakID" joinType="left" phrase="Organization|The name of the organization where the line breaking activity occurs" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the line breaking activity occurs" sample="Active Agenda, HQ"/>
+		<ForeignField name="LocationID" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LocationID" key="LineBreakID" joinType="left" phrase="Location|Specific area within the facility where the line breaking activity occurs" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific area within the facility where the line breaking activity occurs" sample="Cold Storage Receiving Area; Cold Storage No. 6"/>
+		<ForeignField name="LineBreakTypeID" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LineBreakTypeID" key="LineBreakID" joinType="left" phrase="Line Break Type|A combined field used to describe this line break type when associating it with other records" sample="1"/>
+		<ForeignField name="LineBreakCategoryID" foreignTable="lbrt" foreignKey="LineBreakTypeID" foreignField="LineBreakCategoryID" key="LineBreakTypeID" joinType="left" phrase="Category|A broad categoy used to group line breaks of similar types" sample="1"/>
+		<CodeField name="LineBreakCategory" key="LineBreakCategoryID" phrase="Category|A broad categoy used to group line breaks of similar types" sample="Ammonia Refrigeration" codeTypeID="69"/>
+		<ForeignField name="LineBreakType" foreignTable="lbrt" foreignKey="LineBreakTypeID" foreignField="LineBreakType" key="LineBreakTypeID" joinType="left" phrase="Line Break Type|A combined field used to describe this line break type when associating it with other records" sample="Ammonia Refrigeration | Ammonia supply line"/>
+		<ForeignField name="LastReviewDate" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LastReviewDate" key="LineBreakID" joinType="left" phrase="Last Review|The date of the last formal review of the line breaking activity" sample="01/01/2004"/>
+		<ForeignField name="LineBreakTitle" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LineBreak" key="LineBreakID" joinType="left" phrase="Line Break Title|A word or short phrase used to identify this specific line breaking activity" sample="High Side Ammonia Line Break Within Warehouse"/>
+		<ForeignField name="LineBreak" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LineBreak" key="LineBreakID" joinType="left" phrase="Line Break|A combined field used to describe this line break when issuing line breaking permits" sample="High Side Ammonia Line Break Within Warehouse, Active Agenda, HQ"/>
+		<ForeignField name="LineBreakDesc" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LineBreakDesc" key="LineBreakID" joinType="left" phrase="Description|A detailed description of this line breaking activity and any special characteristics associated with the break" sample="The high side ammonia line is periodically opened for repair purposes related to evaporator damage from forklifts."/>
+        <ForeignField name="PersonAccountableID" foreignTable="lbr" foreignKey="LineBreakID" foreignField="PersonAccountableID" key="LineBreakID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the risks associated with this line break activity" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the risks associated with this line break activity" sample="Mattias Thorslund"/>
+		<ForeignField name="FullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="PersonAccountableID" joinType="left" phrase="Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="Mobile" foreignTable="ppl" foreignKey="PersonID" foreignField="Mobile" key="PersonAccountableID" joinType="left" phrase="Mobile Phone|Mobile telephone number of the individual with a label to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="PersonAccountableID" joinType="left" phrase="Accountable Contact|The contact information of the person assigned primary accountability for managing the risks associated with this line break activity" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+        <ForeignField name="EmergencyPhone" foreignTable="lbr" foreignKey="LineBreakID" foreignField="EmergencyPhone" key="LineBreakID" joinType="left" phrase="Emergency Phone|Telephone number to be called in the case of a line break emergency" sample="(559)289-4921"/>
+        <ForeignField name="LastReviewDate" foreignTable="lbr" foreignKey="LineBreakID" foreignField="LastReviewDate" key="LineBreakID" joinType="left" phrase="Last Review|The date of the last formal review of the line break activity" sample="01/01/2004"/>
+		<ForeignField name="System" foreignTable="lbr" foreignKey="LineBreakID" foreignField="System" key="LineBreakID" joinType="left" phrase="System|The specific system involved in the line breaking activity" sample="Ammonia Refrigeration System; Active Agenda, HQ; 10-28-2003; 1"/>
+		<TableField name="Explanation" type="text" validate="notEmpty" phrase="Explanation|An explanation of the line breaking activity to be performed" sample="The mix tank must be sanitized every 3 days. Sanitation of the mix tank requires that a person enter the access hatch at the top of the tank and disassemble the mix augar so that the augar blades may be cleaned and sanitized"/>
+		<TableField name="KeyLearnings" type="text" validate="noValidation" phrase="Key Learnings|Information learned during the line breaking activity which may be useful to others performing similar confined space entries in the same or similar area" sample="The mix augar should be locked out before entering the mix tank. The augar was not locked out and became energized while I was inside the tank. Fortunately someone heard me screaming as I jumped over the augar blade."/>
+		<TableField name="SpecialHazards" type="text" validate="noValidation" phrase="Special Hazards|Special line breaking hazards that should be captured and recorded so that all persons performing similar activities will be aware of the dangers" sample="The mix augar switch is mislabeled as the 'Intercom Switch' and can result in inadvertent activation of the mix augar by people trying to use the intercom."/>
+		<RemoteField name="PermitIssuedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="49" phrase="Permit Issued By|The name of the person issuing the line breaking permit" sample="1"/>
+		<ForeignField name="PermitIssuedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PermitIssuedByID" joinType="left" phrase="Permit Issued By|The name of the person issuing the line breaking permit" sample="Dan Zahlis"/>
+		<RemoteField name="SupervisorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="51" phrase="Supervisor|The supervisor of the area where the line breaking permit is to occur" sample="1"/>
+		<ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor|The supervisor of the area where the line breaking permit is to occur" sample="Jane Doe"/>
+        <TableField name="PerformerRelationshipID" type="int" validate="RequireSelection" phrase="Performer Relationship|The relationship of the person performing the line break activity to the organization where the activity will occur" sample="1"/>
+        <CodeField name="PerformerRelationship" key="PerformerRelationshipID" phrase="Performer Relationship|The relationship of the person performing the line break activity to the organization where the activity will occur" sample="Employee" codeTypeID="47"/>
+		<RemoteField name="PerformedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="50" phrase="Performed By|The qualified person performing the actual line breaking activity" sample="1"/>
+		<ForeignField name="PerformedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PerformedByID" joinType="left" phrase="Performed By|The qualified person performing the actual line breaking activity" sample="Larry Hansen"/>
+		<RemoteField name="AttendantID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="48" phrase="Attendant|The name of the person assigned to attend the line break and maintain contact with the person performing the break. The attendant is also responsible for maintaining contact with emergency responders and initiating emergency response activities if the person performing the break encounters difficulties" sample="1"/>
+		<ForeignField name="Attendant" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AttendantID" joinType="left" phrase="Attendant|The name of the person assigned to attend the confined space entry and maintain contact with the entrant. The attendant is also responsible for maintaining contact with emergency responders and initiating emergency response activities if the entry person encounters difficulties" sample="Jane Doe"/>
+		<RemoteField name="AtmosphereTesterID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="47" phrase="Atmosphere Tester|The name of the person conducting atmosphere testing and monitoring of the environment adjacent to the line break area" sample="1"/>
+		<ForeignField name="AtmosphereTester" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AtmosphereTesterID" joinType="left" phrase="Atmosphere Tester|The name of the person conducting atmosphere testing and monitoring of the environment adjacent to the line break area" sample="Dan Zahlis"/>
+		<RemoteField name="ERTMemberID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="23" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the line break and who remains available in the event that a containment response or emergency rescue becomes necessary" sample="1"/>
+		<ForeignField name="ERTMember" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ERTMemberID" joinType="left" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the line break and who remains available in the event that a containment response or emergency rescue becomes necessary" sample="Mattias Thorslund"/>
+		<ForeignField name="ERTFullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="ERTMemberID" joinType="left" phrase="ERT Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ERTMobile" foreignTable="ppl" foreignKey="PersonID" foreignField="Mobile" key="ERTMemberID" joinType="left" phrase="ERT Mobile Phone|Mobile telephone number of the individual with a label to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ERTFullPager" foreignTable="ppl" foreignKey="PersonID" foreignField="FullPager" key="ERTMemberID" joinType="left" phrase="ERT Pager|Pager number and PIN of the individual" sample="(559)299-8054, PIN: 2112"/>
+		<ForeignField name="ERTContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="ERTMemberID" joinType="left" phrase="ERT Contact|The contact information of the emergency response team member assigned to monitor the line break activity" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PermitNumber"/>;_<CombinedFieldRef name="LineBreakType"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="LineBreakTime"/></CombinedField>
+		<CombinedField name="LineBreakPermit" phrase="Line Break Permit|A combined field used to describe this line break permit when associating it with related records" sample="LBP113, 09-21-2003; Ammonia Refigeration; Active Agenda, HQ"><CombinedFieldRef name="LineBreakTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LineBreakPermitID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="LineBreakPermit"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="hza" name="Hazard Abatement" parentKey="LineBreakID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbr"/>
+		</SubModule>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="LineBreakID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="lbr"/>
+        </SubModule>
+		<SubModule moduleID="chma" name="Chemical Associations" parentKey="LineBreakID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbr"/>
+		</SubModule>
+		<SubModule moduleID="hzea" name="Hazardous Energy Procedure Associations" parentKey="LineBreakID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbr"/>
+		</SubModule>
+		<SubModule moduleID="jana" name="Job Analyses" parentKey="LineBreakID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbr"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="LineBreakPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbrp"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="LineBreakPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbrp"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="LineBreakPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lbrp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List line breaking permits">
+			<ListField name="LineBreakPermitID" phrase="Record ID"/>
+			<ListField name="PermitNumber" phrase="Permit Number"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="LineBreakType" phrase="Break Type"/>
+			<ListField name="LineBreak" phrase="Line Break"/>
+			<ListField name="LineBreakTime" phrase="Date and Time"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search line breaking permits">
+			<EditField name="JobNumber" size="50" maxLength="50"/>
+			<EditField name="PermitNumber" size="50" maxLength="50"/>
+            <OrgComboField name="WOOrganizationID" findMode="text">
+                <UpdateFieldRef name="WorkOrderID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="WorkOrderID" findMode="text" parentField="WOOrganizationID">
+                <SampleItem ID="1" name="3413 | Repair diamond plate walkway on scanner | 02/02/2006"/>
+                <SampleItem ID="3" name="3414 | Repair steel plate in CEO's head | 02/07/2006"/>
+                <SampleItem ID="5" name="3415 | Repair guard rail on line 1 | 01/02/2007"/>
+                <SampleItem ID="7" name="3416 | Repair floor hole in warehouse | 01/12/2001"/>
+            </ComboField>
+            <DateField name="RequestTime"/>
+			<DateField name="LineBreakTime"/>
+			<CodeRadioField name="LineBreakShiftID" orientation="vertical">
+				<SampleItem ID="1" name="Day - 1st"/>
+				<SampleItem ID="3" name="Night - 2nd"/>
+				<SampleItem ID="5" name="Graveyard - 3rd"/>
+			</CodeRadioField>
+			<DateField name="ExpirationTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="LineBreakID"/>
+				<SampleItem ID="1" name="Maintenance Shop"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+			<ComboField name="LineBreakID" findMode="text" parentField="LocationID">
+				<SampleItem ID="1" name="Ammonia Refrigeration | High Side Line Break | Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Ammonia Refrigeration | Low Side | Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Ammonia Refrigeration | Evaporator Break | Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Ammonia Refrigeration | Receiver Line Break | Active Agenda, HQ"/>
+			</ComboField>
+			<ComboField name="LineBreakCategoryID" findMode="text">
+				<UpdateFieldRef name="LineBreakTypeID"/>
+				<SampleItem ID="1" name="Ammonia Refrigeration"/>
+				<SampleItem ID="2" name="Deisel Fuel"/>
+				<SampleItem ID="3" name="Propane System"/>
+				<SampleItem ID="4" name="Nitrogen Charge System"/>
+			</ComboField>
+			<ComboField name="LineBreakTypeID" findMode="text" parentField="LineBreakCategoryID">
+				<SampleItem ID="1" name="High Side Pipe Break"/>
+				<SampleItem ID="2" name="Low Side Pipe Break"/>
+				<SampleItem ID="3" name="Drain Valve Opening"/>
+				<SampleItem ID="4" name="Safety Valve Test"/>
+			</ComboField>
+			<PersonComboField name="PermitIssuedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PerformedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+            <CodeRadioField name="PerformerRelationshipID" findMode="text" orientation="vertical">
+                <SampleItem ID="1" name="Employee"/>
+                <SampleItem ID="2" name="Contractor"/>
+                <SampleItem ID="3" name="Sub-Contractor"/>
+                <SampleItem ID="4" name="Distributor"/>
+                <SampleItem ID="5" name="Manufacturer"/>
+            </CodeRadioField>
+			<PersonComboField name="AttendantID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AtmosphereTesterID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="ERTMemberID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a line breaking permit">
+			<ViewField name="LineBreakPermitID"/>
+			<ViewField name="JobNumber"/>
+			<ViewField name="PermitNumber"/>
+            <ViewField name="WorkOrder"/>
+            <ViewField name="RequestTime"/>
+			<ViewField name="LineBreakTime"/>
+			<ViewField name="LineBreakShift"/>
+			<ViewField name="ExpirationTime"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="LineBreakCategory"/>
+			<ViewField name="LineBreakType"/>
+			<ViewField name="LineBreak"/>
+			<ViewField name="System"/>
+            <ViewField name="LastReviewDate"/>
+			<ViewField name="LineBreakDesc"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="ContactCard"/>
+			<ViewField name="Explanation"/>
+			<ViewField name="KeyLearnings"/>
+			<ViewField name="SpecialHazards"/>
+			<ViewField name="PermitIssuedBy"/>
+			<ViewField name="Supervisor"/>
+			<ViewField name="PerformerRelationship"/>
+			<ViewField name="PerformedBy"/>
+			<ViewField name="Attendant"/>
+			<ViewField name="AtmosphereTester"/>
+			<ViewField name="ERTMember"/>
+            <ViewField name="ERTContactCard"/>
+            <ViewField name="EmergencyPhone"/>
+			<InvisibleField name="LineBreakID"/>
+			<ViewScreenSection name="Information" phrase="Information Associated With This Line Breaking Activity">
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="chma"/>
+				<ViewGrid moduleID="hzea"/>
+                <ViewGrid moduleID="apr" phrase="Checklist Items"/>
+				<ViewGrid moduleID="jana"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a line breaking permit">
+			<ViewField name="LineBreakPermitID"/>
+			<EditField name="JobNumber" size="50" maxLength="50"/>
+			<EditField name="PermitNumber" size="50" maxLength="50"/>
+            <OrgComboField name="WOOrganizationID" findMode="text">
+                <UpdateFieldRef name="WorkOrderID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="WorkOrderID" findMode="text" parentField="WOOrganizationID">
+                <SampleItem ID="1" name="3413 | Repair diamond plate walkway on scanner | 02/02/2006"/>
+                <SampleItem ID="3" name="3414 | Repair steel plate in CEO's head | 02/07/2006"/>
+                <SampleItem ID="5" name="3415 | Repair guard rail on line 1 | 01/02/2007"/>
+                <SampleItem ID="7" name="3416 | Repair floor hole in warehouse | 01/12/2001"/>
+            </ComboField>
+            <DateField name="RequestTime"/>
+			<DateField name="LineBreakTime"/>
+			<CodeRadioField name="LineBreakShiftID" orientation="vertical">
+				<SampleItem ID="1" name="Day - 1st"/>
+				<SampleItem ID="3" name="Night - 2nd"/>
+				<SampleItem ID="5" name="Graveyard - 3rd"/>
+			</CodeRadioField>
+			<DateField name="ExpirationTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="LineBreakID"/>
+				<SampleItem ID="1" name="Maintenance Shop"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="LineBreakID" findMode="text" parentField="LocationID">
+				<UpdateFieldRef name="LastReviewDate"/>
+				<UpdateFieldRef name="LineBreakDesc"/>
+				<UpdateFieldRef name="PersonAccountable"/>
+				<UpdateFieldRef name="ContactCard"/>
+				<UpdateFieldRef name="EmergencyPhone"/>
+				<UpdateFieldRef name="System"/>
+				<SampleItem ID="1" name="Ammonia Refrigeration | High Side Line Break | Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Ammonia Refrigeration | Low Side | Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Ammonia Refrigeration | Evaporator Break | Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Ammonia Refrigeration | Receiver Line Break | Active Agenda, HQ"/>
+			</ComboField>
+			<ViewField name="System" parentField="LineBreakID"/>
+            <ViewField name="LastReviewDate" parentField="LineBreakID"/>
+			<ViewField name="LineBreakDesc" parentField="LineBreakID"/>
+            <ViewField name="PersonAccountable" parentField="LineBreakID"/>
+            <ViewField name="ContactCard" parentField="LineBreakID"/>
+            <ViewField name="EmergencyPhone" parentField="LineBreakID"/>
+			<MemoField name="Explanation" rows="5" cols="75"/>
+			<MemoField name="KeyLearnings" rows="5" cols="75"/>
+			<MemoField name="SpecialHazards" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Assignment" phrase="Assignments|Assign specific responsibilities for a line breaking permit">
+			<RecordSummaryFieldsRef/>
+            <CodeRadioField name="PerformerRelationshipID" findMode="text" orientation="vertical">
+                <SampleItem ID="1" name="Employee"/>
+                <SampleItem ID="2" name="Contractor"/>
+                <SampleItem ID="3" name="Sub-Contractor"/>
+                <SampleItem ID="4" name="Distributor"/>
+                <SampleItem ID="5" name="Manufacturer"/>
+            </CodeRadioField>
+			<PersonComboField name="PerformedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PermitIssuedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AttendantID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AtmosphereTesterID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="ERTMemberID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the line breaking permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the line breaking permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the line breaking permit" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="RecordReports" phrase="Reports|View forms and reports associated with line breaking permits"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="LineBreakPermitID"/>
+		<InvisibleField name="LineBreakID"/>
+		<ViewField name="JobNumber"/>
+		<ViewField name="PermitNumber"/>
+        <ViewField name="WorkOrder"/>
+        <ViewField name="RequestTime"/>
+		<ViewField name="LineBreakTime"/>
+		<ViewField name="LineBreakShift"/>
+		<ViewField name="ExpirationTime"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Location"/>
+		<ViewField name="LineBreakCategory"/>
+		<ViewField name="LineBreakType"/>
+		<ViewField name="LineBreak"/>
+        <ViewField name="System"/>
+        <ViewField name="LastReviewDate"/>
+        <ViewField name="LineBreakDesc"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="ContactCard"/>
+		<ViewField name="PerformerRelationship"/>
+		<ViewField name="PerformedBy"/>
+        <ViewField name="ERTMember"/>
+        <ViewField name="ERTContactCard"/>
+        <ViewField name="EmergencyPhone"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="lbrp" phrase="Permits">
+			<InvisibleField name="LineBreakPermitID"/>
+			<ViewField name="PermitNumber" sample="CSE113"/>
+			<ViewField name="LineBreakTime" sample="09-21-2003"/>
+			<ViewField name="KeyLearnings" sample="The mix augar should be locked out before entering the mix tank. The augar was not locked out and became energized while I was inside the tank. Fortunately someone heard me screaming as I jumped over the augar blade."/>
+		</ViewGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Line Breaking Permits By Shift">
+			<GroupByField name="LineBreakShift"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Line Breaking Permits By Shift">
+			<GroupByField name="LineBreakShift"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Line Breaking Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Line Breaking Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Line Breaking Permits By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Line Breaking Permits By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Line Breaking Permits By Line Break Type">
+			<GroupByField name="LineBreakType"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Line Breaking Permits By Line Break Type">
+			<GroupByField name="LineBreakType"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Line Breaking Permits By Issuer">
+			<GroupByField name="PermitIssuedBy"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Line Breaking Permits By Issuer">
+			<GroupByField name="PermitIssuedBy"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Line Breaking Permits By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Line Breaking Permits By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Line Breaking Permits By Performer">
+			<GroupByField name="PerformedBy"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Line Breaking Permits By Performer">
+			<GroupByField name="PerformedBy"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Line Breaking Permits By Attendant">
+			<GroupByField name="Attendant"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Line Breaking Permits By Attendant">
+			<GroupByField name="Attendant"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Line Breaking Permits By Atmosphere Tester">
+			<GroupByField name="AtmosphereTester"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Line Breaking Permits By Atmosphere Tester">
+			<GroupByField name="AtmosphereTester"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Line Breaking Permits By Emergency Response Team Member">
+			<GroupByField name="ERTMember"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Line Breaking Permits By Emergency Response Team Member">
+			<GroupByField name="ERTMember"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Line Breaking Permits By Category">
+			<GroupByField name="LineBreakCategory"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Line Breaking Permits By Category">
+			<GroupByField name="LineBreakCategory"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie12" title="Line Breaking Permits By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto12" title="Line Breaking Permits By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie13" title="Line Breaking Permits By Performer Relationship">
+			<GroupByField name="PerformerRelationship"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto13" title="Line Breaking Permits By Performer Relationship">
+			<GroupByField name="PerformerRelationship"/>
+			<SummaryField name="LineBreakPermitID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

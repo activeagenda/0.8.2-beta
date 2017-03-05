@@ -1,0 +1,727 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Vehicles" moduleID="veh" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Vehicle" pluralRecordName="Vehicles" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="VehicleID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track vehicles of all types" sample="1"/>
+		<TableField name="AssignedOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Assigned Organization|The name of the local organization assigned to, and responsible for, this vehicle" sample="2"/>
+		<ForeignField name="AssignedOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AssignedOrganizationID" joinType="left" phrase="Assigned Organization|The name of the local organization assigned to, and responsible for, this vehicle" sample="Active Agenda, Sweden"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="89" phrase="Person Accountable|The individual assigned primary accountability for managing this vehicle" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this vehicle" sample="Mattias Thorslund"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the vehicle is located during business hours" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the vehicle is located during business hours" sample="Parking Lot #4"/>
+		<TableField name="VehYear" type="varchar(50)" validate="noValidation" phrase="Year|The year the vehicle was manufactured" sample="1998"/>
+		<TableField name="VehicleModelID" type="int" validate="notEmpty" phrase="Vehicle Model|A combined field used to associate this vehicle model with another record" sample="1"/>
+		<ForeignField name="VehicleModel" foreignTable="vehmd" foreignKey="VehicleModelID" foreignField="VehicleModel" key="VehicleModelID" joinType="left" phrase="Vehicle Model|A combined field used to associate this vehicle model with another record" sample="Landrover; Discovery; LSEi"/>
+		<TableField name="VehicleTypeID" type="int" validate="notEmpty" phrase="Vehicle Type|A combined field used to describe this vehicle type when associating it with other records" sample="1"/>
+		<ForeignField name="VehicleType" foreignTable="veht" foreignKey="VehicleTypeID" foreignField="VehicleType" key="VehicleTypeID" joinType="left" phrase="Vehicle Type|A combined field used to describe this vehicle type when associating it with other records" sample="Direct Store Delivery Refrigeration Vehicle; Active Agenda, HQ"/>
+		<TableField name="VehBody" type="varchar(255)" validate="noValidation" phrase="Vehicle Body|A brief description of this vehicle body for identification purposes" sample="This vehicle has been custom painted with the company logo and color scheme."/>
+		<TableField name="VehOperationTypeID" type="int" validate="noValidation" phrase="Operation Type|The type of operation performed for the organization by the vehicle" sample="1"/>
+		<CodeField name="VehOperationType" key="VehOperationTypeID" phrase="Operation Type|The type of operation performed for the organization by the vehicle" sample="Sales Fleet" codeTypeID="252"/>
+		<TableField name="VehColorID" type="int" validate="noValidation" phrase="Color|The color of the vehicle" sample="1"/>
+		<CodeField name="VehColor" key="VehColorID" phrase="Color|The color of the vehicle" sample="White" codeTypeID="249"/>
+		<TableField name="VehFuelTypeID" type="int" validate="noValidation" phrase="Fuel Type|The type of fuel required for operation of the vehicle" sample="1"/>
+		<CodeField name="VehFuelType" key="VehFuelTypeID" phrase="Fuel Type|The type of fuel required for operation of the vehicle" sample="Unleaded" codeTypeID="250"/>
+		<TableField name="VehDesc" type="varchar(255)" validate="noValidation" phrase="Vehicle Decsription|A brief description of the vehicle and any special factors needing to be tracked" sample="This is Doe's company vehicle. Doe uses the vehicle for business and personal use."/>
+		<TableField name="VehValue" type="money" validate="noValidation" phrase="Vehicle Value|The present estimated value of the vehicle stated in the currency established for this site installation of the software" sample="$19,000.00"/>
+		<TableField name="VehLoad" type="float" validate="noValidation" phrase="Load Capacity|The maximum weight the vehicle is capable of carrying" sample="1.5"/>
+		<TableField name="VehLoadUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="VehLoadUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="VehLoadUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="VehLoadUnitCategory" key="VehLoadUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="VehLoadUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="VehLoadUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="VehWeight" type="float" validate="noValidation" phrase="Unladen Weight|The weight of the vehicle without any load" sample="2.5"/>
+		<TableField name="VehWeightUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="VehWeightUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="VehWeightUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="VehWeightUnitCategory" key="VehWeightUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="VehWeightUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="VehWeightUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="OwnerID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Owner|The name of the organization the vehicle is registered to" sample="1"/>
+		<ForeignField name="Owner" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerID" joinType="left" phrase="Owner|The name of the organization the vehicle is registered to" sample="Active Agenda, HQ"/>
+		<TableField name="VehNo" type="varchar(50)" validate="noValidation" phrase="Vehicle Number|The number assigned to the vehicle for asset tracking purposes" sample="212"/>
+		<TableField name="VehIDNo" type="varchar(50)" validate="noValidation" phrase="Identification Number|The number assigned to the vehicle by the vehicle manufacturer. This number is often used by the government and vehicle dealerships to identify and track vehicle history" sample="9SLY66277726"/>
+		<TableField name="VehLicenseNo" type="varchar(50)" validate="notEmpty" phrase="License Plate Number|The number assigned by the government agency responsible for maintaining vehicle operation safety and environmental performance standards" sample="9FSE187"/>
+		<TableField name="StateID" type="int" validate="noValidation" phrase="State of Registration|The name of the state or similar geographic zone where the vehicle is registered" sample="1"/>
+		<ForeignField name="CountryID" foreignTable="sta" foreignKey="StateID" foreignField="CountryID" key="StateID" joinType="left" phrase="Country|The internationally recognized name of the country" sample="1"/>
+		<ForeignField name="Country" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="CountryID" joinType="left" phrase="Country|A combined field used to associate this country with another record" sample="United States of America (USA)"/>
+		<ForeignField name="State" foreignTable="sta" foreignKey="StateID" foreignField="State" key="StateID" joinType="left" phrase="State of Registration|A combined field used to associate this state with another record" sample="California (CA); United States of America (USA)"/>
+		<RemoteField name="RegExpires" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Registration Expires|Date the vehicle's registration expires. The vehicle's registration must be renewed prior to this date" sample="01/01/2004"/>
+		<TableField name="Commercial" type="bool" validate="noValidation" dbFlags="default 0" phrase="Commercial Vehicle?|whether or not the vehicle is a commercial motor vehicle. This classification is usually associated with an unladen weight; such as, 26,000 pounds" sample="Yes"/>
+		<SummaryField name="IncurredCost" type="money" summaryFunction="sum" summaryField="Incurred" summaryKey="RelatedRecordID" summaryModuleID="cos" summaryCondition="RelatedModuleID = 'veh'" localKey="VehicleID" phrase="Incurred Cost|The sum of incurred costs for this record" sample="USD 3,000"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="VehicleID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'veh'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the vehicle" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="VehicleID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'veh'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the vehicle" sample="702.00"/>
+		<CombinedField name="VehLoadCapacity" phrase="Load Capacity|The maximum load capacity of the vehicle as established by the vehicle manufacturer" sample="10,000 Pound(s)"><CombinedFieldRef name="VehLoad"/>_<CombinedFieldRef name="VehLoadUnits"/></CombinedField>
+		<CombinedField name="VehTotalWeight" phrase="Vehicle Weight|The total unladen weight of the vehicle as established by the vehicle manufacturer or subsequent, more accurate, weight evaluations" sample="2,725 Pound(s)"><CombinedFieldRef name="VehWeight"/>_<CombinedFieldRef name="VehWeightUnits"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="VehicleModel"/>;_<CombinedFieldRef name="VehLicenseNo"/>;_<CombinedFieldRef name="AssignedOrganization"/></CombinedField>
+		<CombinedField name="Vehicle" phrase="Vehicle|A combined field used to describe this vehicle when associating it with other records" sample="Landrover, Discovery; 9FSE187; Active Agenda, HQ"><CombinedFieldRef name="VehicleModel"/>;_<CombinedFieldRef name="VehLicenseNo"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="VehicleID"/>
+		</PrimaryKey>
+		<OwnerField name="AssignedOrganizationID"/>
+		<RecordDescriptionField name="Vehicle"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="veha" name="Vehicle Assignments" parentKey="VehicleID" localKey="VehicleID"/>
+		<SubModule moduleID="vehml" name="Odometer" parentKey="VehicleID" localKey="VehicleID"/>
+		<SubModule moduleID="vehtn" name="Vehicle Tracking Numbers" parentKey="VehicleID" localKey="VehicleID"/>
+		<SubModule moduleID="cos" name="Costs" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<!--Required for the summary field-->
+		<SubModule moduleID="eqpa" name="Equipment Associations" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Minimum Requirements" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="VehicleTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veht"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Continuation" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Policies" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="VehicleID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="veh"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List vehicles">
+			<ListField name="VehicleID" phrase="Record ID"/>
+			<ListField name="AssignedOrganization" phrase="Organization"/>
+			<ListField name="VehicleType" phrase="Type"/>
+			<ListField name="VehicleModel" phrase="Model"/>
+			<ListField name="VehYear" phrase="Year"/>
+			<ListField name="VehValue" phrase="Value"/>
+			<ListField name="VehLicenseNo" phrase="License"/>
+			<ListField name="RegExpires" phrase="Registration Expires"/>
+			<ListField name="IncurredCost" phrase="Cost"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search vehicles">
+			<OrgComboField name="OwnerID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="VehicleTypeID" findMode="text">
+				<SampleItem ID="1" name="Sport Utility"/>
+				<SampleItem ID="2" name="Sedan"/>
+				<SampleItem ID="3" name="Trailer"/>
+				<SampleItem ID="4" name="Van"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="AssignedOrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="LocationID" findMode="text" parentField="AssignedOrganizationID" parentListModuleField="OrganizationID">
+				<SampleItem ID="1" name="Parking Lot #4"/>
+				<SampleItem ID="2" name="Parking Lot #1"/>
+				<SampleItem ID="3" name="Parking Lot #2"/>
+				<SampleItem ID="4" name="Parking Lot #3"/>
+			</ComboField>
+			<EditField name="VehYear" size="25" maxLength="25"/>
+			<ComboField name="VehicleModelID" findMode="text">
+				<SampleItem ID="1" name="Landrover; Discovery; LSEi"/>
+				<SampleItem ID="2" name="Landrover; Discovery; LS"/>
+				<SampleItem ID="3" name="Landrover; Discovery; Series 2"/>
+				<SampleItem ID="4" name="Ford; Taurus; LE"/>
+				<SampleItem ID="5" name="Ford; Taurus; Lei"/>
+				<SampleItem ID="6" name="Ford; Taurus; LSE"/>
+			</ComboField>
+			<CodeComboField name="VehOperationTypeID" findMode="text">
+				<SampleItem ID="1" name="Sales Fleet"/>
+				<SampleItem ID="2" name="Commercial Distribution"/>
+				<SampleItem ID="3" name="Direct Store Distribution"/>
+				<SampleItem ID="4" name="Field Agriculture"/>
+			</CodeComboField>
+			<CodeComboField name="VehColorID" findMode="text">
+				<SampleItem ID="1" name="White Gold"/>
+				<SampleItem ID="2" name="White"/>
+				<SampleItem ID="3" name="Red"/>
+				<SampleItem ID="4" name="Blue"/>
+			</CodeComboField>
+			<CodeComboField name="VehFuelTypeID" findMode="text">
+				<SampleItem ID="1" name="Unleaded"/>
+				<SampleItem ID="2" name="Deisel"/>
+				<SampleItem ID="3" name="Propane"/>
+				<SampleItem ID="4" name="Electric"/>
+			</CodeComboField>
+			<EditField name="VehLoad" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="VehLoadUnitCategoryID">
+					<UpdateFieldRef name="VehLoadUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="VehLoadUnitsID" parentField="VehLoadUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="VehWeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="VehWeightUnitCategoryID">
+					<UpdateFieldRef name="VehWeightUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="VehWeightUnitsID" parentField="VehWeightUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MoneyField name="VehValue"/>
+			<EditField name="VehNo" size="50" maxLength="50"/>
+			<EditField name="VehIDNo" size="50" maxLength="50"/>
+			<EditField name="VehLicenseNo" size="50" maxLength="50"/>
+			<ComboField name="CountryID" findMode="text">
+				<UpdateFieldRef name="StateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="StateID" findMode="text" parentField="CountryID">
+				<SampleItem ID="1" name="California (CA); United States of America (USA)"/>
+				<SampleItem ID="2" name="Utah (UT); United States of America (USA)"/>
+				<SampleItem ID="3" name="Alaska (AK); United States of America (USA)"/>
+				<SampleItem ID="4" name="Oregon (OR); United States of America (USA)"/>
+				<SampleItem ID="5" name="Washington (WA); United States of America (USA)"/>
+			</ComboField>
+			<DateField name="RegExpires"/>
+			<CheckBoxField name="Commercial"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a vehicle">
+			<ViewField name="VehicleID"/>
+			<ViewField name="Owner"/>
+			<ViewField name="VehicleType"/>
+			<ViewField name="AssignedOrganization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="Location"/>
+			<ViewField name="VehYear">
+				<ViewField name="VehicleModel"/>
+			</ViewField>
+			<ViewField name="VehBody"/>
+			<ViewField name="VehOperationType"/>
+			<ViewField name="VehColor"/>
+			<ViewField name="VehFuelType"/>
+			<ViewField name="VehLoadCapacity"/>
+			<ViewField name="VehTotalWeight"/>
+			<ViewField name="VehDesc"/>
+			<ViewField name="VehValue"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewScreenSection name="Numbers" phrase="Numbers">
+				<ViewField name="VehNo"/>
+				<ViewField name="VehIDNo"/>
+				<ViewField name="VehLicenseNo"/>
+				<ViewGrid moduleID="vehtn"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="License" phrase="License">
+				<ViewField name="State"/>
+				<ViewField name="RegExpires"/>
+				<ViewField name="Commercial"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="vehml"/>
+				<ViewGrid moduleID="eqpa"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="veha"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a vehicle">
+			<ViewField name="VehicleID"/>
+			<OrgComboField name="OwnerID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="VehicleTypeID" findMode="text">
+				<SampleItem ID="1" name="Sport Utility"/>
+				<SampleItem ID="2" name="Sedan"/>
+				<SampleItem ID="3" name="Trailer"/>
+				<SampleItem ID="4" name="Van"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="AssignedOrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="LocationID" findMode="text" parentField="AssignedOrganizationID" parentListModuleField="OrganizationID">
+				<SampleItem ID="1" name="Parking Lot #4"/>
+				<SampleItem ID="2" name="Parking Lot #1"/>
+				<SampleItem ID="3" name="Parking Lot #2"/>
+				<SampleItem ID="4" name="Parking Lot #3"/>
+			</ComboField>
+			<EditField name="VehYear" size="25" maxLength="25"/>
+			<ComboField name="VehicleModelID" findMode="text">
+				<SampleItem ID="1" name="Landrover; Discovery; LSEi"/>
+				<SampleItem ID="2" name="Landrover; Discovery; LS"/>
+				<SampleItem ID="3" name="Landrover; Discovery; Series 2"/>
+				<SampleItem ID="4" name="Ford; Taurus; LE"/>
+				<SampleItem ID="5" name="Ford; Taurus; Lei"/>
+				<SampleItem ID="6" name="Ford; Taurus; LSE"/>
+			</ComboField>
+			<MemoField name="VehBody" rows="5" cols="75"/>
+			<CodeComboField name="VehOperationTypeID" findMode="text">
+				<SampleItem ID="1" name="Sales Fleet"/>
+				<SampleItem ID="2" name="Commercial Distribution"/>
+				<SampleItem ID="3" name="Direct Store Distribution"/>
+				<SampleItem ID="4" name="Field Agriculture"/>
+			</CodeComboField>
+			<CodeComboField name="VehColorID" findMode="text">
+				<SampleItem ID="1" name="White Gold"/>
+				<SampleItem ID="2" name="White"/>
+				<SampleItem ID="3" name="Red"/>
+				<SampleItem ID="4" name="Blue"/>
+			</CodeComboField>
+			<CodeComboField name="VehFuelTypeID" findMode="text">
+				<SampleItem ID="1" name="Unleaded"/>
+				<SampleItem ID="2" name="Deisel"/>
+				<SampleItem ID="3" name="Propane"/>
+				<SampleItem ID="4" name="Electric"/>
+			</CodeComboField>
+			<EditField name="VehLoad" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="VehLoadUnitCategoryID">
+					<UpdateFieldRef name="VehLoadUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="VehLoadUnitsID" parentField="VehLoadUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="VehWeight" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="VehWeightUnitCategoryID">
+					<UpdateFieldRef name="VehWeightUnitsID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="VehWeightUnitsID" parentField="VehWeightUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<MemoField name="VehDesc" rows="5" cols="75"/>
+			<MoneyField name="VehValue"/>
+		</EditScreen>
+		<EditScreen name="Numbers" phrase="Numbers|Associate tracking numbers with a vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditField name="VehNo" size="50" maxLength="50"/>
+			<EditField name="VehIDNo" size="50" maxLength="50"/>
+			<EditField name="VehLicenseNo" size="50" maxLength="50"/>
+			<EditGrid moduleID="vehtn"/>
+		</EditScreen>
+		<EditScreen name="License" phrase="License|Edit license and registration information for a vehicle">
+			<RecordSummaryFieldsRef/>
+			<ComboField name="CountryID" findMode="text">
+				<UpdateFieldRef name="StateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="StateID" findMode="text" parentField="CountryID">
+				<SampleItem ID="1" name="California (CA); United States of America (USA)"/>
+				<SampleItem ID="2" name="Utah (UT); United States of America (USA)"/>
+				<SampleItem ID="3" name="Alaska (AK); United States of America (USA)"/>
+				<SampleItem ID="4" name="Oregon (OR); United States of America (USA)"/>
+				<SampleItem ID="5" name="Washington (WA); United States of America (USA)"/>
+			</ComboField>
+			<DateField name="RegExpires"/>
+			<CheckBoxField name="Commercial"/>
+		</EditScreen>
+		<EditScreen name="Assignments" phrase="Assignments|Assign vehicle operators to the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="veha"/>
+		</EditScreen>
+		<EditScreen name="Odometer" phrase="Odometer|Associate odometer readings with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="vehml"/>
+		</EditScreen>
+		<EditScreen name="Equipment" phrase="Equipment|Associate equipment with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="eqpa"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit requirements with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuation" phrase="Continuity|Associate business continuation requirements with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the vehicle">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the vehicle" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="VehicleID"/>
+		<InvisibleField name="VehicleTypeID"/>
+		<ViewField name="Owner"/>
+		<ViewField name="AssignedOrganization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="Location"/>
+		<ViewField name="VehYear">
+			<ViewField name="VehicleModel"/>
+		</ViewField>
+		<ViewField name="VehicleType"/>
+		<ViewField name="VehOperationType"/>
+		<ViewField name="VehColor"/>
+		<ViewField name="VehFuelType"/>
+		<ViewField name="VehLoadCapacity"/>
+		<ViewField name="VehTotalWeight"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Vehicles By Organization">
+			<GroupByField name="AssignedOrganization"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Vehicles By Organization">
+			<GroupByField name="AssignedOrganization"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Vehicles By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Vehicles By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Vehicles By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Vehicles By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Vehicles By Model">
+			<GroupByField name="VehicleModel"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Vehicles By Model">
+			<GroupByField name="VehicleModel"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Vehicles By Type">
+			<GroupByField name="VehicleType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Vehicles By Type">
+			<GroupByField name="VehicleType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Vehicles By Audit Type">
+			<GroupByField name="VehAuditType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Vehicles By Audit Type">
+			<GroupByField name="VehAuditType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Vehicles By Operation Type">
+			<GroupByField name="VehOperationType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Vehicles By Operation Type">
+			<GroupByField name="VehOperationType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Vehicles By Fuel Type">
+			<GroupByField name="VehFuelType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Vehicles By Fuel Type">
+			<GroupByField name="VehFuelType"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Vehicles By Owner">
+			<GroupByField name="Owner"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Vehicles By Owner">
+			<GroupByField name="Owner"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Commercial Vehicles">
+			<GroupByField name="Commercial"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Commercial Vehicles">
+			<GroupByField name="Commercial"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Commercial Vehicles">
+			<GroupByField name="Commercial"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Commercial Vehicles">
+			<GroupByField name="Commercial"/>
+			<SummaryField name="VehicleID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

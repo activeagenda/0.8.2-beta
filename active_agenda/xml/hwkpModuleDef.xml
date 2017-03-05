@@ -1,0 +1,628 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Hot Work Permits" moduleID="hwkp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Hot Work Permit" pluralRecordName="Hot Work Permits" addNewName="Permit" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="HotWorkPermitID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track hot work permits" sample="1"/>
+        <TableField name="JobNumber" type="varchar(50)" validate="noValidation" phrase="Job Number|The unique number assigned to the job requiring hot work. This number is typically assigned by an engineering or maintenance dapartment" sample="1123"/>
+        <TableField name="PermitNumber" type="varchar(50)" validate="noValidation" phrase="Permit Number|The unique number assigned to the permit used for hot work and placed at the area where the hot work is to be performed. The permit ID can be used as the permit number because it is a unique, automatically generated, numbering system" sample="HWP113"/>
+        <TableField name="WorkOrderID" type="int" dbFlags="unsigned not null" phrase="Record ID|Numerical ID to identify and track work orders" sample="1"/>
+        <ForeignField name="WOOrganizationID" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="OrganizationID" key="WorkOrderID" joinType="left" phrase="W.O. Organization|The organization with primary responsibility for this work order" sample="Active Agenda, HQ"/>
+        <ForeignField name="WOOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WOOrganizationID" joinType="left" phrase="W.O. Organization|The organization with primary responsibility for this work order" sample="Active Agenda, HQ"/>
+        <ForeignField name="WorkOrderNo" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="WorkOrderNo" key="WorkOrderID" joinType="left" phrase="Work Order Number|A unique number assigned to the work order. This number is usually assigned by a maintenance and engineering department and is pre-printed on work order forms" sample="2004-77"/>
+        <ForeignField name="WorkOrder" foreignTable="wrk" foreignKey="WorkOrderID" foreignField="WorkOrder" key="WorkOrderID" joinType="left" phrase="Work Order|The work order associated with the hot work activity when applicable" sample="3413 | Repair diamond plate walkway on scanner | 02/02/2006 | In Progress"/>
+        <RemoteField name="RequestTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="50" phrase="Request Date|The date and time the hot work permit was requested" sample="01/01/2004"/>
+        <RemoteField name="HotWorkTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="7" phrase="Hot Work Date|The date and time the hot work is scheduled to occur" sample="01/01/2004"/>
+        <RemoteField name="ExpirationTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|The date and time the hot work permit is scheduled to expire" sample="01/01/2004"/>
+        <TableField name="HotWorkShiftID" type="int" validate="RequireSelection" phrase="Hot Work Shift|The shift during which the hot work is scheduled to occur" sample="1"/>
+        <CodeField name="HotWorkShift" key="HotWorkShiftID" phrase="Hot Work Shift|The shift during which the hot work is scheduled to occur" sample="1st - Day" codeTypeID="165"/>
+        <TableField name="HotWorkID" type="int" validate="RequireSelection" phrase="Hot Work ID|An automatically assigned number used to track hot work activity throughout the organization" sample="1"/>
+        <ForeignField name="OrganizationID" listType="allParticipants" foreignTable="hwk" foreignKey="HotWorkID" foreignField="OrganizationID" key="HotWorkID" joinType="left" phrase="Organization|The name of the organization where the hot work activity occurs" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the hot work activity occurs" sample="Active Agenda, HQ"/>
+        <ForeignField name="LocationID" foreignTable="hwk" foreignKey="HotWorkID" foreignField="LocationID" key="HotWorkID" joinType="left" phrase="Location|Specific area within the facility where the hot work activity occurs" sample="1"/>
+        <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific area within the facility where the hot work activity occurs" sample="Cold Storage Receiving Area; Cold Storage No. 6"/>
+        <ForeignField name="HotWorkTypeID" foreignTable="hwk" foreignKey="HotWorkID" foreignField="HotWorkTypeID" key="HotWorkID" joinType="left" phrase="Hot Work Type|A word or short phrase used to categorize and track the variety of hot work types occurring throughout the organization and streamline risk control administration" sample="1"/>
+        <ForeignField name="HotWorkCategoryID" foreignTable="hwkt" foreignKey="HotWorkTypeID" foreignField="HotWorkCategoryID" key="HotWorkTypeID" joinType="left" phrase="Category|A broad categoy used to group hot works of similar types" sample="1"/>
+        <CodeField name="HotWorkCategory" key="HotWorkCategoryID" phrase="Category|A broad categoy used to group hot works of similar types" sample="Vault" codeTypeID="64"/>
+        <ForeignField name="HotWorkType" foreignTable="hwkt" foreignKey="HotWorkTypeID" foreignField="HotWorkType" key="HotWorkTypeID" joinType="left" phrase="Hot Work Type|A word or short phrase used to categorize and track the variety of hot work types occurring throughout the organization and streamline risk control administration" sample="1"/>
+        <ForeignField name="HotWorkTitle" foreignTable="hwk" foreignKey="HotWorkID" foreignField="HotWorkTitle" key="HotWorkID" joinType="left" phrase="Hot Work Title|A word or short phrase used to identify this specific hot work activity" sample="Welding Within the Dry Warehouse"/>
+        <ForeignField name="HotWorkDesc" foreignTable="hwk" foreignKey="HotWorkID" foreignField="HotWorkDesc" key="HotWorkID" joinType="left" phrase="Description|A detailed description of this hot work activity and any special characteristics associated with the work" sample="The shipping dock plates are frequently repaired as a result of damage caused by lift trucks and shipping trailers. The repairs frequently require the use of welding, grinding and cutting."/>
+        <ForeignField name="PersonAccountableID" foreignTable="hwk" foreignKey="HotWorkID" foreignField="PersonAccountableID" key="HotWorkID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the risks associated with this hot work activity" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the risks associated with this hot work activity" sample="Mattias Thorslund"/>
+		<ForeignField name="FullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="PersonAccountableID" joinType="left" phrase="Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="Mobile" foreignTable="ppl" foreignKey="PersonID" foreignField="Mobile" key="PersonAccountableID" joinType="left" phrase="Mobile Phone|Mobile telephone number of the individual with a label to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="PersonAccountableID" joinType="left" phrase="Accountable Contact|The contact information of the person assigned primary accountability for managing the risks associated with this hot work activity" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+        <ForeignField name="EmergencyPhone" foreignTable="hwk" foreignKey="HotWorkID" foreignField="EmergencyPhone" key="HotWorkID" joinType="left" phrase="Emergency Phone|Telephone number to be called in the case of a hot work emergency" sample="(559)289-4921"/>
+        <ForeignField name="LastReviewDate" foreignTable="hwk" foreignKey="HotWorkID" foreignField="LastReviewDate" key="HotWorkID" joinType="left" phrase="Last Review|The date of the last formal review of the hot work activity" sample="01/01/2004"/>
+        <ForeignField name="HotWork" foreignTable="hwk" foreignKey="HotWorkID" foreignField="HotWork" key="HotWorkID" joinType="left" phrase="Hot Work|A combined field used to describe this hot work when associating it with related records" sample="Welding Within the Dry Warehouse; Active Agenda, HQ"/>
+        <TableField name="Explanation" type="text" validate="notEmpty" phrase="Explanation|An explanation of the hot work to be performed" sample="A handrail needs to be welded into place on line 1 in the production area. This work will require grinding, torch cutting and arc welding"/>
+        <TableField name="KeyLearnings" type="text" validate="noValidation" phrase="Key Learnings|Information learned during the hot work activity which may be useful to others performing similar hot work in the same or similar area" sample="Cool water should be applied to the feet of the production platform at 30 minute intervals to avoid combustion of the floor."/>
+        <TableField name="SpecialHazards" type="text" validate="noValidation" phrase="Special Hazards|Special hot work hazards that should be captured and recorded so that all persons performing similar entries will be aware of the dangers" sample="The mix augar switch is mislabeled as the 'Intercom Switch' and can result in inadvertent activation of the mix augar by people trying to use the intercom."/>
+        <RemoteField name="PermitIssuedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="31" phrase="Permit Issued By|The name of the person issuing the hot work permit" sample="1"/>
+        <ForeignField name="PermitIssuedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PermitIssuedByID" joinType="left" phrase="Permit Issued By|The name of the person issuing the The name of the person issuing the hot work permit" sample="Dan Zahlis"/>
+        <RemoteField name="SupervisorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="35" phrase="Supervisor Notified|The supervisor of the area where the hot work is to occur" sample="1"/>
+        <ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor Notified|The supervisor of the area where the hot work is to occur" sample="Jane Doe"/>
+        <RemoteField name="PerformedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="32" phrase="Performed By|An automatically assigned number used to associate persons performing hot work activities with permits" sample="1"/>
+        <ForeignField name="PerformedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PerformedByID" joinType="left" phrase="Performed By|Person performing the hot work activity" sample="Mattias Thorslund"/>
+        <TableField name="PerformerRelationshipID" type="int" validate="RequireSelection" phrase="Performer Relationship|The relationship of the person performing the hot work activity to the organization where the activity will occur" sample="1"/>
+        <CodeField name="PerformerRelationship" key="PerformerRelationshipID" phrase="Performer Relationship|The relationship of the person performing the hot work activity to the organization where the activity will occur" sample="Employee" codeTypeID="47"/>
+        <RemoteField name="FollowUpReviewByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="33" phrase="Follow Up Review By|The name of the person conducting the follow-up review of the work area to confirm the area is free of fire hazards" sample="1"/>
+        <ForeignField name="FollowUpReviewBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FollowUpReviewByID" joinType="left" phrase="Follow Up Review By|The name of the person conducting the follow-up review of the work area to confirm the area is free of fire hazards" sample="Mattias Thorslund"/>
+        <RemoteField name="SafetyCheckByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="34" phrase="Fire Watch By|The name of the person performing the fire watch safety check to ensure the hot work area is free of residual sparks or heat" sample="1"/>
+        <ForeignField name="SafetyCheckBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SafetyCheckByID" joinType="left" phrase="Fire Watch By|Fire Watch By|The name of the person performing the fire watch safety check to ensure the hot work area is free of residual sparks or heat" sample="Mattias Thorslund"/>
+        <RemoteField name="ERTMemberID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="23" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the hot work and who remains available in the event that a fire response becomes necessary" sample="1"/>
+        <ForeignField name="ERTMember" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ERTMemberID" joinType="left" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the hot work and who remains available in the event that a fire response becomes necessary" sample="Mattias Thorslund"/>
+		<ForeignField name="ERTFullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="ERTMemberID" joinType="left" phrase="ERT Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ERTMobile" foreignTable="ppl" foreignKey="PersonID" foreignField="Mobile" key="ERTMemberID" joinType="left" phrase="ERT Mobile Phone|Mobile telephone number of the individual with a label to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="ERTFullPager" foreignTable="ppl" foreignKey="PersonID" foreignField="FullPager" key="ERTMemberID" joinType="left" phrase="ERT Pager|Pager number and PIN of the individual" sample="(559)299-8054, PIN: 2112"/>
+		<ForeignField name="ERTContactCard" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactCard" key="ERTMemberID" joinType="left" phrase="ERT Contact|The contact information of the emergency response team member assigned to monitor the hot work activity" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PermitNumber"/>;_<CombinedFieldRef name="HotWorkType"/>;_<CombinedFieldRef name="HotWorkTime"/></CombinedField>
+        <CombinedField name="HotWorkPermit" phrase="Hot Work Permit|A combined field used to describe this hot work permit when associating it with related records" sample="HWP113; 09-21-2003; Welding; Active Agenda, HQ"><CombinedFieldRef name="HotWorkTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="HotWorkPermitID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="HotWorkPermit"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="hza" name="Hazard Abatement" parentKey="HotWorkID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwk"/>
+        </SubModule>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="HotWorkID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwk"/>
+        </SubModule>
+        <SubModule moduleID="chma" name="Chemical Associations" parentKey="HotWorkID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwk"/>
+        </SubModule>
+        <SubModule moduleID="hzea" name="Hazardous Energy Procedure Associations" parentKey="HotWorkID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwk"/>
+        </SubModule>
+        <SubModule moduleID="jana" name="Job Analyses" parentKey="HotWorkID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwk"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="HotWorkPermitID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwkp"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="HotWorkPermitID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwkp"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="HotWorkPermitID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="hwkp"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List hot work permits">
+            <ListField name="HotWorkPermitID" phrase="Record ID"/>
+            <ListField name="PermitNumber" phrase="Permit Number"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="Location" phrase="Location"/>
+            <ListField name="HotWork" phrase="Hot Work"/>
+            <ListField name="HotWorkTime" phrase="Date and Time"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search hot work permits">
+            <EditField name="JobNumber" size="50" maxLength="50"/>
+            <EditField name="PermitNumber" size="50" maxLength="50"/>
+            <OrgComboField name="WOOrganizationID" findMode="text">
+                <UpdateFieldRef name="WorkOrderID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="WorkOrderID" findMode="text" parentField="WOOrganizationID">
+                <SampleItem ID="1" name="3413 | Repair diamond plate walkway on scanner | 02/02/2006"/>
+                <SampleItem ID="3" name="3414 | Repair steel plate in CEO's head | 02/07/2006"/>
+                <SampleItem ID="5" name="3415 | Repair guard rail on line 1 | 01/02/2007"/>
+                <SampleItem ID="7" name="3416 | Repair floor hole in warehouse | 01/12/2001"/>
+            </ComboField>
+            <DateField name="RequestTime"/>
+            <DateField name="HotWorkTime"/>
+            <CodeRadioField name="HotWorkShiftID" orientation="vertical">
+                <SampleItem ID="1" name="Day - 1st"/>
+                <SampleItem ID="3" name="Night - 2nd"/>
+                <SampleItem ID="5" name="Graveyard - 3rd"/>
+            </CodeRadioField>
+            <DateField name="ExpirationTime"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <UpdateFieldRef name="HotWorkID"/>
+                <SampleItem ID="1" name="Maintenance Shop"/>
+                <SampleItem ID="3" name="Shipping Bay #1"/>
+                <SampleItem ID="5" name="Administrative Office"/>
+                <SampleItem ID="7" name="Production Line #1"/>
+            </ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ComboField name="HotWorkID" findMode="text" parentField="LocationID">
+                <SampleItem ID="1" name="Welding | Welding - Dry Warehouse; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Welding | Maintenance Shop Welding; Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Welding | Welding - Packaging Area; Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Welding | Food Line Welding; Active Agenda, HQ"/>
+            </ComboField>
+            <CodeComboField name="HotWorkCategoryID" findMode="text">
+                <UpdateFieldRef name="HotWorkTypeID" listParentField="HotWorkCategoryID"/>
+                <SampleItem ID="1" name="Vault"/>
+                <SampleItem ID="2" name="Mix Tank"/>
+                <SampleItem ID="3" name="Sewer Tank"/>
+                <SampleItem ID="4" name="Silo"/>
+                <SampleItem ID="5" name="Vat"/>
+            </CodeComboField>
+            <ComboField name="HotWorkTypeID" findMode="text" parentField="HotWorkCategoryID">
+                <UpdateFieldRef name="HotWorkID"/>
+                <SampleItem ID="1" name="Welding"/>
+                <SampleItem ID="2" name="Cutting"/>
+                <SampleItem ID="3" name="Cutting, Grinding"/>
+                <SampleItem ID="4" name="Cutting, Welding"/>
+                <SampleItem ID="5" name="Grinding"/>
+                <SampleItem ID="6" name="Welding, Cutting"/>
+                <SampleItem ID="7" name="Welding, Cutting, Grinding"/>
+                <SampleItem ID="8" name="Welding, Gridning"/>
+            </ComboField>
+            <PersonComboField name="PermitIssuedByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SupervisorID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="PerformedByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeRadioField name="PerformerRelationshipID" findMode="text" orientation="vertical">
+                <SampleItem ID="1" name="Employee"/>
+                <SampleItem ID="2" name="Contractor"/>
+                <SampleItem ID="3" name="Sub-Contractor"/>
+                <SampleItem ID="4" name="Distributor"/>
+                <SampleItem ID="5" name="Manufacturer"/>
+            </CodeRadioField>
+            <PersonComboField name="FollowUpReviewByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SafetyCheckByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="ERTMemberID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a hot work permit">
+            <ViewField name="HotWorkPermitID"/>
+            <ViewField name="JobNumber"/>
+            <ViewField name="PermitNumber"/>
+            <ViewField name="WorkOrder"/>
+            <ViewField name="RequestTime"/>
+            <ViewField name="HotWorkTime"/>
+            <ViewField name="HotWorkShift"/>
+            <ViewField name="ExpirationTime"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Location"/>
+            <ViewField name="HotWorkType"/>
+            <ViewField name="HotWork"/>
+            <ViewField name="LastReviewDate"/>
+            <ViewField name="HotWorkDesc"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="ContactCard"/>
+            <ViewField name="EmergencyPhone"/>
+            <ViewField name="Explanation"/>
+            <ViewField name="KeyLearnings"/>
+            <ViewField name="SpecialHazards"/>
+            <ViewField name="PerformerRelationship"/>
+            <ViewField name="PerformedBy"/>
+            <ViewField name="PermitIssuedBy"/>
+            <ViewField name="Supervisor"/>
+            <ViewField name="FollowUpReviewBy"/>
+            <ViewField name="SafetyCheckBy"/>
+            <ViewField name="ERTMember"/>
+            <ViewField name="ERTContactCard"/>
+            <ViewField name="EmergencyPhone"/>
+            <InvisibleField name="HotWorkID"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="hza"/>
+                <ViewGrid moduleID="chma"/>
+                <ViewGrid moduleID="hzea"/>
+                <ViewGrid moduleID="apr" phrase="Checklist Items"/>
+                <ViewGrid moduleID="jana"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a hot work permit">
+            <ViewField name="HotWorkPermitID"/>
+            <EditField name="JobNumber" size="50" maxLength="50"/>
+            <EditField name="PermitNumber" size="50" maxLength="50"/>
+            <OrgComboField name="WOOrganizationID" findMode="text">
+                <UpdateFieldRef name="WorkOrderID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="WorkOrderID" findMode="text" parentField="WOOrganizationID">
+                <SampleItem ID="1" name="3413 | Repair diamond plate walkway on scanner | 02/02/2006"/>
+                <SampleItem ID="3" name="3414 | Repair steel plate in CEO's head | 02/07/2006"/>
+                <SampleItem ID="5" name="3415 | Repair guard rail on line 1 | 01/02/2007"/>
+                <SampleItem ID="7" name="3416 | Repair floor hole in warehouse | 01/12/2001"/>
+            </ComboField>
+            <DateField name="RequestTime"/>
+            <DateField name="HotWorkTime"/>
+            <CodeRadioField name="HotWorkShiftID" orientation="vertical">
+                <SampleItem ID="1" name="Day - 1st"/>
+                <SampleItem ID="3" name="Night - 2nd"/>
+                <SampleItem ID="5" name="Graveyard - 3rd"/>
+            </CodeRadioField>
+            <DateField name="ExpirationTime"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <UpdateFieldRef name="HotWorkID"/>
+                <SampleItem ID="1" name="Maintenance Shop"/>
+                <SampleItem ID="3" name="Shipping Bay #1"/>
+                <SampleItem ID="5" name="Administrative Office"/>
+                <SampleItem ID="7" name="Production Line #1"/>
+            </ComboField>
+            <ComboField name="HotWorkID" findMode="text" parentField="LocationID">
+                <UpdateFieldRef name="LastReviewDate"/>
+                <UpdateFieldRef name="HotWorkDesc"/>
+                <UpdateFieldRef name="PersonAccountable"/>
+                <UpdateFieldRef name="ContactCard"/>
+                <UpdateFieldRef name="EmergencyPhone"/>
+                <SampleItem ID="1" name="Welding | Welding - Dry Warehouse; Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Welding | Maintenance Shop Welding; Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Welding | Welding - Packaging Area; Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Welding | Food Line Welding; Active Agenda, HQ"/>
+            </ComboField>
+            <ViewField name="LastReviewDate" parentField="HotWorkID"/>
+            <ViewField name="HotWorkDesc" parentField="HotWorkID"/>
+            <ViewField name="PersonAccountable" parentField="HotWorkID"/>
+            <ViewField name="ContactCard" parentField="HotWorkID"/>
+            <ViewField name="EmergencyPhone" parentField="HotWorkID"/>
+            <MemoField name="Explanation" rows="5" cols="75"/>
+            <MemoField name="KeyLearnings" rows="5" cols="75"/>
+            <MemoField name="SpecialHazards" rows="5" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Assignment" phrase="Assignments|Assign specific responsibilities for a hot work permit">
+            <RecordSummaryFieldsRef/>
+            <CodeRadioField name="PerformerRelationshipID" findMode="text" orientation="vertical">
+                <SampleItem ID="1" name="Employee"/>
+                <SampleItem ID="2" name="Contractor"/>
+                <SampleItem ID="3" name="Sub-Contractor"/>
+                <SampleItem ID="4" name="Distributor"/>
+                <SampleItem ID="5" name="Manufacturer"/>
+            </CodeRadioField>
+            <PersonComboField name="PerformedByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="PermitIssuedByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SupervisorID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="FollowUpReviewByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="SafetyCheckByID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="ERTMemberID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the hot work permit">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the hot work permit">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the hot work permit" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+		<RecordReportScreen name="RecordReports" phrase="Reports|View forms and reports associated with hot work permits"/>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="HotWorkPermitID"/>
+        <InvisibleField name="HotWorkID"/>
+        <ViewField name="PermitNumber"/>
+        <ViewField name="WorkOrder"/>
+        <ViewField name="RequestTime"/>
+        <ViewField name="HotWorkTime"/>
+        <ViewField name="HotWorkShift"/>
+        <ViewField name="ExpirationTime"/>
+        <ViewField name="Organization"/>
+        <ViewField name="Location"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="ContactCard"/>
+        <ViewField name="PerformerRelationship"/>
+        <ViewField name="PerformedBy"/>
+        <ViewField name="ERTMember"/>
+        <ViewField name="ERTContactCard"/>
+        <ViewField name="EmergencyPhone"/>
+        <ViewField name="HotWorkCategory"/>
+        <ViewField name="HotWorkType"/>
+        <ViewField name="HotWork"/>
+        <ViewField name="LastReviewDate"/>
+        <ViewField name="HotWorkDesc"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="hwkp" phrase="Permits">
+            <InvisibleField name="HotWorkPermitID"/>
+            <ViewField name="PermitNumber" sample="HWP113"/>
+            <ViewField name="RequestTime" sample="09-21-2003"/>
+            <ViewField name="HotWorkTime" sample="09-21-2003"/>
+            <ViewField name="KeyLearnings" sample="Cool water should be applied to the feet of the production platform at 30 minute intervals to avoid combustion of the floor."/>
+        </ViewGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Hot Work Permit Activity By Shift">
+            <GroupByField name="HotWorkShift"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Hot Work Permit Activity By Shift">
+            <GroupByField name="HotWorkShift"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Hot Work Permit Activity By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Hot Work Permit Activity By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Hot Work Permit Activity By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Hot Work Permit Activity By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Hot Work Permit Activity By Type">
+            <GroupByField name="HotWorkType"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Hot Work Permit Activity By Type">
+            <GroupByField name="HotWorkType"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Hot Work Permit Activity By Issuer">
+            <GroupByField name="PermitIssuedBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Hot Work Permit Activity By Issuer">
+            <GroupByField name="PermitIssuedBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Hot Work Permit Activity By Supervisor">
+            <GroupByField name="Supervisor"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Hot Work Permit Activity By Supervisor">
+            <GroupByField name="Supervisor"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Hot Work Permit Activity By Performer">
+            <GroupByField name="PerformedBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Hot Work Permit Activity By Performer">
+            <GroupByField name="PerformedBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Hot Work Permit Activity By Safety Checker">
+            <GroupByField name="SafetyCheckBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Hot Work Permit Activity By Safety Checker">
+            <GroupByField name="SafetyCheckBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie09" title="Hot Work Permit Activity By Reviewer">
+            <GroupByField name="FollowUpReviewBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto09" title="Hot Work Permit Activity By Reviewer">
+            <GroupByField name="FollowUpReviewBy"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie10" title="Hot Work Permit Activity By Emergency Response Team Member">
+            <GroupByField name="ERTMember"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto10" title="Hot Work Permit Activity By Emergency Response Team Member">
+            <GroupByField name="ERTMember"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie11" title="Hot Work Permit Activity By Category">
+            <GroupByField name="HotWorkCategory"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto11" title="Hot Work Permit Activity By Category">
+            <GroupByField name="HotWorkCategory"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie12" title="Hot Work Permit Activity By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto12" title="Hot Work Permit Activity By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie13" title="Hot Work Permit Activity By Relationship or Performer">
+            <GroupByField name="PerformerRelationship"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto13" title="Hot Work Permit Activity By Relationship or Performer">
+            <GroupByField name="PerformerRelationship"/>
+            <SummaryField name="HotWorkPermitID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

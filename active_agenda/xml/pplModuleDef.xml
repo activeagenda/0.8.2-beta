@@ -1,0 +1,448 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="People" moduleID="ppl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Person" pluralRecordName="People" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="PersonID" type="int" dbFlags="unsigned auto_increment not null" phrase="Person ID|A unique, automatically assigned, number used to track people associated with the organization" sample="2"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned not null" phrase="Organization|Name of organization associated with the individual" sample="2"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|Name of organization associated with the individual" sample="Active Agenda, Inc."/>
+		<ForeignField name="OrganizationShortName" foreignTable="org" foreignKey="OrganizationID" foreignField="ShortName" key="OrganizationID" joinType="left" phrase="Organization Short Name|Short name of the organization associated with the individual" sample="AASWE"/>
+		<!-- Department ID is set in pple. This is sort of an ugly hack to get the FilteringCheckGrid in mtga to work. MJT 2005-07-17 -->
+		<RemoteField name="DepartmentID" validate="noValidation" remoteModuleID="orgda" remoteModuleIDField="RelatedModuleID" remoteRecordIDField="RelatedRecordID" remoteField="DepartmentID" phrase="Department|Department of the local organization which the employee belongs to" sample="1"/>
+		<!--<ForeignField name="DepartmentID" foreignTable="orgda" foreignKey="RelatedRecordID" foreignField="DepartmentID" key="PersonID" listCondition="RelatedModuleID = 'pple'"  joinType="left" phrase="Department ID|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>-->
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<TableField name="LastName" type="varchar(50)" validate="notEmpty" dbFlags="" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<TableField name="FirstName" type="varchar(50)" validate="notEmpty" dbFlags="" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<TableField name="MiddleName" type="varchar(50)" dbFlags="" phrase="Middle Name|Middle Name or initial of an individual" sample="Francis"/>
+		<TableField name="DisplayName" type="varchar(50)" validate="notEmpty" dbFlags="" phrase="Display Name|Commonly used name of an individual used to identify a person. This name may vary from a person's given name" sample="Dan Zahlis"/>
+		<TableField name="MobilePhone" type="varchar(50)" dbFlags="" phrase="Mobile Phone|Mobile telephone number of the individual" sample="(559)289-4921"/>
+		<TableField name="MobilePhoneAddress" type="varchar(50)" dbFlags="" phrase="Mobile Phone Address|Mobile telephone address for receiving text messages" sample="5592894921@mobile.att.net"/>
+		<TableField name="PagerNumber" type="varchar(50)" dbFlags="" phrase="Pager Number|Telephone number used to page the individual" sample="(559)298-4151"/>
+		<TableField name="PagerPIN" type="varchar(50)" dbFlags="" phrase="Pager PIN|Personal Identification Number used in association with an individual's pager" sample="27553"/>
+		
+        <TableField name="SkypeName" type="varchar(50)" dbFlags="" phrase="Skype Name|The name used by the person to participate in free worldwide telephone services offered by skype at www.skype.com" sample="zahlis"/>
+        <CombinedField name="SkypeLink" phrase="Skype Link|A link that starts a phone conversation via Skype">special:skype:<CombinedFieldRef name="SkypeName"/>?call</CombinedField>
+        <CombinedField name="SkypeIcon" phrase="Skype Status Icon|An icon that displays the user's availability in Skype"><![CDATA[<img src="http://mystatus.skype.com/smallicon/]]><CombinedFieldRef name="SkypeName"/><![CDATA[" alt="Skype status icon"/>]]></CombinedField>
+        <CombinedField name="SkypeLinkIcon" phrase="Skype Name|The name used by the person to participate in free worldwide telephone services offered by skype at www.skype.com. If you have the client software, you can click on the link to start a conversation."><![CDATA[<a href="skype:]]><CombinedFieldRef name="SkypeName"/><![CDATA[?call"> ]]><CombinedFieldRef name="SkypeName"/><![CDATA[__]]><CombinedFieldRef name="SkypeIcon"/><![CDATA[</a>]]></CombinedField>
+        
+		<TableField name="WorkAddress1" type="varchar(128)" dbFlags="" phrase="Work Address|First physical street address of the location where the individual works" sample="836 Cherry Lane"/>
+		<TableField name="WorkAddress2" type="varchar(128)" dbFlags="" phrase="Work Address|Second physical street address where the individual works; such as, suite number or p.o. box" sample="Suite 101"/>
+		<TableField name="WorkCountyID" type="int" dbFlags="unsigned" phrase="Work County|A combined field used to track and associate counties" sample="1"/>
+		<ForeignField name="WorkCountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="WorkStateID" joinType="left" phrase="Country|The internationally recognized name of the country" sample="United States of America (USA)"/>
+		<ForeignField name="WorkCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="WorkCountryID" joinType="left" phrase="Work Country|A combined field used to associate this country with another record" sample="United States of America (USA)"/>
+		<ForeignField name="WorkStateID" foreignTable="cti" foreignTableAlias="cti_w" foreignKey="CountyID" foreignField="StateID" key="WorkCountyID" joinType="left" phrase="State|A combined field used to associate this state with another record" sample="1"/>
+		<ForeignField name="WorkState" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="State" key="WorkStateID" joinType="left" phrase="Work State|A combined field used to associate this state with another record" sample="California (CA)"/>
+		<ForeignField name="WorkCounty" foreignTable="cti" foreignTableAlias="cti_w" foreignKey="CountyID" foreignField="County" key="WorkCountyID" joinType="left" phrase="Work County|A combined field used to associate this county with another record" sample="Fresno"/>
+		<TableField name="WorkCity" type="varchar(50)" dbFlags="" phrase="Work City|City where the individual works" sample="Clovis"/>
+		<TableField name="WorkPostalCode" type="varchar(50)" dbFlags="" phrase="Work Postal Code|Postal code used to direct mail to the individual's work address" sample="93612"/>
+		<TableField name="WorkPhone" type="varchar(50)" dbFlags="" phrase="Work Phone|Telephone number of the individual at their place of work" sample="(559)299-8054"/>
+		<TableField name="WorkExtension" type="varchar(50)" dbFlags="" phrase="Work Extension|Telephone extension used to direct calls to an individual" sample="737"/>
+		<TableField name="WorkFax" type="varchar(50)" dbFlags="" phrase="Work Fax|Facsimile telephone number of the individual at work" sample="(559)299-8054"/>
+		<TableField name="WorkEmail" type="varchar(128)" dbFlags="" phrase="Work Email|Email address used by the individual at work" sample="dzahlis@emsprisesoftware.com"/>
+		<TableField name="HomeAddress1" type="varchar(128)" dbFlags="" phrase="Home Address|First physical street address of the location where the individual lives" sample="937 N. Adler Ave."/>
+		<TableField name="HomeAddress2" type="varchar(128)" dbFlags="" phrase="Home Address|Second physical street address where the individual lives; such as, apartment number" sample="147"/>
+		<ForeignField name="HomeCountryID" foreignTable="sta" foreignTableAlias="sta2a" foreignKey="StateID" foreignField="CountryID" key="HomeStateID" joinType="left" phrase="Home Country|The internationally recognized name of the country" sample="United States of America (USA)"/>
+		<ForeignField name="HomeCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="HomeCountryID" joinType="left" phrase="Home Country|A combined field used to associate this country with another record" sample="United States of America (USA)"/>
+		<ForeignField name="HomeStateID" foreignTable="cti" foreignTableAlias="cti_h" foreignKey="CountyID" foreignField="StateID" key="HomeCountyID" joinType="left" phrase="Home State|A combined field used to associate this state with another record" sample="1"/>
+		<ForeignField name="HomeState" foreignTable="sta" foreignTableAlias="sta2a" foreignKey="StateID" foreignField="StateAbbreviation" key="HomeStateID" joinType="left" phrase="Home State|A combined field used to associate this state with another record" sample="California (CA)"/>
+		<TableField name="HomeCountyID" type="int" dbFlags="unsigned" phrase="Home County|A combined field used to track and associate counties" sample="1"/>
+		<ForeignField name="HomeCounty" foreignTable="cti" foreignTableAlias="cti_h" foreignKey="CountyID" foreignField="County" key="HomeCountyID" joinType="left" phrase="Home County|A combined field used to associate this county with another record" sample="Fresno"/>
+		<TableField name="HomeCity" type="varchar(50)" dbFlags="" phrase="Home City|City where the individual lives" sample="Clovis"/>
+		<TableField name="HomePostalCode" type="varchar(50)" dbFlags="" phrase="Home Postal Code|Postal code used to direct mail to the individual's home address" sample="93611"/>
+		<TableField name="HomePhone" type="varchar(50)" dbFlags="" phrase="Home Phone|Telephone number of the individual at home" sample="(559)299-0479"/>
+		<TableField name="HomeFax" type="varchar(50)" dbFlags="" phrase="Home Fax|Facsimile telephone number of the individual at home" sample="(559)299-8054"/>
+		<TableField name="HomeEmail" type="varchar(128)" dbFlags="" phrase="Home Email|Email address used by the individual at home" sample="dan@zahlis.com"/>
+        <ForeignField name="TerminationDate" foreignTable="pple" foreignKey="PersonID" foreignField="TerminationDate" key="PersonID" joinType="left" phrase="Termination Date|The date the employee was terminated from the organization" sample="1"/>
+        <CalculatedField name="StillEmployed" type="bool" calcFunction="ifnull" params="TerminationDate +yes" validate="" phrase="Still Employed|Returns 'yes' if employment with the organization is still active" sample="1"/>
+		<CombinedField name="SearchSelect" phrase="Search Select Name|A combination of fields used by the SearchSelectGrid to identify the persons listed" sample="Thorslund, Mattias, J.; AAHQ"><CombinedFieldRef name="DisplayName"/>_-_<CombinedFieldRef name="OrganizationShortName"/></CombinedField>
+		<CombinedField name="WorkAddress" phrase="Work Address|Physical street address where the person can be located at work" sample="836 Cherry Lane, Clovis, CA 93611"><CombinedFieldRef name="WorkAddress1"/><![CDATA[<br />]]><CombinedFieldRef name="WorkAddress2"/><![CDATA[<br />]]><CombinedFieldRef name="WorkCity"/>,_<CombinedFieldRef name="WorkState"/>_<CombinedFieldRef name="WorkPostalCode"/><![CDATA[<br />]]><CombinedFieldRef name="WorkCountry"/></CombinedField>
+		<CombinedField name="HomeAddress" phrase="Home Address|Physical street address where the person can be located at home" sample="937 N. Adler Ave., Clovis, CA 93611"><CombinedFieldRef name="HomeAddress1"/><![CDATA[<br />]]><CombinedFieldRef name="HomeAddress2"/><![CDATA[<br />]]><CombinedFieldRef name="HomeCity"/>,_<CombinedFieldRef name="HomeState"/>_<CombinedFieldRef name="HomePostalCode"/><![CDATA[<br />]]><CombinedFieldRef name="HomeCountry"/></CombinedField>
+		<CombinedField name="FullPager" phrase="Pager|Pager number and PIN of the individual" sample="(559)299-8054, PIN: 2112">Pager:_<CombinedFieldRef name="PagerNumber"/>_PIN:_<CombinedFieldRef name="PagerPIN"/></CombinedField>
+		<CombinedField name="FullWorkPhone" phrase="Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"><CombinedFieldRef name="WorkPhone"/>,_ext._<CombinedFieldRef name="WorkExtension"/></CombinedField>
+		<CombinedField name="Mobile" phrase="Mobile Phone|Mobile telephone number of the individual with a label to identify the number" sample="(559)299-8054, ext. 2112"><CombinedFieldRef name="MobilePhone"/></CombinedField>
+		<CombinedField name="ContactNumbers" phrase="Contact Numbers|A combined field used to group a person contact phone numbers" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile)"><CombinedFieldRef name="WorkPhone"/>,_ext._<CombinedFieldRef name="WorkExtension"/>_(work)<![CDATA[<br />]]><CombinedFieldRef name="MobilePhone"/>_(mobile)<![CDATA[</a>]]></CombinedField>
+		<CombinedField name="ContactCard" phrase="Contact Card|A combined field used to group basic contact information of a person" sample="(559)299-8054, ext. 2112 (work) (559)916-6106 (mobile) dzahlis@activeagenda.net (email)"><CombinedFieldRef name="WorkPhone"/>, ext. <CombinedFieldRef name="WorkExtension"/>_(work)<![CDATA[<br />]]><CombinedFieldRef name="MobilePhone"/>_(mobile)<![CDATA[<br />]]><CombinedFieldRef name="WorkFax"/>_(fax)
+            <![CDATA[ <br /><a href="mailto:]]><CombinedFieldRef name="WorkEmail"/><![CDATA[">]]><CombinedFieldRef name="WorkEmail"/><![CDATA[</a>]]></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="DisplayName"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Person" phrase="Person|A combined field used to describe this person when associating him or her with other records" sample="Mattias Thorslund | Active Agenda, HQ"><CombinedFieldRef name="DisplayName"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PersonID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Person"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List people">
+			<ListField name="PersonID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="DisplayName" phrase="Display Name"/>
+			<ListField name="LastName" phrase="Last Name"/>
+			<ListField name="FirstName" phrase="First Name"/>
+			<ListField name="WorkPhone" phrase="Work Phone"/>
+            <ListField name="WorkEmail" link="WorkEmail" phrase="Work Email"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search people">
+			<ComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="DepartmentID"/>
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<EditField name="LastName" size="50" maxLength="50"/>
+			<EditField name="FirstName" size="50" maxLength="50"/>
+			<EditField name="MiddleName" size="50" maxLength="50"/>
+			<EditField name="DisplayName" size="50" maxLength="50"/>
+			<EditField name="MobilePhone" size="50" maxLength="50"/>
+			<EditField name="MobilePhoneAddress" size="50" maxLength="50"/>
+			<EditField name="PagerNumber" size="50" maxLength="50"/>
+			<EditField name="PagerPIN" size="50" maxLength="50"/>
+			<EditField name="WorkAddress1" size="50" maxLength="128"/>
+			<EditField name="WorkAddress2" size="50" maxLength="128"/>
+			<ComboField name="WorkCountryID" findMode="text">
+				<UpdateFieldRef name="WorkStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="WorkStateID" findMode="text" parentField="WorkCountryID">
+				<UpdateFieldRef name="WorkCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="WorkCountyID" findMode="text" parentField="WorkStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="WorkCity" size="50" maxLength="50"/>
+			<EditField name="WorkPostalCode" size="50" maxLength="50"/>
+			<EditField name="WorkPhone" size="50" maxLength="50"/>
+			<EditField name="WorkExtension" size="50" maxLength="50"/>
+			<EditField name="WorkFax" size="50" maxLength="50"/>
+			<EditField name="WorkEmail" size="75" maxLength="128"/>
+			<EditField name="HomeAddress1" size="50" maxLength="128"/>
+			<EditField name="HomeAddress2" size="50" maxLength="128"/>
+			<ComboField name="HomeCountryID" findMode="text">
+				<UpdateFieldRef name="HomeStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="HomeStateID" findMode="text" parentField="HomeCountryID">
+				<UpdateFieldRef name="HomeCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="HomeCountyID" findMode="text" parentField="HomeStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="HomeCity" size="50" maxLength="50"/>
+			<EditField name="HomePostalCode" size="50" maxLength="50"/>
+			<EditField name="HomePhone" size="50" maxLength="50"/>
+			<EditField name="HomeFax" size="50" maxLength="50"/>
+			<EditField name="HomeEmail" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a person">
+			<ViewField name="PersonID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Department"/>
+			<ViewField name="DisplayName"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="WorkAddress"/>
+			<ViewField name="FullWorkPhone"/>
+            <ViewField name="SkypeLinkIcon"/>
+			<ViewField name="WorkFax"/>
+			<ViewField name="HomeAddress"/>
+			<ViewField name="HomePhone"/>
+			<ViewField name="HomeFax"/>
+			<ViewField name="MobilePhone"/>
+			<ViewField name="MobilePhoneAddress" link="MobilePhoneAddress"/>
+			<ViewField name="WorkEmail" link="WorkEmail"/>
+			<ViewField name="HomeEmail" link="HomeEmail"/>
+			<ViewField name="PagerNumber"/>
+			<ViewField name="PagerPIN"/>
+			<ViewField name="HomeCounty"/>
+			<ViewField name="WorkCounty"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a person">
+			<ComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="DepartmentID"/>
+				<SampleItem ID="1" name="Acme Manufacturing, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<EditField name="LastName" size="50" maxLength="50"/>
+			<EditField name="FirstName" size="50" maxLength="50"/>
+			<EditField name="MiddleName" size="50" maxLength="50"/>
+			<EditField name="DisplayName" size="50" maxLength="50"/>
+			<EditField name="MobilePhone" size="50" maxLength="50"/>
+			<EditField name="MobilePhoneAddress" size="50" maxLength="50"/>
+			<EditField name="PagerNumber" size="50" maxLength="50"/>
+			<EditField name="PagerPIN" size="50" maxLength="50"/>
+            <EditField name="SkypeName" size="50" maxLength="50"/>
+		</EditScreen>
+		<EditScreen name="WorkAddress" phrase="Work|Edit the work address of a person">
+			<RecordSummaryFieldsRef/>
+			<EditField name="WorkAddress1" size="50" maxLength="128"/>
+			<EditField name="WorkAddress2" size="50" maxLength="128"/>
+			<ComboField name="WorkCountryID" findMode="text">
+				<UpdateFieldRef name="WorkStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="WorkStateID" findMode="text" parentField="WorkCountryID">
+				<UpdateFieldRef name="WorkCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="WorkCountyID" findMode="text" parentField="WorkStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="WorkCity" size="50" maxLength="50"/>
+			<EditField name="WorkPostalCode" size="50" maxLength="50"/>
+			<EditField name="WorkPhone" size="50" maxLength="50"/>
+			<EditField name="WorkExtension" size="50" maxLength="50"/>
+			<EditField name="WorkFax" size="50" maxLength="50"/>
+			<EditField name="WorkEmail" size="75" maxLength="128"/>
+		</EditScreen>
+		<EditScreen name="HomeAddress" phrase="Home|Edit the home address of a person">
+			<RecordSummaryFieldsRef/>
+			<EditField name="HomeAddress1" size="50" maxLength="128"/>
+			<EditField name="HomeAddress2" size="50" maxLength="128"/>
+			<ComboField name="HomeCountryID" findMode="text">
+				<UpdateFieldRef name="HomeStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="HomeStateID" findMode="text" parentField="HomeCountryID">
+				<UpdateFieldRef name="HomeCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="HomeCountyID" findMode="text" parentField="HomeStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="HomeCity" size="50" maxLength="50"/>
+			<EditField name="HomePostalCode" size="50" maxLength="50"/>
+			<EditField name="HomePhone" size="50" maxLength="50"/>
+			<EditField name="HomeFax" size="50" maxLength="50"/>
+			<EditField name="HomeEmail" size="75" maxLength="128"/>
+		</EditScreen>
+		<EditScreenLink name="EmployeeInfo" phrase="Employee Info|Employee info for this person" linkToModuleID="pple"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="PersonID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="DisplayName"/>
+		<ViewField name="LastName"/>
+		<ViewField name="FirstName"/>
+		<ViewField name="WorkAddress"/>
+		<ViewField name="FullWorkPhone"/>
+		<ViewField name="WorkFax"/>
+		<ViewField name="MobilePhone"/>
+		<ViewField name="WorkEmail" link="WorkEmail"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="ppl" phrase="People">
+			<InvisibleField name="PersonID"/>
+			<ViewField name="LastName" sample="Zahlis"/>
+			<ViewField name="FirstName" sample="Daniel"/>
+			<ViewField name="MiddleName" sample="Francis"/>
+			<ViewField name="WorkPhone" sample="(559)299-8054"/>
+			<ViewField name="WorkExtension" sample="737"/>
+            <ViewField name="WorkEmail" link="WorkEmail" sample="dzahlis@activeagenda.net"/>
+		</ViewGrid>
+		<EditGrid moduleID="ppl" phrase="People">
+			<GridForm>
+				<InvisibleField name="PersonID"/>
+				<EditField name="LastName" size="50" maxLength="50" sample="Zahlis"/>
+				<EditField name="FirstName" size="50" maxLength="50" sample="Daniel"/>
+				<EditField name="MiddleName" size="50" maxLength="50" sample="Francis"/>
+				<EditField name="DisplayName" size="50" maxLength="50" sample="Francis"/>
+				<EditField name="WorkPhone" size="50" maxLength="50" sample="(559)299-8054"/>
+				<EditField name="WorkExtension" size="50" maxLength="50" sample="737"/>
+				<EditField name="SkypeName" size="50" maxLength="50" sample="zahlis"/>
+                <EditField name="WorkEmail" size="75" maxLength="128" sample="dzahlis@activeagenda.net"/>
+			</GridForm>
+			<InvisibleField name="PersonID"/>
+			<ViewField name="DisplayName" sample="Zahlis"/>
+			<ViewField name="WorkPhone" sample="(559)299-8054"/>
+			<ViewField name="WorkExtension" sample="737"/>
+            <ViewField name="WorkEmail" link="WorkEmail" sample="dzahlis@emsprisesoftware.com"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 502 $" date="$Date: 2007-02-17 01:03:38 -0800 (Sat, 17 Feb 2007) $"/>
+</Module>

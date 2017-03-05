@@ -1,0 +1,69 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:867:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'rskcl\' AS ModuleID,
+   rskcl.RiskClassID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`cod1`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`rskcl`.RelatedRecordID,\'\'),\')\'),\' Module (Record ID: )\'),\'\')),\' | \') AS Value,
+`rdc1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `rskcl`
+LEFT OUTER JOIN `rdc` ON (rskcl.RiskClassID = rdc.RecordID AND rdc.ModuleID = \'rskcl\')
+   
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rskcl`.RelatedRecordID = rdc1.RecordID AND `rskcl`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`rskcl`.RelatedModuleID = `mod1`.ModuleID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rskcl`.RiskClassificationID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'16\')
+WHERE rskcl.RiskClassID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:780:"UPDATE rdc
+INNER JOIN rskcl ON (rdc.RecordID = rskcl.RiskClassID AND rdc.ModuleID = \'rskcl\')
+   
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rskcl`.RelatedRecordID = rdc1.RecordID AND `rskcl`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`rskcl`.RelatedModuleID = `mod1`.ModuleID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rskcl`.RiskClassificationID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'16\')
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`cod1`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' Module (Record ID: \',IFNULL(`rskcl`.RelatedRecordID,\'\'),\')\'),\' Module (Record ID: )\'),\'\')),\' | \'),
+rdc.OrganizationID = `rdc1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'rskcl\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

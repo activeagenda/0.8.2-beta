@@ -1,0 +1,352 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Training Providers" moduleID="trapv" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Training Provider" pluralRecordName="Training Providers" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="TrainingProviderID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track training providers" sample="1"/>
+        <TableField name="CourseID" type="int" validate="noValidation" phrase="Course|A combined field used to describe this course when associating it with other records" sample="1"/>
+        <ForeignField name="TrainingTypeID" foreignTable="tra" foreignKey="CourseID" foreignField="TrainingTypeID" key="CourseID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="1"/>
+        <ForeignField name="TrainingCategoryID" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingCategoryID" key="TrainingTypeID" joinType="left" phrase="Training Category|A word or short phrase used to describe the category of training" sample="1"/>
+        <CodeField name="TrainingCategory" key="TrainingCategoryID" phrase="Training Category|A word or short phrase used to describe the category of training" sample="On the Job" codeTypeID="59"/>
+        <ForeignField name="TrainingTypeDesc" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingTypeDesc" key="TrainingTypeID" joinType="left" phrase="Training Type Description|A detailed description of the training type" sample="On the job health and safety training should utilize the exact same types of equipment used by an employee during the performance of the job duties being trained."/>
+        <ForeignField name="TrainingType" foreignTable="trat" foreignKey="TrainingTypeID" foreignField="TrainingType" key="TrainingTypeID" joinType="left" phrase="Training Type|A combined field used to describe this training type when associating it with other records" sample="On the Job | Health and Safety"/>
+        <ForeignField name="Course" foreignTable="tra" foreignKey="CourseID" foreignField="Course" key="CourseID" joinType="left" phrase="Course|A combined field used to describe this course when associating it with other records" sample="Advanced Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-200.2"/>
+        <TableField name="ProviderID" type="int" defaultValue="defaultorgID" dbFlags="unsigned" phrase="Provider|The organization offerring to provide the training course" sample="1"/>
+        <ForeignField name="Provider" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ProviderID" joinType="left" phrase="Provider|The organization offerring to provide the training course" sample="IWCA"/>
+        <RemoteField name="ProviderLiaisonID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="130" phrase="Liaison|The name of the person acting as a liaison between the organization and the training provider" sample="1"/>
+        <ForeignField name="ProviderLiaison" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ProviderLiaisonID" joinType="left" phrase="Liaison|The name of the person acting as a liaison between the organization and the training provider" sample="Mattias Thorslund"/>
+        <ForeignField name="FullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="ProviderLiaisonID" joinType="left" phrase="Work Phone|Telephone number of the individual at their place of work" sample="(559)299-8054, ext. 2112"/>
+        <ForeignField name="WorkEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkEmail" key="ProviderLiaisonID" joinType="left" phrase="Work Email|Email address used by the individual at work" sample="dzahlis@activeagenda.net"/>
+        <TableField name="CoursePrice" type="money" dbFlags="" phrase="Price|The price charged by the provider to deliver the training course" sample="USD 99.00 Per Attendee"/>
+        <TableField name="CoursePriceUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="CoursePriceUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="CoursePriceUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="CoursePriceUnitCategory" key="CoursePriceUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="CoursePriceUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="CoursePriceUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="ProviderDetails" type="text" dbFlags="" phrase="Provider Details|Any details pertinent to the training course provider" sample="IWCA is an exclusive provider of the course"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Provider"/>;_<CombinedFieldRef name="Course"/></CombinedField>
+        <CombinedField name="TrainingProvider" phrase="TrainingProvider|A combined field used to describe this training provider when associating it with other records" sample="IWCA | Advanced Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-200.2"><CombinedFieldRef name="Provider"/>;_<CombinedFieldRef name="Course"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="TrainingProviderID"/>
+        </PrimaryKey>
+        <!--<OwnerField name="OrganizationID"/> Not required-->
+        <RecordDescriptionField name="TrainingProvider"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List training materials associated with training courses">
+            <ListField name="TrainingProviderID" phrase="Record ID"/>
+            <ListField name="Course" phrase="Course"/>
+            <ListField name="Provider" phrase="Provider"/>
+            <ListField name="ProviderLiaison" phrase="Provider Liaison"/>
+            <ListField name="FullWorkPhone" phrase="Work Phone"/>
+            <ListField name="WorkEmail" phrase="WorkEmail"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search training materials associated with training courses">
+            <CodeComboField name="TrainingCategoryID" findMode="text">
+                <UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+                <SampleItem ID="1" name="Disease"/>
+                <SampleItem ID="2" name="Complaint"/>
+                <SampleItem ID="3" name="Illness"/>
+                <SampleItem ID="4" name="Injury"/>
+                <SampleItem ID="5" name="Publicity"/>
+                <SampleItem ID="6" name="Theft"/>
+            </CodeComboField>
+            <ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+                <UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+                <SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+                <SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+                <SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+            </ComboField>
+            <OrgComboField name="ProviderID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="ProviderLiaisonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <MoneyField name="CoursePrice">
+                <Self/>
+                <ComboField name="CoursePriceUnitCategoryID">
+                    <UpdateFieldRef name="CoursePriceUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="CoursePriceUnitsID" parentField="CoursePriceUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a training material item associated with a training course">
+            <ViewField name="TrainingProviderID"/>
+            <ViewField name="Course"/>
+            <ViewField name="Provider"/>
+            <ViewField name="ProviderLiaison"/>
+            <ViewField name="FullWorkPhone"/>
+            <ViewField name="WorkEmail" link="WorkEmail"/>
+            <ViewField name="CoursePrice">
+                <ViewField name="CoursePriceUnits"/>
+            </ViewField>
+            <ViewField name="ProviderDetails"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a training material item associated with a training course">
+            <ViewField name="TrainingProviderID"/>
+            <CodeComboField name="TrainingCategoryID" findMode="text">
+                <UpdateFieldRef name="TrainingTypeID" listParentField="TrainingCategoryID"/>
+                <SampleItem ID="1" name="Disease"/>
+                <SampleItem ID="2" name="Complaint"/>
+                <SampleItem ID="3" name="Illness"/>
+                <SampleItem ID="4" name="Injury"/>
+                <SampleItem ID="5" name="Publicity"/>
+                <SampleItem ID="6" name="Theft"/>
+            </CodeComboField>
+            <ComboField name="TrainingTypeID" findMode="text" parentField="TrainingCategoryID">
+                <UpdateFieldRef name="CourseID" listParentField="TrainingTypeID"/>
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <ComboField name="CourseID" findMode="text" parentField="TrainingTypeID">
+                <SampleItem ID="1" name="Introduction to Hazard Analysis of Critical Control Points (HACCP)"/>
+                <SampleItem ID="2" name="Introduction to Best Manufacturing Practices (GMPs)"/>
+                <SampleItem ID="3" name="Introduction to Product Hazard Reporting"/>
+            </ComboField>
+            <OrgComboField name="ProviderID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="ProviderLiaisonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <MoneyField name="CoursePrice">
+                <Self/>
+                <ComboField name="CoursePriceUnitCategoryID">
+                    <UpdateFieldRef name="CoursePriceUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="CoursePriceUnitsID" parentField="CoursePriceUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+            <MemoField name="ProviderDetails" rows="10" cols="75"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="trapv" phrase="Providers">
+            <InvisibleField name="TrainingProviderID"/>
+            <ViewField name="Course" sample="Advanced Hazard Analysis of Critical Control Points (HACCP); Leadership; QA-HACCP-200.2"/>
+            <ViewField name="Provider" sample="IWCA"/>
+            <ViewField name="ProviderLiaison" sample="Mattias Thorslund"/>
+            <ViewField name="FullWorkPhone" sample="(900)999-9999"/>
+            <ViewField name="WorkEmail" link="WorkEmail" sample="dzahlis@activeagenda.net"/>
+            <ViewField name="CoursePrice" sample="USD 99.00">
+                <ViewField name="CoursePriceUnits" sample="Per Person"/>
+            </ViewField>
+        </ViewGrid>
+        <EditGrid moduleID="trapv" phrase="Providers">
+            <GridForm>
+                <InvisibleField name="TrainingProviderID"/>
+                <OrgComboField name="ProviderID" findMode="text" sample="IWCA">
+                    <SampleItem ID="1" name="Active Agenda HQ"/>
+                    <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                    <SampleItem ID="5" name="Active Agenda, New York"/>
+                    <SampleItem ID="7" name="Active Agenda, Munich"/>
+                </OrgComboField>
+                <PersonComboField name="ProviderLiaisonID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <MoneyField name="CoursePrice" sample="USD 99.00">
+                    <Self/>
+                    <ComboField name="CoursePriceUnitCategoryID" sample="Stipulated">
+                        <UpdateFieldRef name="CoursePriceUnitsID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="CoursePriceUnitsID" parentField="CoursePriceUnitCategoryID" sample="Per Person">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </MoneyField>
+                <MemoField name="ProviderDetails" rows="10" cols="75"/>
+            </GridForm>
+            <InvisibleField name="TrainingProviderID"/>
+            <ViewField name="Provider" sample="IWCA"/>
+            <ViewField name="ProviderLiaison" sample="Mattias Thorslund"/>
+            <ViewField name="FullWorkPhone" sample="(900)999-9999"/>
+            <ViewField name="WorkEmail" link="WorkEmail" sample="dzahlis@activeagenda.net"/>
+            <ViewField name="CoursePrice" sample="USD 99.00">
+                <ViewField name="CoursePriceUnits" sample="Per Person"/>
+            </ViewField>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Training Providers By Type">
+            <GroupByField name="TrainingType"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Training Providers By Type">
+            <GroupByField name="TrainingType"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Training Providers By Course">
+            <GroupByField name="Course"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Training Providers By Course">
+            <GroupByField name="Course"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Training Providers By Category">
+            <GroupByField name="TrainingCategory"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Training Providers By Category">
+            <GroupByField name="TrainingCategory"/>
+            <SummaryField name="TrainingProviderID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

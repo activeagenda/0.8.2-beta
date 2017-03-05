@@ -1,0 +1,394 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Outside Counsel" moduleID="ireoc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Outside Counsel" pluralRecordName="Outside Counsel" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="OutCounselID" type="int" dbFlags="unsigned auto_increment not null" phrase="Outside Counsel ID|An automatically assigned number used to associate outside counsel with reported situations or incidents" sample="1"/>
+        <TableField name="IncidentReportID" type="int" validate="noValidation" phrase="Incident Report ID|An automatically assigned number used to track situations and incidents" sample="11"/>
+        <ForeignField name="IncidentName" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentName" key="IncidentReportID" joinType="left" phrase="Incident Name|A unique name used to identify the situation or incident" sample="Thorslund Discrimination Claim; Active Agenda, HQ; 10-28-2003"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module ID|A character ID assigned to each module of the application" sample="lpa"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name of the module which is associated with the incident which involves legal representation" sample="Loss - Employment Practices"/>
+        <TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the record in the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A group of fields used to describe the related record" sample="Psych - Stress; Betty Boop; Active Agenda, HQ; Open"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The organization responsible for the litigation plan in association with this legal representation" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for the litigation plan in association with this legal representation" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="97" phrase="Person Accountable|The individual assigned primary accountability for managing the litigation process for the organization" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the litigation process for the organization" sample="Mattias Thorslund"/>
+        <TableField name="LawFirmID" type="int" listType="special=7" validate="RequireSelection" phrase="Law Firm|Name of the law firm associated with the reported situation or incident" sample="1"/>
+        <ForeignField name="LawFirm" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="LawFirmID" joinType="left" phrase="Law Firm|Name of the law firm associated with the reported situation or incident" sample="Johnson, Johnson and Johnson"/>
+        <RemoteField name="LeadAttorneyID" listType="special=7" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="9" phrase="Lead Attorney|Name of the attorney assigned by the firm as the lead attorney liaison between the organization and the respective law firm" sample="1"/>
+        <ForeignField name="LeadAttorney" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LeadAttorneyID" joinType="left" phrase="Lead Attorney|Name of the attorney assigned by the firm as the lead attorney liaison between the organization and the respective law firm" sample="Mattias Thorslund"/>
+        <TableField name="LitigationRelationshipID" type="int" validate="RequireSelection" phrase="Relationship|The relationship of this law firm to the organization in association with this incident" sample="Plaintiff"/>
+        <CodeField name="LitigationRelationship" key="LitigationRelationshipID" phrase="Relationship|The relationship of this law firm to the organization in association with this incident" sample="Plaintiff [litigant's behalf]" codeTypeID="184"/>
+        <RemoteField name="AssignedDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="2" phrase="Assigned Date|Date the situation or incident was assigned to the respective law firm" sample="01/01/2004"/>
+        <TableField name="RepresentationDetails" type="text" validate="noValidation" phrase="Representation Details|A detailed description of the legal representation and selection process" sample="The law firm was selected by corporate headquarters as an approved law firm. Local management disagreed with this assignment but ultimately accepted the corporate mandate."/>
+        <RemoteField name="PersonAuthorizingID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="46" phrase="Person Authorizing|The individual authorizing the selection of this law firm" sample="1"/>
+        <ForeignField name="PersonAuthorizing" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAuthorizingID" joinType="left" phrase="Person Authorizing|The individual authorizing the selection of this law firm" sample="Mattias Thorslund"/>
+        <TableField name="CostofRepresentation" type="money" validate="Money notNegative" phrase="Representation Cost|The total cost of representation as stated in the currency established as the default currency for this site installation of the software" sample="$50,000.00"/>
+        <TableField name="RepresentationStatusID" type="int" validate="RequireSelection" phrase="Representation Status|Status of the legal representation associated with this incident or claim of loss" sample="1"/>
+        <CodeField name="RepresentationStatus" key="RepresentationStatusID" phrase="Representation Status|Status of the legal representation associated with this incident or claim of loss" sample="Open - Awaiting Assignment" codeTypeID="231"/>
+        <TableField name="ResolutionOutcomeID" type="int" validate="RequireSelection" phrase="Outcome|The nature of the outcome achieved by the assigned law firm" sample="1"/>
+        <CodeField name="ResolutionOutcome" key="ResolutionOutcomeID" phrase="Outcome|The nature of the outcome achieved by the assigned law firm" sample="Settlement Before Trial" codeTypeID="232"/>
+        <TableField name="ResolutionCost" type="money" validate="Money notNegative" phrase="Resolution Cost|The cost of resolution associated with the outcome as stated in the currency used for the site installation for the software" sample="$2,000,000.00"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="IncidentName"/>_involving_<CombinedFieldRef name="LawFirm"/>_assigned_on_<CombinedFieldRef name="AssignedDate"/>_and_currently_<CombinedFieldRef name="RepresentationStatus"/></CombinedField>
+        <CombinedField name="OutCounsel" phrase="Outside Counsel|A combined field used to describe this outside counsel when associating it with other records" sample="Thorslund Discrimination Claim; Active Agenda, HQ; 10-28-2003; Active Agenda, HQ; Johnson, Johnson and Johnson; 01/01/2004; Open - Awaiting Assignment"><CombinedFieldRef name="LawFirm"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="OutCounselID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="OutCounsel"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="OutCounselID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="ireoc"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List legal firms associated with incident reports">
+            <ListField name="OutCounselID" phrase="Counsel ID"/>
+            <ListField name="IncidentReportID" phrase="Report ID" align="center"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="LawFirm" phrase="Law Firm"/>
+            <ListField name="LitigationRelationship" phrase="Relationship"/>
+            <ListField name="ResolutionOutcome" phrase="Outcome"/>
+            <ListField name="ResolutionCost" phrase="Outcome Cost"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search legal firms associated with incident reports">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda Sweden"/>
+                <SampleItem ID="5" name="Active Agenda Latvia"/>
+                <SampleItem ID="7" name="Active Agenda Norway"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <OrgComboField name="LawFirmID" findMode="text">
+                <UpdateFieldRef name="LeadAttorneyID"/>
+                <SampleItem ID="1" name="Johnson, Johnson and Johnson"/>
+                <SampleItem ID="2" name="Dewey, Cheatem and Howe"/>
+                <SampleItem ID="3" name="Conflictus, Disputeson and Overbillingsly"/>
+                <SampleItem ID="4" name="Taker, Depriver and Destroyer"/>
+            </OrgComboField>
+            <PersonComboField name="LeadAttorneyID" findMode="alpha" parentField="LawFirmID">
+                <SampleItem ID="1" name="Mattias Johnson" orgName="Johnson, Johnson and Johnson"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Dewey, Cheatem and Howe"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Conflictus, Disputeson and Overbillingsly"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Taker, Depriver and Destroyer"/>
+            </PersonComboField>
+            <CodeComboField name="LitigationRelationshipID" findMode="text">
+                <SampleItem ID="1" name="Plaintiff [litigant's behalf]"/>
+                <SampleItem ID="2" name="Plaintiff [organization's behalf]"/>
+                <SampleItem ID="3" name="Defense [litigant's behalf]"/>
+                <SampleItem ID="4" name="Defense [organization's behalf]"/>
+            </CodeComboField>
+            <DateField name="AssignedDate"/>
+            <PersonComboField name="PersonAuthorizingID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="CostofRepresentation" size="25" maxLength="25"/>
+            <CodeComboField name="RepresentationStatusID" findMode="text">
+                <SampleItem ID="1" name="Open and Awaiting Reassignment"/>
+                <SampleItem ID="2" name="Open and Assigned"/>
+                <SampleItem ID="3" name="Open and Transferred"/>
+                <SampleItem ID="4" name="Closed"/>
+            </CodeComboField>
+            <CodeComboField name="ResolutionOutcomeID" findMode="text">
+                <SampleItem ID="1" name="Settlement Before Trial"/>
+                <SampleItem ID="2" name="Settlement During Trial"/>
+                <SampleItem ID="3" name="Jury Verdict (favorable)"/>
+                <SampleItem ID="4" name="Jury Verdict (unfavorable)"/>
+                <SampleItem ID="5" name="Aminstrative Finding (favorable)"/>
+                <SampleItem ID="6" name="Aminstrative Finding (unfavorable)"/>
+                <SampleItem ID="7" name="Arbitration Finding (favorable)"/>
+                <SampleItem ID="8" name="Arbitration Finding (unfavorable)"/>
+            </CodeComboField>
+            <MoneyField name="ResolutionCost"/>
+            <MoneyField name="CostofRepresentation"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a law firm associated with an incident report">
+            <ViewField name="OutCounselID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentName"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="LawFirm"/>
+            <ViewField name="LeadAttorney"/>
+            <ViewField name="LitigationRelationship"/>
+            <ViewField name="AssignedDate"/>
+            <ViewField name="RepresentationDetails"/>
+            <ViewField name="PersonAuthorizing"/>
+            <ViewField name="CostofRepresentation"/>
+            <ViewField name="RepresentationStatus"/>
+            <ViewField name="ResolutionOutcome"/>
+            <ViewField name="ResolutionCost"/>
+            <ViewGrid moduleID="bpc"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a law firm associated with an incident report">
+            <ViewField name="OutCounselID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentName"/>
+            <ViewField name="RelatedModule"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda Sweden"/>
+                <SampleItem ID="5" name="Active Agenda Latvia"/>
+                <SampleItem ID="7" name="Active Agenda Norway"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <OrgComboField name="LawFirmID" findMode="text">
+                <UpdateFieldRef name="LeadAttorneyID"/>
+                <SampleItem ID="1" name="Johnson, Johnson and Johnson"/>
+                <SampleItem ID="2" name="Dewey, Cheatem and Howe"/>
+                <SampleItem ID="3" name="Conflictus, Disputeson and Overbillingsly"/>
+                <SampleItem ID="4" name="Taker, Depriver and Destroyer"/>
+            </OrgComboField>
+            <PersonComboField name="LeadAttorneyID" findMode="alpha" parentField="LawFirmID">
+                <SampleItem ID="1" name="Mattias Johnson" orgName="Johnson, Johnson and Johnson"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Dewey, Cheatem and Howe"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Conflictus, Disputeson and Overbillingsly"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Taker, Depriver and Destroyer"/>
+            </PersonComboField>
+            <CodeComboField name="LitigationRelationshipID" findMode="text">
+                <SampleItem ID="1" name="Plaintiff [litigant's behalf]"/>
+                <SampleItem ID="2" name="Plaintiff [organization's behalf]"/>
+                <SampleItem ID="3" name="Defense [litigant's behalf]"/>
+                <SampleItem ID="4" name="Defense [organization's behalf]"/>
+            </CodeComboField>
+            <DateField name="AssignedDate"/>
+            <MemoField name="RepresentationDetails" rows="5" cols="75"/>
+            <PersonComboField name="PersonAuthorizingID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="CostofRepresentation" size="25" maxLength="25"/>
+            <CodeComboField name="RepresentationStatusID" findMode="text">
+                <SampleItem ID="1" name="Open and Awaiting Reassignment"/>
+                <SampleItem ID="2" name="Open and Assigned"/>
+                <SampleItem ID="3" name="Open and Transferred"/>
+                <SampleItem ID="4" name="Closed"/>
+            </CodeComboField>
+            <CodeComboField name="ResolutionOutcomeID" findMode="text">
+                <SampleItem ID="1" name="Settlement Before Trial"/>
+                <SampleItem ID="2" name="Settlement During Trial"/>
+                <SampleItem ID="3" name="Jury Verdict (favorable)"/>
+                <SampleItem ID="4" name="Jury Verdict (unfavorable)"/>
+                <SampleItem ID="5" name="Aminstrative Finding (favorable)"/>
+                <SampleItem ID="6" name="Aminstrative Finding (unfavorable)"/>
+                <SampleItem ID="7" name="Arbitration Finding (favorable)"/>
+                <SampleItem ID="8" name="Arbitration Finding (unfavorable)"/>
+            </CodeComboField>
+            <EditField name="ResolutionCost" size="25" maxLength="25"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the hiring of outside counsel" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="ireoc" phrase="Litigation">
+            <InvisibleField name="OutCounselID"/>
+            <ViewField name="LawFirm" sample="Johnson, Johnson and Johnson"/>
+            <ViewField name="LeadAttorney" sample="Mattias Thorslund"/>
+            <ViewField name="AssignedDate" sample="01/01/2004"/>
+            <ViewField name="LitigationRelationship" sample="Plaintiff [litigant's behalf]"/>
+            <ViewField name="RepresentationStatus" sample="Open - Awaiting Assignment"/>
+        </ViewGrid>
+        <EditGrid moduleID="ireoc" phrase="Litigation">
+            <GridForm>
+                <InvisibleField name="OutCounselID"/>
+                <OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Active Agenda Sweden"/>
+                    <SampleItem ID="5" name="Active Agenda Latvia"/>
+                    <SampleItem ID="7" name="Active Agenda Norway"/>
+                </OrgComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <OrgComboField name="LawFirmID" findMode="text" sample="Johnson, Johnson and Johnson">
+                    <UpdateFieldRef name="LeadAttorneyID"/>
+                    <SampleItem ID="1" name="Johnson, Johnson and Johnson"/>
+                    <SampleItem ID="2" name="Dewey, Cheatem and Howe"/>
+                    <SampleItem ID="3" name="Conflictus, Disputeson and Overbillingsly"/>
+                    <SampleItem ID="4" name="Taker, Depriver and Destroyer"/>
+                </OrgComboField>
+                <PersonComboField name="LeadAttorneyID" findMode="alpha" parentField="LawFirmID" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Johnson" orgName="Johnson, Johnson and Johnson"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Dewey, Cheatem and Howe"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Conflictus, Disputeson and Overbillingsly"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Taker, Depriver and Destroyer"/>
+                </PersonComboField>
+                <CodeComboField name="LitigationRelationshipID" findMode="text" sample="Plaintiff [litigant's behalf]">
+                    <SampleItem ID="1" name="Plaintiff [litigant's behalf]"/>
+                    <SampleItem ID="2" name="Plaintiff [organization's behalf]"/>
+                    <SampleItem ID="3" name="Defense [litigant's behalf]"/>
+                    <SampleItem ID="4" name="Defense [organization's behalf]"/>
+                </CodeComboField>
+                <DateField name="AssignedDate" sample="01/01/2004"/>
+                <MemoField name="RepresentationDetails" rows="5" cols="75" sample="The law firm was selected by corporate headquarters as an approved law firm. Local management disagreed with this assignment but ultimately accepted the corporate mandate."/>
+                <PersonComboField name="PersonAuthorizingID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <EditField name="CostofRepresentation" size="25" maxLength="25" sample="$23,948.83"/>
+                <CodeComboField name="RepresentationStatusID" findMode="text" sample="Open - Awaiting Assignment">
+                    <SampleItem ID="1" name="Open and Awaiting Reassignment"/>
+                    <SampleItem ID="2" name="Open and Assigned"/>
+                    <SampleItem ID="3" name="Open and Transferred"/>
+                    <SampleItem ID="4" name="Closed"/>
+                </CodeComboField>
+                <CodeComboField name="ResolutionOutcomeID" findMode="text" sample="Settlement Before Trial">
+                    <SampleItem ID="1" name="Settlement Before Trial"/>
+                    <SampleItem ID="2" name="Settlement During Trial"/>
+                    <SampleItem ID="3" name="Jury Verdict (favorable)"/>
+                    <SampleItem ID="3" name="Jury Verdict (unfavorable)"/>
+                    <SampleItem ID="4" name="Aminstrative Finding (favorable)"/>
+                    <SampleItem ID="4" name="Aminstrative Finding (unfavorable)"/>
+                    <SampleItem ID="4" name="Arbitration Finding (favorable)"/>
+                    <SampleItem ID="4" name="Arbitration Finding (unfavorable)"/>
+                </CodeComboField>
+                <EditField name="ResolutionCost" size="25" maxLength="25" sample="$2,000,000.00"/>
+            </GridForm>
+            <ViewField name="LawFirm" sample="Johnson, Johnson and Johnson"/>
+            <ViewField name="LeadAttorney" sample="Mattias Thorslund"/>
+            <ViewField name="AssignedDate" sample="01/01/2004"/>
+            <ViewField name="LitigationRelationship" sample="Plaintiff [litigant's behalf]"/>
+            <ViewField name="RepresentationStatus" sample="Open - Awaiting Assignment"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

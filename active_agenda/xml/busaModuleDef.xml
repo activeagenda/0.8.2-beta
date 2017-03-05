@@ -1,0 +1,694 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Business Continuation Plans" moduleID="busa" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Business Continuation Plan" pluralRecordName="Business Continuation Plans" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="BusinessContID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate people, equipment and others assets with business continuation or recovery events" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the business continuation requirement" sample="opp"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the business continuation requirement" sample="Operating Permits"/>
+        <TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Air Polution, Smoke Stack Emissions Permit, APCD7726-23"/>
+        <TableField name="BusinessContinuationID" type="int" dbFlags="unsigned not null" phrase="Business Continuation Issue|A combined field used to describe this business continuation requirement or item when associating it with other records" sample="1"/>
+        <ForeignField name="BusinessProcessTypeID" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="BusinessProcessTypeID" key="BusinessContinuationID" joinType="left" phrase="Process Type|The specific type of business process to be protected against a business interruption" sample="1"/>
+        <CodeField name="BusinessProcessType" key="BusinessProcessTypeID" phrase="Process Type|The specific type of business process to be protected against a business interruption" sample="Production" codeTypeID="283"/>
+        <ForeignField name="BusinessContinuationTitle" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="BusinessContinuationTitle" key="BusinessContinuationID" joinType="left" phrase="Title|A brief title used to describe the business continuation guideline" sample="Emergency Cold Storage Support"/>
+        <ForeignField name="BusinessContinuationNeed" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="BusinessContinuationTitle" key="BusinessContinuationID" joinType="left" phrase="Needs Assessment|A detailed description of the need for business continuation pre-planning in association with the business process" sample="Failure to secure a cold storage agreement in advance of loosing local storage capabilities could result in the immediate loss of $2.5 MM in inventory."/>
+        <ForeignField name="OperationalConsiderations" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="OperationalConsiderations" key="BusinessContinuationID" joinType="left" phrase="Operational Considerations|A detailed description of the operational considerations to me made when evaluating business continuation needs associated with the business process" sample="Inventory values should be calculated based on optimal movement of inventory from a downed cold storage to the new location. Consideration should be applied to moving the highest valued inventory first. Costs of shipping and overtime should be factored into the relocation estimate."/>
+        <ForeignField name="FinancialConsiderations" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="FinancialConsiderations" key="BusinessContinuationID" joinType="left" phrase="Financial Considerations|A detailed description of the financial considerations to me made when evaluating business continuation needs associated with the business process" sample="A total calculation of the value of the inventory to be moved shall be performed prior to securing arrangements with a cold storage facility"/>
+        <ForeignField name="SignificantImpact" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="SignificantImpact" key="BusinessContinuationID" joinType="left" phrase="Significant Impact|The financial impact defined as significant. The significant impact value establishes the timeline for action to avoid incurring a financial impact of this magnitude." sample="7,000,000"/>
+        <ForeignField name="BusinessContinuation" foreignTable="bus" foreignKey="BusinessContinuationID" foreignField="BusinessContinuation" key="BusinessContinuationID" joinType="left" phrase="Business Continuation|A combined field used to describe this business continuation requirement or item when associating it with other records" sample="Emergency Cold Storage Support"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for enforcing this business continuation requirement" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for enforcing this business continuation requirement" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="8" phrase="Person Accountable|The individual assigned primary accountability for this business continuation assignment" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for this business continuation assignment" sample="Mattias Thorslund"/>
+        <TableField name="BusRecoveryTitle" type="varchar(128)" validate="notEmpty" phrase="Recovery Title|A short title used to describe the business recovery business continuation responsibility of the person accountable" sample="Air Pollution Control District Permit Modification"/>
+        <TableField name="BusRecoveryRespon" type="text" validate="notEmpty" phrase="Responsibilities|A detailed description of the business continuation responsibilities of the person accountable" sample="The accountable person is expected to contact the Air Pollution Control District immediately and notify them of the need for a permit modification. It is the accountable persons responsibility to secure a modification capable of allowing the facility to operate a temporary smokestack. The accountable person is responsible for identifying a back-up smoke stack supplier and securing District approvals in advance of a business continuation event."/>
+        <TableField name="CriticalityID" type="int" validate="RequireSelection" phrase="Criticality|A way of categorizing the critical nature of securing a resource and prioritizing business continuation efforts" sample="1"/>
+        <CodeField name="Criticality" key="CriticalityID" phrase="Criticality|A way of categorizing the critical nature of securing a resource and prioritizing business continuation efforts" sample="Plant Closure" codeTypeID="130"/>
+        <TableField name="Impact" type="money" validate="Money notZero notNegative" phrase="Financial Impact|The automatically calculated value of the potential impact associated with failure to secure this resource to continue operations,  stated in the currency choosen for the application" sample="6,900,000.00"/>
+        <TableField name="Budget" type="money" validate="Money notZero notNegative" phrase="Budget|The automatically calculated value of the budget established in order to secure this resource to continue operations, stated in the currency choosen for the application" sample="6,900,000.00"/>
+        <TableField name="TakeActionImmediacy" type="float" validate="Number notEmpty notZero notNegative" phrase="Take Action Within|The amount of time which can pass before the person accountable must take action to secure the business continuation item" sample="1"/>
+        <TableField name="ImmediacyUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="ImmediacyUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ImmediacyUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="ImmediacyUnitCategory" key="ImmediacyUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="ImmediacyUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ImmediacyUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="AcquireWithin" type="varchar(10)" validate="noValidation" phrase="Acquire Within|The number of days within which the business continuation item must be secured" sample="84"/>
+        <TableField name="AcquireWithinUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="AcquireWithinUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AcquireWithinUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="AcquireWithinUnitCategory" key="AcquireWithinUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="AcquireWithinUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AcquireWithinUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="ContinuationStatusID" type="int" validate="RequireSelection" phrase="Status|Readiness status of the business continuation requirement" sample="1"/>
+        <CodeField name="ContinuationStatus" key="ContinuationStatusID" phrase="Status|Readiness status of the business continuation requirement" sample="Contract Negotiations" codeTypeID="120"/>
+        <SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'busa'" localKey="BusinessContID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="BusRecoveryTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+        <CombinedField name="BusinessCont" phrase="Business Continuation Association|A combined field used to describe this business continuation association when associating it with other records" sample="Active Agenda, HQ; Operating Permits; Plant Closure; Contract Negotiations"><CombinedFieldRef name="BusRecoveryTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="BusinessContID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="BusinessCont"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="valc" name="Values Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="vala" name="Values Associations" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="aprd" name="Asset Protection" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="stdc" name="Standards Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="agrc" name="Agreement Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="agr" name="Agreements" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="supc" name="Supplier Considerations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="sup" name="Suppliers" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="BusinessContID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="busa"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List business consequence considerations">
+            <ListField name="BusinessContID" phrase="Record ID"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="BusRecoveryTitle" phrase="Title"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search business continuation requirements">
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Operating Permits"/>
+                <SampleItem ID="1" name="Chemicals"/>
+                <SampleItem ID="2" name="Corrective Actions"/>
+                <SampleItem ID="2" name="Postings"/>
+            </ComboField>
+            <ComboField name="BusinessContinuationID" findMode="text">
+                <SampleItem ID="1" name="Emergency Cold Storage Support"/>
+                <SampleItem ID="1" name="Emergency Colocation Facility"/>
+                <SampleItem ID="2" name="Staffing Replacement"/>
+                <SampleItem ID="2" name="Production Equipment Support"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="BusinessProcessTypeID">
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+            <MoneyField name="SignificantImpact"/>
+            <MoneyField name="Impact"/>
+            <MoneyField name="Budget"/>
+            <CodeComboField name="CriticalityID">
+                <SampleItem ID="1" name="Plant Shutdown"/>
+                <SampleItem ID="2" name="Loss of Customers"/>
+                <SampleItem ID="3" name="Loss of Supply"/>
+                <SampleItem ID="3" name="Loss of Distribution"/>
+            </CodeComboField>
+            <EditField name="BusinessContinuationTitle" size="75" maxLength="128"/>
+            <EditField name="BusRecoveryTitle" size="75" maxLength="128"/>
+            <EditField name="TakeActionImmediacy" size="10" maxLength="10">
+                <Self/>
+                <ComboField name="ImmediacyUnitCategoryID">
+                    <UpdateFieldRef name="ImmediacyUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ImmediacyUnitsID" parentField="ImmediacyUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <EditField name="AcquireWithin" size="10" maxLength="10">
+                <Self/>
+                <ComboField name="AcquireWithinUnitCategoryID">
+                    <UpdateFieldRef name="AcquireWithinUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="AcquireWithinUnitsID" parentField="AcquireWithinUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <CodeComboField name="ContinuationStatusID">
+                <SampleItem ID="1" name="Contract Negotiations"/>
+                <SampleItem ID="2" name="Prepared"/>
+                <SampleItem ID="3" name="Unprepared"/>
+                <SampleItem ID="3" name="In Progress"/>
+            </CodeComboField>
+            <CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a business continuation requirement or activity">
+            <ViewField name="BusinessContID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="BusinessProcessType"/>
+            <ViewField name="BusinessContinuationTitle"/>
+            <ViewField name="BusRecoveryTitle"/>
+            <ViewField name="BusinessContinuationNeed"/>
+            <ViewField name="BusRecoveryRespon"/>
+            <ViewField name="OperationalConsiderations"/>
+            <ViewField name="FinancialConsiderations"/>
+            <ViewField name="SignificantImpact"/>
+            <ViewField name="Impact"/>
+            <ViewField name="Budget"/>
+            <ViewField name="Criticality"/>
+            <ViewField name="TakeActionImmediacy">
+                <ViewField name="ImmediacyUnits"/>
+            </ViewField>
+            <ViewField name="AcquireWithin">
+                <ViewField name="AcquireWithinUnits"/>
+            </ViewField>
+            <ViewField name="ContinuationStatus"/>
+            <ViewField name="RiskImperatives"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="vala"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="apr"/>
+                <ViewGrid moduleID="bcq"/>
+                <ViewGrid moduleID="agr"/>
+                <ViewGrid moduleID="sup"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a business continuation requirement or activity">
+            <ViewField name="BusinessContID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <CodeComboField name="BusinessProcessTypeID" findMode="text">
+                <UpdateFieldRef name="BusinessContinuationID" listParentField="BusinessProcessTypeID"/>
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+            <ComboField name="BusinessContinuationID" findMode="text" parentField="BusinessProcessTypeID">
+                <SampleItem ID="1" name="Production | Machinery Replacement"/>
+                <SampleItem ID="2" name="Shipping and Logistics | Emergency Cold Storage Support"/>
+                <SampleItem ID="3" name="Information Technology | Emergency Colocation Facility"/>
+                <SampleItem ID="4" name="Human Resource Management | Staffing Replacement"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ViewField name="BusinessContinuationTitle" parentField="BusinessContinuationID"/>
+            <EditField name="BusRecoveryTitle" size="75" maxLength="128"/>
+            <ViewField name="BusinessContinuationNeed" parentField="BusinessContinuationID"/>
+            <MemoField name="BusRecoveryRespon" rows="10" cols="75"/>
+            <ViewField name="SignificantImpact" parentField="BusinessContinuationID"/>
+            <MoneyField name="Impact"/>
+            <MoneyField name="Budget"/>
+            <CodeComboField name="CriticalityID">
+                <SampleItem ID="1" name="Plant Shutdown"/>
+                <SampleItem ID="2" name="Loss of Customers"/>
+                <SampleItem ID="3" name="Loss of Supply"/>
+                <SampleItem ID="3" name="Loss of Distribution"/>
+            </CodeComboField>
+            <EditField name="TakeActionImmediacy" size="10" maxLength="10">
+                <Self/>
+                <ComboField name="ImmediacyUnitCategoryID">
+                    <UpdateFieldRef name="ImmediacyUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ImmediacyUnitsID" parentField="ImmediacyUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <EditField name="AcquireWithin" size="10" maxLength="10">
+                <Self/>
+                <ComboField name="AcquireWithinUnitCategoryID">
+                    <UpdateFieldRef name="AcquireWithinUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="AcquireWithinUnitsID" parentField="AcquireWithinUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <CodeComboField name="ContinuationStatusID">
+                <SampleItem ID="1" name="Contract Negotiations"/>
+                <SampleItem ID="2" name="Prepared"/>
+                <SampleItem ID="3" name="Unprepared"/>
+                <SampleItem ID="3" name="In Progress"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="Culture" phrase="Culture|Associate values with the business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="valc"/>
+            <EditGrid moduleID="vala"/>
+        </EditScreen>
+        <EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="aprd"/>
+            <EditGrid moduleID="apr"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="regc"/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="stdc"/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="bcqc"/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with a business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="agrc"/>
+            <EditGrid moduleID="agr"/>
+        </EditScreen>
+        <EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers of items needed to continue business following a business disruption event">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="supc"/>
+            <EditGrid moduleID="sup"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the business continuation requirement">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the business continuation requirement">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a pysical business continuation file">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a business continuation requirement or activity">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="rsk"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a business continuation requirement or activity" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="BusinessContID"/>
+        <InvisibleField name="BusinessContinuationID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="RelatedRecordDescription"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="BusinessProcessType"/>
+        <ViewField name="BusRecoveryTitle"/>
+        <ViewField name="BusRecoveryRespon"/>
+        <ViewField name="SignificantImpact"/>
+        <ViewField name="Impact"/>
+        <ViewField name="Budget"/>
+        <ViewField name="Criticality"/>
+        <ViewField name="TakeActionImmediacy">
+            <ViewField name="ImmediacyUnits"/>
+        </ViewField>
+        <ViewField name="AcquireWithin">
+            <ViewField name="AcquireWithinUnits"/>
+        </ViewField>
+        <ViewField name="ContinuationStatus"/>
+        <ViewField name="RiskImperatives"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="busa" phrase="Continuity Requirements">
+            <InvisibleField name="BusinessContID"/>
+            <ViewField name="Organization" sample="Emprise HQ"/>
+            <ViewField name="BusinessProcessType" sample="Business Process"/>
+            <ViewField name="BusRecoveryTitle" sample="Air Pollution Control District Permit Modification"/>
+            <ViewField name="Criticality" sample="Plant Closure"/>
+        </ViewGrid>
+        <EditGrid moduleID="busa" phrase="Continuity Requirements">
+            <GridForm>
+                <InvisibleField name="BusinessContID"/>
+                <CodeComboField name="BusinessProcessTypeID" findMode="text">
+                    <UpdateFieldRef name="BusinessContinuationID" listParentField="BusinessProcessTypeID"/>
+                    <SampleItem ID="1" name="Production"/>
+                    <SampleItem ID="2" name="Quality Assurance or Control"/>
+                    <SampleItem ID="3" name="Customer Service"/>
+                    <SampleItem ID="4" name="Maintenance and Engineering"/>
+                    <SampleItem ID="5" name="Sales or Sales Administration"/>
+                    <SampleItem ID="6" name="Finance and Treasury"/>
+                    <SampleItem ID="7" name="Research and Development"/>
+                    <SampleItem ID="8" name="Human Resources Management"/>
+                    <SampleItem ID="9" name="Information Technology"/>
+                    <SampleItem ID="10" name="Premises Administration"/>
+                    <SampleItem ID="11" name="Marketing or Public Relations"/>
+                    <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                    <SampleItem ID="13" name="Strategic Planning"/>
+                    <SampleItem ID="14" name="Distribution or Logistics"/>
+                </CodeComboField>
+                <ComboField name="BusinessContinuationID" findMode="text" parentField="BusinessProcessTypeID">
+                    <SampleItem ID="1" name="Emergency Cold Storage Support"/>
+                    <SampleItem ID="1" name="Emergency Colocation Facility"/>
+                    <SampleItem ID="2" name="Staffing Replacement"/>
+                    <SampleItem ID="2" name="Production Equipment Support"/>
+                </ComboField>
+                <OrgComboField name="OrganizationID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                    <SampleItem ID="5" name="Active Agenda, New York"/>
+                    <SampleItem ID="7" name="Active Agenda, Munich"/>
+                </OrgComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <EditField name="BusRecoveryTitle" size="75" maxLength="128"/>
+                <MemoField name="BusRecoveryRespon" cols="75" rows="5"/>
+                <CodeComboField name="CriticalityID" findMode="text">
+                    <SampleItem ID="1" name="Plant Shutdown"/>
+                    <SampleItem ID="2" name="Loss of Customers"/>
+                    <SampleItem ID="3" name="Loss of Supply"/>
+                    <SampleItem ID="3" name="Loss of Distribution"/>
+                </CodeComboField>
+                <EditField name="TakeActionImmediacy" size="10" maxLength="10">
+                    <Self/>
+                    <ComboField name="ImmediacyUnitCategoryID">
+                        <UpdateFieldRef name="ImmediacyUnitsID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="ImmediacyUnitsID" parentField="ImmediacyUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+                <EditField name="AcquireWithin" size="10" maxLength="10">
+                    <Self/>
+                    <ComboField name="AcquireWithinUnitCategoryID">
+                        <UpdateFieldRef name="AcquireWithinUnitsID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="AcquireWithinUnitsID" parentField="AcquireWithinUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+            </GridForm>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="BusRecoveryTitle" sample="Air Pollution Control District Permit Modification"/>
+            <ViewField name="BusinessProcessType" sample="Production"/>
+            <ViewField name="Criticality" sample="Plant Closure"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <RadarChart name="Radar01" title="Business Continuation Requirements By Risk Imperative" subModuleID="rsk" mode="categorize">
+            <GroupByField name="RiskImperative"/>
+            <SummaryField name="ImperativeID" type="count"/>
+        </RadarChart>
+        <PieChart name="Pie01" title="Business Continuation Requirements By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Business Continuation Requirements By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Business Continuation Requirements By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Business Continuation Requirements By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Business Continuation Requirements By Criticality">
+            <GroupByField name="Criticality"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Business Continuation Requirements By Criticality">
+            <GroupByField name="Criticality"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Business Continuation Requirements By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Business Continuation Requirements By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Business Continuation Requirements By Status">
+            <GroupByField name="ContinuationStatus"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Business Continuation Requirements By Status">
+            <GroupByField name="ContinuationStatus"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Business Continuation Requirements By Business Process">
+            <GroupByField name="BusinessProcessType"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Business Continuation Requirements By Business Process">
+            <GroupByField name="BusinessProcessType"/>
+            <SummaryField name="BusinessContID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

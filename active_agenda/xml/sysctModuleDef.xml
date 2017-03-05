@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Component Types" moduleID="sysct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Component Type" pluralRecordName="Component Types" allowAddRecord="yes" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="SysComponentTypeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track system component types" sample="1"/>
+		<TableField name="ComponentCategoryID" type="int" validate="RequireSelection" phrase="Component Category|A broadly defined title or phrase used to group similar system component categories" sample="1"/>
+		<CodeField name="ComponentCategory" key="ComponentCategoryID" phrase="Component Category|A broadly defined title or phrase used to group similar system component categories" sample="Information Technology" codeTypeID="117"/>
+		<TableField name="ComponentType" type="varchar(128)" validate="notEmpty" phrase="Component Type|A title or phrase used to describe a specific type of system component" sample="Server"/>
+		<TableField name="ComponentDesc" type="text" validate="noValidation" phrase="Description|A detailed description of the component type" sample="A server is a computer used to serve programs and content to a variety of users assigned permissions to access the unit"/>
+		<RemoteField name="PersonAccountableID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="123" phrase="Person Accountable|The name of the person accountable for system components of this type" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person accountable for system components of this type" sample="Mattias Thorslund"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ComponentCategory"/>:_<CombinedFieldRef name="ComponentType"/></CombinedField>
+		<CombinedField name="SysComponentType" phrase="Component Type|A combined field used to describe this system component type when associating it with other records" sample="Information Technology: Server"><CombinedFieldRef name="ComponentCategory"/>:_<CombinedFieldRef name="ComponentType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SysComponentTypeID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="SysComponentType"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="SysComponentTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sysct"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SysComponentTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sysct"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SysComponentTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sysct"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List system component types">
+			<ListField name="SysComponentTypeID" phrase="Record ID"/>
+			<ListField name="ComponentCategory" phrase="Component Category"/>
+			<ListField name="ComponentType" phrase="Component Type"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search system component types">
+			<CodeComboField name="ComponentCategoryID" findMode="text">
+				<SampleItem ID="1" name="Information Technology"/>
+				<SampleItem ID="2" name="Bag House"/>
+				<SampleItem ID="3" name="Liquid Petroleum Gas"/>
+				<SampleItem ID="4" name="Methyl Bromide Fumigation"/>
+				<SampleItem ID="5" name="Nitrogen Sterilization"/>
+				<SampleItem ID="6" name="Refrigeration"/>
+			</CodeComboField>
+			<EditField name="ComponentType" size="75" maxLength="128"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a system component type">
+			<ViewField name="SysComponentTypeID"/>
+			<ViewField name="ComponentCategory"/>
+			<ViewField name="ComponentType"/>
+			<ViewField name="ComponentDesc"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a system component type">
+			<ViewField name="SysComponentTypeID"/>
+			<CodeComboField name="ComponentCategoryID" findMode="text">
+				<SampleItem ID="1" name="Information Technology"/>
+				<SampleItem ID="2" name="Bag House"/>
+				<SampleItem ID="3" name="Liquid Petroleum Gas"/>
+				<SampleItem ID="4" name="Methyl Bromide Fumigation"/>
+				<SampleItem ID="5" name="Nitrogen Sterilization"/>
+				<SampleItem ID="6" name="Refrigeration"/>
+			</CodeComboField>
+			<EditField name="ComponentType" size="75" maxLength="128"/>
+			<MemoField name="ComponentDesc" rows="5" cols="75"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for a system component type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with a system component type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a component type">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SysComponentTypeID"/>
+		<ViewField name="ComponentCategory"/>
+		<ViewField name="ComponentType"/>
+		<ViewField name="ComponentDesc"/>
+		<ViewField name="PersonAccountable"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Component Types By Category">
+			<GroupByField name="ComponentCategory"/>
+			<SummaryField name="SysComponentTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Component Types By Category">
+			<GroupByField name="ComponentCategory"/>
+			<SummaryField name="SysComponentTypeID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Component Types By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SysComponentTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Component Types By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SysComponentTypeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

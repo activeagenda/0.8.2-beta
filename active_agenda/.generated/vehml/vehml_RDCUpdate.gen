@@ -1,0 +1,71 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:889:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'vehml\' AS ModuleID,
+   vehml.MileageID AS RecordID,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`cod2`.Description,\'\'),\' \',IFNULL(`vehmd2`.VehModel,\'\'),\' \',IFNULL(`vehmd2`.VehModelNo,\'\')),\'  \'),\'\'),\' | \',IFNULL(`veh1`.VehLicenseNo,\'\')),\' | \'),\'\'),\' | \',IFNULL(`vehml`.Odometer,\'\')),\' | \') AS Value,
+`veh1`.AssignedOrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `vehml`
+LEFT OUTER JOIN `rdc` ON (vehml.MileageID = rdc.RecordID AND rdc.ModuleID = \'vehml\')
+   
+   LEFT OUTER JOIN `veh` AS veh1 
+   ON (`vehml`.VehicleID = `veh1`.VehicleID )
+   LEFT OUTER JOIN `vehmd` AS vehmd2 
+   ON (`veh1`.VehicleModelID = `vehmd2`.VehicleModelID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`vehmd2`.VehMakeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'29\')
+WHERE vehml.MileageID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:806:"UPDATE rdc
+INNER JOIN vehml ON (rdc.RecordID = vehml.MileageID AND rdc.ModuleID = \'vehml\')
+   
+   LEFT OUTER JOIN `veh` AS veh1 
+   ON (`vehml`.VehicleID = `veh1`.VehicleID )
+   LEFT OUTER JOIN `vehmd` AS vehmd2 
+   ON (`veh1`.VehicleModelID = `vehmd2`.VehicleModelID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`vehmd2`.VehMakeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'29\')
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`cod2`.Description,\'\'),\' \',IFNULL(`vehmd2`.VehModel,\'\'),\' \',IFNULL(`vehmd2`.VehModelNo,\'\')),\'  \'),\'\'),\' | \',IFNULL(`veh1`.VehLicenseNo,\'\')),\' | \'),\'\'),\' | \',IFNULL(`vehml`.Odometer,\'\')),\' | \'),
+rdc.OrganizationID = `veh1`.AssignedOrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'vehml\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

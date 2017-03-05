@@ -1,0 +1,320 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Responsibilities" moduleID="rsp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Responsibility" pluralRecordName="Responsibilities" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ResponsibilityID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track organizational level responsibilities associated with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the assigned responsibility" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the assigned responsibility" sample="Partnerships"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Corrective Actions; Active Agenda, HQ"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization where this level based responsibility is enforced" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization where this level based responsibility is enforced" sample="Active Agenda, HQ"/>
+		<TableField name="OrgLevelID" type="int" validate="RequireSelection" phrase="Organization Level|The hierarchical level of the organization" sample="1"/>
+		<CodeField name="OrgLevel" key="OrgLevelID" phrase="Organization Level|The hierarchical level of the organization" sample="Leadership" codeTypeID="22"/>
+		<TableField name="ResponsibilityTitle" type="varchar(128)" validate="notEmpty" phrase="Responsibility Title|A short phrase or title used to describe the organizational level responsibility" sample="Brush your teeth every morning and night."/>
+		<TableField name="OrgResponsibility" type="text" validate="notEmpty" phrase="Responsibility|A detailed description of the specific responsibility of the organization level as it pertains to the related record" sample="Provide financial support and resources to the corrective action partnership team and participate in the direct delivery of local corrective actions"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'rsp'" localKey="ResponsibilityID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="ResponsibilityTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Responsibility" phrase="Responsibility|A combined field used to describe this responsibility when associating it with other records" sample="Operating Permits | ID: 1 | Active Agenda, HQ | Leadership"><CombinedFieldRef name="ResponsibilityTitle"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ResponsibilityID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Responsibility"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ResponsibilityID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rsp"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ResponsibilityID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rsp"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ResponsibilityID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rsp"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ResponsibilityID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rsp"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ResponsibilityID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="rsp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List partnerships associated with related records">
+			<ListField name="ResponsibilityID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="ResponsibilityTitle" phrase="Responsibility"/>
+			<ListField name="OrgLevel" phrase="Organization Level"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search partnerships associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Partnerships"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="OrgLevelID" findMode="text">
+				<SampleItem ID="1" name="Leadership"/>
+				<SampleItem ID="2" name="Management"/>
+				<SampleItem ID="3" name="Supervisorial"/>
+				<SampleItem ID="4" name="Team Leadership"/>
+				<SampleItem ID="5" name="Line"/>
+				<SampleItem ID="6" name="Staff"/>
+			</CodeComboField>
+			<EditField name="ResponsibilityTitle" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an organization responsibility associated with a related record">
+			<ViewField name="ResponsibilityID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="OrgLevel"/>
+			<ViewField name="ResponsibilityTitle"/>
+			<ViewField name="OrgResponsibility"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an organization responsibility associated with a related record">
+			<ViewField name="ResponsibilityID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="OrgLevelID" findMode="text">
+				<SampleItem ID="1" name="Leadership"/>
+				<SampleItem ID="2" name="Management"/>
+				<SampleItem ID="3" name="Supervisorial"/>
+				<SampleItem ID="4" name="Team Leadership"/>
+				<SampleItem ID="5" name="Line"/>
+				<SampleItem ID="6" name="Staff"/>
+			</CodeComboField>
+			<EditField name="ResponsibilityTitle" size="75" maxLength="128"/>
+			<MemoField name="OrgResponsibility" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the level responsibility">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the level responsibility">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a responsibility">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a responsibility">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a responsibility" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ResponsibilityID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="OrgLevel"/>
+		<ViewField name="ResponsibilityTitle"/>
+		<ViewField name="OrgResponsibility"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="rsp" phrase="Level Responsibilities">
+			<InvisibleField name="ResponsibilityID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="OrgLevel" sample="Leadership"/>
+			<ViewField name="ResponsibilityTitle" sample="Provide financial support and resources to the corrective action partnership team"/>
+		</ViewGrid>
+		<EditGrid moduleID="rsp" phrase="Level Responsibilities">
+			<GridForm>
+				<InvisibleField name="ResponsibilityID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<CodeComboField name="OrgLevelID" findMode="text" sample="Leadership">
+					<SampleItem ID="1" name="Leadership"/>
+					<SampleItem ID="2" name="Management"/>
+					<SampleItem ID="3" name="Supervisorial"/>
+					<SampleItem ID="4" name="Team Leadership"/>
+					<SampleItem ID="5" name="Line"/>
+					<SampleItem ID="6" name="Staff"/>
+				</CodeComboField>
+                <EditField name="ResponsibilityTitle" size="75" maxLength="128"/>
+				<MemoField name="OrgResponsibility" rows="5" cols="75" sample="Provide financial support and resources to the corrective action partnership team and participate in the direct delivery of local corrective actions"/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="OrgLevel" sample="Leadership"/>
+			<ViewField name="ResponsibilityTitle" sample="Provide financial support and resources to the corrective action partnership team"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Responsibilities By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Responsibilities By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Responsibilities By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Responsibilities By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Responsibilities By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Responsibilities By Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Responsibilities By Level">
+			<GroupByField name="OrgLevel"/>
+			<SummaryField name="ResponsibilityID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

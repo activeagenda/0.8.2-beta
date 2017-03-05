@@ -1,0 +1,535 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Confined Space Entry Permits" moduleID="cspp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Confined Space Entry Permit" pluralRecordName="Confined Space Entry Permits" addNewName="Permit" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="EntryPermitID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track confined space entries and associated permits" sample="1"/>
+		<TableField name="JobNumber" type="varchar(50)" validate="notEmpty" phrase="Job Number|The unique number assigned to the job requiring confined space entry. This number is typically assigned by an engineering or maintenance dapartment" sample="1123"/>
+		<TableField name="PermitNumber" type="varchar(50)" validate="notEmpty" phrase="Permit Number|The unique number assigned to the permit used for space entry and placed at the entrance to the space during the performance of entrance activities.  The permit ID can be used as the permit number because it is a unique, automatically generated, numbering system" sample="CSE113"/>
+		<RemoteField name="EntryTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="7" phrase="Entry Date|The date and time the confined space was entered" sample="01/01/2004"/>
+		<TableField name="EntryShiftID" type="int" validate="RequireSelection" phrase="Entry Shift|The shift during which the confined space was entered" sample="1"/>
+		<CodeField name="EntryShift" key="EntryShiftID" phrase="Entry Shift|The shift during which the confined space was entered" sample="1st - Day" codeTypeID="147"/>
+		<RemoteField name="ExpirationTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Time|The date and time the confined space entry permit will expire and no longer be valid to permit the entry into the confined space" sample="12:30 pm"/>
+		<TableField name="ConfinedSpaceID" type="int" validate="RequireSelection" phrase="Confined Space|A description of the confined space based on a combination of field values assigned from within the confined space module" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="OrganizationID" key="ConfinedSpaceID" joinType="left" phrase="Organization|The name of the organization where the confined space exists" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the confined space exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="LocationID" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="LocationID" key="ConfinedSpaceID" joinType="left" phrase="Location|Specific area within the facility where the confined space is located" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific area within the facility where the confined space is located" sample="Cold Storage Receiving Area; Cold Storage No. 6"/>
+		<ForeignField name="ConfinedSpaceTypeID" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="ConfinedSpaceTypeID" key="ConfinedSpaceID" joinType="left" phrase="Confined Space Type|A combined field used to describe this confined space type when associating it with other records" sample="1"/>
+		<ForeignField name="ConfinedSpaceCategoryID" foreignTable="cspt" foreignKey="ConfinedSpaceTypeID" foreignField="ConfinedSpaceCategoryID" key="ConfinedSpaceTypeID" joinType="left" phrase="Category|A broad categoy used to group confined spaces of similar types" sample="1"/>
+		<CodeField name="ConfinedSpaceCategory" key="ConfinedSpaceCategoryID" phrase="Category|A broad categoy used to group confined spaces of similar types" sample="Vault" codeTypeID="56"/>
+		<ForeignField name="ConfinedSpaceType" foreignTable="cspt" foreignKey="ConfinedSpaceTypeID" foreignField="ConfinedSpaceType" key="ConfinedSpaceTypeID" joinType="left" phrase="Confined Space Type|A combined field used to describe this confined space type when associating it with other records" sample="Vault | Above Ground Wire Vault"/>
+		<ForeignField name="LastReviewDate" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="LastReviewDate" key="ConfinedSpaceID" joinType="left" phrase="Last Review|The date of the last formal review of the confined space" sample="01/01/2004"/>
+		<ForeignField name="ConfinedSpace" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="ConfinedSpace" key="ConfinedSpaceID" joinType="left" phrase="Confined Space|A description of the confined space based on a combination of field values assigned from within the confined space module" sample="Mix Tank | Ice Cream Mix Tank Number 7 | Active Agenda, HQ"/>
+		<ForeignField name="ConfinedSpaceDesc" foreignTable="csp" foreignKey="ConfinedSpaceID" foreignField="ConfinedSpaceDesc" key="ConfinedSpaceID" joinType="left" phrase="Description|A detailed description of this confined space and any special characteristics associated with entry or egress" sample="The mix tank has an internal augar which must be shut off and controlled before entry. Entry without shutting down the augar could result in death."/>
+		<RemoteField name="PermitIssuedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="16" phrase="Permit Issued By|The name of the person issuing the confined space entry permit" sample="1"/>
+		<ForeignField name="PermitIssuedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PermitIssuedByID" joinType="left" phrase="Permit Issued By|The name of the person issuing the confined space entry permit" sample="Mattias Thorslund"/>
+		<TableField name="Explanation" type="text" validate="notEmpty" phrase="Explanation|An explanation of the confined space entry to be performed" sample="The mix tank must be sanitized every 3 days. Sanitation of the mix tank requires that a person enter the access hatch at the top of the tank and disassemble the mix augar so that the augar blades may be cleaned and sanitized"/>
+		<TableField name="KeyLearnings" type="text" validate="notEmpty" phrase="Key Learnings|Information learned during the confined space entry which may be useful to others performing similar confined space entries in the same or similar area" sample="The mix augar should be locked out before entering the mix tank. The augar was not locked out and became energized while I was inside the tank. Fortunately someone heard me screaming as I jumped over the augar blade."/>
+		<TableField name="SpecialHazards" type="text" validate="notEmpty" phrase="Special Hazards|Special confined space entry hazards that should be captured and recorded for default permits so that all persons performing similar entries will be aware of the dangers" sample="The mix augar switch is mislabeled as the 'Intercom Switch' and can result in inadvertent activation of the mix augar by people trying to use the intercom."/>
+		<RemoteField name="SupervisorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="17" phrase="Supervisor|The supervisor of the area immediate to the location where the confined space entry is to occur" sample="1"/>
+		<ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor|The supervisor of the area immediate to the location where the confined space entry is to occur" sample="Jane Doe"/>
+		<RemoteField name="EntryPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="15" phrase="Entry Person|The qualified person assigned responsibility for entering the confined space" sample="1"/>
+		<ForeignField name="EntryPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="EntryPersonID" joinType="left" phrase="Entry Person|The qualified person assigned responsibility for entering the confined space" sample="Larry Hansen"/>
+		<RemoteField name="AttendantID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="14" phrase="Attendant|The name of the person assigned to attend the confined space entry and maintain contact with the entrant. The attendant is also responsible for maintaining contact with emergency responders and initiating emergency response activities if the entry person encounters difficulties" sample="1"/>
+		<ForeignField name="Attendant" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AttendantID" joinType="left" phrase="Attendant|The name of the person assigned to attend the confined space entry and maintain contact with the entrant. The attendant is also responsible for maintaining contact with emergency responders and initiating emergency response activities if the entry person encounters difficulties" sample="Jane Doe"/>
+		<RemoteField name="AtmosphereTesterID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="13" phrase="Atmosphere Tester|The name of the person conducting atmosphere testing and monitoring of the environment within the confined space" sample="1"/>
+		<ForeignField name="AtmosphereTester" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AtmosphereTesterID" joinType="left" phrase="Atmosphere Tester|The name of the person conducting atmosphere testing and monitoring of the environment within the confined space" sample="Dan Zahlis"/>
+		<RemoteField name="ERTMemberID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="23" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the entry and who remains available in the event that a confined space rescue becomes necessary" sample="1"/>
+		<ForeignField name="ERTMember" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ERTMemberID" phrase="Emergency Response Team Member|The name of the emergency response team member that has been contacted in advance of the entry and who remains available in the event that a confined space rescue becomes necessary" sample="Mattias Thorslund" joinType="left"/>
+		<ForeignField name="ContactNumbers" foreignTable="ppl" foreignKey="PersonID" foreignField="ContactNumbers" key="ERTMemberID" phrase="ERT Contact Numbers|The contact numbers for the emergency response team member" sample="559.299.9282" joinType="left"/>
+		<ForeignField name="FullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="ERTMemberID" phrase="Work Phone|The work phone number of the emergency response team member" sample="559.299.9282" joinType="left"/>
+		<ForeignField name="MobilePhone" foreignTable="ppl" foreignKey="PersonID" foreignField="MobilePhone" key="ERTMemberID" phrase="Mobile Phone|The mobile phone number of the emergency response team member" sample="559.299.9282" joinType="left"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="CSE113; 09-21-2003; Mix Tank; Active Agenda, HQ"><CombinedFieldRef name="PermitNumber"/>;_<CombinedFieldRef name="EntryTime"/>;_<CombinedFieldRef name="ConfinedSpaceType"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="EntryPermit" phrase="Entry Permit|A combined field used to describe this entry permit when associating it with other records" sample="CSE113; 09-21-2003; Mix Tank; Active Agenda, HQ"><CombinedFieldRef name="ConfinedSpace"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="EntryPermitID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="EntryPermit"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="hza" name="Hazard Abatement" parentKey="ConfinedSpaceID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="csp"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="ConfinedSpaceID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="csp"/>
+		</SubModule>
+		<SubModule moduleID="chma" name="Chemical Associations" parentKey="ConfinedSpaceID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="csp"/>
+		</SubModule>
+		<SubModule moduleID="hzea" name="Hazardous Energy Procedure Associations" parentKey="ConfinedSpaceID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="csp"/>
+		</SubModule>
+		<SubModule moduleID="jana" name="Job Analyses" parentKey="ConfinedSpaceID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="csp"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="EntryPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cspp"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="EntryPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cspp"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="EntryPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cspp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List confined space entry permits">
+			<ListField name="EntryPermitID" phrase="Record ID"/>
+			<ListField name="PermitNumber" phrase="Permit Number"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="ConfinedSpace" phrase="Confined Space"/>
+			<ListField name="EntryTime" phrase="Date and Time"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search confined space entry permits">
+			<EditField name="JobNumber" size="50" maxLength="50"/>
+			<EditField name="PermitNumber" size="50" maxLength="50"/>
+			<DateField name="EntryTime"/>
+			<CodeRadioField name="EntryShiftID" orientation="vertical">
+				<SampleItem ID="1" name="Day - 1st"/>
+				<SampleItem ID="3" name="Night - 2nd"/>
+				<SampleItem ID="5" name="Graveyard - 3rd"/>
+			</CodeRadioField>
+			<DateField name="ExpirationTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text">
+				<SampleItem ID="1" name="Maintenance Shop"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<CodeComboField name="ConfinedSpaceCategoryID" findMode="text">
+				<SampleItem ID="1" name="Sewer"/>
+				<SampleItem ID="2" name="Vault"/>
+				<SampleItem ID="3" name="Vat"/>
+				<SampleItem ID="4" name="Degreaser"/>
+			</CodeComboField>
+			<ComboField name="ConfinedSpaceTypeID" findMode="text">
+				<SampleItem ID="1" name="Mix Tank"/>
+				<SampleItem ID="2" name="Silo"/>
+				<SampleItem ID="3" name="Hopper"/>
+				<SampleItem ID="4" name="Sub Surface Vault"/>
+			</ComboField>
+			<ComboField name="ConfinedSpaceID" findMode="text">
+				<SampleItem ID="1" name="Mix Tank | Ice Cream Mix Tank Number 7 | Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Mix Tank | Ice Cream Mix Tank Number 6 | Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Mix Tank | Ice Cream Mix Tank Number 5 | Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mix Tank | Ice Cream Mix Tank Number 4 | Active Agenda, HQ"/>
+			</ComboField>
+			<PersonComboField name="PermitIssuedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="EntryPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AttendantID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AtmosphereTesterID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="ERTMemberID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a confined space entry permit">
+			<ViewField name="EntryPermitID"/>
+			<ViewField name="JobNumber"/>
+			<ViewField name="PermitNumber"/>
+			<ViewField name="EntryTime"/>
+			<ViewField name="EntryShift"/>
+			<ViewField name="ExpirationTime"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="ConfinedSpaceCategory"/>
+			<ViewField name="ConfinedSpaceType"/>
+			<ViewField name="ConfinedSpace"/>
+			<ViewField name="LastReviewDate"/>
+			<ViewField name="ConfinedSpaceDesc"/>
+			<ViewField name="Explanation"/>
+			<ViewField name="KeyLearnings"/>
+			<ViewField name="SpecialHazards"/>
+			<ViewField name="PermitIssuedBy"/>
+			<ViewField name="Supervisor"/>
+			<ViewField name="EntryPerson"/>
+			<ViewField name="Attendant"/>
+			<ViewField name="AtmosphereTester"/>
+			<ViewField name="ERTMember"/>
+			<ViewField name="ContactNumbers"/>
+			<InvisibleField name="ConfinedSpaceID"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="hza" isInfo="yes"/>
+				<ViewGrid moduleID="chma" isInfo="yes"/>
+				<ViewGrid moduleID="hzea" isInfo="yes"/>
+				<ViewGrid moduleID="apr" phrase="Checklist Items" isInfo="yes"/>
+				<ViewGrid moduleID="jana" isInfo="yes"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a confined space entry permit">
+			<ViewField name="EntryPermitID"/>
+			<EditField name="JobNumber" size="50" maxLength="50"/>
+			<EditField name="PermitNumber" size="50" maxLength="50"/>
+			<DateField name="EntryTime"/>
+			<CodeRadioField name="EntryShiftID" orientation="vertical">
+				<SampleItem ID="1" name="Day - 1st"/>
+				<SampleItem ID="3" name="Night - 2nd"/>
+				<SampleItem ID="5" name="Graveyard - 3rd"/>
+			</CodeRadioField>
+			<DateField name="ExpirationTime"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="ConfinedSpaceID"/>
+				<SampleItem ID="1" name="Maintenance Shop"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="ConfinedSpaceID" findMode="text" parentField="LocationID">
+				<UpdateFieldRef name="LastReviewDate"/>
+				<UpdateFieldRef name="ConfinedSpaceDesc"/>
+				<SampleItem ID="1" name="Mix Tank | Ice Cream Mix Tank Number 7 | Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Mix Tank | Ice Cream Mix Tank Number 6 | Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Mix Tank | Ice Cream Mix Tank Number 5 | Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mix Tank | Ice Cream Mix Tank Number 4 | Active Agenda, HQ"/>
+			</ComboField>
+			<ViewField name="LastReviewDate" parentField="ConfinedSpaceID"/>
+			<ViewField name="ConfinedSpaceDesc" parentField="ConfinedSpaceID"/>
+			<MemoField name="Explanation" rows="5" cols="75"/>
+			<MemoField name="KeyLearnings" rows="5" cols="75"/>
+			<MemoField name="SpecialHazards" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Assignment" phrase="Assignments|Assign people with confined space entry responsibilities">
+			<RecordSummaryFieldsRef/>
+			<PersonComboField name="PermitIssuedByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="EntryPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AttendantID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="AtmosphereTesterID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="ERTMemberID" findMode="alpha">
+				<UpdateFieldRef name="ContactCard"/>
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ViewField name="ContactNumbers" parentField="ERTMemberID"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the confined space entry permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the confined space entry permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the confined space entry permit" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="RecordReports" phrase="Reports|View forms and reports associated with confined space entry permits"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="EntryPermitID"/>
+		<InvisibleField name="ConfinedSpaceID"/>
+		<ViewField name="JobNumber"/>
+		<ViewField name="PermitNumber"/>
+		<ViewField name="EntryTime"/>
+		<ViewField name="ExpirationTime"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Location"/>
+		<ViewField name="ConfinedSpaceCategory"/>
+		<ViewField name="ConfinedSpaceType"/>
+		<ViewField name="ConfinedSpace"/>
+		<ViewField name="LastReviewDate"/>
+		<ViewField name="ConfinedSpaceDesc"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="cspp" phrase="Entry Permits">
+			<InvisibleField name="EntryPermitID"/>
+			<ViewField name="PermitNumber" sample="CSE113"/>
+			<ViewField name="EntryTime" sample="09-21-2003"/>
+			<ViewField name="KeyLearnings" sample="The mix augar should be locked out before entering the mix tank. The augar was not locked out and became energized while I was inside the tank. Fortunately someone heard me screaming as I jumped over the augar blade."/>
+		</ViewGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Entry Permits By Shift">
+			<GroupByField name="EntryShift"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Entry Permits By Shift">
+			<GroupByField name="EntryShift"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Entry Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Entry Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Entry Permits By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Entry Permits By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Entry Permits By Confined Space Type">
+			<GroupByField name="ConfinedSpaceType"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Entry Permits By Confined Space Type">
+			<GroupByField name="ConfinedSpaceType"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Entry Permits By Confined Space">
+			<GroupByField name="ConfinedSpace"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Entry Permits By Confined Space">
+			<GroupByField name="ConfinedSpace"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Entry Permits By Issuer">
+			<GroupByField name="PermitIssuedBy"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Entry Permits By Issuer">
+			<GroupByField name="PermitIssuedBy"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Entry Permits By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Entry Permits By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Entry Permits By Entry Person">
+			<GroupByField name="EntryPerson"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Entry Permits By Entry Person">
+			<GroupByField name="EntryPerson"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Entry Permits By Attendant">
+			<GroupByField name="Attendant"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Entry Permits By Attendant">
+			<GroupByField name="Attendant"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Entry Permits By Atmosphere Tester">
+			<GroupByField name="AtmosphereTester"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Entry Permits By Atmosphere Tester">
+			<GroupByField name="AtmosphereTester"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Entry Permits By Emergency Response Team Member">
+			<GroupByField name="ERTMember"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Entry Permits By Emergency Response Team Member">
+			<GroupByField name="ERTMember"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie12" title="Entry Permits By Category">
+			<GroupByField name="ConfinedSpaceCategory"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto12" title="Entry Permits By Category">
+			<GroupByField name="ConfinedSpaceCategory"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie13" title="Entry Permits By Type">
+			<GroupByField name="ConfinedSpaceType"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto13" title="Entry Permits By Type">
+			<GroupByField name="ConfinedSpaceType"/>
+			<SummaryField name="EntryPermitID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

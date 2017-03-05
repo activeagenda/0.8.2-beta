@@ -1,0 +1,266 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Dependents" moduleID="ppld" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Dependent" pluralRecordName="Dependents" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="DependentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Dependent ID|A unique number assigned to each employee's' dependent" sample="1"/>
+		<TableField name="EmployeePersonID" type="int" dbFlags="unsigned" phrase="Employee|A combined field used to describe this employee when associating her/him with other records" sample="2"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="EmployeePersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Emprise, HQ"/>
+		<ForeignField name="EmployeePerson" foreignTable="pple" foreignKey="PersonID" foreignField="Employee" key="EmployeePersonID" joinType="left" phrase="Employee|A combined field used to describe this employee when associating her/him with other records" sample="Zahlis, Daniel, 2710"/>
+		<TableField name="LastName" type="varchar(50)" dbFlags="" phrase="Last Name|Family name of the employee dependent" sample="Zahlis"/>
+		<TableField name="FirstName" type="varchar(50)" dbFlags="" phrase="First Name|Given name of the employee dependent" sample="Cheryl"/>
+		<TableField name="MiddleName" type="varchar(50)" dbFlags="" phrase="Middle Name|Middle name or initial of the employee dependent" sample="Francis"/>
+		<TableField name="RelationshipID" type="int" dbFlags="unsigned" phrase="Relationship|The relationship of the dependent to the employee" sample="1"/>
+		<CodeField name="Relationship" key="RelationshipID" phrase="Relationship|The relationship of the dependent to the employee" sample="Spouse" codeTypeID="78"/>
+		<TableField name="DepGenderID" type="int" dbFlags="unsigned" phrase="Dependent Gender|Gender of the employee's dependent'" sample="1"/>
+		<CodeField name="DepGender" key="DepGenderID" phrase="Dependent Gender|Gender of the employee's dependent'" sample="Female" codeTypeID="133"/>
+		<TableField name="DepBirthdate" type="date" dbFlags="" phrase="Dependent Birthdate|The birth date of the employee's dependent" sample="09-15-1964"/>
+		<TableField name="DepAge" type="varchar(5)" dbFlags="" phrase="Dependent Age|Age of the employee's dependent which is automatically calculated using the birthdate and server date" sample="39"/>
+		<TableField name="DepSocialSecNo" type="varchar(25)" dbFlags="" phrase="Dependent Social Security Number|The identification number assigned to individuals by the individual's country" sample="776-22-9928"/>
+		<TableField name="Employed" type="bool" dbFlags="" phrase="Employed|Whether this dependent is employed" sample="Yes"/>
+		<TableField name="SpecialFactors" type="varchar(255)" dbFlags="" phrase="Additional Information|Any additional information relative to the dependent which may be of importance to the organization" sample="This dependent has secondary health insurance coverage"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="EmployeePerson"/>;_<CombinedFieldRef name="FirstName"/>_<CombinedFieldRef name="LastName"/>;_<CombinedFieldRef name="Relationship"/></CombinedField>
+		<CombinedField name="Dependent" phrase="Dependent|A combined field used to describe this dependent when associating him or her with other records" sample="Zahlis, Daniel, 2710 | Cheryl Zahlis | Spouse"><CombinedFieldRef name="EmployeePerson"/>;_<CombinedFieldRef name="FirstName"/>_<CombinedFieldRef name="LastName"/>;_<CombinedFieldRef name="Relationship"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="DependentID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Dependent"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List employee dependents">
+			<ListField name="DependentID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="EmployeePerson" phrase="Employee"/>
+			<ListField name="Relationship" phrase="Relationship"/>
+			<ListField name="DepGender" phrase="Gender"/>
+			<ListField name="DepAge" phrase="Age"/>
+			<ListField name="Employed" phrase="Employed"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search employee dependents">
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise HQ"/>
+				<SampleItem ID="3" name="Emprise, Sacramento"/>
+				<SampleItem ID="5" name="Emprise, New York"/>
+				<SampleItem ID="7" name="Emprise, Munich"/>
+			</ComboField>
+			<PersonComboField name="EmployeePersonID" findMode="alpha" parentField="OrganizationID">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, HQ"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, HQ"/>
+			</PersonComboField>
+			<EditField name="LastName" size="50" maxLength="50"/>
+			<EditField name="FirstName" size="50" maxLength="50"/>
+			<EditField name="MiddleName" size="50" maxLength="50"/>
+			<CodeComboField name="RelationshipID" findMode="text">
+				<SampleItem ID="1" name="Spouse"/>
+				<SampleItem ID="2" name="Father"/>
+				<SampleItem ID="3" name="Mother"/>
+				<SampleItem ID="4" name="Life Partner"/>
+				<SampleItem ID="5" name="Physician"/>
+			</CodeComboField>
+			<CodeRadioField name="DepGenderID">
+				<SampleItem ID="1" name="Male"/>
+				<SampleItem ID="2" name="Female"/>
+			</CodeRadioField>
+			<DateField name="DepBirthdate"/>
+			<CheckBoxField name="Employed"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an employee dependent">
+			<ViewField name="DependentID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="MiddleName"/>
+			<ViewField name="Relationship"/>
+			<ViewField name="DepGender"/>
+			<ViewField name="DepBirthdate"/>
+			<ViewField name="DepAge"/>
+			<ViewField name="DepSocialSecNo"/>
+			<ViewField name="Employed"/>
+			<ViewField name="SpecialFactors"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an employee dependent">
+			<ViewField name="DependentID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<EditField name="LastName" size="50" maxLength="50"/>
+			<EditField name="FirstName" size="50" maxLength="50"/>
+			<EditField name="MiddleName" size="50" maxLength="50"/>
+			<CodeComboField name="RelationshipID" findMode="text">
+				<SampleItem ID="1" name="Spouse"/>
+				<SampleItem ID="2" name="Father"/>
+				<SampleItem ID="3" name="Mother"/>
+				<SampleItem ID="4" name="Life Partner"/>
+				<SampleItem ID="5" name="Physician"/>
+			</CodeComboField>
+			<CodeRadioField name="DepGenderID">
+				<SampleItem ID="1" name="Male"/>
+				<SampleItem ID="2" name="Female"/>
+			</CodeRadioField>
+			<DateField name="DepBirthdate"/>
+			<ViewField name="DepAge"/>
+			<EditField name="DepSocialSecNo" size="25" maxLength="25"/>
+			<CheckBoxField name="Employed"/>
+			<MemoField name="SpecialFactors" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="ppld" phrase="Dependents">
+			<InvisibleField name="DependentID"/>
+			<ViewField name="LastName" sample="Zahlis"/>
+			<ViewField name="FirstName" sample="Cheryl"/>
+			<ViewField name="Relationship" sample="Spouse"/>
+			<ViewField name="DepGender" sample="Female"/>
+			<ViewField name="DepAge" sample="39"/>
+			<ViewField name="Employed" sample="Yes"/>
+		</ViewGrid>
+		<EditGrid moduleID="ppld" phrase="Dependents">
+			<GridForm>
+				<InvisibleField name="DependentID"/>
+				<EditField name="LastName" size="50" maxLength="50" sample="Zahlis"/>
+				<EditField name="FirstName" size="50" maxLength="50" sample="Cheryl"/>
+				<EditField name="MiddleName" size="50" maxLength="50" sample="Francis"/>
+				<CodeComboField name="RelationshipID" findMode="text" sample="Spouse">
+					<SampleItem ID="1" name="Spouse"/>
+					<SampleItem ID="2" name="Father"/>
+					<SampleItem ID="3" name="Mother"/>
+					<SampleItem ID="4" name="Life Partner"/>
+					<SampleItem ID="5" name="Physician"/>
+				</CodeComboField>
+				<CodeComboField name="DepGenderID" sample="Female">
+					<SampleItem ID="1" name="Female"/>
+					<SampleItem ID="2" name="Male"/>
+				</CodeComboField>
+				<DateField name="DepBirthdate" sample="09-15-1964"/>
+				<ViewField name="DepAge" sample="39"/>
+				<EditField name="DepSocialSecNo" size="25" maxLength="25" sample="776-22-9928"/>
+				<CheckBoxField name="Employed" sample="Yes"/>
+				<MemoField name="SpecialFactors" rows="5" cols="75" sample="This dependent has secondary health insurance coverage"/>
+			</GridForm>
+			<InvisibleField name="DependentID"/>
+			<ViewField name="LastName" sample="Zahlis"/>
+			<ViewField name="FirstName" sample="Cheryl"/>
+			<ViewField name="Relationship" sample="Spouse"/>
+			<ViewField name="DepGender" sample="Female"/>
+			<ViewField name="DepAge" sample="39"/>
+			<ViewField name="Employed" sample="Yes"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

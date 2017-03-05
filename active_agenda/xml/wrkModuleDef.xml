@@ -1,0 +1,509 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Work Orders" moduleID="wrk" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Work Order" pluralRecordName="Work Orders" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="WorkOrderID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|Numerical ID to identify and track work orders" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the work order" sample="aprch"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the work order" sample="Asset Protection Checklist History"/>
+        <TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Maintenance Shop - Paint Area Review, 2-27-2004, Mattias Thorslund"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for this work order" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this work order" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="96" phrase="Person Accountable|The individual assigned primary accountability for tracking and managing this work order" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for tracking and managing this work order" sample="Mattias Thorslund"/>
+        <TableField name="WorkOrderNo" type="varchar(30)" validate="notEmpty" phrase="Work Order Number|A unique number assigned to the work order. This number is usually assigned by a maintenance and engineering department and is pre-printed on work order forms" sample="2004-77"/>
+        <TableField name="WorkOrderTypeID" type="int" validate="RequireSelection" phrase="Work Order Type|A general category used to group work orders of similar types" sample="1"/>
+        <CodeField name="WorkOrderType" key="WorkOrderTypeID" phrase="Work Order Type|A general category used to group work orders of similar types" sample="Modification" codeTypeID="259"/>
+        <RemoteField name="IssuedDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="47" phrase="Issued Date|Date the work order was issued" sample="01/01/2004"/>
+        <RemoteField name="AssignedDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="2" phrase="Assigned Date|Date the work order was generated" sample="01/01/2004"/>
+        <CalculatedField name="AssignmentDelay" type="int" calcFunction="timediff" params="AssignedDate IssuedDate" validate="" phrase="Assignment Delay|A calculated field based on the amount of time between the issued date and the final assignment date" sample="6"/>
+        <RemoteField name="PersonAssignedID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="75" phrase="Person Assigned|The individual assigned responsibility for performing the work requested" sample="1"/>
+        <ForeignField name="PersonAssigned" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAssignedID" joinType="left" phrase="Person Assigned|The individual assigned responsibility for performing the work requested" sample="Larry Hansen"/>
+        <RemoteField name="AssignedDueDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="1" phrase="Assigned Due Date|Date the work order should be completed by" sample="01/01/2004"/>
+        <RemoteField name="CompletionDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="3" phrase="Completion Date|Date the work order was completed" sample="01/01/2004"/>
+        <CalculatedField name="CompletionDelay" type="int" calcFunction="timediff" params="CompletionDate IssuedDate" validate="" phrase="Completion Delay|A calculated field based on the number of days between the issued date and the completion date" sample="30"/>
+        <TableField name="WorkOrderTitle" type="varchar(128)" validate="notEmpty" phrase="Work Order Title|A short and descriptive title used to describe the work order" sample="Resurface production facility floor"/>
+        <TableField name="WorkOrderDesc" type="text" validate="noValidation" phrase="Work Order Description|A detailed description of the work being requested" sample="Modify the tape cutter on packaging line number one. Install a blade guard similar to the ones in place on lines 3 through 7"/>
+        <TableField name="PriorityID" type="int" validate="RequireSelection" phrase="Priority|The level of priority associated with this work order" sample="1"/>
+        <CodeField name="Priority" key="PriorityID" phrase="Priority|The level of priority associated with this work order" sample="Urgent" codeTypeID="214"/>
+        <TableField name="WorkOrderStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the work order" sample="2"/>
+        <CodeField name="WorkOrderStatus" key="WorkOrderStatusID" phrase="Status|The present status of the work order" sample="In Progress" codeTypeID="258"/>
+        <SummaryField name="BusinessConsequences" summaryFunction="list" summaryField="ConsequenceCategory" summaryKey="RelatedRecordID" summaryModuleID="bcq" summaryCondition="RelatedModuleID = 'wrk'" localKey="WorkOrderID" phrase="Business Consequences|A list of associated business consequences" sample="Increased Productivity, Increased Profit"/>
+        <SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'wrk'" localKey="WorkOrderID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="WorkOrderNo"/>;_<CombinedFieldRef name="WorkOrderType"/>;_<CombinedFieldRef name="AssignedDueDate"/>;_<CombinedFieldRef name="Priority"/>;_<CombinedFieldRef name="WorkOrderStatus"/></CombinedField>
+        <CombinedField name="AssignmentDelayCalc" phrase="Assignment Delay|A calculated field based on the amount of time between the issued date and the final assignment date" sample="6 Hours"><CombinedFieldRef name="AssignmentDelay"/>_Hours</CombinedField>
+        <CombinedField name="CompletionDelayCalc" phrase="Completion Delay|A calculated field based on the number of days between the issued date and the completion date" sample="30 Hours"><CombinedFieldRef name="CompletionDelay"/>_Hours</CombinedField>
+        <CombinedField name="SystemWorkOrderNumber" phrase="System Work Order Number|A combined field used to describe assign a work order number from the system automatically" sample="WO: 4 - 34">WO:_<CombinedFieldRef name="OrganizationID"/>_-_<CombinedFieldRef name="WorkOrderID"/></CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions (Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="WorkOrderTitle"/>_(<CombinedFieldRef name="SystemWorkOrderNumber"/>);_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+        <CombinedField name="WorkOrder" phrase="Work Order|A combined field used to describe this work order when associating it with other records" sample="3413 | Repair diamond plate walkway on scanner | 02/02/2006"><CombinedFieldRef name="WorkOrderTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="WorkOrderID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="WorkOrder"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="WorkOrderID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="wrk"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List work orders">
+            <ListField name="WorkOrderID" phrase="Record ID"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="WorkOrderTitle" phrase="WorkOrder Title"/>
+            <ListField name="SystemWorkOrderNumber" phrase="System Number"/>
+            <ListField name="IssuedDate" phrase="Issued Date"/>
+            <ListField name="WorkOrderStatus" phrase="Status"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search work orders">
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Partnerships"/>
+                <SampleItem ID="2" name="Corrective Actions"/>
+                <SampleItem ID="3" name="Injury Loss"/>
+                <SampleItem ID="4" name="Hazard Reports"/>
+            </ComboField>
+            <EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="SystemWorkOrderNumber" size="30" maxLength="30"/>
+            <EditField name="WorkOrderNo" size="30" maxLength="30"/>
+            <CodeComboField name="WorkOrderTypeID">
+                <SampleItem ID="1" name="Modification"/>
+                <SampleItem ID="2" name="Maintenance"/>
+                <SampleItem ID="3" name="Removal"/>
+                <SampleItem ID="2" name="Repair"/>
+                <SampleItem ID="3" name="Replacement"/>
+            </CodeComboField>
+            <DateField name="IssuedDate"/>
+            <DateField name="AssignedDate"/>
+            <PersonComboField name="PersonAssignedID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="AssignedDueDate"/>
+            <DateField name="CompletionDate"/>
+            <CodeComboField name="PriorityID">
+                <SampleItem ID="1" name="Urgent"/>
+                <SampleItem ID="2" name="Critical"/>
+                <SampleItem ID="3" name="Normal"/>
+            </CodeComboField>
+            <CodeComboField name="WorkOrderStatusID">
+                <SampleItem ID="1" name="In Progress"/>
+                <SampleItem ID="2" name="Declined"/>
+                <SampleItem ID="3" name="Assigned But Not Started"/>
+                <SampleItem ID="4" name="Accepted But Unassigned"/>
+                <SampleItem ID="4" name="Outsourced"/>
+            </CodeComboField>
+            <CodeCheckSearchField name="BusinessConsequences" subModuleID="bcq" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="ConsequenceCategoryID" codeTypeID="190" phrase="Business Consequences|Filter search results by one or more related business consequences"/>
+            <CodeCheckSearchField name="RiskImperatives" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a work order associated with a related record">
+            <ViewField name="WorkOrderID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="WorkOrderTitle"/>
+            <ViewField name="WorkOrderDesc"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="SystemWorkOrderNumber"/>
+            <ViewField name="WorkOrderNo"/>
+            <ViewField name="WorkOrderType"/>
+            <ViewField name="IssuedDate"/>
+            <ViewField name="AssignedDate"/>
+            <ViewField name="PersonAssigned"/>
+            <ViewField name="AssignedDueDate"/>
+            <ViewField name="CompletionDate"/>
+            <ViewField name="Priority"/>
+            <ViewField name="WorkOrderStatus"/>
+            <ViewField name="RiskImperatives"/>
+            <ViewScreenSection name="DatesDelays" phrase="Dates and Delays">
+                <ViewField name="IssuedDate"/>
+                <ViewField name="AssignedDate"/>
+                <ViewField name="AssignmentDelayCalc"/>
+                <ViewField name="CompletionDate"/>
+                <ViewField name="CompletionDelayCalc"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="bcq"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a work order associated with a related record">
+            <ViewField name="WorkOrderID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <EditField name="WorkOrderTitle" size="75" maxLength="128"/>
+            <MemoField name="WorkOrderDesc" rows="5" cols="75"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="5" name="Active Agenda, New York"/>
+                <SampleItem ID="7" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ViewField name="SystemWorkOrderNumber"/>
+            <EditField name="WorkOrderNo" size="30" maxLength="30"/>
+            <CodeComboField name="WorkOrderTypeID">
+                <SampleItem ID="1" name="Modification"/>
+                <SampleItem ID="2" name="Maintenance"/>
+                <SampleItem ID="3" name="Removal"/>
+                <SampleItem ID="2" name="Repair"/>
+                <SampleItem ID="3" name="Replacement"/>
+            </CodeComboField>
+            <DateField name="IssuedDate"/>
+            <DateField name="AssignedDate"/>
+            <PersonComboField name="PersonAssignedID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="AssignedDueDate"/>
+            <DateField name="CompletionDate"/>
+            <CodeComboField name="PriorityID">
+                <SampleItem ID="1" name="Urgent"/>
+                <SampleItem ID="2" name="Critical"/>
+                <SampleItem ID="3" name="Normal"/>
+            </CodeComboField>
+            <CodeComboField name="WorkOrderStatusID">
+                <SampleItem ID="1" name="In Progress"/>
+                <SampleItem ID="2" name="Declined"/>
+                <SampleItem ID="3" name="Assigned But Not Started"/>
+                <SampleItem ID="4" name="Accepted But Unassigned"/>
+                <SampleItem ID="4" name="Outsourced"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with a work order">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for a work order">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with a work order">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate physical files with a work order">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a work order">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="rsk"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a work order" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="WorkOrderID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="RelatedRecordDescription"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="SystemWorkOrderNumber"/>
+        <ViewField name="WorkOrderNo"/>
+        <ViewField name="IssuedDate"/>
+        <ViewField name="CompletionDate"/>
+        <ViewField name="WorkOrderDesc"/>
+        <ViewField name="WorkOrderStatus"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="wrk" phrase="Work Orders">
+            <InvisibleField name="WorkOrderID"/>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="WorkOrderTitle" sample="Resurface Production Room Floor"/>
+            <ViewField name="SystemWorkOrderNumber" sample="WO: 4 - 34"/>
+            <ViewField name="WorkOrderNo" sample="2004-77"/>
+            <ViewField name="WorkOrderType" sample="Modification"/>
+            <ViewField name="IssuedDate" sample="01/01/2004"/>
+            <ViewField name="Priority" sample="Urgent"/>
+            <ViewField name="WorkOrderStatus" sample="In Progress"/>
+        </ViewGrid>
+        <EditGrid moduleID="wrk" phrase="Work Orders">
+            <GridForm>
+                <InvisibleField name="WorkOrderID"/>
+                <EditField name="WorkOrderTitle" size="75" maxLength="128"/>
+                <MemoField name="WorkOrderDesc" rows="5" cols="75"/>
+                <OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Active Agenda, Sacramento"/>
+                    <SampleItem ID="5" name="Active Agenda, New York"/>
+                    <SampleItem ID="7" name="Active Agenda, Munich"/>
+                </OrgComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <ViewField name="SystemWorkOrderNumber" sample="WO: 4 - 34"/>
+                <EditField name="WorkOrderNo" size="30" maxLength="30" sample="2004-77"/>
+                <CodeComboField name="WorkOrderTypeID" sample="Modification">
+                    <SampleItem ID="1" name="Modification"/>
+                    <SampleItem ID="2" name="Maintenance"/>
+                    <SampleItem ID="3" name="Removal"/>
+                    <SampleItem ID="2" name="Repair"/>
+                    <SampleItem ID="3" name="Replacement"/>
+                </CodeComboField>
+                <DateField name="IssuedDate" sample="01/01/2004"/>
+                <DateField name="AssignedDate" sample="01/01/2004"/>
+                <PersonComboField name="PersonAssignedID" findMode="alpha" sample="Larry Hansen">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <DateField name="AssignedDueDate" sample="01/07/2004"/>
+                <DateField name="CompletionDate" sample="03/07/2004"/>
+                <CodeComboField name="PriorityID" sample="Urgent">
+                    <SampleItem ID="1" name="Urgent"/>
+                    <SampleItem ID="2" name="Critical"/>
+                    <SampleItem ID="3" name="Normal"/>
+                </CodeComboField>
+                <CodeComboField name="WorkOrderStatusID" sample="In Progress">
+                    <SampleItem ID="1" name="In Progress"/>
+                    <SampleItem ID="2" name="Declined"/>
+                    <SampleItem ID="3" name="Assigned But Not Started"/>
+                    <SampleItem ID="4" name="Accepted But Unassigned"/>
+                    <SampleItem ID="4" name="Outsourced"/>
+                </CodeComboField>
+            </GridForm>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="WorkOrderTitle" sample="Resurface Production Room Floor"/>
+            <ViewField name="SystemWorkOrderNumber" sample="WO: 4 - 34"/>
+            <ViewField name="WorkOrderNo" sample="2004-77"/>
+            <ViewField name="WorkOrderType" sample="Modification"/>
+            <ViewField name="IssuedDate" sample="01/01/2004"/>
+            <ViewField name="Priority" sample="Urgent"/>
+            <ViewField name="WorkOrderStatus" sample="In Progress"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <RadarChart name="Radar01" title="Work Orders By Risk Imperative" subModuleID="rsk" mode="categorize">
+            <GroupByField name="RiskImperative"/>
+            <SummaryField name="ImperativeID" type="count"/>
+        </RadarChart>
+        <PieChart name="Pie01" title="Work Orders By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Work Orders By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Work Orders By Status">
+            <GroupByField name="WorkOrderStatus"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Work Orders By Status">
+            <GroupByField name="WorkOrderStatus"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Work Orders By Type">
+            <GroupByField name="WorkOrderType"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Work Orders By Type">
+            <GroupByField name="WorkOrderType"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Work Orders By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Work Orders By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Work Orders By Priority">
+            <GroupByField name="Priority"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Work Orders By Priority">
+            <GroupByField name="Priority"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Work Orders By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Work Orders By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Work Orders By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Work Orders By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Work Orders By Person Assigned">
+            <GroupByField name="PersonAssigned"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Work Orders By Person Assigned">
+            <GroupByField name="PersonAssigned"/>
+            <SummaryField name="WorkOrderID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

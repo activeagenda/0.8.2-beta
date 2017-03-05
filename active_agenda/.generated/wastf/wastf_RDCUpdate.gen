@@ -1,0 +1,89 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:1243:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'wastf\' AS ModuleID,
+   wastf.WasteTransferID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(`cod3`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`was1`.WasteName,\'\')),\'\'),\'\'),\' | \',IFNULL(`org2`.Name,\'\'),\' | \',IFNULL(`dat1`.RelatedDate,\'\')),\' |  |  |  | \') AS Value,
+`was1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `wastf`
+LEFT OUTER JOIN `rdc` ON (wastf.WasteTransferID = rdc.RecordID AND rdc.ModuleID = \'wastf\')
+   
+   LEFT OUTER JOIN `was` AS was1 
+   ON (`wastf`.WasteID = `was1`.WasteID )
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`wastf`.WasteTransferID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'wastf\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'46\')
+   LEFT OUTER JOIN `wastp` AS wastp1 
+   ON (`wastf`.WasteTransporterID = `wastp1`.TransporterID )
+   LEFT OUTER JOIN `cod` AS cod3 
+   ON (`was1`.WasteTypeID = `cod3`.CodeID 
+     AND `cod3`.CodeTypeID = \'11\')
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`was1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `org` AS org2 
+   ON (`wastp1`.TransporterID = `org2`.OrganizationID )
+WHERE wastf.WasteTransferID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:1148:"UPDATE rdc
+INNER JOIN wastf ON (rdc.RecordID = wastf.WasteTransferID AND rdc.ModuleID = \'wastf\')
+   
+   LEFT OUTER JOIN `was` AS was1 
+   ON (`wastf`.WasteID = `was1`.WasteID )
+   LEFT OUTER JOIN `dat` AS dat1 
+    ON (`wastf`.WasteTransferID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'wastf\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'46\')
+   LEFT OUTER JOIN `wastp` AS wastp1 
+   ON (`wastf`.WasteTransporterID = `wastp1`.TransporterID )
+   LEFT OUTER JOIN `cod` AS cod3 
+   ON (`was1`.WasteTypeID = `cod3`.CodeID 
+     AND `cod3`.CodeTypeID = \'11\')
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`was1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `org` AS org2 
+   ON (`wastp1`.TransporterID = `org2`.OrganizationID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`org1`.Name,\'\'),\' | \',IFNULL(`cod3`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`was1`.WasteName,\'\')),\'\'),\'\'),\' | \',IFNULL(`org2`.Name,\'\'),\' | \',IFNULL(`dat1`.RelatedDate,\'\')),\' |  |  |  | \'),
+rdc.OrganizationID = `was1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'wastf\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

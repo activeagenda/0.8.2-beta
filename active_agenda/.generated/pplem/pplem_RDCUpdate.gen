@@ -1,0 +1,75 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:958:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'pplem\' AS ModuleID,
+   pplem.EmergContactID AS RecordID,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`ppl2`.LastName,\'\'),\', \',IFNULL(`ppl2`.FirstName,\'\')),\', \'),\'\'),\' | \',IFNULL(`pplem`.ContactFirstName,\'\'),\' \',IFNULL(`pplem`.ContactLastName,\'\'),\' | \',IFNULL(`cod1`.Description,\'\')),\' |   | \') AS Value,
+`ppl1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `pplem`
+LEFT OUTER JOIN `rdc` ON (pplem.EmergContactID = rdc.RecordID AND rdc.ModuleID = \'pplem\')
+   
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`pplem`.EmployeePersonID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`pplem`.RelationshipID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'270\')
+   LEFT OUTER JOIN `pple` AS pple1 
+   ON (`pplem`.EmployeePersonID = `pple1`.PersonID )
+   LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`pple1`.PersonID = `ppl2`.PersonID )
+WHERE pplem.EmergContactID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:865:"UPDATE rdc
+INNER JOIN pplem ON (rdc.RecordID = pplem.EmergContactID AND rdc.ModuleID = \'pplem\')
+   
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`pplem`.EmployeePersonID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`pplem`.RelationshipID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'270\')
+   LEFT OUTER JOIN `pple` AS pple1 
+   ON (`pplem`.EmployeePersonID = `pple1`.PersonID )
+   LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`pple1`.PersonID = `ppl2`.PersonID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`ppl2`.LastName,\'\'),\', \',IFNULL(`ppl2`.FirstName,\'\')),\', \'),\'\'),\' | \',IFNULL(`pplem`.ContactFirstName,\'\'),\' \',IFNULL(`pplem`.ContactLastName,\'\'),\' | \',IFNULL(`cod1`.Description,\'\')),\' |   | \'),
+rdc.OrganizationID = `ppl1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'pplem\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

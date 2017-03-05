@@ -1,0 +1,63 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:590:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'rtp\' AS ModuleID,
+   rtp.RecommendationID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`rtp`.RecToPreventTitle,\'\')),\'\') AS Value,
+`rdc1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `rtp`
+LEFT OUTER JOIN `rdc` ON (rtp.RecommendationID = rdc.RecordID AND rdc.ModuleID = \'rtp\')
+   
+   INNER JOIN `rtc` AS rtc1 
+   ON (`rtp`.CauseID = `rtc1`.CauseID )
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rtc1`.RelatedRecordID = rdc1.RecordID AND `rtc1`.RelatedModuleID = rdc1.ModuleID)
+WHERE rtp.RecommendationID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:497:"UPDATE rdc
+INNER JOIN rtp ON (rdc.RecordID = rtp.RecommendationID AND rdc.ModuleID = \'rtp\')
+   
+   INNER JOIN `rtc` AS rtc1 
+   ON (`rtp`.CauseID = `rtc1`.CauseID )
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rtc1`.RelatedRecordID = rdc1.RecordID AND `rtc1`.RelatedModuleID = rdc1.ModuleID)
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`rtp`.RecToPreventTitle,\'\')),\'\'),
+rdc.OrganizationID = `rdc1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'rtp\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

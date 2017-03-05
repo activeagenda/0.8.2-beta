@@ -1,0 +1,67 @@
+Active Agenda installation instructions. Updated February 23, 2007.
+
+By Mattias Thorslund, Active Agenda, Inc.
+To suggest improvements to this document, or to the installation procedure in general, email mthorslund@activeagenda.net.
+
+Online, possibly more up-to-date instructions, are available here:
+http://www.activeagenda.net/documentation/index.php?title=Upgrade
+
+UPGRADE PROCEDURE:
+==================
+
+Note: These instructions cover upgrading from version 0.8.1. If you are upgrading from 0.8.0, you must first upgrade to 0.8.1.
+
+
+1. Back-up files and database.
+Using mysqldump, or phpMyAdmin, make a full backup of the current Active Agenda database. Copy the active agenda folder tree to a different location as a backup.
+
+
+2. Remove obsolete files:
+The structure of the generated files folder (s2a/active_agenda/.generated) has changed. All files that belong to a module, are now grouped in a subfolder, named like the module's module ID. Remove the .generated folder altogether.
+
+In Linux, the command is simply:
+$ cd /path/to/s2a/active_agenda/
+$ rm -Rf .generated
+
+
+3. Add a new setting in your config.php file:
+If your OS is Windows, use:
+if(!defined(PATH_SEPARATOR)){
+    define('PATH_SEPARATOR', ';');  //Windows
+}
+
+If your OS is Linux or another Unix-like system:
+if(!defined(PATH_SEPARATOR)){
+    define('PATH_SEPARATOR', ':');  //non-Windows
+}
+
+
+4. Unpack the contents of the new archive, overwriting the old files with the new.
+Un-tar, unzip or use your favorite archiving software to extract the files from the archive and let them overwrite the existing Active Agenda files.
+
+From the Linux command line, you could do the following:
+$ mkdir unpack_folder
+$ tar xjf active_agenda-0.8.2-beta.tar.bz2 -C unpack_folder
+$ cp -RTf unpack_folder/active_agenda-0.8.2-beta/s2a /path/to/s2a
+$ rm -Rf unpack_folder
+
+
+5. Database migration:
+The table format of several tables has been changed in the new release.
+ * If you do not want to keep the data in your current database, simply use the s2a-install-db.php utility just like when making a new installation. There is no need to delete the existing database first.
+ * To keep the data and upgrade the database, use the s2a-apply-db-upgrade.php file, like this:
+
+prompt$ php s2a-apply-db-upgrade.php
+
+If your PHP executable is not in the PATH environment variable, then you must specify its location:
+
+prompt$ C:\php4\php s2a-apply-db-upgrade.php
+
+This must be executed from the s2a folder where the file s2a-apply-db-upgrade.php is located.
+
+The upgrade procedure will ask you want to update you master data. This option will install the master data in temporary files, and then copy any records that aren't in your existing master data tables from the temporary tables.
+
+The master data installation uses the MySQL executable. If your MySQL client executable is not in the default execution path, the script will prompt you for the location. If you used LAMPP (on Linux) and installed it to the default location, that location would be /opt/lampp/bin/mysql.
+
+
+6. That's all!

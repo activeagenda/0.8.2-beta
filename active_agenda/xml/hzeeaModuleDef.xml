@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Energy Source Associations" moduleID="hzeea" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Energy Source Association" pluralRecordName="Energy Source Associations">
+	<ModuleFields>
+		<TableField name="EnergySourceAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Association ID|An automatically assigned number used to associate energy sources with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the energy source" sample="hze"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the energy source" sample="Hazardous Energy"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="HECP: Frick Ammonia Compressor #6262 "/>
+		<TableField name="EnergySourceID" type="int" validate="RequireSelection" phrase="Energy Source|A description of the energy source based on a combination of field values assigned from within the Energy Sources module" sample="16"/>
+		<ForeignField name="LocationID" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="LocationID" key="EnergySourceID" joinType="left" phrase="Location|Specific location within the facility where the energy source is located" sample="Cold Storage Receiving Area, Packing House Number 3, Cold Storage No. 6, 006"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the energy source is located" sample="Cold Storage, 6"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="OrganizationID" key="EnergySourceID" joinType="left" phrase="Organization|The name of the organization where the energy source is located" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the energy source is located" sample="Active Agenda, HQ"/>
+		<ForeignField name="EnergyTypeID" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="EnergyTypeID" key="EnergySourceID" joinType="left" phrase="Energy Type|The type of energy associated with this energy source" sample="1"/>
+		<CodeField name="EnergyType" key="EnergyTypeID" phrase="Energy Type|The type of energy associated with this energy source" sample="Electrical" codeTypeID="60"/>
+		<ForeignField name="EnergySourceNumber" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="EnergySourceNumber" key="EnergySourceID" joinType="left" phrase="Source Number|A unique number assigned to the energy source for tracking and identification purposes" sample="667"/>
+		<ForeignField name="EnergySourceDesc" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="EnergySourceDesc" key="EnergySourceID" joinType="left" phrase="Source Description|A detailed description of the energy source" sample="The MCC located in the Engine Room"/>
+		<ForeignField name="EnergySource" foreignTable="hzee" foreignKey="EnergySourceID" foreignField="EnergySource" key="EnergySourceID" joinType="left" phrase="Energy Source|A description of the energy source based on a combination of field values assigned from within the Energy Sources module" sample="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="EnergySource"/></CombinedField>
+		<CombinedField name="EnergySourceAssoc" phrase="Energy Source Association|A combined field used to describe this energy source association when associating it with other records" sample="Confined Space Entry Permits | Motor Control Center 27, Switch 5; Active Agenda, HQ"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="EnergySource"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="EnergySourceAssocID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="EnergySourceAssoc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules/>
+	<Screens>
+		<ListScreen name="List" phrase="List|List energy source associations with related records">
+			<ListField name="EnergySourceAssocID" phrase="Association ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="EnergySource" phrase="Energy Source"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search energy source associations with related records">
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="EnergySourceID"/>
+				<SampleItem ID="1" name="Cold Storage, 6"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="EnergySourceID" findMode="text" parentField="LocationID">
+				<SampleItem ID="1" name="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Motor Control Center 27, Switch 4; Active Agenda, HQ"/>
+				<SampleItem ID="5" name="Motor Control Center 27, Switch 3; Active Agenda, HQ"/>
+				<SampleItem ID="7" name="Motor Control Center 27, Switch 2; Active Agenda, HQ"/>
+			</ComboField>
+			<CodeComboField name="EnergyTypeID" findMode="alpha">
+				<SampleItem ID="1" name="Electrical"/>
+				<SampleItem ID="3" name="Kinetic"/>
+				<SampleItem ID="5" name="Stored"/>
+				<SampleItem ID="7" name="Pneumatic"/>
+			</CodeComboField>
+			<EditField name="EnergySourceNumber" size="25" maxLength="25"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an energy source association with a related record">
+			<ViewField name="EnergySourceAssocID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordID"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Location"/>
+			<ViewField name="EnergyType"/>
+			<ViewField name="EnergySource"/>
+			<ViewField name="EnergySourceNumber"/>
+			<ViewField name="EnergySourceDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an energy source association with a related record">
+			<ViewField name="EnergySourceAssocID"/>
+			<ViewField name="RelatedModule"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="EnergySourceID"/>
+				<SampleItem ID="1" name="Cold Storage, 6"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="EnergySourceID" findMode="text" parentField="LocationID">
+				<UpdateFieldRef name="EnergySourceNumber"/>
+				<UpdateFieldRef name="EnergySourceDesc"/>
+				<SampleItem ID="1" name="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Motor Control Center 27, Switch 4; Active Agenda, HQ"/>
+				<SampleItem ID="5" name="Motor Control Center 27, Switch 3; Active Agenda, HQ"/>
+				<SampleItem ID="7" name="Motor Control Center 27, Switch 2; Active Agenda, HQ"/>
+			</ComboField>
+			<ViewField name="EnergySourceNumber" parentField="EnergySourceID"/>
+			<ViewField name="EnergySourceDesc" parentField="EnergySourceID"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="EnergySourceAssocID"/>
+		<ViewField name="RelatedModule"/>
+		<ViewField name="RelatedRecordID"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Location"/>
+		<ViewField name="EnergyType"/>
+		<ViewField name="EnergySource"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="hzeea" phrase="Energy Sources">
+			<ViewField name="Location" sample="Cold Storage, 6"/>
+			<ViewField name="EnergyType" sample="Electrical"/>
+			<ViewField name="EnergySource" sample="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+			<ViewField name="EnergySourceNumber" sample="4553"/>
+		</ViewGrid>
+		<EditGrid moduleID="hzeea" phrase="Energy Sources">
+			<GridForm>
+				<InvisibleField name="EnergySourceAssocID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+					<UpdateFieldRef name="EnergySourceID"/>
+					<SampleItem ID="1" name="Cold Storage, 6"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Office"/>
+					<SampleItem ID="7" name="Production Line #1"/>
+				</ComboField>
+				<ComboField name="EnergySourceID" findMode="text" parentField="LocationID">
+					<UpdateFieldRef name="EnergySourceNumber"/>
+					<UpdateFieldRef name="EnergySourceDesc"/>
+					<SampleItem ID="1" name="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Motor Control Center 27, Switch 4; Active Agenda, HQ"/>
+					<SampleItem ID="5" name="Motor Control Center 27, Switch 3; Active Agenda, HQ"/>
+					<SampleItem ID="7" name="Motor Control Center 27, Switch 2; Active Agenda, HQ"/>
+				</ComboField>
+				<ViewField name="EnergySourceNumber" parentField="EnergySourceID"/>
+				<ViewField name="EnergySourceDesc" parentField="EnergySourceID"/>
+			</GridForm>
+			<ViewField name="Location" sample="Cold Storage, 6"/>
+			<ViewField name="EnergyType" sample="Electrical"/>
+			<ViewField name="EnergySource" sample="Motor Control Center 27, Switch 5; Active Agenda, HQ"/>
+			<ViewField name="EnergySourceNumber" sample="4553"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

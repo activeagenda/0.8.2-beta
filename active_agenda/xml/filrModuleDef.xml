@@ -1,0 +1,343 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="File Records" moduleID="filr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="File Record" pluralRecordName="File Records" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="FileRecordID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate records with physical files" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="RequireSelection" phrase="Related Module|The name of the module which is related to the physical file start date" sample="opp"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name of the module which is related to the physical file start date" sample="Operating Permits"/>
+        <TableField name="RelatedRecordID" type="int" validate="RequireSelection" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Air Polution, Smoke Stack Emissions Permit, APCD7726-23"/>
+        <TableField name="FileRetentionID" type="int" dbFlags="unsigned not null" phrase="File|The name of the file where the where the record is located" sample="1"/>
+        <ForeignField name="FilingOrganizationID" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FilingOrganizationID" key="FileRetentionID" joinType="left" phrase="Filing Organization|The name of the organization where the  where the physical file is located" sample="Active Agenda, Inc."/>
+        <ForeignField name="FilingOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="FilingOrganizationID" joinType="left" phrase="Filing Organization|The name of the organization where the  where the physical file is located" sample="Active Agenda, Inc."/>
+        <ForeignField name="LocationID" foreignTable="filph" foreignKey="FileRetentionID" foreignField="LocationID" key="FileRetentionID" joinType="left" phrase="File Location|Specific area within the facility where the physical file is located" sample="1"/>
+        <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="File Location|Specific area within the facility where the physical file is located" sample="Administrative Building, Server Room, 102"/>
+        <ForeignField name="PhysicalFileStartDate" foreignTable="filph" foreignKey="FileRetentionID" foreignField="PhysicalFileStartDate" key="FileRetentionID" joinType="left" phrase="File Start Date|The date the physical file associated with the record was stated" sample="01/01/2004"/>
+        <ForeignField name="FilingPersonAccountableID" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FilingPersonAccountableID" key="FileRetentionID" joinType="left" phrase="Person Accountable|The name of the person responsible for records retention and disposal" sample="1"/>
+        <ForeignField name="FilingPersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FilingPersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person responsible for records retention and disposal" sample="Mattias Thorslund"/>
+        <ForeignField name="FileSubjectID" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FileSubjectID" key="FileRetentionID" joinType="left" phrase="File Subject|The name of the individual, when applicable, that is the subject of the physical file" sample="1"/>
+		<ForeignField name="FileSubject" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FileSubjectID" joinType="left" phrase="File Subject|The name of the individual, when applicable, that is the subject of the physical file" sample="Jane Doe"/>
+		<ForeignField name="FileName" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FileName" key="FileRetentionID" joinType="left" phrase="File Name|A short title or phrase used to identify the physical file" sample="Zahlis Personnel File"/>
+		<ForeignField name="FileNumber" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FileNumber" key="FileRetentionID" joinType="left" phrase="File Number|A number manually assigned to a file for tracking purposes" sample="2720"/>
+		<ForeignField name="SystemNumber" foreignTable="filph" foreignKey="FileRetentionID" foreignField="SystemNumber" key="FileRetentionID" joinType="left" phrase="System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID" sample="234720"/>
+		<ForeignField name="PhysicalFileStatusID" foreignTable="filph" foreignKey="FileRetentionID" foreignField="PhysicalFileStatusID" key="FileRetentionID" joinType="left" phrase="File Status|The current status of the physical file associated with the record" sample="1"/>
+        <CodeField name="PhysicalFileStatus" key="PhysicalFileStatusID" phrase="File Status|The current status of the physical file associated with the record" sample="Active" codeTypeID="85"/>
+        <ForeignField name="FileRetention" foreignTable="filph" foreignKey="FileRetentionID" foreignField="FileRetention" key="FileRetentionID" joinType="left" phrase="File|The name of the file where the where the record is located" sample="Zahlis Medical file"/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="FilingOrganization"/>;_<CombinedFieldRef name="FileNumber"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+        <CombinedField name="FileRecord" phrase="File Record|A summary of the physical file record"><CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="FileRecordID"/>
+        </PrimaryKey>
+        <OwnerField name="FilingOrganizationID"/>
+        <RecordDescriptionField name="FileRecord"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <!--<SubModules>
+    </SubModules>-->
+    <Screens>
+        <ListScreen name="List" phrase="List|List physical files">
+            <ListField name="FileRecordID" phrase="Record ID"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="FileName" phrase="File Name"/>
+            <ListField name="FileNumber" phrase="File Number" align="center"/>
+            <ListField name="SystemNumber" phrase="System Number" align="center"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search physical files">
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Postings"/>
+                <SampleItem ID="2" name="Corrective Actions"/>
+                <SampleItem ID="3" name="Chemicals"/>
+            </ComboField>
+            <OrgComboField name="FilingOrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, Inc."/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="FilingOrganizationID">
+                <UpdateFieldRef name="FileRetentionID"/>
+                <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <ComboField name="FileRetentionID" findMode="text" parentField="LocationID">
+                <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <PersonComboField name="FilingPersonAccountableID" findMode="text">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <PersonComboField name="FileSubjectID" findMode="text">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="PhysicalFileStartDate"/>
+            <CodeComboField name="PhysicalFileStatusID" findMode="text">
+                <SampleItem ID="1" name="Active"/>
+                <SampleItem ID="2" name="Disposed"/>
+                <SampleItem ID="3" name="Transfered"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the physical file">
+            <ViewField name="FileRecordID"/>
+            <ViewField name="FileNumber"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="PhysicalFileStartDate"/>
+            <ViewField name="FilingOrganization"/>
+            <ViewField name="Location"/>
+            <ViewField name="FileName"/>
+            <ViewField name="FileNumber"/>
+            <ViewField name="SystemNumber"/>
+            <ViewField name="FilingPersonAccountable"/>
+            <ViewField name="FileSubject"/>
+            <ViewField name="PhysicalFileStatus"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the physical file">
+            <ViewField name="FileRecordID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <OrgComboField name="FilingOrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, Inc."/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="FilingOrganizationID" parentListModuleField="OrganizationID">
+                <UpdateFieldRef name="FileRetentionID"/>
+                <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <ComboField name="FileRetentionID" findMode="text" parentField="LocationID">
+                <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                <SampleItem ID="2" name="Shipping Bay #1"/>
+                <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+            </ComboField>
+            <ViewField name="FileName" parentField="FileRetentionID"/>
+            <ViewField name="FileNumber" parentField="FileRetentionID"/>
+            <ViewField name="SystemNumber" parentField="FileRetentionID"/>
+            <ViewField name="FilingPersonAccountable" parentField="FileRetentionID"/>
+            <ViewField name="FileSubject" parentField="FileRetentionID"/>
+            <ViewField name="PhysicalFileStatus" parentField="FileRetentionID"/>
+        </EditScreen>
+    </Screens>
+    <!--<RecordSummaryFields>
+    </RecordSummaryFields>-->
+    <Exports>
+        <ViewGrid moduleID="filr" phrase="Physical Files">
+            <InvisibleField name="FileRecordID"/>
+            <ViewField name="FilingOrganization" sample="Active Agenda, Inc."/>
+            <ViewField name="Location" sample="Administrative Building, Server Room, 102"/>
+            <ViewField name="FileName" sample="Zahlis Personnel File"/>
+            <ViewField name="FileNumber" sample="zah0701"/>
+            <ViewField name="SystemNumber" sample="1521"/>
+        </ViewGrid>
+        <EditGrid moduleID="filr" phrase="Physical Files">
+            <GridForm>
+                <InvisibleField name="FileRecordID"/>
+                <OrgComboField name="FilingOrganizationID" findMode="text">
+                    <UpdateFieldRef name="LocationID"/>
+                    <SampleItem ID="1" name="Active Agenda, Inc."/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                </OrgComboField>
+                <ComboField name="LocationID" findMode="text" parentField="FilingOrganizationID" parentListModuleField="OrganizationID">
+                    <UpdateFieldRef name="FileRetentionID"/>
+                    <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                    <SampleItem ID="2" name="Shipping Bay #1"/>
+                    <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                    <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+                </ComboField>
+                <ComboField name="FileRetentionID" findMode="text" parentField="LocationID">
+                    <SampleItem ID="1" name="Administrative Building, Server Room, 102"/>
+                    <SampleItem ID="2" name="Shipping Bay #1"/>
+                    <SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+                    <SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+                </ComboField>
+                <ViewField name="FileName" parentField="FileRetentionID"/>
+                <ViewField name="FileNumber" parentField="FileRetentionID"/>
+                <ViewField name="SystemNumber" parentField="FileRetentionID"/>
+                <ViewField name="FilingPersonAccountable" parentField="FileRetentionID"/>
+                <ViewField name="FileSubject" parentField="FileRetentionID"/>
+                <ViewField name="PhysicalFileStatus" parentField="FileRetentionID"/>
+            </GridForm>
+            <InvisibleField name="FileRecordID"/>
+            <ViewField name="FilingOrganization" sample="Active Agenda, Inc."/>
+            <ViewField name="Location" sample="Administrative Building, Server Room, 102"/>
+            <ViewField name="FileName" sample="Zahlis Personnel File"/>
+            <ViewField name="FileNumber" sample="zah0701"/>
+            <ViewField name="SystemNumber" sample="1521"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Physical Files By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Physical Files By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Physical Files By Status">
+            <GroupByField name="PhysicalFileStatus"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Physical Files By Status">
+            <GroupByField name="PhysicalFileStatus"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Physical Files By Person Accountable">
+            <GroupByField name="FilingPersonAccountable"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Physical Files By Person Accountable">
+            <GroupByField name="FilingPersonAccountable"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Physical Files By Organization">
+            <GroupByField name="FilingOrganization"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Physical Files By Organization">
+            <GroupByField name="FilingOrganization"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Physical Files By File Subject">
+            <GroupByField name="FileSubject"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Physical Files By File Subject">
+            <GroupByField name="FileSubject"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Physical Files By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Physical Files By Location">
+            <GroupByField name="Location"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Physical Files By File Retention">
+            <GroupByField name="FileRetention"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Physical Files By File Retention">
+            <GroupByField name="FileRetention"/>
+            <SummaryField name="FileRecordID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

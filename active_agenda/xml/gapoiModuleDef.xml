@@ -1,0 +1,713 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!--
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Gap Analysis Results" moduleID="gapoi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Gap Analysis Result" pluralRecordName="Gap Analysis Results" allowAddRecord="no" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="GapAnalysisItemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate organizations with resource requirements" sample="1"/>
+        <TableField name="OrgGapAnalysisID" type="int" dbFlags="unsigned not null" phrase="Organizational Analysis|The organizational gap analysis that includes the gap analysis item" sample="1"/>
+        <ForeignField name="OrganizationID" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="OrganizationID" key="OrgGapAnalysisID" joinType="left" phrase="Organization|The name of the organization where the gap analysis is scheduled to occur" sample="Active Agenda, HQ"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the gap analysis is scheduled to occur" sample="Active Agenda, HQ"/>
+        <ForeignField name="GapTitle" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="GapTitle" key="OrgGapAnalysisID" joinType="left" phrase="Gap Analysis Title|A short title used to identify the organizational gap analysis" sample="Harris Woolf Risk Control Needs Analysis"/>
+        <ForeignField name="GapObjective" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="GapObjective" key="OrgGapAnalysisID" joinType="left" phrase="Gap Objective|A detailed description of the scope, purpose, and/or objective of the gap analysis" sample="XYZ Corporation needs to analyze all operational risk practices to reduce and avoid loss costs"/>
+        <ForeignField name="OrganizationLiaisonID" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="OrganizationLiaisonID" key="OrgGapAnalysisID" joinType="left" phrase="Organization Liaison|The individual assigned primary accountability for organizing the gap analysis for the organization being evaluated" sample="1"/>
+        <ForeignField name="OrganizationLiaison" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="OrganizationLiaisonID" joinType="left" phrase="Organization Liaison|The individual assigned primary accountability for organizing the gap analysis for the organization being evaluated" sample="Mattias Thorslund"/>
+        <ForeignField name="AuditTeamLeaderID" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="OrganizationLiaisonID" key="OrgGapAnalysisID" joinType="left" phrase="Gap Team Leader|The individual assigned primary accountability for conducting the gap analysis" sample="1"/>
+        <ForeignField name="AuditTeamLeader" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AuditTeamLeaderID" joinType="left" phrase="Gap Team Leader|The individual assigned primary accountability for conducting the gap analysis" sample="Mattias Thorslund"/>
+        <ForeignField name="ScheduledStart" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="ScheduledStart" key="OrgGapAnalysisID" joinType="left" phrase="Scheduled Start|The date and time the organizational gap analysis is scheduled to began" sample="01:37 pm"/>
+        <ForeignField name="ScheduledEnd" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="ScheduledEnd" key="OrgGapAnalysisID" joinType="left" phrase="Scheduled End|The date and time the organizational gap analysis is scheduled to end" sample="02:17 pm"/>
+        <ForeignField name="ScheduledDuration" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="ScheduledDuration" key="OrgGapAnalysisID" joinType="left" phrase="Scheduled Duration|The scheduled duration of the organizational gap analysis" sample="2 days"/>
+        <ForeignField name="OrgGapAnalysis" foreignTable="gapo" foreignKey="OrgGapAnalysisID" foreignField="OrgGapAnalysis" key="OrgGapAnalysisID" joinType="left" phrase="Organizational Analysis|The organizational gap analysis that includes the gap analysis item"/>
+        <RemoteField name="GapItemContactID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="181" phrase="Gap Item Contact|The individual assigned primary accountability for explaining the organization's business process" sample="1"/>
+        <ForeignField name="GapItemContact" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="GapItemContactID" joinType="left" phrase="Gap Item Contact|The individual assigned primary accountability for explaining the organization's business process" sample="Mattias Thorslund"/>
+        <RemoteField name="GapItemReviewerID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="182" phrase="Gap Item Reviewer|The individual assigned primary accountability for conducting the gap analysis for the gap item" sample="1"/>
+        <ForeignField name="GapItemReviewer" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="GapItemReviewerID" joinType="left" phrase="Gap Item Reviewer|The individual assigned primary accountability for conducting the gap analysis for the gap item" sample="Mattias Thorslund"/>
+        <TableField name="GapAnalysisID" type="int" dbFlags="unsigned not null" phrase="Analysis Item|The item to be considered for gap analysis" sample="1"/>
+        <ForeignField name="GapAnalysis" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="GapAnalysis" key="GapAnalysisID" joinType="left" phrase="Analysis Item|The item to be considered for gap analysis" sample="Loss - Injury or Illness | Report or Form | OSHA 300 Log"/>
+        <ForeignField name="ModuleID" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="ModuleID" key="GapAnalysisID" joinType="left" phrase="Gap Analysis Area|The name of the risk control area or module associated with the gap analysis" sample="2"/>
+        <ForeignField name="Module" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="ModuleID" joinType="left" phrase="Gap Analysis Area|The name of the the risk control area or module associated with the gap analysis" sample="Loss - Injury and Illness"/>
+        <ForeignField name="AnalysisTypeID" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="AnalysisTypeID" key="GapAnalysisID" joinType="left" phrase="Analysis Type|The specific type of gap analysis performed" sample="1"/>
+        <CodeField name="AnalysisType" key="AnalysisTypeID" phrase="Analysis Type|The specific type of gap analysis performed" sample="Files" codeTypeID="157"/>
+        <ForeignField name="AnalysisItem" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="AnalysisItem" key="GapAnalysisID" joinType="left" phrase="Analysis Item|A brief title used to identify the item being analyzed for gaps" sample="OSHA 300 Logs"/>
+        <ForeignField name="AnalysisDescription" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="AnalysisDescription" key="GapAnalysisID" joinType="left" phrase="Analysis Description|A more detailed description of the item to be analyzed for gaps" sample="Federal OSHA requires all companies to maintain OSHA 300 logs of recordable injuries and the logs must be current within five days"/>
+        <TableField name="OrganizationDescription" type="text" validate="noValidation" phrase="Organization Description|A detailed description of the businees process employed by the organization" sample="XYZ Corporation uses a clerk to maintain the OSHA 300 Log. They update the log when corporate requests information."/>
+        <ForeignField name="KeyResources" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="KeyResources" key="GapAnalysisID" joinType="left" phrase="Key Resources|A list of key human resources and/or job titles likely to be of assistance when analyzing for gaps in the business process" sample="Human Resources Manager, Safety Coordinator or Director"/>
+        <TableField name="OrganizationResources" type="text" validate="noValidation" phrase="Organization Resources|A list of human resources assisting with the gap analysis for the business process" sample="Sue Blue, Human Resources Manager; Ted Red, Safety Coordinator"/>
+        <ForeignField name="KeyLocations" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="KeyLocations" key="GapAnalysisID" joinType="left" phrase="Key Locations|A list of key locations where business processes occur, process materials are maintained, or processes can be evaluated" sample="Safety Director's office, Human resource director's office"/>
+        <TableField name="OrganizationLocations" type="text" validate="noValidation" phrase="Organization Locations|A list of locations where business processes were evaluated" sample="Human resource director's office"/>
+        <ForeignField name="KeyRisks" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="KeyRisks" key="GapAnalysisID" joinType="left" phrase="Key Risks|A brief description of the key risks associated with failure to manage or repair gaps in the business process" sample="Regulatory non-compliance, excessive (non-value adding) administration"/>
+        <TableField name="OrganizationRisks" type="text" validate="noValidation" phrase="Organization Risks|A description of key organizational risks identified in association with the gap analysis" sample="The organization is at risk of receiving a fine for failure to comply with OSHA Standards"/>
+        <ForeignField name="MethodsandBenefits" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="MethodsandBenefits" key="GapAnalysisID" joinType="left" phrase="Methods and Benefits|A brief description of the methods used by Active Agenda to address the operational risk requirement and the resulting benefits" sample="Active Agenda automates data collection and reporting on the OSHA 300 Log."/>
+        <RemoteField name="LikelihoodID" validate="noValidation" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodID" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="1"/>
+        <ForeignField name="LikelihoodValue" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="LikelihoodValue" key="LikelihoodID" joinType="left" phrase="Likelihood Value|A numerical value assigned to the likelihood of risk occurrence. The likelihood value is used in combination with the severity value to calculate a risk index score and an associated recommendation to mitigate the risk" sample="3"/>
+        <ForeignField name="RiskLikelihoodTerm" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="RiskLikelihoodTerm" key="LikelihoodID" joinType="left" phrase="Risk Likelihood Term|A one word description of the risk likelihood level" sample="Remote"/>
+        <ForeignField name="Likelihood" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="Likelihood" key="LikelihoodID" joinType="left" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="REMOTE: Extremely unlikely to occur"/>
+        <RemoteField name="LikelihoodStatusID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="1"/>
+        <CodeField name="LikelihoodStatus" key="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="Resolved" codeTypeID="112"/>
+        <RemoteField name="LikelihoodFactors" validate="notEmpty" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodFactors" phrase="Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat" sample="SCBAs were purchased for all First Responders and all responders have been trained by the Fire Department"/>
+        <RemoteField name="SeverityID" validate="noValidation" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="SeverityID" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="1"/>
+        <ForeignField name="SeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="SeverityID" joinType="left" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="6"/>
+        <ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+        <ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+        <CalculatedField name="TotalCost" type="money" calcFunction="sum" params="TotalEstExp" phrase="Total Cost|The automatically calculated cost associated with this gap anlayis item. This field is used to calculate the calculated severity and in the instance of the gap analysis items the field calculates total estimated costs and does not include actual costs" sample="702.00"/>
+        <RangeField name="CostSeverityID" foreignTable="rsks" foreignKey="SeverityLowCost" foreignField="SeverityID" key="TotalEstExp" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <ForeignField name="CostSeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <ForeignField name="CostSeverity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+        <RemoteField name="CachedTotalCost" type="money" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="TotalCost" phrase="Total Cost|The total cost of this incident" sample="1.00"/>
+        <RemoteField name="CachedSeverityValue" type="int" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="SeverityValue" phrase="Cost Severity|The severity this incident" sample="1.00"/>
+        <CalculatedField name="CalculatedSeverityValue" type="int" calcFunction="max" params="CachedSeverityValue SeverityValue" phrase="Calculated Severity Value|The greater of the User-assigned severity value and the acutomaticlly assigned Cost Severity value" sample="3"/>
+        <CalculatedField name="IndexValue" type="int" calcFunction="multiply" params="LikelihoodValue CalculatedSeverityValue" validate="" phrase="Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed" sample="15"/>
+        <RangeField name="RiskRecommendation" foreignTable="rskx" foreignKey="IndexValue" foreignField="RiskRecommendation" key="IndexValue" phrase="Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity" sample="Take action if and when appropriate"/>
+        <TableField name="AnalysisStartTime" type="datetime" validate="notEmpty" phrase="Start Time|Time the gap analysis began" sample="01:37 pm"/>
+        <TableField name="AnalysisEndTime" type="datetime" validate="noValidation" phrase="End Time|Time this gap analysis ended" sample="02:17 pm"/>
+        <ForeignField name="HoursEstimate" type="float" foreignTable="gap" foreignKey="GapAnalysisID" foreignField="HoursEstimate" key="GapAnalysisID" joinType="left" phrase="Estimate (hours)|The number of hours estimated to analyze gaps in the business process" sample="1.5"/>
+        <CalculatedField name="HoursActual" type="int" calcFunction="timediff" params="AnalysisEndTime AnalysisStartTime" validate="" phrase="Actual Hours|The actual number of hours required to to conduct the analysis for the gap item" sample="2"/>
+        <TableField name="ReviewStatusID" type="int" validate="noValidation" phrase="Review Status|The current status of the gap analysis item review" sample="1"/>
+        <CodeField name="ReviewStatus" key="ReviewStatusID" phrase="Review Status|The current status of the gap analysis item review" sample="Ongoing" codeTypeID="263"/>
+        <SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="GapAnalysisItemID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'gapoi'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the gap analysis item" sample="702.00"/>
+        <SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="GapAnalysisItemID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'gapoi'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the gap analysis item" sample="702.00"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, Inc. | Loss - Injury or Illness | Report or Form | OSHA 300 Log"><CombinedFieldRef name="GapTitle"/>;_<CombinedFieldRef name="GapAnalysis"/></CombinedField>
+        <CombinedField name="GapAnalysisItem" phrase="Gap Analysis Item|A combined field used to describe the organizational gap analysis item when associating it with other records" sample="Active Agenda, Inc. | Loss - Injury or Illness | Report or Form | OSHA 300 Log"><CombinedFieldRef name="Module"/>;_<CombinedFieldRef name="AnalysisItem"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="GapAnalysisItemID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="GapAnalysisItem"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="valc" name="Values Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="vala" name="Values Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="aprd" name="Asset Protection" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="cosc" name="Exposure Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="cosex" name="Exposures" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="optc" name="Opportunity Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="opt" name="Opportunities" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="hzc" name="Hazard Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="hza" name="Hazard Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="bcqc" name="Business Consequence Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="stdc" name="Standards Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="agrc" name="Agreement Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="agr" name="Agreements" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="insc" name="Insurance Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="insa" name="Insurance Policy Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="busc" name="Business Continuity Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="busa" name="Business Continuity Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="oppc" name="Operating Permit Considerations" parentKey="GapAnalysisID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gap"/>
+        </SubModule>
+        <SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="GapAnalysisItemID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="gapoi"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List organizational gap analyses">
+            <ListField name="GapAnalysisItemID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="ScheduledStart" phrase="Scheduled"/>
+            <ListField name="GapAnalysis" phrase="Gap Analysis"/>
+            <ListField name="IndexValue" phrase="Index Value"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search organizational gap analyses">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <EditField name="GapTitle" size="75" maxLength="128"/>
+            <PersonComboField name="OrganizationLiaisonID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="AuditTeamLeaderID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <DateField name="ScheduledStart"/>
+            <PersonComboField name="GapItemContactID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="GapItemReviewerID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="ModuleID" findMode="text">
+                <SampleItem ID="1" name="Loss - Injury or Illness"/>
+                <SampleItem ID="2" name="Loss - Employment Practices"/>
+                <SampleItem ID="3" name="Loss - Vehicles"/>
+                <SampleItem ID="4" name="Loss - Equipment"/>
+            </ComboField>
+            <CodeComboField name="AnalysisTypeID" findMode="text">
+                <SampleItem ID="1" name="Recordkeeping File"/>
+                <SampleItem ID="2" name="Interview"/>
+                <SampleItem ID="3" name="Physical Review"/>
+                <SampleItem ID="4" name="Written program or policy"/>
+                <SampleItem ID="5" name="Form or Report"/>
+                <SampleItem ID="6" name="Other"/>
+            </CodeComboField>
+            <ComboField name="LikelihoodID" findMode="text">
+                <SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+                <SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+                <SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+                <SampleItem ID="4" name="HIGH: Likely to occur"/>
+                <SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+            </ComboField>
+            <ComboField name="SeverityID" findMode="text">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <EditField name="IndexValue" size="5" maxLength="5"/>
+            <EditField name="RiskRecommendation" size="75" maxLength="128"/>
+            <CodeComboField name="ReviewStatusID" findMode="text">
+                <SampleItem ID="1" name="Not started"/>
+                <SampleItem ID="2" name="In progress"/>
+                <SampleItem ID="3" name="Skipped"/>
+                <SampleItem ID="4" name="Complete"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the organizational gap analysis">
+            <ViewField name="GapAnalysisItemID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="GapTitle"/>
+            <ViewField name="GapObjective"/>
+            <ViewField name="OrganizationLiaison"/>
+            <ViewField name="AuditTeamLeader"/>
+            <ViewField name="ScheduledStart"/>
+            <ViewField name="ScheduledEnd"/>
+            <ViewField name="ScheduledDuration"/>
+            <ViewField name="GapItemContact"/>
+            <ViewField name="GapItemReviewer"/>
+            <ViewField name="AnalysisType"/>
+            <ViewField name="AnalysisItem"/>
+            <ViewField name="OrganizationDescription"/>
+            <ViewField name="OrganizationResources"/>
+            <ViewField name="OrganizationLocations"/>
+            <ViewField name="OrganizationRisks"/>
+            <ViewField name="AnalysisStartTime"/>
+            <ViewField name="AnalysisEndTime"/>
+            <ViewField name="HoursEstimate"/>
+            <ViewField name="HoursActual"/>
+            <ViewField name="MethodsandBenefits"/>
+            <ViewField name="TotalEstOpp"/>
+            <ViewField name="TotalEstExp"/>
+            <ViewField name="Likelihood"/>
+            <ViewField name="LikelihoodStatus"/>
+            <ViewField name="LikelihoodFactors"/>
+            <ViewField name="Severity"/>
+            <ViewField name="IndexValue"/>
+            <ViewField name="RiskRecommendation"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="vala"/>
+                <ViewGrid moduleID="cosex"/>
+                <ViewGrid moduleID="opt"/>
+                <ViewGrid moduleID="hza"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="apr"/>
+                <ViewGrid moduleID="agr"/>
+                <ViewGrid moduleID="insa"/>
+                <ViewGrid moduleID="busa"/>
+                <ViewGrid moduleID="oppa"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the organizational gap analysis">
+            <ViewField name="GapAnalysisItemID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OrganizationLiaison"/>
+            <ViewField name="AuditTeamLeader"/>
+            <ViewField name="GapTitle"/>
+            <ViewField name="GapObjective"/>
+            <ViewField name="ScheduledStart"/>
+            <ViewField name="ScheduledEnd"/>
+            <ViewField name="ScheduledDuration"/>
+            <ViewField name="Module"/>
+            <PersonComboField name="GapItemContactID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="GapItemReviewerID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ViewField name="AnalysisType"/>
+            <ViewField name="AnalysisItem"/>
+            <ViewField name="AnalysisDescription"/>
+            <MemoField name="OrganizationDescription" rows="5" cols="75"/>
+            <ViewField name="KeyResources"/>
+            <MemoField name="OrganizationResources" rows="5" cols="75"/>
+            <ViewField name="KeyLocations"/>
+            <MemoField name="OrganizationLocations" rows="5" cols="75"/>
+            <ViewField name="KeyRisks"/>
+            <MemoField name="OrganizationRisks" rows="5" cols="75"/>
+            <DateField name="AnalysisStartTime"/>
+            <DateField name="AnalysisEndTime"/>
+            <ViewField name="HoursEstimate"/>
+            <ViewField name="HoursActual"/>
+            <ViewField name="MethodsandBenefits"/>
+            <ViewField name="TotalEstOpp"/>
+            <ViewField name="TotalEstExp"/>
+            <ComboField name="LikelihoodID" findMode="text">
+                <SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+                <SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+                <SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+                <SampleItem ID="4" name="HIGH: Likely to occur"/>
+                <SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+            </ComboField>
+            <CodeComboField name="LikelihoodStatusID" findMode="text">
+                <SampleItem ID="1" name="Resolved"/>
+                <SampleItem ID="2" name="Seeking Resolution"/>
+                <SampleItem ID="3" name="Unresolved"/>
+            </CodeComboField>
+            <MemoField name="LikelihoodFactors" cols="75" rows="5"/>
+            <ComboField name="SeverityID" findMode="text">
+                <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+            </ComboField>
+            <ViewField name="IndexValue"/>
+            <ViewField name="RiskRecommendation"/>
+            <CodeComboField name="ReviewStatusID" findMode="text">
+                <SampleItem ID="1" name="Not started"/>
+                <SampleItem ID="2" name="In progress"/>
+                <SampleItem ID="3" name="Skipped"/>
+                <SampleItem ID="4" name="Complete"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="aprd"/>
+            <EditGrid moduleID="apr"/>
+        </EditScreen>
+        <EditScreen name="Exposures" phrase="Exposures|Associate cost exposures with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="cosc"/>
+            <EditGrid moduleID="cosex"/>
+        </EditScreen>
+        <EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="optc"/>
+            <EditGrid moduleID="opt"/>
+        </EditScreen>
+        <EditScreen name="Culture" phrase="Culture|Associate values with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="valc"/>
+            <EditGrid moduleID="vala"/>
+        </EditScreen>
+        <EditScreen name="Hazards" phrase="Hazards|Associate hazards with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="hzc"/>
+            <EditGrid moduleID="hza"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="regc"/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="stdc"/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="bcqc"/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="BusinessContinuation" phrase="Continuity|Associate business continuation requirements with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="busc"/>
+            <EditGrid moduleID="busa"/>
+        </EditScreen>
+        <EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="agrc"/>
+            <EditGrid moduleID="agr"/>
+        </EditScreen>
+        <EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="insc"/>
+            <EditGrid moduleID="insa"/>
+        </EditScreen>
+        <EditScreen name="Permits" phrase="Permits|Associate operating permits with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="oppc"/>
+            <EditGrid moduleID="oppa"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities associated with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the gap analysis item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the gap analysis item" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+        <RecordReportScreen name="RecordReports" phrase="Reports|View reports on the current gap analysis item"/>
+        <ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="gapoi" phrase="Review Results">
+            <InvisibleField name="GapAnalysisItemID"/>
+            <ViewField name="Module" sample="Record Keeping"/>
+            <ViewField name="AnalysisType" sample="Record Keeping"/>
+            <ViewField name="AnalysisItem" sample="OSHA 300 Log"/>
+            <ViewField name="IndexValue" sample="8" align="center"/>
+            <ViewField name="ReviewStatus" sample="Complete"/>
+        </ViewGrid>
+        <EditGrid moduleID="gapoi" phrase="Review Results">
+            <GridForm>
+                <InvisibleField name="GapAnalysisItemID"/>
+                <PersonComboField name="GapItemContactID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <PersonComboField name="GapItemReviewerID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <MemoField name="OrganizationDescription" rows="5" cols="75"/>
+                <MemoField name="OrganizationResources" rows="5" cols="75"/>
+                <MemoField name="OrganizationLocations" rows="5" cols="75"/>
+                <MemoField name="OrganizationRisks" rows="5" cols="75"/>
+                <DateField name="AnalysisStartTime"/>
+                <DateField name="AnalysisEndTime"/>
+                <ComboField name="LikelihoodID" findMode="text">
+                    <SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+                    <SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+                    <SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+                    <SampleItem ID="4" name="HIGH: Likely to occur"/>
+                    <SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+                </ComboField>
+                <ComboField name="SeverityID" findMode="text">
+                    <SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+                    <SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+                    <SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+                    <SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+                    <SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+                </ComboField>
+                <CodeComboField name="ReviewStatusID" findMode="text">
+                    <SampleItem ID="1" name="Not started"/>
+                    <SampleItem ID="2" name="In progress"/>
+                    <SampleItem ID="3" name="Skipped"/>
+                    <SampleItem ID="4" name="Complete"/>
+                </CodeComboField>
+            </GridForm>
+            <InvisibleField name="GapAnalysisItemID"/>
+            <ViewField name="Module" sample="Loss Injury or Illness"/>
+            <ViewField name="AnalysisType" sample="Record Keeping"/>
+            <ViewField name="AnalysisItem" sample="OSHA 300 Log"/>
+            <ViewField name="IndexValue" sample="8" align="center"/>
+            <ViewField name="ReviewStatus" sample="Complete"/>
+        </EditGrid>
+        <SearchSelectGrid moduleID="gapoi" phrase="Review Items" primaryListField="AnalysisItem">
+            <SearchForm>
+                <ComboField name="ModuleID" findMode="text">
+                    <SampleItem ID="1" name="Loss - Injury or Illness"/>
+                    <SampleItem ID="2" name="Loss - Employment Practices"/>
+                    <SampleItem ID="3" name="Loss - Vehicles"/>
+                    <SampleItem ID="4" name="Loss - Equipment"/>
+                </ComboField>
+            </SearchForm>
+        </SearchSelectGrid>
+    </Exports>
+    <RecordSummaryFields>
+        <ViewField name="GapAnalysisItemID"/>
+        <InvisibleField name="GapAnalysisID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="OrganizationLiaison"/>
+        <ViewField name="AuditTeamLeader"/>
+        <ViewField name="GapTitle"/>
+        <ViewField name="GapObjective"/>
+        <ViewField name="ScheduledStart"/>
+        <ViewField name="ScheduledEnd"/>
+        <ViewField name="ScheduledDuration"/>
+        <ViewField name="GapItemContact"/>
+        <ViewField name="GapItemReviewer"/>
+        <ViewField name="AnalysisType"/>
+        <ViewField name="AnalysisItem"/>
+        <ViewField name="OrganizationDescription"/>
+        <ViewField name="OrganizationResources"/>
+        <ViewField name="OrganizationLocations"/>
+        <ViewField name="OrganizationRisks"/>
+        <ViewField name="AnalysisStartTime"/>
+        <ViewField name="AnalysisEndTime"/>
+        <ViewField name="HoursEstimate"/>
+        <ViewField name="HoursActual"/>
+        <ViewField name="MethodsandBenefits"/>
+        <ViewField name="TotalEstOpp"/>
+        <ViewField name="TotalEstExp"/>
+        <ViewField name="Likelihood"/>
+        <ViewField name="LikelihoodStatus"/>
+        <ViewField name="LikelihoodFactors"/>
+        <ViewField name="Severity"/>
+        <ViewField name="IndexValue"/>
+        <ViewField name="RiskRecommendation"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Gap Analysis Item By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="OrgGapAnalysisID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Gap Analysis Item By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Gap Analysis Item By Organization Liaison">
+            <GroupByField name="OrganizationLiaison"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Gap Analysis Item By Organization Liaison">
+            <GroupByField name="OrganizationLiaison"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Gap Analysis Item By Audit Leader">
+            <GroupByField name="AuditTeamLeader"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Gap Analysis Item By Audit Leader">
+            <GroupByField name="AuditTeamLeader"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Gap Analysis Item By Contact">
+            <GroupByField name="GapItemContact"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Gap Analysis Item By Contact">
+            <GroupByField name="GapItemContact"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Gap Analysis Item By Reviewer">
+            <GroupByField name="GapItemReviewer"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Gap Analysis Item By Reviewer">
+            <GroupByField name="GapItemReviewer"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Gap Analysis Item By Type">
+            <GroupByField name="AnalysisType"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Gap Analysis Item By Type">
+            <GroupByField name="AnalysisType"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Gap Analysis Item By Likelihood">
+            <GroupByField name="Likelihood"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Gap Analysis Item By Likelihood">
+            <GroupByField name="Likelihood"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Gap Analysis Item By Severity">
+            <GroupByField name="Severity"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Gap Analysis Item By Severity">
+            <GroupByField name="Severity"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie09" title="Gap Analysis Item By Recommendation">
+            <GroupByField name="RiskRecommendation"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto09" title="Gap Analysis Item By Recommendation">
+            <GroupByField name="RiskRecommendation"/>
+            <SummaryField name="GapAnalysisItemID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

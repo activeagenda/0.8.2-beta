@@ -1,0 +1,830 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Inventory" moduleID="chmin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Inventory" pluralRecordName="Chemical Inventories" allowAddRecord="no" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="ChemicalInventoryID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track chemical inventory and storage practices" sample="1"/>
+		<TableField name="ChemicalID" type="int" validate="noValidation" phrase="Chemical ID|An automatically assigned number used to track material safety data sheets for chemicals used by the organization" sample="1"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="CommonName" key="ChemicalID" joinType="left" phrase="Chemical Name|The common name of the chemical stored at this location" sample="Methyl Ethyl Goo"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this record. Access to this record can be restricted to those users directly associated with the same organization" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="15" phrase="Person Accountable|The person with primary accountability for managing the chemical inventory item" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The person with primary accountability for managing the chemical inventory item" sample="Mattias Thorslund"/>
+		<RemoteField name="DepartmentID" validate="RequireSelection" remoteModuleID="orgda" remoteModuleIDField="RelatedModuleID" remoteRecordIDField="RelatedRecordID" remoteField="DepartmentID" phrase="Department Responsible|Department responsible for the management of the chemical at the specific location identified" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department Responsible|Department responsible for the management of the chemical at the specific location identified" sample="Human Resources, Local, Human Resources, 77282"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the chemical is stored or used" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the chemical is stored or used" sample="Packaging Area"/>
+		<TableField name="ChemicalStorageMethodID" type="int" validate="RequireSelection" phrase="Storage Method|The specific method used to store the chemical on site" sample="1"/>
+		<CodeField name="ChemicalStorageMethod" key="ChemicalStorageMethodID" phrase="Storage Method|The specific method used to store the chemical on site" sample="55 Gallon Drums" codeTypeID="115"/>
+		<TableField name="TrackingNumber" type="varchar(50)" validate="noValidation" phrase="Container Number|A unique tracking number fixed to the storage container/s" sample="CID-210"/>
+		<TableField name="StorageDesc" type="text" validate="notEmpty" phrase="Storage Description|A detailed description of the method and manner of storage for this chemical" sample="The Methyl Ethyl Goo is stored in drums atop secondary containment pallets"/>
+		<TableField name="ReOrderQuantity" type="float" validate="noValidation" phrase="Reorder Quantity|The inventory quantity at which the chemical should be ordered to replentish the inventory at this specific location" sample="21"/>
+		<TableField name="ReOrderQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="ReOrderQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ReOrderQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="ReOrderQuantityUoMCategory" key="ReOrderQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="ReOrderQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ReOrderQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<TableField name="StartQuantity" type="float" validate="noValidation" phrase="Start Quantity|The quantity of chemical at this location when tracking begins" sample="23"/>
+		<TableField name="StartQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="StartQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="StartQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="StartQuantityUoMCategory" key="StartQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="StartQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="StartQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<RemoteField name="StartDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="12" phrase="Start Date|The date the start quantity was entered" sample="09-28-2003"/>
+		<TableField name="Issued" type="float" validate="noValidation" phrase="Issued|The amount of inventory issued or checked out from this specific location" sample="25"/>
+		<TableField name="IssuedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="IssuedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="IssuedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="IssuedUoMCategory" key="IssuedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="IssuedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="IssuedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<!--The issued fields are automatically calculated based on transactions occuring and logged within the chmtr table between the StartDate and CalculationDate indicated. DFZ 4-1-2004-->
+		<TableField name="Returned" type="float" validate="noValidation" phrase="Returned|The amount of inventory returned or checked in to iventory at this specific location" sample="25"/>
+		<TableField name="ReturnedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="ReturnedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ReturnedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="ReturnedUoMCategory" key="ReturnedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="ReturnedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ReturnedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<!--The Returned fields are automatically calculated based on transactions occuring and logged within the chmtr table between the StartDate and CalculationDate indicated. DFZ 4-1-2004-->
+		<TableField name="Added" type="float" validate="noValidation" phrase="Added|New amount of inventory added to the inventory at this specific location" sample="25"/>
+		<TableField name="AddedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="AddedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AddedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AddedUoMCategory" key="AddedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AddedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AddedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<!--The Added fields are automatically calculated based on transactions occuring and logged within the chmtr table between the StartDate and CalculationDate indicated. DFZ 4-1-2004-->
+		<TableField name="Transferred" type="float" validate="noValidation" phrase="Transferred|Items of this chemical which were transferred to another location" sample="25"/>
+		<TableField name="TransferredUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="TransferredUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TransferredUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="TransferredUoMCategory" key="TransferredUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="TransferredUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TransferredUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<!--The Transferred fields are automatically calculated based on transactions occuring and logged within the chmtr table between the StartDate and CalculationDate indicated. DFZ 4-1-2004-->
+		<TableField name="PresentQuantity" type="float" validate="noValidation" phrase="Present Quantity|The present quantity of chemical at this location. The present quantity is based on a manual count of items in inventory at this specific location" sample="13"/>
+		<TableField name="PresentQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="PresentQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="PresentQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="PresentQuantityUoMCategory" key="PresentQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="PresentQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="PresentQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<TableField name="PresentQuantityDate" type="date" validate="noValidation" phrase="Present Quantity Date|An automatically recorded date when the present quantity was appended" sample="09-28-2003"/>
+		<RemoteField name="PresentQuantityPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="11" phrase="Present Quantity Person|The individual determining and recording the present quantity" sample="1"/>
+		<ForeignField name="PresentQuantityPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PresentQuantityPersonID" joinType="left" phrase="Present Quantity Person|The individual determining and recording the present quantity" sample="Mattias Thorslund"/>
+		<TableField name="BeginningCalculationDate" type="date" validate="noValidation" phrase="Beginning Calculation Date|The beginning date used for calculating pertinent indicators and losses between the beginning calculation date and ending calculation Date" sample="09-28-2003"/>
+		<TableField name="EndingCalculationDate" type="date" validate="noValidation" phrase="Ending Calculation Date|The ending date used for calculating pertinent indicators and losses between the beginning calculation date and ending calculation Date" sample="09-28-2004"/>
+		<TableField name="LossQuantity" type="float" validate="noValidation" phrase="Loss Quantity|The quantity of chemical which cannot be accounted for but is unavailable. Lost chemical is any chemical which cannot be accounted for by chemical which was issued and not returned" sample="6"/>
+		<TableField name="LossQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+		<ForeignField name="LossQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="LossQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="LossQuantityUoMCategory" key="LossQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="LossQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="LossQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter"/>
+		<!--LossQuantity is calculated based on "Issues," "Returns," "Adds" and "Transfers" between the StartDate and EndingCalculationDate. DFZ 3-31-2004-->
+		<!--The LossQuantity and LossQuantityUnits are calculated based on the (Start Quantity - Issued + Returned + Added - Transferred - PresentQty) DFZ 10-19-2003-->
+		<TableField name="LossCost" type="money" validate="noValidation" phrase="Loss Cost|The financial cost of losses associated with this chemical at this specific location as of the Calculation Date" sample="$2,000.00"/>
+		<!--the LossCostToDate is a calculated value based on the (LossQuantity [units based on UnitsofMeasure equivalent analysis] * UnitCost from <eqpsp> when the OrganizationID and chemicalID=OrganizationID and chemicalID of the "PrimarySupplier"). DFZ 3-31-2004-->
+		<TableField name="MaxAmountAllowed" type="float" validate="noValidation" phrase="Maximum Amount Allowed|Maximum amount of chemical allowed to be stored at this specific location at any one time" sample="7"/>
+		<TableField name="MaxAmtUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="MaxAmtUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="MaxAmtUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="MaxAmtUnitCategory" key="MaxAmtUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="MaxAmtUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="MaxAmtUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="AmountPerYear" type="float" validate="noValidation" phrase="Amount Per Year|Amount of chemical stored at this specific location per year" sample="360"/>
+		<TableField name="AmtPerYrUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmtPerYrUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmtPerYrUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmtPerYrUnitCategory" key="AmtPerYrUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmtPerYrUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmtPerYrUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<!--The AmountPerYear fields are calculated based on transactions occurring within the chmtr module between the BeginningCalculationDate and the EndingCalculationDate-->
+		<!--The formula simply calculates the total amount of this chemical stored over a 365 (1 year) period. This formula would be: StartQuantity+Adds occurring between the Begining and Ending Calculation Dates. DFZ 4-2-2004-->
+		<TableField name="AmountPerDay" type="float" validate="noValidation" phrase="Amount Per Day|Amount of chemical stored at this specific location per day" sample="1"/>
+		<TableField name="AmtPerDayUoMID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="AmtPerDayUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AmtPerDayUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="AmtPerDayUnitCategory" key="AmtPerDayUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="AmtPerDayUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AmtPerDayUoMID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<!--The AmountPerDay fields are calculated based on transactions occurring within the chmtr module between the BeginningCalculationDate and the EndingCalculationDate-->
+		<!--The formula simply calculates the average amount of this chemical stored on a daily basis. This formula would be (Start Quantity - Issued + Returned + Added - Transferred) occurring between the Begining and Ending Calculation Dates. DFZ 4-2-2004-->
+		<TableField name="DaysOnSite" type="float" validate="noValidation" phrase="Days On Site Per Year|Number of days this chemical is stored at this specific location per year" sample="365"/>
+		<!--The DaysOnSite fields are calculated based on transactions occurring within the chmtr module between the BeginningCalculationDate and the EndingCalculationDate-->
+		<!--The formula simply calculates the amount of this chemical stored on a daily basis. This formula would be ([Start Quantity - Issued + Returned + Added - Transferred]Countif >0) occurring between the Begining and Ending Calculation Dates. DFZ 4-2-2004-->
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Water | Active Agenda, Inc. | Development Zone"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Location"/></CombinedField>
+		<CombinedField name="PresentInventoryQuantity" phrase="Present Quantity|A combined field used to describe the present chemical inventory quantity when associating it with other records" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"><CombinedFieldRef name="PresentQuantity"/>_<CombinedFieldRef name="PresentQuantityUoM"/></CombinedField>
+		<CombinedField name="ChemicalInventory" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued; Active Agenda, HQ; Packaging Area"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="Location"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChemicalInventoryID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="ChemicalInventory"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="chmtr" name="Chemical Transactions" parentKey="ChemicalInventoryID" localKey="ChemicalInventoryID"/>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Continuation" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="orgda" name="Department Associations" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="eqpc" name="Equipment Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="eqpa" name="Equipment Associations" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Abatement" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="orgtc" name="Job Title Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="orgja" name="Job Title Associations" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Applicable Regulations" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Applicable Standards" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Suppliers" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Permit Considerations" parentKey="ChemicalID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chm"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ChemicalInventoryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="chmin"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List the chemical inventory">
+			<ListField name="ChemicalInventoryID" phrase="Record ID"/>
+			<ListField name="Chemical" phrase="Chemical Name"/>
+			<ListField name="ChemicalID" phrase="Chemical ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="PresentInventoryQuantity" phrase="Present Inventory"/>
+			<ListField name="ChemicalStorageMethod" phrase="Storage Method"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search the chemical inventory">
+			<ComboField name="ChemicalID" findMode="text">
+				<SampleItem ID="1" name="Methyl Ethyl Goo"/>
+				<SampleItem ID="2" name="Hydrogen Dioxide"/>
+				<SampleItem ID="3" name="Anhydrous Ammonia"/>
+				<SampleItem ID="4" name="Goo Slime"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<UpdateFieldRef name="DepartmentID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DepartmentID" findMode="text">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<CodeComboField name="ChemicalStorageMethodID" findMode="text">
+				<SampleItem ID="1" name="55 Gallon Drums"/>
+				<SampleItem ID="3" name="Above Ground Storage Tank"/>
+				<SampleItem ID="5" name="Receiver"/>
+				<SampleItem ID="7" name="Below Ground Storage Tank"/>
+			</CodeComboField>
+			<EditField name="TrackingNumber"/>
+			<EditField name="AmountPerYear" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmtPerYrUnitCategoryID">
+					<UpdateFieldRef name="AmtPerYrUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmtPerYrUoMID" parentField="AmtPerYrUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="AmountPerDay" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmtPerDayUnitCategoryID">
+					<UpdateFieldRef name="AmtPerDayUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmtPerDayUoMID" parentField="AmtPerDayUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="MaxAmountAllowed" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="MaxAmtUnitCategoryID">
+					<UpdateFieldRef name="MaxAmtUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="MaxAmtUoMID" parentField="MaxAmtUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="DaysOnSite" size="10" maxLength="10"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a chemical inventory item">
+			<ViewField name="ChemicalInventoryID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="Department"/>
+			<ViewField name="Location"/>
+			<ViewField name="ChemicalStorageMethod"/>
+			<ViewField name="TrackingNumber"/>
+			<ViewField name="StorageDesc"/>
+			<ViewField name="AmountPerYear">
+				<ViewField name="AmtPerYrUoM"/>
+			</ViewField>
+			<ViewField name="AmountPerDay">
+				<ViewField name="AmtPerDayUoM"/>
+			</ViewField>
+			<ViewField name="MaxAmountAllowed">
+				<ViewField name="MaxAmtUoM"/>
+			</ViewField>
+			<ViewField name="DaysOnSite"/>
+			<ViewField name="ReOrderQuantity">
+				<ViewField name="ReOrderQuantityUoM"/>
+			</ViewField>
+			<ViewField name="StartQuantity">
+				<ViewField name="StartQuantityUoM"/>
+			</ViewField>
+			<ViewField name="StartDate"/>
+			<ViewField name="Issued">
+				<ViewField name="IssuedUoM"/>
+			</ViewField>
+			<ViewField name="Returned">
+				<ViewField name="ReturnedUoM"/>
+			</ViewField>
+			<ViewField name="Added">
+				<ViewField name="AddedUoM"/>
+			</ViewField>
+			<ViewField name="Transferred">
+				<ViewField name="TransferredUoM"/>
+			</ViewField>
+			<ViewField name="PresentQuantity">
+				<ViewField name="PresentQuantityUoM"/>
+			</ViewField>
+			<ViewField name="PresentQuantityPerson"/>
+			<ViewField name="PresentQuantityDate"/>
+			<ViewField name="BeginningCalculationDate"/>
+			<ViewField name="EndingCalculationDate"/>
+			<ViewField name="LossQuantity">
+				<ViewField name="LossQuantityUoM"/>
+			</ViewField>
+			<ViewField name="LossCost"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bpc"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="orgda"/>
+				<ViewGrid moduleID="eqpa"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="orgja"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a chemical inventory item">
+			<ViewField name="ChemicalInventoryID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<UpdateFieldRef name="DepartmentID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<CodeComboField name="ChemicalStorageMethodID" findMode="text">
+				<SampleItem ID="1" name="55 Gallon Drums"/>
+				<SampleItem ID="3" name="Above Ground Storage Tank"/>
+				<SampleItem ID="5" name="Receiver"/>
+				<SampleItem ID="7" name="Below Ground Storage Tank"/>
+			</CodeComboField>
+			<EditField name="TrackingNumber"/>
+			<MemoField name="StorageDesc" rows="5" cols="75"/>
+			<EditField name="AmountPerYear" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmtPerYrUnitCategoryID">
+					<UpdateFieldRef name="AmtPerYrUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmtPerYrUoMID" parentField="AmtPerYrUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="AmountPerDay" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="AmtPerDayUnitCategoryID">
+					<UpdateFieldRef name="AmtPerDayUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="AmtPerDayUoMID" parentField="AmtPerDayUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="DaysOnSite" size="5" maxLength="5"/>
+			<EditField name="ReOrderQuantity" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="ReOrderQuantityUoMCategoryID">
+					<UpdateFieldRef name="ReOrderQuantityUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="ReOrderQuantityUoMID" parentField="ReOrderQuantityUoMCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="StartQuantity" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="StartQuantityUoMCategoryID">
+					<UpdateFieldRef name="StartQuantityUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="StartQuantityUoMID" parentField="StartQuantityUoMCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<DateField name="StartDate"/>
+			<ViewField name="Issued">
+				<ViewField name="IssuedUoM"/>
+			</ViewField>
+			<ViewField name="Returned">
+				<ViewField name="ReturnedUoM"/>
+			</ViewField>
+			<ViewField name="Added">
+				<ViewField name="AddedUoM"/>
+			</ViewField>
+			<ViewField name="Transferred">
+				<ViewField name="TransferredUoM"/>
+			</ViewField>
+			<EditField name="MaxAmountAllowed" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="MaxAmtUnitCategoryID">
+					<UpdateFieldRef name="MaxAmtUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="MaxAmtUoMID" parentField="MaxAmtUnitCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<EditField name="PresentQuantity" size="10" maxLength="10">
+				<Self/>
+				<ComboField name="PresentQuantityUoMCategoryID">
+					<UpdateFieldRef name="PresentQuantityUoMID"/>
+					<SampleItem ID="1" name="Weight"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="6" name="Distance"/>
+					<SampleItem ID="3" name="Packaging"/>
+					<SampleItem ID="4" name="Time"/>
+					<SampleItem ID="5" name="Volume"/>
+				</ComboField>
+				<ComboField name="PresentQuantityUoMID" parentField="PresentQuantityUoMCategoryID">
+					<SampleItem ID="1" name="Milligram"/>
+					<SampleItem ID="2" name="Centigram"/>
+					<SampleItem ID="3" name="Decigram"/>
+					<SampleItem ID="4" name="Gram"/>
+				</ComboField>
+			</EditField>
+			<DateField name="PresentQuantityDate"/>
+			<PersonComboField name="PresentQuantityPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="BeginningCalculationDate"/>
+			<DateField name="EndingCalculationDate"/>
+			<ViewField name="LossQuantity">
+				<ViewField name="LossQuantityUoM"/>
+			</ViewField>
+			<ViewField name="LossCost"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate asset protection methods and criteria with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuation" phrase="Continuity|Associate business continuation requirements with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Departments" phrase="Departments|Associate departments with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="orgda"/>
+		</EditScreen>
+		<EditScreen name="Equipment" phrase="Equipment|Associate equipment with the agreement">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="eqpc"/>
+			<EditGrid moduleID="eqpa" phrase="Handling Equipment"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="JobTitles" phrase="Job Titles|Associate job titles with with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="orgtc"/>
+			<EditGrid moduleID="orgja"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate compliance or consensus standards with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the chemical inventory">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the chemical inventory" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChemicalInventoryID"/>
+		<ViewField name="ChemicalID"/>
+		<ViewField name="Chemical"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="Department"/>
+		<ViewField name="Location"/>
+		<ViewField name="ChemicalStorageMethod"/>
+		<ViewField name="TrackingNumber"/>
+		<ViewField name="StorageDesc"/>
+		<ViewField name="AmountPerYear">
+			<ViewField name="AmtPerYrUoM"/>
+		</ViewField>
+		<ViewField name="AmountPerDay">
+			<ViewField name="AmtPerDayUoM"/>
+		</ViewField>
+		<ViewField name="MaxAmountAllowed">
+			<ViewField name="MaxAmtUoM"/>
+		</ViewField>
+		<ViewField name="DaysOnSite"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="chmin" phrase="Chemical Inventory">
+			<InvisibleField name="ChemicalInventoryID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Chemical Storage Area"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="TrackingNumber" sample="CID-210"/>
+			<ViewField name="PresentInventoryQuantity" sample="13 Each"/>
+		</ViewGrid>
+		<EditGrid moduleID="chmin" phrase="Chemical Inventory">
+			<GridForm>
+				<InvisibleField name="ChemicalInventoryID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+					<SampleItem ID="1" name="Chemical Storage Area"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Office"/>
+					<SampleItem ID="7" name="Production Line #1"/>
+				</ComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<EditField name="TrackingNumber" size="50" maxLength="50" sample="PPE-APR-3710-5"/>
+				<CodeComboField name="ChemicalStorageMethodID" findMode="text" sample="55 Gallon Drums">
+					<SampleItem ID="1" name="55 Gallon Drums"/>
+					<SampleItem ID="3" name="Above Ground Storage Tank"/>
+					<SampleItem ID="5" name="Receiver"/>
+					<SampleItem ID="7" name="Below Ground Storage Tank"/>
+				</CodeComboField>
+				<EditField name="PresentQuantity" size="10" maxLength="10">
+					<Self/>
+					<ComboField name="PresentQuantityUoMCategoryID">
+						<UpdateFieldRef name="PresentQuantityUoMID"/>
+						<SampleItem ID="1" name="Weight"/>
+						<SampleItem ID="2" name="Area"/>
+						<SampleItem ID="6" name="Distance"/>
+						<SampleItem ID="3" name="Packaging"/>
+						<SampleItem ID="4" name="Time"/>
+						<SampleItem ID="5" name="Volume"/>
+					</ComboField>
+					<ComboField name="PresentQuantityUoMID" parentField="PresentQuantityUoMCategoryID">
+						<SampleItem ID="1" name="Milligram"/>
+						<SampleItem ID="2" name="Centigram"/>
+						<SampleItem ID="3" name="Decigram"/>
+						<SampleItem ID="4" name="Gram"/>
+					</ComboField>
+				</EditField>
+				<DateField name="PresentQuantityDate" sample="09-28-2003"/>
+				<PersonComboField name="PresentQuantityPersonID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Chemical Storage Area"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="TrackingNumber" sample="CID-210"/>
+			<ViewField name="PresentInventoryQuantity" sample="13 Each"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Chemical Inventory By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemical Inventory By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Chemical Inventory By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Chemical Inventory By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Chemical Inventory By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Chemical Inventory By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Chemical Inventory By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Chemical Inventory By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Chemical Inventory By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Chemical Inventory By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Chemical Inventory By Storage Method">
+			<GroupByField name="ChemicalStorageMethod"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Chemical Inventory By Storage Method">
+			<GroupByField name="ChemicalStorageMethod"/>
+			<SummaryField name="ChemicalInventoryID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

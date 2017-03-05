@@ -1,0 +1,683 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Corrective Actions" moduleID="cor" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Corrective Action" pluralRecordName="Corrective Actions" addNewName="Action" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="CorrActID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track corrective actions" sample="1"/>
+		<TableField name="CorrectiveSituationTypeID" type="int" dbFlags="unsigned not null" phrase="Corrective Situation Type|A combined field used to describe the corrective situation type when associating it with other records" sample="1"/>
+		<ForeignField name="PolicyOrganizationID" defaultValue="defaultorgID" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="PolicyOrganizationID" key="CorrectiveSituationTypeID" joinType="left" phrase="Policy Organization|The organization responsible for the establishment and enforcement of consistent employment practices" sample="1"/>
+		<ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization responsible for the establishment and enforcement of consistent employment practices" sample="Active Agenda, Inc"/>
+		<ForeignField name="PolicyPersonAccountableID" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="PersonAccountableID" key="CorrectiveSituationTypeID" joinType="left" phrase="Guidance Person|The person assigned primary accountability for advising and enforcing consistent employment practices" sample="1"/>
+		<ForeignField name="PolicyPersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PolicyPersonAccountableID" joinType="left" phrase="Guidance Person|The person assigned primary accountability for advising and enforcing consistent employment practices" sample="Mattias Thorslund"/>
+		<ForeignField name="CorrectiveSituationCategoryID" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="CorrectiveSituationCategoryID" key="CorrectiveSituationTypeID" joinType="left" phrase="Category|A broadly defined title or phrase used to group similar corrective situation types requiring corrective action" sample="1"/>
+		<CodeField name="CorrectiveSituationCategory" key="CorrectiveSituationCategoryID" phrase="Category|A broadly defined title or phrase used to group similar corrective situation types requiring corrective action" sample="Crime" codeTypeID="58"/>
+		<ForeignField name="CorrectiveSituationTitle" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="CorrectiveSituationTitle" key="CorrectiveSituationTypeID" joinType="left" phrase="Title|A title or phrase used to describe a specific corrective situation type requiring corrective action" sample="Theft"/>
+		<ForeignField name="CorrectiveSituationDescription" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="CorrectiveSituationDescription" key="CorrectiveSituationTypeID" joinType="left" phrase="Situation Type Description|A general description of a corrective situation type requiring corrective action" sample="Theft includes the taking of property of a rightful owner with intent to convert the property to the person own use"/>
+		<ForeignField name="WorkRuleNo" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="WorkRuleNo" key="CorrectiveSituationTypeID" joinType="left" phrase="Rule Number|Work rule or policy number associated with the corrective situation type to be addressed" sample="2347"/>
+		<ForeignField name="CorrectiveSituationType" foreignTable="corst" foreignKey="CorrectiveSituationTypeID" foreignField="CorrectiveSituationType" key="CorrectiveSituationTypeID" joinType="left" phrase="Situation Type|A combined field used to describe the corrective situation type when associating it with other records" sample="Crime | Theft"/>
+		<!--<SummaryField name="ConsistentPractices" summaryFunction="list" summaryField="CorrectivePractice" summaryKey="CorrectiveSituationTypeID" summaryModuleID="corcp" localKey="CorrActID" phrase="Consistent Practices|The consistent practice policy steps defined by the policy organization" sample="1st | Verbal Warning, 2nd Written Warning, 3rd Last Change Agreement, 4th Termination"/>
+        -->
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned not null" phrase="Organization|The organization directly associated with this corrective action" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization directly associated with this corrective action" sample="Active Agenda, Inc"/>
+		<TableField name="SituationDesc" type="text" dbFlags="" phrase="Situation Description|A detailed description of the situation which led to the corrective action" sample="Mr. Thorslund removed the LCD projector from the facility without providing notice that he had done so. A co-employee noticed the projector at Mr. Thorslund's home during a Super Bowl party at Mr. Thorslund's home. Mr. Thorslund denied knowing of the projector's whereabouts when he was questioned."/>
+		<RemoteField name="SituationDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="16" phrase="Situation Date|The date and time of the situation which led to the corrective action" sample="01/01/2004"/>
+		<RecordMetaField name="EntryDate" returnType="date" lookupType="created" phrase="System Entry Date|The date and time the situation was entered into the system" sample="01/01/2004 12:02:34"/>
+		<CalculatedField name="EntryDelay" type="time" calcFunction="timediff" params="EntryDate SituationDate" validate="" phrase="Entry Delay|A calculated field based on the amount of time between the date of the situation and the date the situation was entered into the system" sample="30"/>
+		<RemoteField name="CorrActSubjectID" defaultValue="defaultorgID" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="19" phrase="Action Subject|The recipient of the corrective action" sample="1"/>
+		<ForeignField name="CorrActSubject" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="CorrActSubjectID" joinType="left" phrase="Action Subject|The recipient of the corrective action" sample="Mattias Thorslund"/>
+		<TableField name="OccurNoID" type="int" validate="RequireSelection" phrase="Occurrence|The number of times the corrective action subject has been responsible for the same or similar corrective situation" sample="3"/>
+		<CodeField name="OccurNo" key="OccurNoID" phrase="Occurrence|The number of times the corrective action subject has been responsible for the same or similar corrective situation" sample="1st" codeTypeID="75"/>
+		<TableField name="CorrectivePracticeCategoryID" type="int" validate="RequireSelection" phrase="Action Category|A brief phrase used to describe a category of corrective action practices" sample="1"/>
+		<CodeField name="CorrectivePracticeCategory" key="CorrectivePracticeCategoryID" phrase="Action Category|A brief phrase used to describe a category of corrective action practices" sample="Termination" codeTypeID="57"/>
+		<TableField name="CorrectivePracticeDescription" type="text" validate="notEmpty" phrase="Action Description|A detailed description of the corrective action taken" sample="The employee was terminated and escourted out of the facility"/>
+		<RemoteField name="CorrActDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="7" phrase="Action Date|The date and time the corrective action was taken" sample="01/01/2004"/>
+		<CalculatedField name="CorrActDelay" type="time" calcFunction="timediff" params="CorrActDate SituationDate" validate="" phrase="Corrective Action Delay|A calculated field based on the amount of time between the date of the situation leading to the corrective action and the date of the corrective activity" sample="30"/>
+		<TableField name="CorrActDesc" type="text" dbFlags="" phrase="Action Description|A detailed description of the corrective action taken" sample="Mr. Thorslund was terminated after the company learned that Mr. Thorslund had lied. His theft was verified following a search of his home by the LCD Projector Police"/>
+		<RemoteField name="CorrActByID" defaultValue="defaultorgID" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="18" phrase="Action By|The name of the person taking the corrective action" sample="1"/>
+		<ForeignField name="CorrActBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="CorrActByID" joinType="left" phrase="Action By|The name of the person taking the corrective action" sample="Jane Doe"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="21" phrase="Person Accountable|The individual assigned primary accountability for managing this corrective action process" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this corrective action process" sample="Mattias Thorslund"/>
+		<TableField name="CorrActStatusID" type="int" dbFlags="unsigned" phrase="Status|Status of the corrective action process" sample="1"/>
+		<CodeField name="CorrActStatus" key="CorrActStatusID" phrase="Status|Status of the corrective action process" sample="Resolved and Expunged" codeTypeID="123"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'cor'" localKey="CorrActID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="CorrActID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'cor'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the corrective action" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="CorrActID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'cor'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the corrective action" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Theft; Mattias Thorslund; 2-24-2004; Termination"><CombinedFieldRef name="CorrectiveSituationType"/>;_<CombinedFieldRef name="CorrActSubject"/>;_<CombinedFieldRef name="CorrActDate"/>;_<CombinedFieldRef name="CorrectivePracticeCategory"/></CombinedField>
+		<CombinedField name="CorrAct" phrase="Corrective Action|A combined field used to describe this corrective action when associating it with other records" sample="Theft; Mattias Thorslund; 2-24-2004; Termination"><CombinedFieldRef name="CorrectiveSituationTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="CorrActID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="CorrAct"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="corcp" name="Corrective Practices">
+			<SubModuleCondition field="CorrectiveSituationTypeID" value="[*CorrectiveSituationTypeID*]"/>
+		</SubModule>
+		<!--<SubModule moduleID="cor" name="Corrective History">
+            <SubModuleCondition field="CorrActSubjectID" value="[*CorrActSubjectID*]"/>
+        </SubModule>-->
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Policy Associations" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Consequence Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="rtc" name="Root Cause" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Risk Considerations" parentKey="CorrectiveSituationTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="corst"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="CorrActID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cor"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List corrective actions">
+			<ListField name="CorrActID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SituationDate" phrase="Situation Date"/>
+			<ListField name="CorrActDate" phrase="Corrective Action Date"/>
+			<ListField name="CorrectivePracticeCategory" phrase="Action Taken"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search corrective actions">
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<UpdateFieldRef name="CorrectiveSituationCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="CorrectiveSituationCategoryID" findMode="text" parentField="PolicyOrganizationID">
+				<UpdateFieldRef name="CorrectiveSituationTypeID" listParentField="CorrectiveSituationCategoryID"/>
+				<SampleItem ID="1" name="Crime"/>
+				<SampleItem ID="2" name="Attendance"/>
+				<SampleItem ID="3" name="Work Performance"/>
+				<SampleItem ID="4" name="Insubordination"/>
+				<SampleItem ID="5" name="Harassment"/>
+			</CodeComboField>
+			<ComboField name="CorrectiveSituationTypeID" findMode="text" parentField="CorrectiveSituationCategoryID">
+				<SampleItem ID="1" name="Crime | Theft"/>
+				<SampleItem ID="2" name="Crime | Burglary"/>
+				<SampleItem ID="3" name="Crime | Vandalism"/>
+				<SampleItem ID="4" name="Crime | Arson"/>
+				<SampleItem ID="5" name="Crime | Bribery"/>
+			</ComboField>
+			<PersonComboField name="PolicyPersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="CorrectiveSituationTitle" size="75" maxLength="128"/>
+			<EditField name="WorkRuleNo" size="25" maxLength="50"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<DateField name="SituationDate"/>
+			<DateField name="EntryDate"/>
+			<PersonComboField name="CorrActSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="OccurNoID">
+				<SampleItem ID="1" name="1st"/>
+				<SampleItem ID="2" name="2nd"/>
+				<SampleItem ID="3" name="3rd"/>
+				<SampleItem ID="4" name="4th"/>
+				<SampleItem ID="5" name="5th"/>
+			</CodeRadioField>
+			<CodeComboField name="CorrectivePracticeCategoryID" findMode="text">
+				<SampleItem ID="1" name="Termination"/>
+				<SampleItem ID="2" name="Agreement"/>
+				<SampleItem ID="3" name="Demotion"/>
+				<SampleItem ID="4" name="Fine"/>
+				<SampleItem ID="5" name="Next Cumulative Step"/>
+				<SampleItem ID="6" name="Suspension"/>
+				<SampleItem ID="7" name="Verbal Counseling"/>
+				<SampleItem ID="8" name="Verbal Warning"/>
+				<SampleItem ID="9" name="Written Warning"/>
+			</CodeComboField>
+			<DateField name="CorrActDate"/>
+			<PersonComboField name="CorrActByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CorrActStatusID">
+				<SampleItem ID="1" name="Resolved and Expunged"/>
+				<SampleItem ID="2" name="Closed"/>
+				<SampleItem ID="3" name="Expunged"/>
+				<SampleItem ID="4" name="In Progress"/>
+				<SampleItem ID="5" name="Reopened"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a corrective action">
+			<ViewField name="CorrActID"/>
+			<ViewField name="PolicyOrganization"/>
+			<InvisibleField name="CorrectiveSituationTypeID"/>
+			<ViewField name="CorrectiveSituationType"/>
+			<ViewField name="WorkRuleNo"/>
+			<ViewField name="SituationDesc"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SituationDate"/>
+			<ViewField name="EntryDate"/>
+			<ViewField name="CorrActSubject"/>
+			<ViewField name="OccurNo"/>
+			<ViewField name="CorrectivePracticeCategory"/>
+			<ViewField name="CorrectivePracticeDescription"/>
+			<ViewField name="CorrActDate"/>
+			<ViewField name="CorrActBy"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="CorrActStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+				<ViewField name="SituationDate"/>
+				<ViewField name="EntryDate"/>
+				<ViewField name="EntryDelay"/>
+				<ViewField name="CorrActDate"/>
+				<ViewField name="CorrActDelay"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="corcp"/>
+				<!--<ViewGrid moduleID="cor"/>-->
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="rtc"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a corrective action">
+			<ViewField name="CorrActID"/>
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<UpdateFieldRef name="CorrectiveSituationCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="CorrectiveSituationCategoryID" findMode="text" parentField="PolicyOrganizationID">
+				<UpdateFieldRef name="CorrectiveSituationTypeID" listParentField="CorrectiveSituationCategoryID"/>
+				<SampleItem ID="1" name="Crime"/>
+				<SampleItem ID="2" name="Attendance"/>
+				<SampleItem ID="3" name="Work Performance"/>
+				<SampleItem ID="4" name="Insubordination"/>
+				<SampleItem ID="5" name="Harassment"/>
+			</CodeComboField>
+			<ComboField name="CorrectiveSituationTypeID" findMode="text" parentField="CorrectiveSituationCategoryID">
+				<UpdateFieldRef name="WorkRuleNo"/>
+				<UpdateFieldRef name="CorrectiveSituationDescription"/>
+				<SampleItem ID="1" name="Crime | Theft"/>
+				<SampleItem ID="2" name="Crime | Burglary"/>
+				<SampleItem ID="3" name="Crime | Vandalism"/>
+				<SampleItem ID="4" name="Crime | Arson"/>
+				<SampleItem ID="5" name="Crime | Bribery"/>
+			</ComboField>
+			<ViewField name="CorrectiveSituationDescription" parentField="CorrectiveSituationTypeID"/>
+			<ViewField name="WorkRuleNo" parentField="CorrectiveSituationTypeID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<DateField name="SituationDate"/>
+			<PersonComboField name="CorrActSubjectID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<!--<ViewField name="ConsistentPractices" parentField="CorrectiveSituationTypeID"/>-->
+			<MemoField name="SituationDesc" rows="5" cols="75"/>
+			<CodeRadioField name="OccurNoID">
+				<SampleItem ID="1" name="1st"/>
+				<SampleItem ID="2" name="2nd"/>
+				<SampleItem ID="3" name="3rd"/>
+				<SampleItem ID="4" name="4th"/>
+				<SampleItem ID="5" name="5th"/>
+			</CodeRadioField>
+			<DateField name="CorrActDate"/>
+			<CodeComboField name="CorrectivePracticeCategoryID" findMode="text">
+				<SampleItem ID="1" name="Termination"/>
+				<SampleItem ID="2" name="Agreement"/>
+				<SampleItem ID="3" name="Demotion"/>
+				<SampleItem ID="4" name="Fine"/>
+				<SampleItem ID="5" name="Next Cumulative Step"/>
+				<SampleItem ID="6" name="Suspension"/>
+				<SampleItem ID="7" name="Verbal Counseling"/>
+				<SampleItem ID="8" name="Verbal Warning"/>
+				<SampleItem ID="9" name="Written Warning"/>
+			</CodeComboField>
+			<MemoField name="CorrectivePracticeDescription" rows="5" cols="75"/>
+			<PersonComboField name="CorrActByID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CorrActStatusID">
+				<SampleItem ID="1" name="Resolved and Expunged"/>
+				<SampleItem ID="2" name="Closed"/>
+				<SampleItem ID="3" name="Expunged"/>
+				<SampleItem ID="4" name="In Progress"/>
+				<SampleItem ID="5" name="Reopened"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="RootCause" phrase="Causes|Associate root causes with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rtc" phrase="Associate Root Causes"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr" phrase="Associate Physical Files"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the corrective action" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="CorrActID"/>
+		<InvisibleField name="CorrectiveSituationTypeID"/>
+		<InvisibleField name="OrganizationID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="CorrectiveSituationType"/>
+		<ViewField name="CorrActSubject"/>
+		<ViewField name="SituationDate"/>
+		<ViewField name="CorrActDate"/>
+		<ViewField name="SituationDesc"/>
+		<ViewField name="CorrectivePracticeCategory"/>
+		<ViewField name="CorrectivePracticeDescription"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Exports>
+		<!--<ViewGrid moduleID="cor" phrase="Corrective History">
+            <InvisibleField name="CorrActID"/>
+            <ViewField name="SituationDate" sample="01-01-2006"/>
+            <ViewField name="CorrectiveSituationType" sample="Crime | Theft"/>
+            <ViewField name="OccurNo" sample="1st"/>
+            <ViewField name="CorrActDate" sample="01-02-2006"/>
+            <ViewField name="CorrectivePracticeCategory" sample="Termination"/>
+        </ViewGrid>-->
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Corrective Actions By Person Taking Action">
+			<GroupByField name="CorrActBy"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</RadarChart>
+		<RadarChart name="Radar02" title="Corrective Actions By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Corrective Actions By Situation Category">
+			<GroupByField name="CorrectiveSituationCategory"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Corrective Actions By Situation Category">
+			<GroupByField name="CorrectiveSituationCategory"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Corrective Actions By Situation">
+			<GroupByField name="Situation"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Corrective Actions By Situation">
+			<GroupByField name="Situation"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Corrective Actions By Situation Type">
+			<GroupByField name="CorrectiveSituationType"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Corrective Actions By Situation Type">
+			<GroupByField name="CorrectiveSituationType"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Corrective Actions By Person Taking Action">
+			<GroupByField name="CorrActBy"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Corrective Actions By Person Taking Action">
+			<GroupByField name="CorrActBy"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Corrective Actions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Corrective Actions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Corrective Actions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Corrective Actions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Corrective Actions By Subject">
+			<GroupByField name="CorrActSubject"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Corrective Actions By Subject">
+			<GroupByField name="CorrActSubject"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Corrective Actions By Status">
+			<GroupByField name="CorrActStatus"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Corrective Actions By Status">
+			<GroupByField name="CorrActStatus"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Corrective Actions By Risk Imperative">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Corrective Actions By Risk Imperative">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Corrective Actions By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Corrective Actions By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Corrective Actions By Policy Person Accountable">
+			<GroupByField name="PolicyPersonAccountable"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Corrective Actions By Policy Person Accountable">
+			<GroupByField name="PolicyPersonAccountable"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie12" title="Corrective Actions By Occurrence Number">
+			<GroupByField name="OccurNo"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto12" title="Corrective Actions By Occurrence Number">
+			<GroupByField name="OccurNo"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie13" title="Corrective Actions By Action Category">
+			<GroupByField name="CorrectivePracticeCategory"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto13" title="Corrective Actions By Action Category">
+			<GroupByField name="CorrectivePracticeCategory"/>
+			<SummaryField name="CorrActID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

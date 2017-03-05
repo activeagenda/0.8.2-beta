@@ -1,0 +1,357 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'FileRetentionID' => gettext("Record ID|An automatically assigned number used to associate physical file retention methods and start dates with physical files"),
+   'SystemNumber' => gettext("System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID"),
+   'PhysicalFileStartDate' => gettext("File Start Date|The date the physical file associated with the record was stated"),
+   'FileReq' => gettext("File Requirement|A combined field used to describe this file requirement when associating it with other records"),
+   'FilingOrganization' => gettext("Filing Organization|The name of the organization where the  where the physical file is located"),
+   'Location' => gettext("File Location|Specific area within the facility where the physical file is located"),
+   'Original' => gettext("Original File|Whether the file is the original file consisting of original documentation"),
+   'FilingPersonAccountable' => gettext("Person Accountable|The name of the person responsible for records retention and disposal"),
+   'FileSubject' => gettext("File Subject|The name of the individual, when applicable, that is the subject of the physical file"),
+   'FileName' => gettext("File Name|A short title or phrase used to identify the physical file"),
+   'FileNumber' => gettext("File Number|A number manually assigned to a file for tracking purposes"),
+   'FilingMethod' => gettext("Filing Method|The specific method utilized to retain the physical file"),
+   'FilingMethodDesc' => gettext("Filing Method Description|A detailed description of the file retention method associated with this record"),
+   'FilingDisposition' => gettext("Disposition Method|The file disposition method following the expiration of the retention period"),
+   'FilingDispositionDesc' => gettext("Disposition Method Description|A detailed description of the file disposition requirements associated with this module or type of information"),
+   'PhysicalFileDispositionDate' => gettext("File Disposition Date|The actual or projected disposal date of the physical file associated with the record"),
+   'DaysRemaining' => gettext("Days Remaining|The total number of days remaining before the phyisical file should be disposed of in accordance with the disposition policy"),
+   'PhysicalFileStatus' => gettext("File Status|The current status of the physical file associated with the record")
+   );
+
+
+    $sections = unserialize('a:2:{i:0;a:3:{s:6:"phrase";s:13:"Physical File";s:3:"sql";s:5155:"SELECT 
+   `filph`.FileRetentionID,
+   NULLIF(CONCAT(IFNULL(`filph`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph`.FileRetentionID,\'\')),\'\') AS SystemNumber,
+   `dat1`.RelatedDate AS PhysicalFileStartDate,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`filt2`.FileTypeTitle,\'\')),\'\'),\'\')),\'\') AS FileReq,
+   `org2`.Name AS FilingOrganization,
+   NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+   `filph`.Original,
+   `ppl2`.DisplayName AS FilingPersonAccountable,
+   `ppl3`.DisplayName AS FileSubject,
+   `filph`.FileName,
+   `filph`.FileNumber,
+   `cod4`.Description AS FilingMethod,
+   `filph`.FilingMethodDesc,
+   `cod5`.Description AS FilingDisposition,
+   `filph`.FilingDispositionDesc,
+   CASE `fil1`.FileRetentionUnitsID 
+                WHEN 48 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod SECOND)
+                WHEN 5 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod MINUTE)
+                WHEN 19 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod HOUR)
+                WHEN 53 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod DAY)
+                WHEN 54 THEN 
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL (7 * `fil1`.FileRetentionPeriod) DAY)
+                WHEN 55 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod MONTH)
+                WHEN 56 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL (3 * `fil1`.FileRetentionPeriod) MONTH)
+                WHEN 57 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod YEAR)
+                ELSE
+                    NULL
+                END AS PhysicalFileDispositionDate,
+   DATEDIFF(CASE `fil1`.FileRetentionUnitsID 
+                WHEN 48 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod SECOND)
+                WHEN 5 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod MINUTE)
+                WHEN 19 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod HOUR)
+                WHEN 53 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod DAY)
+                WHEN 54 THEN 
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL (7 * `fil1`.FileRetentionPeriod) DAY)
+                WHEN 55 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod MONTH)
+                WHEN 56 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL (3 * `fil1`.FileRetentionPeriod) MONTH)
+                WHEN 57 THEN
+                    DATE_ADD(`dat1`.RelatedDate, INTERVAL `fil1`.FileRetentionPeriod YEAR)
+                ELSE
+                    NULL
+                END, NOW()) AS DaysRemaining,
+   `cod6`.Description AS PhysicalFileStatus,
+   NULLIF(CONCAT(IFNULL(`org2`.Name,\'\'),\' | \',IFNULL(`filph`.FileName,\'\'),\' \',IFNULL(`ppl3`.DisplayName,\'\')),\' |  \') AS RecordLabel,
+   `filph`.FilingOrganizationID
+FROM `filph`
+   
+     LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph`.FileReqID = `fil1`.FileReqID )
+     LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`filph`.FileRetentionID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'filph\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'28\')
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`filph`.FilingOrganizationID = `org2`.OrganizationID )
+     LEFT OUTER JOIN `acc` AS acc2 
+    ON (`filph`.FileRetentionID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'filph\'
+     AND `acc2`._Deleted = 0
+     AND `acc2`.AccountabilityDescriptorID = \'107\')
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`filph`.FileRetentionID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'filph\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'85\')
+     LEFT OUTER JOIN `cod` AS cod4 
+   ON (`filph`.FilingMethodID = `cod4`.CodeID 
+     AND `cod4`.CodeTypeID = \'63\')
+     LEFT OUTER JOIN `cod` AS cod5 
+   ON (`filph`.FilingDispositionID = `cod5`.CodeID 
+     AND `cod5`.CodeTypeID = \'79\')
+     LEFT OUTER JOIN `cod` AS cod6 
+   ON (`filph`.PhysicalFileStatusID = `cod6`.CodeID 
+     AND `cod6`.CodeTypeID = \'85\')
+     LEFT OUTER JOIN `filt` AS filt2 
+   ON (`fil1`.FileTypeID = `filt2`.FileTypeID )
+     LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`acc2`.PersonAccountableID = `ppl2`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl3 
+   ON (`inv1`.PersonInvolvedID = `ppl3`.PersonID )
+     LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+     LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE
+   filph.FileRetentionID=\'/**RecordID**/\'";s:6:"fields";a:18:{s:15:"FileRetentionID";O:9:"viewfield":16:{s:4:"name";s:15:"FileRetentionID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:128:"Record ID|An automatically assigned number used to associate physical file retention methods and start dates with physical files";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:21:"PhysicalFileStartDate";O:9:"viewfield":16:{s:4:"name";s:21:"PhysicalFileStartDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:80:"File Start Date|The date the physical file associated with the record was stated";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:7:"FileReq";O:9:"viewfield":16:{s:4:"name";s:7:"FileReq";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:111:"File Requirement|A combined field used to describe this file requirement when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Original";O:9:"viewfield":16:{s:4:"name";s:8:"Original";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Original File|Whether the file is the original file consisting of original documentation";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:23:"FilingPersonAccountable";O:9:"viewfield":16:{s:4:"name";s:23:"FilingPersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Person Accountable|The name of the person responsible for records retention and disposal";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"FileSubject";O:9:"viewfield":16:{s:4:"name";s:11:"FileSubject";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"File Subject|The name of the individual, when applicable, that is the subject of the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";s:11:"varchar(20)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"FilingMethod";O:9:"viewfield":16:{s:4:"name";s:12:"FilingMethod";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"Filing Method|The specific method utilized to retain the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"FilingMethodDesc";O:9:"viewfield":16:{s:4:"name";s:16:"FilingMethodDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:105:"Filing Method Description|A detailed description of the file retention method associated with this record";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"FilingDisposition";O:9:"viewfield":16:{s:4:"name";s:17:"FilingDisposition";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Disposition Method|The file disposition method following the expiration of the retention period";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:21:"FilingDispositionDesc";O:9:"viewfield":16:{s:4:"name";s:21:"FilingDispositionDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:141:"Disposition Method Description|A detailed description of the file disposition requirements associated with this module or type of information";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:27:"PhysicalFileDispositionDate";O:9:"viewfield":16:{s:4:"name";s:27:"PhysicalFileDispositionDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"File Disposition Date|The actual or projected disposal date of the physical file associated with the record";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:13:"DaysRemaining";O:9:"viewfield":16:{s:4:"name";s:13:"DaysRemaining";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:139:"Days Remaining|The total number of days remaining before the phyisical file should be disposed of in accordance with the disposition policy";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:18:"PhysicalFileStatus";O:9:"viewfield":16:{s:4:"name";s:18:"PhysicalFileStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:78:"File Status|The current status of the physical file associated with the record";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}i:1;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:6:{s:12:"viewgrid_apr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"apr";s:6:"phrase";s:25:"Asset Protection Measures";s:6:"number";N;s:6:"Fields";a:6:{s:14:"AssetProtectID";O:14:"invisiblefield":11:{s:4:"name";s:14:"AssetProtectID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Record ID|An automatically assigned number used to track asset protection methods and criteria";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"AssetProtectTitle";O:9:"viewfield":16:{s:4:"name";s:17:"AssetProtectTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:209:"Title|A short title used to describe the item to be reviewed or audited. This title should be concise, but descriptive enough for the person performing the asset protection activity to easily identify the item";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AssetProtectCategory";O:9:"viewfield":16:{s:4:"name";s:20:"AssetProtectCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:120:"Category|A general category used to catgorize asset protection measures for greater flexibility in developing checklists";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"AssetProtectPurpose";O:9:"viewfield":16:{s:4:"name";s:19:"AssetProtectPurpose";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:61:"Purpose|The purpose of the asset protection method or measure";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ReviewLocation";O:9:"viewfield":16:{s:4:"name";s:14:"ReviewLocation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Review Location|Specific location within the facility where the item is located and can be reviewed";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"ScheduleFrequency";O:9:"viewfield":16:{s:4:"name";s:17:"ScheduleFrequency";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:131:"Schedule Frequency|A combined field used to describe the asset protection schedule frequency when associating it with other records";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"apr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:144:"SELECT 
+    count(*) 
+FROM `apr`
+   
+WHERE apr._Deleted = 0
+   AND `apr`.RelatedModuleID = \'filph\'
+AND `apr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1261:"SELECT 
+   `apr`.AssetProtectID,
+`apr`.ReviewOrganizationID,
+`apr`.AssetProtectTitle,
+`cod1`.Description AS AssetProtectCategory,
+`cod2`.Description AS AssetProtectPurpose,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS ReviewLocation,
+NULLIF(CONCAT(IFNULL(`apr`.SchedFreq,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\')),\' \') AS ScheduleFrequency
+FROM `apr`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`apr`.AssetProtectCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'50\')
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`apr`.AssetProtectPurposeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'101\')
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`apr`.AssetProtectID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'apr\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`apr`.SchedFreqUnitsID = `uts1`.UnitID )
+   LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE apr._Deleted = 0
+AND `apr`.RelatedModuleID = \'filph\'
+AND `apr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:14:"AssetProtectID";s:3:"int";s:17:"AssetProtectTitle";s:12:"varchar(128)";s:20:"AssetProtectCategory";N;s:19:"AssetProtectPurpose";N;s:14:"ReviewLocation";N;s:17:"ScheduleFrequency";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:6:{s:14:"AssetProtectID";s:5:"right";s:17:"AssetProtectTitle";s:4:"left";s:20:"AssetProtectCategory";s:4:"left";s:19:"AssetProtectPurpose";s:4:"left";s:14:"ReviewLocation";s:7:"justify";s:17:"ScheduleFrequency";s:7:"justify";}}s:13:"viewgrid_busa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"busa";s:6:"phrase";s:23:"Continuity Requirements";s:6:"number";N;s:6:"Fields";a:5:{s:14:"BusinessContID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BusinessContID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:142:"Record ID|An automatically assigned number used to associate people, equipment and others assets with business continuation or recovery events";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:110:"Organization|The organization with primary responsibility for enforcing this business continuation requirement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"BusinessProcessType";O:9:"viewfield":16:{s:4:"name";s:19:"BusinessProcessType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Process Type|The specific type of business process to be protected against a business interruption";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"BusRecoveryTitle";O:9:"viewfield":16:{s:4:"name";s:16:"BusRecoveryTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:130:"Recovery Title|A short title used to describe the business recovery business continuation responsibility of the person accountable";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Criticality";O:9:"viewfield":16:{s:4:"name";s:11:"Criticality";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:123:"Criticality|A way of categorizing the critical nature of securing a resource and prioritizing business continuation efforts";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"busa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:148:"SELECT 
+    count(*) 
+FROM `busa`
+   
+WHERE busa._Deleted = 0
+   AND `busa`.RelatedModuleID = \'filph\'
+AND `busa`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:741:"SELECT 
+   `busa`.BusinessContID,
+`busa`.OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS BusinessProcessType,
+`busa`.BusRecoveryTitle,
+`cod2`.Description AS Criticality
+FROM `busa`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`busa`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `bus` AS bus1 
+   ON (`busa`.BusinessContinuationID = `bus1`.BusinessContinuationID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`busa`.CriticalityID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'130\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bus1`.BusinessProcessTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'283\')
+WHERE busa._Deleted = 0
+AND `busa`.RelatedModuleID = \'filph\'
+AND `busa`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:14:"BusinessContID";s:3:"int";s:12:"Organization";N;s:19:"BusinessProcessType";N;s:16:"BusRecoveryTitle";s:12:"varchar(128)";s:11:"Criticality";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:14:"BusinessContID";s:5:"right";s:12:"Organization";s:4:"left";s:19:"BusinessProcessType";s:4:"left";s:16:"BusRecoveryTitle";s:4:"left";s:11:"Criticality";s:4:"left";}}s:12:"viewgrid_rsp";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"rsp";s:6:"phrase";s:22:"Level Responsibilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ResponsibilityID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ResponsibilityID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:126:"Record ID|An automatically assigned number used to track organizational level responsibilities associated with related records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsp";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Organization|The organization where this level based responsibility is enforced";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsp";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"OrgLevel";O:9:"viewfield":16:{s:4:"name";s:8:"OrgLevel";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:61:"Organization Level|The hierarchical level of the organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsp";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:19:"ResponsibilityTitle";O:9:"viewfield":16:{s:4:"name";s:19:"ResponsibilityTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Responsibility Title|A short phrase or title used to describe the organizational level responsibility";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsp";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:144:"SELECT 
+    count(*) 
+FROM `rsp`
+   
+WHERE rsp._Deleted = 0
+   AND `rsp`.RelatedModuleID = \'filph\'
+AND `rsp`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:459:"SELECT 
+   `rsp`.ResponsibilityID,
+`rsp`.OrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS OrgLevel,
+`rsp`.ResponsibilityTitle
+FROM `rsp`
+
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`rsp`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsp`.OrgLevelID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'22\')
+WHERE rsp._Deleted = 0
+AND `rsp`.RelatedModuleID = \'filph\'
+AND `rsp`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ResponsibilityID";s:3:"int";s:12:"Organization";N;s:8:"OrgLevel";N;s:19:"ResponsibilityTitle";s:12:"varchar(128)";}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ResponsibilityID";s:5:"right";s:12:"Organization";s:4:"left";s:8:"OrgLevel";s:4:"left";s:19:"ResponsibilityTitle";s:4:"left";}}s:13:"viewgrid_prta";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prta";s:6:"phrase";s:16:"Accountabilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantAccID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantAccID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Person Accountable|The name of the person accountable";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"AccountabilityType";O:9:"viewfield":16:{s:4:"name";s:18:"AccountabilityType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Accountability Type|The participant\'s specific type of accountability";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AccountabilityStatus";O:9:"viewfield":16:{s:4:"name";s:20:"AccountabilityStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Accountability Status|The present status of this participant\'s ongoing involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:148:"SELECT 
+    count(*) 
+FROM `prta`
+   
+WHERE prta._Deleted = 0
+   AND `prta`.RelatedModuleID = \'filph\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1174:"SELECT 
+   `prta`.ParticipantAccID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonAccountable,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS AccountabilityType,
+`cod1`.Description AS AccountabilityStatus
+FROM `prta`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prta`.RelatedRecordID = rdc1.RecordID AND `prta`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`prta`.ParticipantAccID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'prta\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'70\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prta`.AccountabilityTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `acc` AS acc2 
+    ON (`prta`.ParticipantAccID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'prta\'
+     AND `acc2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`acc2`.AccountabilityStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prta._Deleted = 0
+AND `prta`.RelatedModuleID = \'filph\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantAccID";s:3:"int";s:17:"PersonAccountable";N;s:18:"AccountabilityType";N;s:20:"AccountabilityStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantAccID";s:5:"right";s:17:"PersonAccountable";s:4:"left";s:18:"AccountabilityType";s:7:"justify";s:20:"AccountabilityStatus";s:4:"left";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:148:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'filph\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1153:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'filph\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:144:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'filph\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:678:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'filph\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

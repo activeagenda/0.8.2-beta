@@ -1,0 +1,1267 @@
+<?xml version="1.0"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2006 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2006 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:annotation>
+		<xs:documentation>
+		CONFIDENTIAL MATERIALS - TRADE SECRET
+		Copyright 2003 - Active Agenda, Inc.
+		
+		
+		The ModuleDef XML Schema:
+		====================
+		
+		This document defines the valid format of a Module Definition document. 		
+		Throughout this document you'll find some of these annotations, providing documentation 
+		on a particular feature.
+		
+		
+		Implementing this schema:
+		----------------------------------
+		To make your application validate your Module Definition document, add the following 
+		attributes to the Module element of your document:
+		
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:noNamespaceSchemaLocation="ModuleDef.xsd"
+		
+		Keep the schema (this document) in the same folder as your module definition document.
+
+		 
+		Purpose:
+		-----------
+		The purpose of the Module Definition document is to capture ONLY the functionality that
+		is different from one module to another.  Cross-module functionality such as Costs, 
+		Attachments, Actions, etc., should NOT be defined in a Modue Definition document.  This 
+		applies also to the Delete Confirmation and Send Notofication screens which derive their
+		content from the module's View screen.  
+		
+		The reason for these rules is to reduce duplication and make maintenance easier.
+		
+		
+		Layout/Anatomy of a ModuleDefinition:
+		-------------------------------------------------
+		The general layout of a Module Definition document is as follows:
+		
+		ModuleFields section: 
+		This contains information on where data to be used in the module is located. It contains 
+		TableField elements (representing a field in the module's database table), ForeignField 
+		elements (defining a link to pull display data from a field in a different table), and 
+		CodeField elements (defining a link to pull display data).  Any field defined in a screen 
+		below must have a corresponding (same name) field in the ModuleFields section (the 
+		schema does not yet verify this).
+
+		SubModules section: 
+		This contains information on where to get data that is displayed in ViewGrid or EditGrid 
+		components. It contains only SubModule elements, which set up a link with  
+		
+		Screens section: 
+		This contains the functional layout definitions of the screens of the module. A screen can 
+		be either a ViewScreen (allows only view-only data) or a EditScreen (allows data to be 
+		modified).  Each field defined in a screen must have a corresponding field in the 
+		ModuleFields section. The fields and grids allowed on these screens are described further 
+		down in this document.
+		
+		ListFields section:
+		This contains a collection of ListField elements representing the fields that are to be 
+		displayed in the List screen of the module. Each field here must have a corresponding field 
+		in the ModuleFields section. 
+		
+		.</xs:documentation>
+		<xs:documentation>
+			Revision History:
+			============
+			
+			Created by MJT on 9/9/2003		created the layout and structure of document
+			Updated by MJT on 9/15/2003 	incorporated chenges from the weekend. pretty complete.
+			Updated by MJT on 9/16/2003		fixed some problems with order of screen fields
+			Updated by MJT on 9/16/2003		added some documenting annotations
+			Updated by MJT on 9/16/2003 	added ModuleField type CombinedField
+			Version 0.8 Released 9/16/2003
+			Updated by MJT on 9/19/2003 	added attribute "link" to ViewField, ViewGridField, and ListField
+			Updated by MJT on 9/19/2003 	added attributes "phrase" and "sample" to TableField, ForeignField, and CodeField
+			Updated by MJT on 9/19/2003 	removed attributes "phrase" and "sample" from screen-fields, grid-fields and list-fields
+			Updates by MJT until 10/28/2003:
+				Added Edit Screen Field Type RadioField
+				Added Edit Screen Field Type CodeRadioField
+				Added Edit Screen Field Type CheckBoxField
+				Added Edit Screen Field Type EditPlusCodeField
+				Modified ViewField to allow sub-items of type ViewField
+			Updated by MJT on 11/04/2003	added Confidential notice in documentation above
+			Updated by MJT on 11/04/2003	removed optional primaryKey attribute from TableField
+			Updated by MJT on 11/08/2003	changed data type varchar(256) to varchar(255) due to limitation in MySQL for varchar fields
+			Updated by MJT on 11/08/2003	added (optional) element OwnerField to TableInfo section
+			Updated by MJT on 11/08/2003	added optional attribute foreignTableAlias to ForeignField type
+			Updated by MJT on 11/26/2003	added data type "float" for floating-point values
+			Updated by MJT on 11/26/2003	added FieldRef "StatusField" to TableInfo section
+			Updated by MJT on 11/26/2003	added DescriptorFields section (collection of FieldRefs) to TableInfo section
+			Updated by MJT on 11/26/2003	added FieldRef "CalendarField" to TableInfo section
+			Updated by MJT on 11/26/2003	added FieldRef "PersonAccountableField" to TableInfo section
+			
+			Updated by MJT on 01/28/2004	added data type tinyint
+			Updated by MJT on 02/11/2004	added new ModuleField DynamicField
+			Updated by MJT on 02/17/2004	added new field types InvisibleField and InvisibleGridField
+			Updated by MJT on 02/18/2004	added InvisibleGridField to CheckGrid
+			Updated by MJT on 02/19/2004	added InvisibleGridField to CodeCheckGrid and ViewGrid, InvisibleField to ListFields
+			Updated by MJT on 03/05/2004	added new screen type GlobalEditScreen.
+			
+			Updated by MJT on 03/18/2004	reworked screen fields and grid fields to allow for "fields-within-fields"
+			Updated by MJT on 03/19/2004	added module field type RemoteField.
+			Updated by MJT on 03/19/2004	added type moduleIDType.
+			...
+			Updated by MJT on 07/26/2004	added validation types Number and notNegative
+		.</xs:documentation>
+	</xs:annotation>
+	<!-- data type declarations-->
+	<xs:simpleType name="dbDataType">
+		<xs:annotation>
+			<xs:documentation>
+			This type contains a list of valid data types used by the database system. Used in the 
+			"type" attribute in the TableField element. (Will add more items as needed.)
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="bit"/>
+			<xs:enumeration value="tinyint"/>
+			<xs:enumeration value="int"/>
+			<xs:enumeration value="float"/>
+			<xs:enumeration value="varchar(5)"/>
+			<xs:enumeration value="varchar(10)"/>
+			<xs:enumeration value="varchar(15)"/>
+			<xs:enumeration value="varchar(20)"/>
+			<xs:enumeration value="varchar(25)"/>
+			<xs:enumeration value="varchar(30)"/>
+			<xs:enumeration value="varchar(50)"/>
+			<xs:enumeration value="varchar(128)"/>
+			<xs:enumeration value="varchar(255)"/>
+			<xs:enumeration value="date"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="text"/>
+			<xs:enumeration value="money"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="joinType">
+		<xs:annotation>
+			<xs:documentation>
+			This type contains the valid choices for the attribute "joinType" in ForeignField and 
+			SubModule elements.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="inner"/>
+			<xs:enumeration value="outer"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="validateType">
+		<xs:annotation>
+			<xs:documentation>
+			This type contains the valid choices for the attribute "validate" in some "...Field" elements. 
+			(Will add more items as needed.)
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="noValidation"/>
+			<xs:enumeration value="notZero"/>
+			<xs:enumeration value="notEmpty"/>
+			<xs:enumeration value="notNegative"/>
+			<xs:enumeration value="Email"/>
+			<xs:enumeration value="Integer"/>
+			<xs:enumeration value="Money"/>
+			<xs:enumeration value="Number"/>
+			<xs:enumeration value="RequireSelection"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="validateTypes">
+		<xs:annotation>
+			<xs:documentation>
+			This type is an attempt to allow combinations of validateType items.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:list itemType="validateType"/>
+	</xs:simpleType>
+	<xs:simpleType name="moduleIDType">
+		<xs:annotation>
+			<xs:documentation>
+			This type restricts the length of module IDs to 5 characters.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:maxLength value="5"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- 		module field element types-->
+	<xs:complexType name="TableField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a field in the module's table.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="type" type="dbDataType" use="required"/>
+		<xs:attribute name="dbFlags" type="xs:string"/>
+		<xs:attribute name="validate" type="validateTypes"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="ForeignField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a link to a field in a different table. The "key" attribute refers to a 
+			TableField element in this module, providing the value to look up the record in the other 
+			table.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="key" type="xs:IDREF" use="required"/>
+		<xs:attribute name="foreignTable" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="foreignTableAlias" type="xs:NMTOKEN"/>
+		<xs:attribute name="foreignKey" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="foreignField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="condition" type="xs:string"/>
+		<xs:attribute name="joinType" type="joinType" default="inner"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="DynamicForeignField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a link to a field in a different table. The difference compared with 
+			ForeignField is that the link is dynamic, defined by moduleIDField (what table/module 
+			to join with), and foreignField (what field to pull data from). The local key joins to the 
+			first PK field in the other module.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="RelatedModuleRef" type="RelatedModuleRef"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="key" type="xs:IDREF" use="required"/>
+		<xs:attribute name="moduleIDField" type="xs:IDREF" use="required"/>
+		<xs:attribute name="foreignField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="condition" type="xs:string"/>
+		<xs:attribute name="joinType" type="joinType" default="inner"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="RelatedModuleRef">
+		<xs:annotation>
+			<xs:documentation>
+			This type is a helper element for the DynamicForeignField.			
+			Place one RelatedModuleRef inside the DFF to enumerate the modules that the DFF might 
+			join with. Not required if the DFF's foreignField="RecordDescription".
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="moduleID" type="moduleIDType" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="RemoteField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a link to a CentralSub module. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="remoteModuleID" type="moduleIDType" use="required"/>
+		<xs:attribute name="remoteModuleIDField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="remoteRecordIDField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="remoteField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="remoteDescriptorField" type="xs:NMTOKEN"/>
+		<xs:attribute name="remoteDescriptor" type="xs:string"/>
+		<xs:attribute name="validate" type="validateTypes"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="CodeField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a link to a codeType. The "key" attribute refers to a 
+			TableField element in this module, providing the value to look up the proper code.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="key" type="xs:IDREF" use="required"/>
+		<xs:attribute name="codeTypeID" type="xs:short" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="OrgField">
+		<xs:annotation>
+			<xs:documentation>
+			This type defines a reference to the related organization of a person field. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="personIDField" type="xs:IDREF" use="required"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="CombinedField" mixed="true">
+		<xs:annotation>
+			<xs:documentation>
+			This type is used to combine the contents of other fields in ModuleFields.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="CombinedFieldRef" type="CombinedFieldRef" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="br" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="CombinedFieldRef">
+		<xs:annotation>
+			<xs:documentation>
+			This type is used to hold references to other fields. Used in CombinedField.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+	</xs:complexType>
+	<!--
+
+
+
+
+
+		=========================================
+						SCREEEN FIELD TYPES
+		=========================================
+-->
+	<xs:complexType name="AbstractScreenField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+				This is an abstract type that other screen fields derive from.
+				Note 1: Grid fields don't derive from this type, they derive from AbstractGridField.
+				Note 2: CheckBoxField (and EditPlusCodeField) does not derive from this type at all.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="ViewField" type="ViewField"/>
+			<xs:element name="InvisibleField" type="InvisibleField"/>
+			<xs:element name="EditField" type="EditField"/>
+			<xs:element name="MoneyField" type="MoneyField"/>
+			<xs:element name="DateField" type="DateField"/>
+			<xs:element name="TimeField" type="TimeField"/>
+			<xs:element name="ComboField" type="ComboField"/>
+			<xs:element name="CodeComboField" type="CodeComboField"/>
+			<xs:element name="PersonComboField" type="PersonComboField"/>
+			<xs:element name="CheckBoxField" type="CheckBoxField"/>
+			<xs:element name="RadioField" type="RadioField"/>
+			<xs:element name="CodeRadioField" type="CodeRadioField"/>
+			<xs:element name="Self"/>
+		</xs:choice>
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="AbstractEditableField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+			This is an abstract type for all editable screen fields to derive from. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractScreenField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="AbstractComboField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+			This is an abstract field for all Combo field types to derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField">
+				<xs:sequence>
+					<xs:element name="UpdateFieldRef" type="FieldRef" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="SampleItem" type="SampleItem" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="parentField" type="cbIDREF"/>
+				<xs:attribute name="listFilter" type="xs:string"/>
+				<xs:attribute name="reload" type="cbReloadType"/>
+				<xs:attribute name="findMode" type="cbFindModeType"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="AbstractRadioField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+			This is an abstract field for all Radio field types to derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField">
+				<xs:sequence>
+					<xs:element name="UpdateFieldRef" type="FieldRef" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="SampleItem" type="SampleItem" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="listFilter" type="xs:string"/>
+				<xs:attribute name="autoSubmit" type="xs:boolean"/>
+				<xs:attribute name="orientation" type="rbOrientationType"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+
+
+-->
+	<xs:complexType name="ViewField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a view-only field, to be displayed on a ViewScreen or EditScreen. 
+			The link attribute is optional, and - if present - makes the entire text into a hyperlink, using 
+			the referenced field as data. Note that the content for link is supposed to be a reference to
+			the field that contains the link (can be the same field as name).
+			
+			Feature added 10/26/03 (MJT):
+			A ViewField can now contain another ViewField. The inner field will appear in the Field 
+			column (without a label), and is intended to display "helper" fields such as units of 
+			measure, etc.
+			
+			Feature expanded 11/11/2003 (MJT):
+			A viewField can now contain more than one ViewField.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractScreenField">
+				<xs:attribute name="link" type="xs:IDREF"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="InvisibleField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a hidden form field, to be used on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractScreenField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="EditField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a simple text entry field, to be displayed on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField">
+				<xs:attribute name="size" type="xs:unsignedByte"/>
+				<xs:attribute name="maxLength" type="xs:unsignedByte"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="MoneyField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a money entry field, to be displayed on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="EditField">
+				<xs:attribute name="localAmountField" type="xs:IDREF" use="required"/>
+				<xs:attribute name="localCurrencyIDField" type="xs:IDREF" use="required"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="DateField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a date entry field, to be displayed on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="TimeField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a time entry field, to be displayed on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<!--
+
+
+-->
+	<xs:complexType name="CheckBoxField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a simple check box field, to be displayed on an EditScreen.  
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="UpdateFieldRef" type="FieldRef" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="MemoField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a larger text-entry (HTML: textarea) field, to be displayed on an EditScreen.  
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditableField">
+				<xs:attribute name="rows" type="xs:unsignedByte"/>
+				<xs:attribute name="cols" type="xs:unsignedByte"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="ComboField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a generic drop-list field, to be displayed on an EditScreen.  SampleItem
+			elements can be added to provide some content for the list when using the ScreenViewer.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractComboField">
+				<xs:attribute name="query" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="CodeComboField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a code drop-list field, to be displayed on an EditScreen.  SampleItem
+			elements can be added to provide some content for the list when using the ScreenViewer.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractComboField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="PersonComboField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a drop-list field consisting of the names of people, to be displayed on an EditScreen.  SampleItem
+			elements can be added to provide some content for the list when using the ScreenViewer.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractComboField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="RadioField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a group of radio buttons, to be displayed on an EditScreen.  SampleItem
+			elements can be added to provide some content for the list when using the ScreenViewer.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractRadioField">
+				<xs:attribute name="query" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+-->
+	<xs:complexType name="CodeRadioField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a group of radio buttons, to be displayed on an EditScreen.  SampleItem
+			elements can be added to provide some content for the list when using the ScreenViewer.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractRadioField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+	...and here's the Dodo bird...!!!
+-->
+	<xs:complexType name="EditPlusCodeField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a simple text entry field, to be displayed on an EditScreen. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="SampleItem" type="SampleItem" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+		<xs:attribute name="size" type="xs:unsignedByte"/>
+		<xs:attribute name="maxLength" type="xs:unsignedByte"/>
+		<xs:attribute name="validate" type="validateType"/>
+		<xs:attribute name="codeFieldName" type="xs:IDREF" use="required"/>
+		<xs:attribute name="codeValidate" type="validateType"/>
+	</xs:complexType>
+	<!--
+	
+	
+	
+		additional types supporting CB's and Radio fields
+-->
+	<xs:simpleType name="cbIDREF">
+		<xs:annotation>
+			<xs:documentation>
+				This data type is to be used by Combo-type screen fields and require that 
+				the name of the corresponding ModuleField ends in "ID".
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:IDREF">
+			<xs:pattern value=".*ID"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="cbReloadType">
+		<xs:annotation>
+			<xs:documentation>
+			cbReloadType is a simple list of legal values for the "reload" attribute in CBs.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="yes"/>
+			<xs:enumeration value="no"/>
+			<xs:enumeration value="auto"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="cbFindModeType">
+		<xs:annotation>
+			<xs:documentation>
+			cbFindModeType is a simple list of legal values for the "findMode" attribute in CBs.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="text"/>
+			<xs:enumeration value="alpha"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="rbOrientationType">
+		<xs:annotation>
+			<xs:documentation>
+			rbOrientationType determines the orientation of Radio fields
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="horizontal"/>
+			<xs:enumeration value="vertical"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SampleItem">
+		<xs:annotation>
+			<xs:documentation>
+			SampleItem is used in ComboField, CodeComboField, PersonComboField and 
+			RadioButtonsField (as well as corresponding "...GridField" elements), to provide some 
+			sample choices for the ScreenViewer style sheet.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="ID" type="xs:short"/>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="orgName" type="xs:string"/>
+	</xs:complexType>
+	<!--
+
+
+
+
+
+
+
+		=========================================
+						GRID FIELD TYPES
+		=========================================
+	-->
+	<xs:complexType name="AbstractGridField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+				This is an abstract type that other grid fields derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="ViewGridField" type="ViewGridField"/>
+			<xs:element name="InvisibleGridField" type="InvisibleGridField"/>
+			<xs:element name="EditGridField" type="EditGridField"/>
+			<xs:element name="MoneyGridField" type="MoneyGridField"/>
+			<xs:element name="DateGridField" type="DateGridField"/>
+			<xs:element name="TimeGridField" type="TimeGridField"/>
+			<xs:element name="ComboGridField" type="ComboGridField"/>
+			<xs:element name="CodeComboGridField" type="CodeComboGridField"/>
+			<xs:element name="PersonComboGridField" type="PersonComboGridField"/>
+			<xs:element name="CheckBoxGridField" type="CheckBoxGridField"/>
+			<xs:element name="RadioGridField" type="RadioGridField"/>
+			<xs:element name="CodeRadioGridField" type="CodeRadioGridField"/>
+			<xs:element name="Self"/>
+		</xs:choice>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="AbstractViewGridField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+				This is an abstract type that viewable grid fields derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractGridField">
+				<xs:attribute name="phrase" type="xs:string" use="required"/>
+				<xs:attribute name="sample" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="AbstractComboGridField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+			This is an abstract field for all Combo field types to derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField">
+				<xs:sequence>
+					<xs:element name="UpdateFieldRef" type="UpdateFieldRef" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="SampleItem" type="SampleItem" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="parentField" type="xs:NMTOKEN"/>
+				<xs:attribute name="listFilter" type="xs:string"/>
+				<xs:attribute name="reload" type="cbReloadType"/>
+				<xs:attribute name="findMode" type="cbFindModeType"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="AbstractRadioGridField" abstract="true">
+		<xs:annotation>
+			<xs:documentation>
+			This is an abstract field for all Radio field types to derive from.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField">
+				<xs:sequence>
+					<xs:element name="UpdateFieldRef" type="UpdateFieldRef" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="SampleItem" type="SampleItem" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="listFilter" type="xs:string"/>
+				<xs:attribute name="autoSubmit" type="xs:boolean"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="AbstractEditGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractViewGridField">
+				<xs:attribute name="validate" type="validateType"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="ViewGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractViewGridField">
+				<xs:attribute name="link" type="xs:NMTOKEN"/>
+				<xs:attribute name="linkSample" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="InvisibleGridField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a hidden form field, to be used in an EditGrid. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AbstractGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="EditGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField">
+				<xs:attribute name="size" type="xs:unsignedByte"/>
+				<xs:attribute name="maxLength" type="xs:unsignedByte"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="MoneyGridField">
+		<xs:annotation>
+			<xs:documentation>
+			This represents a money entry field. 
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="EditGridField">
+				<xs:attribute name="localAmountField" type="xs:IDREF" use="required"/>
+				<xs:attribute name="localCurrencyIDField" type="xs:IDREF" use="required"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="DateGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="TimeGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="MemoGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractEditGridField">
+				<xs:attribute name="rows" type="xs:unsignedByte"/>
+				<xs:attribute name="cols" type="xs:unsignedByte"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+-->
+	<xs:complexType name="CheckBoxGridField">
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="phrase" type="xs:string" use="required"/>
+		<xs:attribute name="sample" type="xs:string"/>
+	</xs:complexType>
+	<!--
+
+
+
+
+
+-->
+	<xs:complexType name="ComboGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractComboGridField">
+				<xs:attribute name="query" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="CodeComboGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractComboGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="PersonComboGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractComboGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="RadioGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractRadioGridField">
+				<xs:attribute name="query" type="xs:string"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+	-->
+	<xs:complexType name="CodeRadioGridField">
+		<xs:complexContent>
+			<xs:extension base="AbstractRadioGridField"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+
+
+
+
+	-->
+	<!-- 		grid types-->
+	<xs:complexType name="ViewGrid">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="InvisibleGridField" type="InvisibleGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="ViewGridField" type="ViewGridField" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="moduleID" type="xs:NMTOKEN" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="EditGrid">
+		<xs:sequence>
+			<xs:sequence minOccurs="0">
+				<xs:element name="GridForm" type="GridForm"/>
+			</xs:sequence>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewGridField" type="ViewGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="InvisibleGridField" type="InvisibleGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="EditGridField" type="EditGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="DateGridField" type="DateGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="TimeGridField" type="TimeGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="CodeComboGridField" type="CodeComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="ComboGridField" type="ComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="PersonComboGridField" type="PersonComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="MemoGridField" type="MemoGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="CheckBoxGridField" type="CheckBoxGridField" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="moduleID" type="xs:NMTOKEN" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="GridForm">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="ViewGridField" type="ViewGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="InvisibleGridField" type="InvisibleGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="EditGridField" type="EditGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="DateGridField" type="DateGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TimeGridField" type="TimeGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="CodeComboGridField" type="CodeComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="ComboGridField" type="ComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="PersonComboGridField" type="PersonComboGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="MemoGridField" type="MemoGridField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="CheckBoxGridField" type="CheckBoxGridField" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CheckGrid">
+		<xs:sequence maxOccurs="1">
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewGridField" type="ViewGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="InvisibleGridField" type="InvisibleGridField" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:sequence maxOccurs="1">
+				<xs:element name="CheckBoxGridField" type="CheckBoxGridField"/>
+			</xs:sequence>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="moduleID" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="primaryListField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="listFilter" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="CodeCheckGrid">
+		<xs:sequence maxOccurs="1">
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewGridField" type="ViewGridField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="InvisibleGridField" type="InvisibleGridField" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:sequence maxOccurs="1">
+				<xs:element name="CheckBoxGridField" type="CheckBoxGridField"/>
+			</xs:sequence>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="moduleID" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="primaryListField" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="sourceCodeTypeID" type="xs:short" use="required"/>
+		<xs:attribute name="listFilter" type="xs:string"/>
+	</xs:complexType>
+	<!-- 		other element types-->
+	<xs:complexType name="ListField">
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+		<xs:attribute name="link" type="xs:IDREF"/>
+	</xs:complexType>
+	<xs:complexType name="SubModule">
+		<xs:attribute name="moduleID" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="name" type="xs:string"/>
+		<xs:attribute name="join" type="xs:string" use="required"/>
+		<xs:attribute name="joinType" type="xs:string"/>
+		<xs:attribute name="condition" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="ViewScreen">
+		<xs:sequence>
+			<xs:sequence maxOccurs="1">
+				<xs:element name="ViewField" type="ViewField" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:sequence maxOccurs="1">
+				<xs:element name="ViewGrid" type="ViewGrid" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:element name="ViewScreenSection" type="ViewScreen" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="EditScreen">
+		<xs:sequence maxOccurs="1">
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewField" type="ViewField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="InvisibleField" type="InvisibleField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="EditField" type="EditField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="MoneyField" type="MoneyField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="DateField" type="DateField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="TimeField" type="TimeField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="CodeComboField" type="CodeComboField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="ComboField" type="ComboField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="PersonComboField" type="PersonComboField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="MemoField" type="MemoField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="RadioField" type="RadioField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="CodeRadioField" type="CodeRadioField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="CheckBoxField" type="CheckBoxField" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="EditPlusCodeField" type="EditPlusCodeField" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewGrid" type="ViewGrid" minOccurs="0"/>
+				<xs:element name="EditGrid" type="EditGrid" minOccurs="0"/>
+				<xs:element name="CheckGrid" type="CheckGrid" minOccurs="0"/>
+				<xs:element name="CodeCheckGrid" type="CodeCheckGrid" minOccurs="0"/>
+			</xs:sequence>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="GlobalEditScreen">
+		<xs:annotation>
+			<xs:documentation>
+			This represents an Edit Screen that is automatically included in ALL other modules (as an icon).
+			It will automatically include a record description of the host module(???), and should normally
+			include just the EditGrid or some sort of CheckGrid.
+			.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence maxOccurs="1">
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="ViewGrid" type="ViewGrid" minOccurs="0"/>
+				<xs:element name="EditGrid" type="EditGrid" minOccurs="0"/>
+				<xs:element name="CheckGrid" type="CheckGrid" minOccurs="0"/>
+				<xs:element name="CodeCheckGrid" type="CodeCheckGrid" minOccurs="0"/>
+			</xs:sequence>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="SearchScreen">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="EditField" type="EditField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="MoneyField" type="MoneyField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="DateField" type="DateField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TimeField" type="TimeField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="CodeComboField" type="CodeComboField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="ComboField" type="ComboField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="PersonComboField" type="PersonComboField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="MemoField" type="MemoField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="RadioField" type="RadioField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="CodeRadioField" type="CodeRadioField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="CheckBoxField" type="CheckBoxField" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="EditPlusCodeField" type="EditPlusCodeField" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+		<xs:attribute name="phrase" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="SampleRecord">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="SampleField" type="SampleField"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SampleField">
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+		<xs:attribute name="value" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="DocumentationSection" mixed="true">
+		<xs:attribute name="title"/>
+	</xs:complexType>
+	<xs:complexType name="PrimaryKey">
+		<xs:sequence>
+			<xs:element name="FieldRef" type="FieldRef" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Index">
+		<xs:sequence>
+			<xs:element name="FieldRef" type="FieldRef" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN"/>
+	</xs:complexType>
+	<xs:complexType name="DescriptorFields">
+		<xs:sequence>
+			<xs:element name="FieldRef" type="FieldRef" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FieldRef">
+		<xs:attribute name="name" type="xs:IDREF" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="UpdateFieldRef">
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+	</xs:complexType>
+	<!-- document structure declaration-->
+	<xs:element name="Module">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ModuleFields" minOccurs="1" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence maxOccurs="unbounded">
+							<xs:element name="TableField" type="TableField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="ForeignField" type="ForeignField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="DynamicForeignField" type="DynamicForeignField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="RemoteField" type="RemoteField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="CodeField" type="CodeField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="OrgField" type="OrgField" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="CombinedField" type="CombinedField" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ModuleInfo" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PrimaryKey" type="PrimaryKey"/>
+							<xs:element name="Index" type="Index" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="OwnerField" type="FieldRef" minOccurs="0"/>
+							<xs:element name="StatusField" type="FieldRef" minOccurs="0"/>
+							<xs:element name="DescriptorFields" type="DescriptorFields" minOccurs="0"/>
+							<xs:element name="CalendarField" type="FieldRef" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="PersonAccountableField" type="FieldRef" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SubModules" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="SubModule" type="SubModule" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Screens" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="SearchScreen" type="SearchScreen" minOccurs="0"/>
+							<xs:element name="ViewScreen" type="ViewScreen"/>
+							<xs:element name="EditScreen" type="EditScreen" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="GlobalEditScreen" type="GlobalEditScreen" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ListFields" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence maxOccurs="unbounded">
+							<xs:element name="ListField" type="ListField" maxOccurs="unbounded"/>
+							<xs:element name="InvisibleField" type="InvisibleField" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SampleData" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="SampleRecord" type="SampleRecord" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Documentation" minOccurs="0">
+					<xs:complexType mixed="true">
+						<xs:sequence>
+							<xs:element name="Introduction" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="Implementation" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="PeopleElements" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="DataCollection" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="DataInput" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="OrganizationalInfo" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="OrganizationalLearning" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="Training" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="ApplyKnowledge" type="DocumentationSection" minOccurs="0"/>
+							<xs:element name="FAQ" type="DocumentationSection" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="moduleID" type="moduleIDType" use="required"/>
+			<xs:attribute name="allowAddRecord" type="xs:string"/>
+			<xs:attribute name="singularRecordName" type="xs:string" use="required"/>
+			<xs:attribute name="pluralRecordName" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

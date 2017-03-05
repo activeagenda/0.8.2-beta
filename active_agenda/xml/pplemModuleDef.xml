@@ -1,0 +1,283 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Emergency Contacts" moduleID="pplem" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Emergency Contact" pluralRecordName="Emergency Contacts" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="EmergContactID" type="int" dbFlags="unsigned auto_increment not null" phrase="Contact ID|A unique number assigned to each emergency contact for each employee" sample="1"/>
+		<TableField name="_ModDate" type="date" dbFlags="" phrase="Last Updated|The date the emergency contact was entered into the system" sample="09-21-2003"/>
+		<TableField name="EmployeePersonID" type="int" dbFlags="unsigned" phrase="Person ID|Automatically assigned number used to track persons" sample="2"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="EmployeePersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Emprise, HQ"/>
+		<ForeignField name="EmployeePerson" foreignTable="pple" foreignKey="PersonID" foreignField="Employee" key="EmployeePersonID" joinType="left" phrase="Employee|A combined field used to describe this employee when associating her/him with other records" sample="Zahlis, Daniel, 2710"/>
+		<TableField name="ContactLastName" type="varchar(50)" dbFlags="" phrase="Last Name|Family name of the emergency contact" sample="Zahlis"/>
+		<TableField name="ContactFirstName" type="varchar(50)" dbFlags="" phrase="First Name|Given name of the emergency contact" sample="Cheryl"/>
+		<TableField name="ContactMiddleName" type="varchar(50)" dbFlags="" phrase="Middle Name|Middle name of the emergency contact" sample="Francis"/>
+		<TableField name="RelationshipID" type="int" dbFlags="unsigned" phrase="Relationship|The relationship between the emergency contact and the employee" sample="1"/>
+		<CodeField name="Relationship" key="RelationshipID" phrase="Relationship|The relationship between the emergency contact and the employee" sample="Spouse" codeTypeID="270"/>
+		<TableField name="ContactAddress1" type="varchar(128)" dbFlags="" phrase="Address 1|First physical street address of the location where the individual lives" sample="937 N. Adler Ave."/>
+		<TableField name="ContactAddress2" type="varchar(128)" dbFlags="" phrase="Address 2|Second physical street address where the individual lives; such as, apartment number" sample="147"/>
+		<ForeignField name="ContactCountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="ContactStateID" joinType="left" phrase="Country|The internationally recognized name of the country" sample="United States of America (USA)"/>
+		<ForeignField name="ContactCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="Country" key="ContactCountryID" joinType="left" phrase="Country|A combined field used to associate this country with another record" sample="United States of America (USA)"/>
+		<TableField name="ContactStateID" type="int" phrase="State|A combined field used to associate this state with another record" sample="1"/>
+		<ForeignField name="ContactState" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="State" key="ContactStateID" joinType="left" phrase="State|A combined field used to associate this state with another record" sample="California (CA)"/>
+		<TableField name="ContactCity" type="varchar(50)" dbFlags="" phrase="City|City where the individual lives" sample="Clovis"/>
+		<TableField name="ContactPostalCode" type="varchar(50)" dbFlags="" phrase="Postal Code|Postal code used to direct mail to the individual's home address" sample="93611"/>
+		<TableField name="ContactPhone" type="varchar(50)" dbFlags="" phrase="Phone|Telephone number of the individual at home" sample="(559)299-0479"/>
+		<TableField name="ContactAltPhone" type="varchar(50)" dbFlags="" phrase="Alternate Phone|Alternate telephone number where the person can also be reached" sample="(559)299-0880"/>
+		<TableField name="ContactFax" type="varchar(50)" dbFlags="" phrase="Contact Fax|Facsimile telephone number of the individual at home" sample="(559)299-8054"/>
+		<TableField name="ContactEmail" type="varchar(128)" dbFlags="" phrase="Contact Email|Email address used by the individual at home" sample="dan@zahlis.com"/>
+		<TableField name="ContactPriority" type="int" phrase="Priority Level|A number that indicates the priority in which attempts to make contact are to be made" sample="1"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="EmployeePerson"/>;_<CombinedFieldRef name="ContactFirstName"/>_<CombinedFieldRef name="ContactLastName"/>;_<CombinedFieldRef name="Relationship"/></CombinedField>
+		<CombinedField name="EmergContact" phrase="Emergency Contact|A combined field used to describe this emergency contact when associating him or her with other records" sample="Zahlis, Daniel, 2710 | Cheryl Zahlis | Spouse"><CombinedFieldRef name="EmployeePerson"/>;_<CombinedFieldRef name="ContactFirstName"/>_<CombinedFieldRef name="ContactLastName"/>;_<CombinedFieldRef name="Relationship"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="EmergContactID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="EmergContact"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List employee emergency contacts">
+			<ListField name="EmergContactID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="EmployeePerson" phrase="Employee"/>
+			<ListField name="ContactLastName" phrase="Last Name"/>
+			<ListField name="ContactFirstName" phrase="First Name"/>
+			<ListField name="Relationship" phrase="Relationship"/>
+			<ListField name="ContactPhone" phrase="Phone"/>
+			<ListField name="ContactAltPhone" phrase="Alternate Phone"/>
+			<ListField name="ContactPriority" phrase="Contact Priority" align="center"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search employee emergency contacts">
+			<DateField name="_ModDate"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="EmployeePersonID"/>
+				<SampleItem ID="1" name="Emprise HQ"/>
+				<SampleItem ID="3" name="Emprise, Sacramento"/>
+				<SampleItem ID="5" name="Emprise, New York"/>
+				<SampleItem ID="7" name="Emprise, Munich"/>
+			</ComboField>
+			<PersonComboField name="EmployeePersonID" findMode="alpha" parentField="OrganizationID">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, HQ"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, HQ"/>
+			</PersonComboField>
+			<CodeComboField name="RelationshipID" findMode="text">
+				<SampleItem ID="1" name="Spouse"/>
+				<SampleItem ID="2" name="Father"/>
+				<SampleItem ID="3" name="Mother"/>
+				<SampleItem ID="4" name="Life Partner"/>
+				<SampleItem ID="5" name="Physician"/>
+				<SampleItem ID="6" name="Son"/>
+				<SampleItem ID="7" name="Daughter"/>
+				<SampleItem ID="8" name="Friend"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an employee emergency contact">
+			<ViewField name="EmergContactID"/>
+			<ViewField name="_ModDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<ViewField name="ContactLastName"/>
+			<ViewField name="ContactFirstName"/>
+			<ViewField name="ContactMiddleName"/>
+			<ViewField name="Relationship"/>
+			<ViewField name="ContactAddress1"/>
+			<ViewField name="ContactAddress2"/>
+			<ViewField name="ContactCity"/>
+			<ViewField name="ContactState"/>
+			<ViewField name="ContactPostalCode"/>
+			<ViewField name="ContactCountry"/>
+			<ViewField name="ContactPhone"/>
+			<ViewField name="ContactAltPhone"/>
+			<ViewField name="ContactFax"/>
+			<ViewField name="ContactEmail"/>
+			<ViewField name="ContactPriority"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an employee emergency contact">
+			<ViewField name="EmergContactID"/>
+			<ViewField name="_ModDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EmployeePerson"/>
+			<EditField name="ContactLastName" size="50" maxLength="50"/>
+			<EditField name="ContactFirstName" size="50" maxLength="50"/>
+			<EditField name="ContactMiddleName" size="50" maxLength="50"/>
+			<CodeComboField name="RelationshipID" findMode="text">
+				<SampleItem ID="1" name="Spouse"/>
+				<SampleItem ID="2" name="Father"/>
+				<SampleItem ID="3" name="Mother"/>
+				<SampleItem ID="4" name="Life Partner"/>
+				<SampleItem ID="5" name="Physician"/>
+			</CodeComboField>
+			<EditField name="ContactAddress1" size="75" maxLength="128"/>
+			<EditField name="ContactAddress2" size="75" maxLength="128"/>
+			<EditField name="ContactCity" size="50" maxLength="50"/>
+			<EditField name="ContactState" size="50" maxLength="50"/>
+			<EditField name="ContactPostalCode" size="50" maxLength="50"/>
+			<EditField name="ContactCountry" size="50" maxLength="50"/>
+			<EditField name="ContactPhone" size="50" maxLength="50"/>
+			<EditField name="ContactAltPhone" size="50" maxLength="50"/>
+			<EditField name="ContactFax" size="50" maxLength="50"/>
+			<EditField name="ContactEmail" size="75" maxLength="128"/>
+			<EditField name="ContactPriority" size="5" maxLength="5"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="pplem" phrase="Emergency Contacts">
+			<InvisibleField name="EmergContactID"/>
+			<ViewField name="_ModDate" sample="09-21-2003"/>
+			<ViewField name="ContactLastName" sample="Zahlis"/>
+			<ViewField name="ContactFirstName" sample="Cheryl"/>
+			<ViewField name="Relationship" sample="Spouse"/>
+			<ViewField name="ContactPhone" sample="(559)299-0479"/>
+			<ViewField name="ContactAltPhone" sample="(559)299-0880"/>
+			<ViewField name="ContactPriority" sample="1" align="center"/>
+		</ViewGrid>
+		<EditGrid moduleID="pplem" phrase="Emergency Contacts">
+			<GridForm>
+				<InvisibleField name="EmergContactID"/>
+				<EditField name="ContactLastName" size="50" maxLength="50" sample="Zahlis"/>
+				<EditField name="ContactFirstName" size="50" maxLength="50" sample="Cheryl"/>
+				<EditField name="ContactMiddleName" size="50" maxLength="50" sample="Francis"/>
+				<CodeComboField name="RelationshipID" findMode="text" sample="Spouse">
+					<SampleItem ID="1" name="Spouse"/>
+					<SampleItem ID="2" name="Father"/>
+					<SampleItem ID="3" name="Mother"/>
+					<SampleItem ID="4" name="Life Partner"/>
+					<SampleItem ID="5" name="Physician"/>
+				</CodeComboField>
+				<EditField name="ContactAddress1" size="75" maxLength="128" sample="937 N. Adler Ave."/>
+				<EditField name="ContactAddress2" size="75" maxLength="128" sample="147"/>
+				<EditField name="ContactCity" size="50" maxLength="50" sample="Clovis"/>
+				<EditField name="ContactState" size="50" maxLength="50" sample="California (CA)"/>
+				<EditField name="ContactPostalCode" size="50" maxLength="50" sample="93611"/>
+				<EditField name="ContactPhone" size="10" maxLength="12" sample="(559)299-0479"/>
+				<EditField name="ContactAltPhone" size="10" maxLength="12" sample="(559)299-0880"/>
+				<EditField name="ContactFax" size="10" maxLength="12" sample="(559)299-8054"/>
+				<EditField name="ContactEmail" size="30" maxLength="50" sample="dan@zahlis.com"/>
+                <EditField name="ContactPriority" size="5" maxLength="5"/>
+			</GridForm>
+			<InvisibleField name="EmergContactID"/>
+			<ViewField name="_ModDate" sample="09-21-2003"/>
+			<ViewField name="ContactLastName" sample="Zahlis"/>
+			<ViewField name="ContactFirstName" sample="Cheryl"/>
+			<ViewField name="Relationship" sample="Spouse"/>
+			<ViewField name="ContactPhone" sample="(559)299-0479"/>
+			<ViewField name="ContactAltPhone" sample="(559)299-0880"/>
+			<ViewField name="ContactPriority" sample="1" align="center"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

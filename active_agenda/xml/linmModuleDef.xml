@@ -1,0 +1,359 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Work Modifications" moduleID="linm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Work Modification" pluralRecordName="Work Modifications" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="WorkModificationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate injuries and/or illnesses with work modifications" sample="1"/>
+        <TableField name="LossInjuryID" type="int" validate="noValidation" phrase="Loss ID|An automatically assigned number used to track injuries resulting in loss" sample="11"/>
+        <ForeignField name="OrganizationID" listType="allParticipants" foreignTable="lin" foreignKey="LossInjuryID" foreignField="OrganizationID" key="LossInjuryID" joinType="left" phrase="Organization|The organization of the injured or ill person" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization of the injured or ill person" sample="Active Agenda, HQ"/>
+        <ForeignField name="InjuredPersonID" foreignTable="lin" foreignKey="LossInjuryID" foreignField="InjuredPersonID" key="LossInjuryID" joinType="left" phrase="Injured Person|The name of the injured or ill person" sample="1"/>
+        <ForeignField name="InjuredPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InjuredPersonID" joinType="left" phrase="Injured Person|The name of the injured or ill person" sample="Jane Doe"/>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="94" phrase="Person Accountable|The individual assigned primary accountability for managing the work modification process for this injured person" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the work modification process for this injured person" sample="Mattias Thorslund"/>
+        <TableField name="ModificationTypeID" type="int" validate="RequireSelection" phrase="Modification Type|The type of work modification resulting from this injury or illness" sample="1"/>
+        <CodeField name="ModificationType" key="ModificationTypeID" phrase="Modification Type|The type of work modification resulting from this injury or illness" sample="Days away from work" codeTypeID="196"/>
+        <TableField name="AuthorizingOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Authorizing Organization|The organization responsible for authorizing the work modification" sample="1"/>
+        <ForeignField name="AuthorizingOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AuthorizingOrganizationID" joinType="left" phrase="Authorizing Organization|The organization responsible for authorizing the work modification" sample="Legal Medical Network, Inc."/>
+        <RemoteField name="AuthorizedByID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="83" phrase="Authorizing Person|The name of the individual that authorized the work modification" sample="1"/>
+        <ForeignField name="AuthorizedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AuthorizedByID" joinType="left" phrase="Authorizing Person|The name of the individual that authorized the work modification" sample="Jane Doe"/>
+        <TableField name="DisabilitySlipAttached" type="bool" validate="notEmpty" dbFlags="default 0" phrase="Disability Attached?|Whether the disability slip authorizing the work modification is attached to the record" sample="Yes"/>
+        <TableField name="DisabilityDescription" type="text" validate="notEmpty" phrase="Disability Description|A detailed description of the contents of the disability slip and the facility or physician authorizing the disability" sample="Dr. Strangelove extended Thorslund's disability another week based on his inability to lift a coffee cup"/>
+        <RemoteField name="StartDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="28" phrase="Start Date|The date this period of work modification began" sample="01/01/2004"/>
+        <RemoteField name="EndDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="36" phrase="End Date|The date this period of work modification ended" sample="01/01/2004"/>
+        <CalculatedField name="Days" calcFunction="datediff_inclusive" params="EndDate StartDate" validate="" phrase="Total Days|The total number of days of modified work or days away from work which resulted from this injury or illness" sample="21"/>
+        <TableField name="DaysNotScheduled" type="int" validate="noValidation" phrase="Days Not Scheduled|The number of days the injured or ill person would not have been scheduled to work and therefore did not lose time from work due to the injury or illness" sample="6"/>
+        <CalculatedField name="ActualDays" calcFunction="subtract" params="Days DaysNotScheduled" validate="" phrase="Actual Days|A calculated field based on the difference between the number of days of lost work or modified work and the number of days the injured or ill person would not have been scheduled to work irrespective of the injury or illness" sample="15"/>
+        <CalculatedField name="DaysRemaining" type="int" calcFunction="daysremaining_not_negative" params="EndDate" phrase="Days Remaining|The total number of days remaining before the work modification ends" sample="3"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="ModificationType"/>_ending_<CombinedFieldRef name="EndDate"/>,_totalling_<CombinedFieldRef name="Days"/>_days</CombinedField>
+        <CombinedField name="WorkModification" phrase="Work Modification|A combined field used to describe this work modification when associating it with other records" sample="Active Agenda, HQ; Days away from work; 20"><CombinedFieldRef name="InjuredPerson"/>;_<CombinedFieldRef name="ModificationType"/>:_<CombinedFieldRef name="Days"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="WorkModificationID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="WorkModification"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List work modifications associated with injuries or illnesses">
+            <ListField name="WorkModificationID" phrase="Record ID"/>
+            <ListField name="LossInjuryID" phrase="Loss ID" align="center"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="InjuredPerson" phrase="Injured Person"/>
+            <ListField name="ModificationType" phrase="Modification Type"/>
+            <ListField name="ActualDays" phrase="Actual Days" align="right"/>
+            <ListField name="DaysRemaining" phrase="Remaining Days" align="right"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search work modifications associated with injuries or illnesses">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="InjuredPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <OrgComboField name="AuthorizingOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="AuthorizedByID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <CheckboxField name="DisabilitySlipAttached"/>
+            <CodeComboField name="ModificationTypeID">
+                <SampleItem ID="1" name="Away from work (days)"/>
+                <SampleItem ID="2" name="On job transfer or restriction (days)"/>
+            </CodeComboField>
+            <DateField name="StartDate"/>
+            <DateField name="EndDate"/>
+            <EditField name="Days" size="5" maxLength="5"/>
+            <EditField name="DaysNotScheduled" size="5" maxLength="5"/>
+            <EditField name="ActualDays" size="5" maxLength="5"/>
+            <EditField name="DaysRemaining" size="5" maxLength="5"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a work modification associated with an injury or illness">
+            <ViewField name="WorkModificationID"/>
+            <ViewField name="LossInjuryID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="InjuredPerson"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="AuthorizingOrganization"/>
+            <ViewField name="AuthorizedBy"/>
+            <ViewField name="DisabilitySlipAttached"/>
+            <ViewField name="DisabilityDescription"/>
+            <ViewField name="ModificationType"/>
+            <ViewField name="StartDate"/>
+            <ViewField name="EndDate"/>
+            <ViewField name="Days"/>
+            <ViewField name="DaysNotScheduled"/>
+            <ViewField name="ActualDays"/>
+            <ViewField name="DaysRemaining"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a work modification associated with an injury or illness">
+            <ViewField name="WorkModificationID"/>
+            <ViewField name="LossInjuryID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="InjuredPerson"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <OrgComboField name="AuthorizingOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="AuthorizedByID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <CheckboxField name="DisabilitySlipAttached"/>
+            <MemoField name="DisabilityDescription" rows="5" cols="75"/>
+            <CodeComboField name="ModificationTypeID">
+                <SampleItem ID="1" name="Away from work (days)"/>
+                <SampleItem ID="2" name="On job transfer or restriction (days)"/>
+            </CodeComboField>
+            <DateField name="StartDate"/>
+            <DateField name="EndDate"/>
+            <ViewField name="Days"/>
+            <EditField name="DaysNotScheduled" size="5" maxLength="5"/>
+            <ViewField name="ActualDays"/>
+            <ViewField name="DaysRemaining"/>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="linm" phrase="Work Modifications">
+            <InvisibleField name="WorkModificationID"/>
+            <ViewField name="ModificationType" sample="Away from work (days)"/>
+            <ViewField name="StartDate" sample="01/01/2004"/>
+            <ViewField name="EndDate" sample="01/21/2004"/>
+            <ViewField name="ActualDays" sample="15" align="center"/>
+            <ViewField name="AuthorizingOrganization" sample="Medical Legal Network, Inc."/>
+            <ViewField name="DisabilitySlipAttached" sample="Yes"/>
+        </ViewGrid>
+        <EditGrid moduleID="linm" phrase="Work Modifications">
+            <GridForm>
+                <InvisibleField name="WorkModificationID"/>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <OrgComboField name="AuthorizingOrganizationID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </OrgComboField>
+                <PersonComboField name="AuthorizedByID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <CheckboxField name="DisabilitySlipAttached"/>
+                <MemoField name="DisabilityDescription" rows="5" cols="75"/>
+                <CodeComboField name="ModificationTypeID" sample="Away from work (days)" codeTypeID="99">
+                    <SampleItem ID="1" name="Away from work (days)"/>
+                    <SampleItem ID="2" name="On job transfer or restriction (days)"/>
+                </CodeComboField>
+                <DateField name="StartDate" sample="01/01/2004"/>
+                <DateField name="EndDate" sample="01/21/2004"/>
+                <ViewField name="Days" sample="21"/>
+                <EditField name="DaysNotScheduled" size="5" maxLength="5" sample="6"/>
+                <ViewField name="ActualDays" sample="15"/>
+            </GridForm>
+            <InvisibleField name="WorkModificationID"/>
+            <ViewField name="ModificationType" sample="Away from work (days)"/>
+            <ViewField name="StartDate" sample="01/01/2004"/>
+            <ViewField name="EndDate" sample="01/21/2004"/>
+            <ViewField name="ActualDays" sample="15" align="center"/>
+            <ViewField name="AuthorizingOrganization" sample="Medical Legal Network, Inc."/>
+            <ViewField name="DisabilitySlipAttached" sample="Yes"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Work Modification Events by Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Work Modification Events by Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Work Modification Events by Injured Person">
+            <GroupByField name="InjuredPerson"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Work Modification Events by Injured Person">
+            <GroupByField name="InjuredPerson"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Work Modification Events by Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Work Modification Events by Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Work Modification Events by Modification Type">
+            <GroupByField name="ModificationType"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Work Modification Events by Modification Type">
+            <GroupByField name="ModificationType"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Work Modification Events by Authorizing Organization">
+            <GroupByField name="AuthorizingOrganization"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Work Modification Events by Authorizing Organization">
+            <GroupByField name="AuthorizingOrganization"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Work Modification Events by Authorizing Person">
+            <GroupByField name="AuthorizedBy"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Work Modification Events by Authorizing Person">
+            <GroupByField name="AuthorizedBy"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Work Modification Events With Disability Slip Attached">
+            <GroupByField name="DisabilitySlipAttached"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Work Modification Events With Disability Slip Attached">
+            <GroupByField name="DisabilitySlipAttached"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Work Modification Events By Actual Days">
+            <GroupByField name="ActualDays"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Work Modification Events By Actual Days">
+            <GroupByField name="ActualDays"/>
+            <SummaryField name="WorkModificationID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,375 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Feedback Response" moduleID="fbkr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Feedback Response" pluralRecordName="Feedback Responses" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="FeedbackResponseID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track response to feedback provided throughout the organization" sample="1"/>
+		<TableField name="FeedbackID" type="int" dbFlags="unsigned not null" phrase="Feedback|A combined field used to describe this feedback when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="fbk" foreignKey="FeedbackID" foreignField="OrganizationID" key="FeedbackID" joinType="left" phrase="Affected Organization|The organization which is most affected by the feedback" sample="Active Agenda, HQ"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Organization" key="OrganizationID" joinType="left" phrase="Affected Organization|The organization which is most affected by the feedback" sample="Active Agenda, HQ"/>
+		<ForeignField name="FeedbackDate" foreignTable="fbk" foreignKey="FeedbackID" foreignField="FeedbackDate" key="FeedbackID" joinType="left" phrase="Feedback Date|The date the feedback was submitted by the person offering the feedback for consideration" sample="09-21-2003"/>
+		<ForeignField name="Anonymous" type="bool" foreignTable="fbk" foreignKey="FeedbackID" foreignField="Anonymous" key="FeedbackID" joinType="left" phrase="Anonymous|Whether the feedback is being provided anonymously" sample="No"/>
+		<ForeignField name="FeedbackProviderID" foreignTable="fbk" foreignKey="FeedbackID" foreignField="FeedbackProviderID" key="FeedbackID" joinType="left" phrase="Feedback Provider|The name of the person providing the feedback for consideration" sample="1"/>
+		<ForeignField name="FeedbackProvider" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FeedbackProviderID" joinType="left" phrase="Feedback Provider|The name of the person providing the feedback for consideration" sample="Mattias Thorslund"/>
+		<ForeignField name="FeedbackTypeID" foreignTable="fbk" foreignKey="FeedbackID" foreignField="FeedbackTypeID" key="FeedbackID" joinType="left" phrase="Feedback Type|A method of grouping feedback of similar types so that cultural inferences may be drawn based on a predominance of feedback types" sample="1"/>
+		<CodeField name="FeedbackType" key="FeedbackTypeID" phrase="Feedback Type|A method of grouping feedback of similar types so that cultural inferences may be drawn based on a predominance of feedback types" sample="Constructive" codeTypeID="151"/>
+		<ForeignField name="FeedbackRecipientID" foreignTable="fbk" foreignKey="FeedbackID" foreignField="FeedbackRecipientID" key="FeedbackID" joinType="left" phrase="Feedback Recipient|The name of the intended recipient of the feedback" sample="1"/>
+		<ForeignField name="FeedbackRecipient" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="FeedbackRecipientID" joinType="left" phrase="Feedback Recipient|The name of the intended recipient of the feedback" sample="Larry Hansen"/>
+		<ForeignField name="DepartmentID" foreignTable="fbk" foreignKey="FeedbackID" foreignField="DepartmentID" key="FeedbackID" joinType="left" phrase="Department Recipient|Department recipient of the feedback when applicable" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department Recipient|Department recipient of the feedback when applicable" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="FeedbackProvided" foreignTable="fbk" foreignKey="FeedbackID" foreignField="FeedbackProvided" key="FeedbackID" joinType="left" phrase="Feedback Provided|A clear, comprehensive, and direct feedback statement which is provided for improvement" sample="Some of Larry's slides used a light background and I found them hard to read. I suggest that Larry use dark backgrounds for his PowerPoint slides."/>
+		<ForeignField name="Feedback" foreignTable="fbk" foreignKey="FeedbackID" foreignField="Feedback" key="FeedbackID" joinType="left" phrase="Feedback|A combined field used to describe this feedback when associating it with other records" sample="09-21-2003; Constructive; To: Larry Hansen; From: Mattias Thorslund; Active Agenda, HQ"/>
+		<RemoteField name="PersonRespondingID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="72" phrase="Person Responding|The name of the individual responding to the provided feedback" sample="1"/>
+		<ForeignField name="PersonResponding" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonRespondingID" joinType="left" phrase="Person Responding|The name of the individual responding to the provided feedback" sample="Jane Doe"/>
+		<RemoteField name="ResponseDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="27" phrase="Response Date|The date the feedback response was provided to the person offering the feedback for consideration by entering the response into the system" sample="01/01/2004"/>
+		<CalculatedField name="ResponseDelay" calcFunction="datediff" params="ResponseDate FeedbackDate" validate="" phrase="Response Delay|A calculated field based on the number of days between the feedback date and the response date" sample="30"/>
+		<TableField name="Response" type="text" validate="noValidation" phrase="Feedback Response|A constructive response to the feedback provided" sample="Thanks for the feedback Mattias. I have heard this type of feedback before and will incorporate the changes you have suggested. Thanks again...Larry"/>
+		<TableField name="ImpactID" type="int" validate="noValidation" phrase="Impact|The impact the feedback is likely to have on the person responding" sample="1"/>
+		<CodeField name="Impact" key="ImpactID" phrase="Impact|The impact the feedback is likely to have on the person responding" sample="Reinforced Behavior" codeTypeID="143"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PersonResponding"/>;_<CombinedFieldRef name="ResponseDate"/>;_Impact:_<CombinedFieldRef name="Impact"/></CombinedField>
+		<CombinedField name="Delay" phrase="Delay|The number of days between the feedback date and the response date" sample="30 Days"><CombinedFieldRef name="ResponseDelay"/>_Days</CombinedField>
+		<CombinedField name="FeedbackResponse" phrase="Feedback Response|A combined field used to describe this feedback response when associating it with other records" sample="Jane Doe; 09-21-2003; Likely Change? Yes"><CombinedFieldRef name="PersonResponding"/>;_<CombinedFieldRef name="Impact"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="FeedbackResponseID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="FeedbackResponse"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="FeedbackResponseID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbkr"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="FeedbackResponseID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbkr"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="FeedbackResponseID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="fbkr"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List responses to feedback">
+			<ListField name="FeedbackResponseID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonResponding" phrase="Responding"/>
+			<ListField name="FeedbackDate" phrase="Feedback Date"/>
+			<ListField name="ResponseDate" phrase="Response Date"/>
+			<ListField name="Delay" phrase="Response Delay"/>
+			<ListField name="Impact" phrase="Impact"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search responses to feedback">
+			<PersonComboField name="FeedbackRecipientID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="FeedbackID" findMode="text">
+				<SampleItem ID="1" name="09-21-2003; Constructive; To: Larry Hansen; From: Mattias Thorslund; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="09-21-2003; Reinforcing; To: Mattias Thorslund; From: Larry Hansen; Active Agenda, HQ"/>
+			</ComboField>
+			<DateField name="FeedbackDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<CodeRadioField name="FeedbackTypeID">
+				<SampleItem ID="1" name="Constructive"/>
+				<SampleItem ID="2" name="Reinforcing"/>
+			</CodeRadioField>
+			<PersonComboField name="FeedbackProviderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="Anonymous"/>
+			<ComboField name="DepartmentID" findMode="text">
+				<SampleItem ID="1" name="Human Resources, Local, Human Resources, 77282"/>
+				<SampleItem ID="3" name="Legal, Corporate, Compliance, 732552"/>
+				<SampleItem ID="5" name="Compliance, Regional, Safety, 12382"/>
+				<SampleItem ID="7" name="Compliance, Local, Environmental, 32582"/>
+			</ComboField>
+			<DateField name="ResponseDate"/>
+			<EditField name="ResponseDelay" size="5" maxLength="5"/>
+			<PersonComboField name="PersonRespondingID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeRadioField name="ImpactID">
+				<SampleItem ID="1" name="Likely to Reinforce"/>
+				<SampleItem ID="2" name="Likely to Change"/>
+				<SampleItem ID="3" name="No Impact"/>
+			</CodeRadioField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a feedback response">
+			<ViewField name="FeedbackResponseID"/>
+			<ViewField name="Feedback"/>
+			<ViewField name="Organization"/>
+			<ViewField name="FeedbackDate"/>
+			<ViewField name="Anonymous"/>
+			<ViewField name="FeedbackProvider"/>
+			<ViewField name="FeedbackType"/>
+			<ViewField name="FeedbackRecipient"/>
+			<ViewField name="FeedbackProvided"/>
+			<ViewField name="PersonResponding"/>
+			<ViewField name="ResponseDate"/>
+			<ViewField name="Delay"/>
+			<ViewField name="Response"/>
+			<ViewField name="Impact"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a feedback response">
+			<ViewField name="FeedbackResponseID"/>
+			<ViewField name="Feedback"/>
+			<ViewField name="Organization"/>
+			<ViewField name="FeedbackDate"/>
+			<ViewField name="Anonymous"/>
+			<ViewField name="FeedbackProvider"/>
+			<ViewField name="FeedbackType"/>
+			<ViewField name="FeedbackRecipient"/>
+			<ViewField name="FeedbackProvided"/>
+			<PersonComboField name="PersonRespondingID" findMode="alpha">
+				<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="ResponseDate"/>
+			<ViewField name="Delay"/>
+			<MemoField name="Response" rows="5" cols="75"/>
+			<CodeRadioField name="ImpactID">
+				<SampleItem ID="1" name="Likely to Reinforce"/>
+				<SampleItem ID="2" name="Likely to Change"/>
+				<SampleItem ID="3" name="No Impact"/>
+			</CodeRadioField>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the feedback response">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the feedback response">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the feedback response" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="FeedbackResponseID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="FeedbackDate"/>
+		<ViewField name="FeedbackProvider"/>
+		<ViewField name="FeedbackType"/>
+		<ViewField name="FeedbackRecipient"/>
+		<ViewField name="FeedbackProvided"/>
+		<ViewField name="PersonResponding"/>
+		<ViewField name="ResponseDate"/>
+		<ViewField name="Response"/>
+		<ViewField name="Impact"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="fbkr" phrase="Responses">
+			<InvisibleField name="FeedbackResponseID"/>
+			<ViewField name="PersonResponding" sample="Jane Doe"/>
+			<ViewField name="ResponseDate" sample="09-21-2003"/>
+			<ViewField name="Delay" sample="30 Days"/>
+			<ViewField name="Response" sample="Thanks for the feedback Mattias. I have heard this type of feedback before and will incorporate the changes you have suggested. Thanks again...Larry"/>
+			<ViewField name="Impact" sample="Likely to Reinforce"/>
+		</ViewGrid>
+		<EditGrid moduleID="fbkr" phrase="Responses">
+			<GridForm>
+				<InvisibleField name="FeedbackResponseID"/>
+				<PersonComboField name="PersonRespondingID" findMode="alpha" sample="Jane Doe">
+					<SampleItem ID="1" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="2" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<DateField name="ResponseDate" sample="09-21-2003"/>
+				<ViewField name="ResponseDelay" sample="30"/>
+				<MemoField name="Response" rows="5" cols="75" sample="Thanks for the feedback Mattias. I have heard this type of feedback before and will incorporate the changes you have suggested. Thanks again...Larry"/>
+				<CodeRadioField name="ImpactID">
+					<SampleItem ID="1" name="Likely to Reinforce"/>
+					<SampleItem ID="2" name="Likely to Change"/>
+					<SampleItem ID="3" name="No Impact"/>
+				</CodeRadioField>
+			</GridForm>
+			<ViewField name="PersonResponding" sample="Jane Doe"/>
+			<ViewField name="ResponseDate" sample="09-21-2003"/>
+			<ViewField name="Delay" sample="30"/>
+			<ViewField name="Response" sample="Thanks for the feedback Mattias. I have heard this type of feedback before and will incorporate the changes you have suggested. Thanks again...Larry"/>
+			<ViewField name="Impact" sample="Likely to Reinforce"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Feedback Responses By Feedback Provider">
+			<GroupByField name="FeedbackProvider"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Feedback Responses By Feedback Provider">
+			<GroupByField name="FeedbackProvider"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Feedback Responses By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Feedback Responses By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Feedback Responses By Feedback Recipient">
+			<GroupByField name="FeedbackRecipient"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Feedback Responses By Feedback Recipient">
+			<GroupByField name="FeedbackRecipient"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Feedback Responses By Feedback Type">
+			<GroupByField name="FeedbackType"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Feedback Responses By Feedback Type">
+			<GroupByField name="FeedbackType"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Feedback Responses By Person Responding">
+			<GroupByField name="PersonResponding"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Feedback Responses By Person Responding">
+			<GroupByField name="PersonResponding"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Feedback Responses By Impact">
+			<GroupByField name="Impact"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Feedback Responses By Impact">
+			<GroupByField name="Impact"/>
+			<SummaryField name="FeedbackResponseID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

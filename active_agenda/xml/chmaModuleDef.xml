@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Associations" moduleID="chma" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Association" pluralRecordName="Chemical Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ChemicalAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track chemical associations with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the chemical" sample="cse"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the chemical" sample="Confined Space Entry Permits"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Entry Permit for Mix Tank #2; 54"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization with which the chemical is being associated" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization with which the chemical is being associated" sample="Active Agenda, Inc."/>
+		<TableField name="ChemicalID" type="int" validate="RequireSelection" phrase="Chemical|A description of the chemical based on a combination of field values assigned from within the Chemicals module" sample="1"/>
+		<ForeignField name="ProductName" foreignTable="chm" foreignKey="ChemicalID" foreignField="ProductName" key="ChemicalID" joinType="left" phrase="Product Name|A name assigned to a chemical or chemical compound by its manufacturer for product marketing and trademarking purposes" sample="Sierra Springs Natural Spring Water"/>
+		<ForeignField name="CommonName" foreignTable="chm" foreignKey="ChemicalID" foreignField="CommonName" key="ChemicalID" joinType="left" phrase="Common Name|A common name assigned to a chemical by the organization using it. Common names are more easily recognized than chemical names and can include code names used by an organization to quickly and accurately identify a chemical" sample="Water"/>
+		<ForeignField name="ChemicalName" foreignTable="chm" foreignKey="ChemicalID" foreignField="ChemicalName" key="ChemicalID" joinType="left" phrase="Chemical Name|The technical name for a chemical" sample="Hydrogen Dioxide"/>
+		<ForeignField name="CASNumber" foreignTable="chm" foreignKey="ChemicalID" foreignField="CASNumber" key="ChemicalID" joinType="left" phrase="CAS Number|Chemical Abstracts Service Registry Number. CAS Registry Numbers (often referred to as CAS RNs or CAS Numbers) are unique identifiers for chemical substances" sample="1336-21-6"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="Chemical" key="ChemicalID" joinType="left" phrase="Chemical|A description of the chemical based on a combination of field values assigned from within the Chemicals module" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+		<TableField name="MannerAffected" type="text" validate="noValidation" phrase="Manner Affected|The manner in which the related record is affected by the chemical" sample="The confined space is washed suing chlorine"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions ()Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="CommonName"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="ChemicalAssoc" phrase="Chemical Association|A combined field used to describe this chemical association when associating it with other records" sample="Water | Confined Space Entry Permits | ID: 12"><CombinedFieldRef name="CommonName"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChemicalAssocID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="ChemicalAssoc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemical associations">
+			<ListField name="ChemicalAssocID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="CommonName" phrase="Common Name"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemical associations">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="ChemicalID" findMode="text">
+				<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+				<SampleItem ID="2" name="Ammonia; Anhydrous Ammonia; 1352-23-1; Active Use"/>
+			</ComboField>
+			<EditField name="ProductName" size="75" maxLength="128"/>
+			<EditField name="CommonName" size="75" maxLength="128"/>
+			<EditField name="ChemicalName" size="75" maxLength="128"/>
+			<EditField name="CASNumber" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the chemical association">
+			<ViewField name="ChemicalAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="ProductName"/>
+			<ViewField name="CommonName"/>
+			<ViewField name="ChemicalName"/>
+			<ViewField name="CASNumber"/>
+			<ViewField name="MannerAffected"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the chemical association">
+			<ViewField name="ChemicalAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="ProductName"/>
+			<ViewField name="CommonName"/>
+			<ViewField name="ChemicalName"/>
+			<ViewField name="CASNumber"/>
+			<MemoField name="MannerAffected" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="chma" phrase="Chemicals">
+			<InvisibleField name="ChemicalAssocID"/>
+			<ViewField name="CommonName" sample="Ammonia"/>
+			<ViewField name="ChemicalName" sample="Anhydrous Ammonia"/>
+			<ViewField name="CASNumber" sample="7664-41-7"/>
+		</ViewGrid>
+		<EditGrid moduleID="chma" phrase="Chemicals">
+			<GridForm>
+				<InvisibleField name="ChemicalAssocID"/>
+				<ComboField name="ChemicalID" findMode="text">
+					<UpdateFieldRef name="ProductName"/>
+					<UpdateFieldRef name="CommonName"/>
+					<UpdateFieldRef name="ChemicalName"/>
+					<UpdateFieldRef name="CASNumber"/>
+					<SampleItem ID="1" name="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+					<SampleItem ID="2" name="Ammonia; Anhydrous Ammonia; 1352-23-1; Active Use"/>
+				</ComboField>
+				<ViewField name="ProductName" parentField="ChemicalID"/>
+				<ViewField name="CommonName" parentField="ChemicalID"/>
+				<ViewField name="ChemicalName" parentField="ChemicalID"/>
+				<ViewField name="CASNumber" parentField="ChemicalID"/>
+				<MemoField name="MannerAffected" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="ChemicalAssocID"/>
+			<ViewField name="CommonName" sample="Ammonia"/>
+			<ViewField name="ChemicalName" sample="Anhydrous Ammonia"/>
+			<ViewField name="CASNumber" sample="7664-41-7"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Chemical Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemical Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Chemical Associations By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Chemical Associations By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Chemical Associations By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Chemical Associations By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="ChemicalAssocID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

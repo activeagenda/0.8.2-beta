@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Work Availability" moduleID="orgwa" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Department" pluralRecordName="Departments" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="WorkAvailabilityID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number assigned used to track work availability associated with an organization" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned" phrase="Organization|The organization assigning departments to an organization" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization to have departments assigned to" sample="Emprise, HQ"/>
+		<TableField name="WorkAvailabilityGroupID" type="int" validate="RequireSelection" phrase="Availability Group|A broadly defined title or phrase used to associate work availability with specifics groups of similar types" sample="1"/>
+		<CodeField name="WorkAvailabilityGroup" key="WorkAvailabilityGroupID" phrase="Availability Group|A broadly defined title or phrase used to associate work availability with specifics groups of similar types" sample="Salaried (executive)" codeTypeID="109"/>
+		<TableField name="WorkUnavailabilityTypeID" type="int" dbFlags="unsigned not null" phrase="Work Unavailability Type|A combined field used to describe this unavailability type when associating it with other records" sample="1"/>
+		<ForeignField name="UnavailabilityCategoryID" foreignTable="orgwu" foreignKey="WorkUnavailabilityTypeID" foreignField="UnavailabilityCategoryID" key="WorkUnavailabilityTypeID" joinType="left" phrase="Unavailability Category|A broadly defined title or phrase used to group similar categories of work unavailability types" sample="1"/>
+		<CodeField name="UnavailabilityCategory" key="UnavailabilityCategoryID" phrase="Unavailability Category|A broadly defined title or phrase used to group similar categories of work unavailability types" sample="Holiday" codeTypeID="98"/>
+		<ForeignField name="WorkUnavailabilityType" foreignTable="orgwu" foreignKey="WorkUnavailabilityTypeID" foreignField="WorkUnavailabilityType" key="WorkUnavailabilityTypeID" joinType="left" phrase="Work Unavailability Type|A combined field used to describe this unavailability type when associating it with other records" sample="Holiday | Christmas"/>
+		<TableField name="Explanation" type="text" dbFlags="" phrase="Explanation|A detailed explanation of the reason for the unavailable work" sample="All US based operations recognize Christmas as a national holiday"/>
+		<RemoteField name="StartDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="28" phrase="Start Date|The date this period of unavailability began" sample="01/01/2004"/>
+		<RemoteField name="EndDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="36" phrase="End Date|The date this period of unavailability ended" sample="01/01/2004"/>
+		<TableField name="Days" type="int" validate="RequireSelection" phrase="Days|The number of days of unavailable work" sample="7"/>
+		<CalculatedField name="CalcDays" type="int" calcFunction="datediff" params="EndDate StartDate" phrase="Calendar Days (calculated)|The number of calendar days of unavailable work" sample="7"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="WorkUnavailabilityType"/>_from_<CombinedFieldRef name="StartDate"/>_to_<CombinedFieldRef name="EndDate"/>_at_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="WorkAvailability" phrase="Work Availability|A combined field used to describe this work availability when associating it with other records" sample="Holiday | Christmas | 12/19/2004 to 12/26/2004 | 7 days"><CombinedFieldRef name="WorkUnavailabilityType"/>;_<CombinedFieldRef name="CalcDays"/>_days</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="WorkAvailabilityID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="WorkAvailability"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List work availability schedules">
+			<ListField name="WorkAvailabilityID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="WorkAvailabilityGroup" phrase="Group"/>
+			<ListField name="UnavailabilityCategory" phrase="Type"/>
+			<ListField name="StartDate" phrase="Start Date"/>
+			<ListField name="EndDate" phrase="End Date"/>
+			<ListField name="Days" phrase="Days"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search work availability schedules">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+			</OrgComboField>
+			<CodeComboField name="WorkAvailabilityGroupID">
+				<SampleItem ID="1" name="Salaried (executive)"/>
+				<SampleItem ID="2" name="Salaried (non-executive)"/>
+				<SampleItem ID="3" name="Hourly (non-union)"/>
+				<SampleItem ID="3" name="Hourly (union)"/>
+			</CodeComboField>
+			<ComboField name="WorkUnavailabilityTypeID" findMode="text">
+				<SampleItem ID="1" name="Holiday | Christmas"/>
+				<SampleItem ID="2" name="Downtime | Scheduled Maintenance"/>
+				<SampleItem ID="3" name="Absence | Short Term Excused"/>
+				<SampleItem ID="4" name="Leave of Absence | Family Medical Leave Act"/>
+			</ComboField>
+			<DateField name="StartDate"/>
+			<DateField name="EndDate"/>
+			<EditField name="Days" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about work availability schedules">
+			<ViewField name="WorkAvailabilityID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="WorkAvailabilityGroup"/>
+			<ViewField name="UnavailabilityCategory"/>
+			<ViewField name="StartDate"/>
+			<ViewField name="EndDate"/>
+			<ViewField name="Days"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about work availability schedules">
+			<ViewField name="WorkAvailabilityID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+			</OrgComboField>
+			<CodeComboField name="WorkAvailabilityGroupID">
+				<SampleItem ID="1" name="Salaried (executive)"/>
+				<SampleItem ID="2" name="Salaried (non-executive)"/>
+				<SampleItem ID="3" name="Hourly (non-union)"/>
+				<SampleItem ID="3" name="Hourly (union)"/>
+			</CodeComboField>
+			<ComboField name="UnavailabilityCategoryID" findMode="text">
+				<UpdateFieldRef name="WorkUnavailabilityTypeID"/>
+				<SampleItem ID="1" name="Holiday"/>
+				<SampleItem ID="2" name="Downtime"/>
+				<SampleItem ID="3" name="Absence"/>
+				<SampleItem ID="4" name="Leave of Absence"/>
+			</ComboField>
+			<ComboField name="WorkUnavailabilityTypeID" findMode="text" parentField="UnavailabilityCategoryID">
+				<SampleItem ID="1" name="Holiday | Christmas"/>
+				<SampleItem ID="2" name="Holiday | President's Day"/>
+				<SampleItem ID="3" name="Holiday | Labor Day"/>
+				<SampleItem ID="4" name="Holiday | Martin Luther King Day"/>
+			</ComboField>
+			<DateField name="StartDate"/>
+			<DateField name="EndDate"/>
+			<EditField name="Days" size="5" maxLength="5"/>
+			<ViewField name="CalcDays"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="orgwa" phrase="Work Availability">
+			<InvisibleField name="WorkAvailabilityID"/>
+			<ViewField name="WorkAvailabilityGroup" sample="Salaried (executive)"/>
+			<ViewField name="WorkUnavailabilityType" sample="Holiday | Christmas"/>
+			<ViewField name="Explanation" sample="All US based operations recognize Christmas as a national holiday"/>
+			<ViewField name="StartDate" sample="12/19/2004"/>
+			<ViewField name="EndDate" sample="12/26/2004"/>
+			<ViewField name="Days" sample="7"/>
+		</ViewGrid>
+		<EditGrid moduleID="orgwa" phrase="Work Availability">
+			<GridForm>
+				<InvisibleField name="WorkAvailabilityID"/>
+				<CodeComboField name="WorkAvailabilityGroupID" sample="Salaried (executive)">
+					<SampleItem ID="1" name="Salaried (executive)"/>
+					<SampleItem ID="2" name="Salaried (non-executive)"/>
+					<SampleItem ID="3" name="Hourly (non-union)"/>
+					<SampleItem ID="3" name="Hourly (union)"/>
+				</CodeComboField>
+				<CodeComboField name="WorkUnavailabilityTypeID" findMode="text" sample="Holiday | Christmas">
+					<SampleItem ID="1" name="Holiday | Christmas"/>
+					<SampleItem ID="2" name="Downtime | Scheduled Maintenance"/>
+					<SampleItem ID="3" name="Absence | Short Term Excused"/>
+					<SampleItem ID="4" name="Leave of Absence | Family Medical Leave Act"/>
+				</CodeComboField>
+				<EditField name="Explanation" sample="All US based operations recognize Christmas as a national holiday"/>
+				<DateField name="StartDate" sample="12/19/2004"/>
+				<DateField name="EndDate" sample="12/26/2004"/>
+				<ViewField name="Days" sample="7"/>
+			</GridForm>
+			<ViewField name="WorkAvailabilityGroup" sample="Salaried (executive)"/>
+			<ViewField name="WorkUnavailabilityType" sample="Holiday | Christmas"/>
+			<ViewField name="Explanation" sample="All US based operations recognize Christmas as a national holiday"/>
+			<ViewField name="StartDate" sample="12/19/2004"/>
+			<ViewField name="EndDate" sample="12/26/2004"/>
+			<ViewField name="Days" sample="7"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

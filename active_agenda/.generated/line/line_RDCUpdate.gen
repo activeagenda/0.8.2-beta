@@ -1,0 +1,79 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:952:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'line\' AS ModuleID,
+   line.EarningsID AS RecordID,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`org2`.Name,\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\')),\' | \'),\'\'),\' | \',IFNULL(ROUND(`line`.Amount, 2),\'\')),\' | \') AS Value,
+`lin1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `line`
+LEFT OUTER JOIN `rdc` ON (line.EarningsID = rdc.RecordID AND rdc.ModuleID = \'line\')
+   
+   LEFT OUTER JOIN `lin` AS lin1 
+   ON (`line`.LossInjuryID = `lin1`.LossInjuryID )
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`lin1`.LossInjuryID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'lin\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'44\')
+   LEFT OUTER JOIN `org` AS org2 
+   ON (`lin1`.OrganizationID = `org2`.OrganizationID )
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+WHERE line.EarningsID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:869:"UPDATE rdc
+INNER JOIN line ON (rdc.RecordID = line.EarningsID AND rdc.ModuleID = \'line\')
+   
+   LEFT OUTER JOIN `lin` AS lin1 
+   ON (`line`.LossInjuryID = `lin1`.LossInjuryID )
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`lin1`.LossInjuryID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'lin\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'44\')
+   LEFT OUTER JOIN `org` AS org2 
+   ON (`lin1`.OrganizationID = `org2`.OrganizationID )
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`org2`.Name,\'\'),\' | \',IFNULL(`ppl1`.DisplayName,\'\')),\' | \'),\'\'),\' | \',IFNULL(ROUND(`line`.Amount, 2),\'\')),\' | \'),
+rdc.OrganizationID = `lin1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'line\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

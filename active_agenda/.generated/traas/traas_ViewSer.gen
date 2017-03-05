@@ -1,0 +1,128 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'AttendeeSchedID' => gettext("Attendee ID|An automatically assigned number used to associate people with meetings"),
+   'CourseTitle' => gettext("Title|A brief name used to identify the course offering"),
+   'CourseCode' => gettext("Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods"),
+   'CourseDesc' => gettext("Description|A detailed description of the course"),
+   'ClassStartTime' => gettext("Start Time|The date and time the training class is scheduled to begin"),
+   'Attendee' => gettext("Attendee|The person attending the training class"),
+   'Punctualness' => gettext("Punctualness|The punctualness of the scheduled attendee"),
+   'Attentiveness' => gettext("Attentiveness|The attentiveness of the scheduled attendee"),
+   'AttendeeDetails' => gettext("Details|A description of any details associated with this person's attendance or failure to attend"),
+   'Completed' => gettext("Completed|Whether the attendee completed the course"),
+   'ValidityPeriod' => gettext("Validity Period|The amount of time that may pass before the training course satisfaction is no longer valid"),
+   'DaysRemaining' => gettext("Days Remaining|The total number of days remaining before the class will need to be refreshed by the attendee")
+   );
+
+
+    $sections = unserialize('a:1:{i:0;a:3:{s:6:"phrase";s:18:"Attendee Scheduled";s:3:"sql";s:3855:"SELECT 
+   `traas`.AttendeeSchedID,
+   `tra1`.CourseTitle AS CourseTitle,
+   `tra1`.CourseCode AS CourseCode,
+   `tra1`.CourseDesc AS CourseDesc,
+   `tracl1`.ClassStartTime AS ClassStartTime,
+   NULLIF(CONCAT(IFNULL(`ppl1`.DisplayName,\'\'),\' - \',IFNULL(`org2`.ShortName,\'\')),\' - \') AS Attendee,
+   `cod4`.Description AS Punctualness,
+   `cod5`.Description AS Attentiveness,
+   `traas`.AttendeeDetails,
+   `traas`.Completed,
+   NULLIF(CONCAT(IFNULL(`tra1`.Validity,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts2`.UnitName,\'\')),\'\'),\'\')),\' \') AS ValidityPeriod,
+   CASE WHEN DATEDIFF(CASE `tra1`.ValidityUnitID 
+                WHEN 48 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity SECOND)
+                WHEN 5 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity MINUTE)
+                WHEN 19 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity HOUR)
+                WHEN 53 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity DAY)
+                WHEN 54 THEN 
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL (7 * `tra1`.Validity) DAY)
+                WHEN 55 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity MONTH)
+                WHEN 56 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL (3 * `tra1`.Validity) MONTH)
+                WHEN 57 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity YEAR)
+                ELSE
+                    NULL
+                END, NOW()) > 0 THEN DATEDIFF(CASE `tra1`.ValidityUnitID 
+                WHEN 48 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity SECOND)
+                WHEN 5 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity MINUTE)
+                WHEN 19 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity HOUR)
+                WHEN 53 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity DAY)
+                WHEN 54 THEN 
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL (7 * `tra1`.Validity) DAY)
+                WHEN 55 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity MONTH)
+                WHEN 56 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL (3 * `tra1`.Validity) MONTH)
+                WHEN 57 THEN
+                    DATE_ADD(`tracl1`.ClassStartTime, INTERVAL `tra1`.Validity YEAR)
+                ELSE
+                    NULL
+                END, NOW()) ELSE 0 END AS DaysRemaining,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`ppl1`.DisplayName,\'\'),\' - \',IFNULL(`org2`.ShortName,\'\')),\' - \'),\'\'),\' | \',IFNULL(`tra1`.CourseTitle,\'\'),\' | \',IFNULL(`tracl1`.ClassStartTime,\'\')),\' |  | \') AS RecordLabel
+FROM `traas`
+   
+     LEFT OUTER JOIN `tracl` AS tracl1 
+   ON (`traas`.TrainingClassID = `tracl1`.TrainingClassID )
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`traas`.AttendeeSchedID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'traas\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'57\')
+     LEFT OUTER JOIN `cod` AS cod4 
+   ON (`traas`.PunctualnessID = `cod4`.CodeID 
+     AND `cod4`.CodeTypeID = \'216\')
+     LEFT OUTER JOIN `cod` AS cod5 
+   ON (`traas`.AttentivenessID = `cod5`.CodeID 
+     AND `cod5`.CodeTypeID = \'105\')
+     LEFT OUTER JOIN `tra` AS tra1 
+   ON (`tracl1`.CourseID = `tra1`.CourseID )
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `uts` AS uts2 
+   ON (`tra1`.ValidityUnitID = `uts2`.UnitID )
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`ppl1`.OrganizationID = `org2`.OrganizationID )
+WHERE
+   traas.AttendeeSchedID=\'/**RecordID**/\'";s:6:"fields";a:12:{s:15:"AttendeeSchedID";O:9:"viewfield":16:{s:4:"name";s:15:"AttendeeSchedID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"Attendee ID|An automatically assigned number used to associate people with meetings";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"CourseTitle";O:9:"viewfield":16:{s:4:"name";s:11:"CourseTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Title|A brief name used to identify the course offering";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"CourseCode";O:9:"viewfield":16:{s:4:"name";s:10:"CourseCode";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:156:"Course Code|A unique code used to identify a course offering. A course code can include numbers, letters and special characters; such as, dashes and periods";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"CourseDesc";O:9:"viewfield":16:{s:4:"name";s:10:"CourseDesc";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:48:"Description|A detailed description of the course";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ClassStartTime";O:9:"viewfield":16:{s:4:"name";s:14:"ClassStartTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Start Time|The date and time the training class is scheduled to begin";s:8:"dataType";s:4:"date";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Attendee";O:9:"viewfield":16:{s:4:"name";s:8:"Attendee";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:48:"Attendee|The person attending the training class";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Punctualness";O:9:"viewfield":16:{s:4:"name";s:12:"Punctualness";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Punctualness|The punctualness of the scheduled attendee";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"Attentiveness";O:9:"viewfield":16:{s:4:"name";s:13:"Attentiveness";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:57:"Attentiveness|The attentiveness of the scheduled attendee";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"AttendeeDetails";O:9:"viewfield":16:{s:4:"name";s:15:"AttendeeDetails";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Details|A description of any details associated with this person\'s attendance or failure to attend";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"Completed";O:9:"viewfield":16:{s:4:"name";s:9:"Completed";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:51:"Completed|Whether the attendee completed the course";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"ValidityPeriod";O:9:"viewfield":16:{s:4:"name";s:14:"ValidityPeriod";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:107:"Validity Period|The amount of time that may pass before the training course satisfaction is no longer valid";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"DaysRemaining";O:9:"viewfield":16:{s:4:"name";s:13:"DaysRemaining";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:108:"Days Remaining|The total number of days remaining before the class will need to be refreshed by the attendee";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}}');
+
+?>

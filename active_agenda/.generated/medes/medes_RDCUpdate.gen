@@ -1,0 +1,71 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:882:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'medes\' AS ModuleID,
+   medes.MedicalExamServiceID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`med1`.MedicalExamTitle,\'\'),\' | \',IFNULL(`cod2`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`medes`.SchedFreq,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts2`.UnitName,\'\')),\'\'),\'\')),\' \'),\'\')),\' |  | \') AS Value,
+`med1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `medes`
+LEFT OUTER JOIN `rdc` ON (medes.MedicalExamServiceID = rdc.RecordID AND rdc.ModuleID = \'medes\')
+   
+   LEFT OUTER JOIN `med` AS med1 
+   ON (`medes`.MedicalExamID = `med1`.MedicalExamID )
+   LEFT OUTER JOIN `uts` AS uts2 
+   ON (`medes`.SchedFreqUnitsID = `uts2`.UnitID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`medes`.ExamServiceID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'110\')
+WHERE medes.MedicalExamServiceID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:777:"UPDATE rdc
+INNER JOIN medes ON (rdc.RecordID = medes.MedicalExamServiceID AND rdc.ModuleID = \'medes\')
+   
+   LEFT OUTER JOIN `med` AS med1 
+   ON (`medes`.MedicalExamID = `med1`.MedicalExamID )
+   LEFT OUTER JOIN `uts` AS uts2 
+   ON (`medes`.SchedFreqUnitsID = `uts2`.UnitID )
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`medes`.ExamServiceID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'110\')
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`med1`.MedicalExamTitle,\'\'),\' | \',IFNULL(`cod2`.Description,\'\'),\' | \',IFNULL(NULLIF(CONCAT(IFNULL(`medes`.SchedFreq,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts2`.UnitName,\'\')),\'\'),\'\')),\' \'),\'\')),\' |  | \'),
+rdc.OrganizationID = `med1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'medes\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

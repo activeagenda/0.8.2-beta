@@ -1,0 +1,574 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Claims" moduleID="clm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Claim" pluralRecordName="Claims" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="ClaimID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track claims related to a specific loss" sample="11"/>
+        <!-- RELATED LOSS RECORD FIELDS (BEGIN) -->
+        <TableField name="IncidentReportID" type="int" validate="noValidation" phrase="Incident Report|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="11"/>
+        <ForeignField name="EventDate" type="datetime" foreignTable="ire" foreignKey="IncidentReportID" foreignField="EventDate" key="IncidentReportID" joinType="left" phrase="Event Date|Date the situation or incident occurred" sample="01/01/2004"/>
+        <ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Reported|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="Clovis; 10-28-2003; Stormwater Release to Dry Creek Irrigation Canal"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" phrase="Related Module ID|The ModuleID of the Loss Module that this claim refers to" sample="len"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Loss Module|The name or title of the module which is associated with the claim" sample="Environmental Loss"/>
+        <TableField name="RelatedRecordID" type="int" phrase="Related Record ID|The record id of the loss record that this claim refers to" sample="11"/>
+        <DynamicForeignField name="RelatedRecord" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Loss Record Description|A description of the related loss record based on a combination of field values assigned from within the related module" sample=""/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Dan Zahlis | 11-14-2005 | Written Warning"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Related Loss Organization|The name of the organization associated with the related loss record" sample="1"/>
+        <ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The organization responsible for the location where this release occurred" sample="Active Agenda, HQ"/>
+        <!-- RELATED LOSS RECORD FIELDS (END) -->
+        <!-- CLAIM PROPERTIES (BEGIN) -->
+        <RemoteField name="ReportDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="32" phrase="Report Date|Date the loss was reported" sample="01/01/2004"/>
+        <RemoteField name="PersonReportingID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="53" phrase="Person Reporting|The name of the individual that reported the environmental loss" sample="1"/>
+        <ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the environmental loss" sample="Jane Doe"/>
+        <TableField name="TimeDeterminable" type="bool" validate="noValidation" dbFlags="default 1" phrase="Time Determinable?|Whether the time the loss occurred is determinable" sample="Yes"/>
+        <RemoteField name="IncurredTime" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="34" phrase="Incurred Date|Date the loss was incurred" sample="01/01/2004"/>
+        <RecordMetaField name="SubmittedByID" type="int" lookupType="created" returnType="userID" phrase="Entry Date|Date the loss was first entered into the system" sample="01/01/2004"/>
+        <ForeignField name="SubmittedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SubmittedByID" joinType="left" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="Jane Doe"/>
+        <RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="Entry Date|Date the loss was first entered into the system" sample="01/01/2004"/>
+        <TableField name="PolicyID" type="int" validate="RequireSelection" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="1"/>
+        <ForeignField name="InsuranceTypeID" foreignTable="ins" foreignKey="PolicyID" foreignField="InsuranceTypeID" key="PolicyID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="1"/>
+        <ForeignField name="InsuranceCategoryID" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceCategoryID" key="InsuranceTypeID" joinType="left" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="1"/>
+        <CodeField name="InsuranceCategory" key="InsuranceCategoryID" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="Property" codeTypeID="3"/>
+        <ForeignField name="InsuranceType" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceType" key="InsuranceTypeID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="Active Agenda, HQ"/>
+        <ForeignField name="IntegrationKey" foreignTable="ins" foreignKey="PolicyID" foreignField="IntegrationKey" key="PolicyID" joinType="left" phrase="Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization" sample="DFC2004DFN001"/>
+        <ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+        <RemoteField name="ClaimDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="35" phrase="Claim Date|Date the claim was officially submitted to an insurance carrier or third party administrator" sample="01/01/2004"/>
+        <TableField name="ClaimNumber" type="varchar(50)" validate="noValidation" phrase="Claim Number|A unique number assigned by an insurance company or third party administrator responsible for managing the claim" sample="03-001-6717"/>
+        <RemoteField name="ClaimsAdjusterID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="179" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="1"/>
+        <ForeignField name="ClaimsAdjuster" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ClaimsAdjusterID" joinType="left" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+        <!--Location Section (Begin) -->
+        <TableField name="OnCoPropID" type="int" validate="RequireSelection" phrase="On Company Property|This box should be checked if the release occurred on company property" sample="1"/>
+        <CodeField name="OnCoProp" key="OnCoPropID" phrase="On Company Property|This box should be checked if the release occurred on company property" sample="Yes" codeTypeID="8"/>
+        <RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the environmental release occurred" sample="1"/>
+        <ForeignField name="LocationOrganizationID" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="LocationID" joinType="left" phrase="Organization|The name of the organization associated with the loss location" sample="1"/>
+        <ForeignField name="LocationOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="LocationOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the loss location" sample="Active Agenda, HQ"/>
+        <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the environmental release occurred" sample="Packaging Area"/>
+        <RemoteField name="LocalClaimManagerID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="178" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="1"/>
+        <ForeignField name="LocalClaimManager" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LocalClaimManagerID" joinType="left" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+        <TableField name="IncurredLocationDesc" type="varchar(255)" validate="noValidation" phrase="Location Description|A detailed description of the location where the release occurred" sample="7-Eleven retail establishment. Backstock freezer"/>
+        <TableField name="IncurredAddress1" type="varchar(50)" validate="noValidation" phrase="Incurred Address|First physical street address of the location where the environmental loss occurred" sample="836 Cherry Lane"/>
+        <TableField name="IncurredAddress2" type="varchar(50)" validate="noValidation" phrase="Incurred Address|Second physical street address of the location where the environmental loss occurred; such as, suite number or p.o. box" sample="Suite 101"/>
+        <TableField name="IncurredCountyID" type="int" validate="RequireSelection" dbFlags="unsigned" phrase="Incurred County|A combined field used to track and associate counties" sample="1"/>
+        <ForeignField name="IncurredCountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="IncurredStateID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="1"/>
+        <ForeignField name="IncurredCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="CountryName" key="IncurredCountryID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="United States of America (USA)"/>
+        <ForeignField name="IncurredStateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="IncurredCountyID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="1"/>
+        <ForeignField name="IncurredState" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="StateName" key="IncurredStateID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="California (CA)"/>
+        <ForeignField name="IncurredCounty" foreignTable="cti" foreignKey="CountyID" foreignField="CountyName" key="IncurredCountyID" joinType="left" phrase="Incurred County|A combined field used to track and associate counties" sample="Fresno"/>
+        <TableField name="IncurredCity" type="varchar(50)" validate="noValidation" phrase="Incurred City|City where the release occurred" sample="Clovis"/>
+        <TableField name="IncurredPostalCode" type="varchar(50)" validate="noValidation" phrase="Incurred Postal Code|Postal code used to direct mail to the physical street address where the release occurred" sample="93612"/>
+        <!--Location Section (End)-->
+        <!-- Loss Status Section (Begin)-->
+        <TableField name="LossStatusTypeID" type="int" validate="RequireSelection" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="1"/>
+        <ForeignField name="LossStatusCategoryID" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusCategoryID" key="LossStatusTypeID" joinType="left" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="1"/>
+        <CodeField name="LossStatusCategory" key="LossStatusCategoryID" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="Open" codeTypeID="9"/>
+        <ForeignField name="LossStatusType" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusType" key="LossStatusTypeID" joinType="left" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="Open: Active"/>
+        <ForeignField name="GeneralLossStatusDescription" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusDescription" key="LossStatusTypeID" joinType="left" phrase="General Status Description|A detailed description of the loss status type" sample="Claims of loss that are open and the claimant is actively seeking treatment and/or engaging the adjuster towards a resolution"/>
+        <TableField name="SpecificLossStatusDescription" type="text" validate="noValidation" phrase="Specific Status Description|A detailed description of the status of the specific claim of loss" sample="The settlement offer is under consideration by the claimant. We offer a settlement every six months and the claimant has indicated a desire to settle the claim this time."/>
+        <RemoteField name="ClosureDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="33" phrase="Claim Closure Date|The date the claim was closed" sample="01/01/2004"/>
+        <!-- Loss Status Section (Begin)-->
+        <!-- Legitimacy Section (Begin)-->
+        <RemoteField name="LossLegitimacyTypeID" validate="noValidation" remoteModuleID="lli" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LossLegitimacyTypeID" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="1"/>
+        <ForeignField name="LegitimacyCategoryID" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyCategoryID" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="1"/>
+        <CodeField name="LegitimacyCategory" key="LegitimacyCategoryID" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="Legitimate" codeTypeID="191"/>
+        <ForeignField name="LegitimacyDesc" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyDesc" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Description|A brief, but detailed, description of the legitimacy type" sample="Any loss claim that results from an indisputable, work-related, injury and the injured person is actively engaged in proactive treatment towards revovery."/>
+        <ForeignField name="LossLegitimacyType" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LossLegitimacyType" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="Legitimate | Clear Liability; Active Treatment"/>
+        <!--Legitimacy Section (End)-->
+        <!-- Date calculations (Begin) -->
+        <CalculatedField name="ReportDelay" type="int" calcFunction="timediff" params="ReportDate IncurredTime" validate="" phrase="Loss Report Delay|A calculated field based on the amount of time between the date the loss was incurred and the date the loss was reported" sample="30"/>
+        <CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate ReportDate" validate="" phrase="System Entry Delay|A calculated field based on the amount of time between the date the loss was reported and the date the loss was entered into the system" sample="30"/>
+        <CalculatedField name="ClaimDelay" type="int" calcFunction="timediff" params="ClaimDate IncurredTime" validate="" phrase="Claim Delay|A calculated field based on the amount of time between the incurred date and the date the claim was formally submitted" sample="30"/>
+        <CalculatedField name="ClosureDelay" type="int" calcFunction="datediff" params="ClosureDate IncurredTime" validate="" phrase="Claim Closure Delay|A calculated field based on the amount of time between the incurred date and the claim closure date" sample="30"/>
+        <CalculatedField name="IncurredDelay" type="int" calcFunction="datediff" params="IncurredTime EventDate" validate="" phrase="Loss Delay|A calculated field based on the amount of time between the date the event occurred and the loss was incurred" sample="30"/>
+        <!-- Date calculations (End) -->
+        <!-- CLAIM PROPERTIES (END) -->
+        <!--Calculations and summary fields-->
+        <SummaryField name="InsurancePolicies" summaryFunction="list" summaryField="Policy" summaryKey="RelatedRecordID" summaryModuleID="insa" summaryCondition="RelatedModuleID = 'clm'" localKey="ClaimID" phrase="Insurance Policies|A list of insurance policies associated with the loss" sample="CIGNA - 882727 - expires 09-23-2005"/>
+        <SummaryField name="LatestLossCostID" summaryFunction="lco_latest_id" summaryField="LossCostID" summaryKey="ClaimID" summaryModuleID="lco" localKey="ClaimID"/>
+        <ForeignField name="LatestValuationDate" type="date" foreignTable="lco" foreignKey="LossCostID" foreignField="ValuationDate" key="LatestLossCostID" joinType="left" phrase="Latest Valuation|The date of the latest valuation for this loss item" sample="2006-12-10"/>
+        <SummaryField name="RelatedCosts" type="money" summaryFunction="sum" summaryField="Incurred" summaryKey="RelatedRecordID" RelatedModuleID="clm" summaryModuleID="cos" localKey="ClaimID" phrase="Other Costs Incurred|The total estimated amount of non-claims costs associated with this loss" sample="702.00"/>
+        <CalculatedField name="TotalCost" type="money" calcFunction="add" params="TotalIncurred RelatedCosts" phrase="Total Costs Incurred|The total loss cost to date as stated in the currency of assigned to the site. The total loss cost includes claims costs and costs to manage or mitigate the loss" sample="702.00"/>
+        <SummaryField name="TotalIncurred" type="money" validate="noValidation" summaryFunction="sum" summaryField="Incurred" localKey="LatestLossCostID" summaryKey="LossCostID" summaryModuleID="lcod" phrase="Claim Costs Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+        <SummaryField name="TotalPayments" type="money" validate="noValidation" summaryFunction="sum" summaryField="Payments" localKey="LatestLossCostID" summaryKey="LossCostID" summaryModuleID="lcod" phrase="Claim Paid|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+        <CalculatedField name="TotalOutstanding" type="money" calcFunction="subtract" params="TotalIncurred TotalPayments" phrase="Claim Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts" sample="702.00"/>
+        <!--Calculations and summary fields-->
+        <LinkField name="SourceRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <!--Combined field section (Begin) -->
+        <CombinedField name="IncurredDelayCalc" phrase="Loss Delay|A calculated field based on the amount of time between the date the event occurred and the loss was incurred" sample="30 Hours"><CombinedFieldRef name="IncurredDelay"/>_Hours</CombinedField>
+        <CombinedField name="ReportDelayCalc" phrase="Loss Report Delay|A calculated field based on the amount of time between the date the loss was incurred and the date the loss was reported" sample="30 Hours"><CombinedFieldRef name="ReportDelay"/>_Hours</CombinedField>
+        <CombinedField name="EntryDelayCalc" phrase="System Entry Delay|A calculated field based on the amount of time between the date the loss was reported and the date the loss was entered into the system" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours</CombinedField>
+        <CombinedField name="ClaimDelayCalc" phrase="Claim Delay|A calculated field based on the amount of time between the incurred date and the date the claim was formally submitted" sample="30 Hours"><CombinedFieldRef name="ClaimDelay"/>_Hours</CombinedField>
+        <CombinedField name="ClosureDelayCalc" phrase="Claim Closure Delay|A calculated field based on the amount of time between the incurred date and the claim closure date" sample="30 Hours"><CombinedFieldRef name="ClosureDelay"/>_Days</CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="EventDate"/></CombinedField>
+        <CombinedField name="Claim" phrase="Claim|A combined field used to describe this claim when associating it with other records" sample="Storm Water; Benzene; Active Agenda, HQ; Packaging Area; 02-22-2004"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="OwnerOrganization"/></CombinedField>
+        <!--Combined field section (End) -->
+    </ModuleFields>
+    <ModuleInfo>
+        <!--ADD TRIGGER: look at docr and add corresponding records to docs based on all documentation requirements which meet the following criteria: Same OrganizationID and same ModuleID-->
+        <PrimaryKey>
+            <FieldRef name="ClaimID"/>
+        </PrimaryKey>
+        <OwnerField name="OwnerOrganizationID"/>
+        <RecordDescriptionField name="Claim"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="lco" name="Loss Costs" parentKey="ClaimID" localKey="ClaimID"/>
+        <SubModule moduleID="lcod" name="Loss Cost Details">
+            <SubModuleCondition field="ClaimID" value="[*ClaimID*]"/>
+        </SubModule>
+        <SubModule moduleID="insa" name="Insurance Policies" parentKey="ClaimID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="clm"/>
+        </SubModule>
+        <SubModule moduleID="lch" name="Loss Characteristics" parentKey="ClaimID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="clm"/>
+        </SubModule>
+        <SubModule moduleID="cos" name="Related Costs" parentKey="ClaimID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="clm"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List claims">
+            <ListField name="ClaimID" phrase="Record ID"/>
+            <ListField name="IncidentReportID" phrase="Incident ID" align="center"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="ClaimDate" phrase="Claim Date"/>
+            <ListField name="TotalIncurred" phrase="Incurred"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search claims">
+            <ComboField name="IncidentReportID" findMode="text">
+                <SampleItem ID="1" name="Clovis; 10-28-2003; Discrimination Claim"/>
+                <SampleItem ID="2" name="Clovis; 10-18-2004; Ammonia Release"/>
+                <SampleItem ID="3" name="Latvia; 10-08-2003; Severe Injury from Forklift"/>
+                <SampleItem ID="4" name="Sweden; 10-12-2002; Hostile Workplace Claim"/>
+                <SampleItem ID="5" name="Sweden; 10-24-2001; Theft of LCD Projector"/>
+            </ComboField>
+            <EditField name="IncurredDelay" size="5" maxLength="5"/>
+            <EditField name="ReportDelay" size="5" maxLength="5"/>
+            <EditField name="EntryDelay" size="5" maxLength="5"/>
+            <EditField name="ClaimDelay" size="5" maxLength="5"/>
+            <EditField name="ClosureDelay" size="5" maxLength="5"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the claim">
+            <ViewField name="ClaimID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentReport"/>
+            <ViewField name="RelatedModule" link="SourceRecordLink"/>
+            <ViewField name="RelatedRecord"/>
+            <ViewField name="OwnerOrganization"/>
+            <ViewField name="EventDate"/>
+            <ViewField name="IncurredTime"/>
+            <ViewField name="ReportDate"/>
+            <ViewField name="EntryDate"/>
+            <ViewField name="SubmittedBy"/>
+            <ViewField name="ClaimDate"/>
+            <ViewField name="ClosureDate"/>
+            <ViewField name="PersonReporting"/>
+            <ViewField name="Policy"/>
+            <ViewField name="IntegrationKey"/>
+            <ViewField name="ClaimNumber"/>
+            <ViewField name="ClaimsAdjuster"/>
+            <ViewField name="LatestValuationDate"/>
+            <ViewField name="RelatedCosts"/>
+            <ViewField name="TotalCost"/>
+            <ViewField name="TotalIncurred"/>
+            <ViewField name="TotalPayments"/>
+            <ViewField name="TotalOutstanding"/>
+            <ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+                <ViewField name="EventDate"/>
+                <ViewField name="IncurredTime"/>
+                <ViewField name="IncurredDelayCalc"/>
+                <ViewField name="ReportDate"/>
+                <ViewField name="ReportDelayCalc"/>
+                <ViewField name="EntryDate"/>
+                <ViewField name="EntryDelayCalc"/>
+                <ViewField name="ClaimDate"/>
+                <ViewField name="ClaimDelayCalc"/>
+                <ViewField name="ClosureDate"/>
+                <ViewField name="ClosureDelayCalc"/>
+            </ViewScreenSection>
+            <ViewGrid moduleID="lco"/>
+            <ViewGrid moduleID="lch"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the claim">
+            <ViewField name="ClaimID"/>
+            <ViewField name="IncidentReportID"/>
+            <ViewField name="IncidentReport"/>
+            <ViewField name="EventDate"/>
+            <ViewField name="RelatedModule" link="SourceRecordLink"/>
+            <ViewField name="RelatedRecord"/>
+            <ViewField name="OwnerOrganization"/>
+            <ViewField name="LatestValuationDate"/>
+            <ViewField name="RelatedCosts"/>
+            <ViewField name="TotalCost"/>
+            <ViewField name="TotalIncurred"/>
+            <ViewField name="TotalPayments"/>
+            <ViewField name="TotalOutstanding"/>
+            <DateField name="IncurredTime"/>
+            <DateField name="ClaimDate"/>
+            <DateField name="ReportDate"/>
+            <PersonComboField name="PersonReportingID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ViewField name="EntryDate"/>
+            <ViewField name="SubmittedBy"/>
+            <CodeComboField name="InsuranceCategoryID" findMode="text">
+                <UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+                <SampleItem ID="1" name="Subrogation (claim made)"/>
+                <SampleItem ID="2" name="Subrogation (claim received)"/>
+                <SampleItem ID="3" name="Coverage"/>
+                <SampleItem ID="4" name="Denial"/>
+            </CodeComboField>
+            <ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+                <UpdateFieldRef name="PolicyID"/>
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </ComboField>
+            <ComboField name="PolicyID" findMode="text" parentField="InsuranceTypeID">
+                <UpdateFieldRef name="IntegrationKey"/>
+                <SampleItem ID="1" name="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+                <SampleItem ID="2" name="General Liability; Zurich; GL-193-03; Active Agenda, HQ; 03-02-2002, 03-02-2003"/>
+                <SampleItem ID="3" name="General Liability; AIG; GL-39-2003; Active Agenda, HQ; 03-02-2001, 03-02-2002"/>
+                <SampleItem ID="4" name="General Liability; Fireman's Fund; GL-2003-837; Active Agenda, HQ; 03-02-2000, 03-02-2001"/>
+            </ComboField>
+            <ViewField name="IntegrationKey" parentField="PolicyID"/>
+            <EditField name="ClaimNumber" size="50" maxLength="50"/>
+            <PersonComboField name="ClaimsAdjusterID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+        </EditScreen>
+        <EditScreen name="LossLocation" phrase="Location|Edit summary information about the claim location">
+            <CodeRadioField name="OnCoPropID" orientation="vertical">
+                <SampleItem ID="1" name="Yes"/>
+                <SampleItem ID="2" name="No"/>
+                <SampleItem ID="3" name="On and Off Company Property"/>
+            </CodeRadioField>
+            <OrgComboField name="LocationOrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="LocationOrganizationID">
+                <SampleItem ID="1" name="Document Storage Room"/>
+                <SampleItem ID="3" name="Shipping Office"/>
+                <SampleItem ID="5" name="Administration Break Room"/>
+                <SampleItem ID="7" name="Dry Warehouse"/>
+            </ComboField>
+            <PersonComboField name="LocalClaimManagerID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <MemoField name="IncurredLocationDesc" cols="75" rows="5"/>
+            <EditField name="IncurredAddress1" size="30" maxLength="50"/>
+            <EditField name="IncurredAddress2" size="30" maxLength="50"/>
+            <ComboField name="IncurredCountryID" findMode="text">
+                <UpdateFieldRef name="IncurredStateID"/>
+                <SampleItem ID="1" name="United States of America (USA)"/>
+                <SampleItem ID="2" name="Sweden (SWE)"/>
+                <SampleItem ID="3" name="Latvia (LAT)"/>
+                <SampleItem ID="4" name="Chile (CHI)"/>
+                <SampleItem ID="5" name="Denmark (DEN)"/>
+                <SampleItem ID="6" name="Equador (EQU)"/>
+            </ComboField>
+            <ComboField name="IncurredStateID" findMode="text" parentField="IncurredCountryID">
+                <UpdateFieldRef name="IncurredCountyID"/>
+                <SampleItem ID="1" name="California (CA)"/>
+                <SampleItem ID="2" name="Arizona (AZ)"/>
+                <SampleItem ID="3" name="Oregon (OR)"/>
+                <SampleItem ID="4" name="Nevada (NV)"/>
+                <SampleItem ID="5" name="New Mexico (NM)"/>
+                <SampleItem ID="6" name="Washington (WA)"/>
+            </ComboField>
+            <ComboField name="IncurredCountyID" findMode="text" parentField="IncurredStateID">
+                <SampleItem ID="1" name="Fresno"/>
+                <SampleItem ID="2" name="Bakersfield"/>
+                <SampleItem ID="3" name="Los Angeles"/>
+                <SampleItem ID="4" name="Orange"/>
+                <SampleItem ID="5" name="Riverside"/>
+                <SampleItem ID="6" name="San Diego"/>
+            </ComboField>
+            <EditField name="IncurredCity" size="30" maxLength="50"/>
+            <EditField name="IncurredPostalCode" size="30" maxLength="50"/>
+        </EditScreen>
+        <EditScreen name="LossStatus" phrase="Status|Edit summary information about the claim status">
+            <RecordSummaryFieldsRef/>
+            <CodeComboField name="LossStatusCategoryID" findMode="text">
+                <UpdateFieldRef name="LossStatusTypeID"/>
+                <SampleItem ID="1" name="Open"/>
+                <SampleItem ID="2" name="Closed"/>
+                <SampleItem ID="3" name="Under Consideration"/>
+                <SampleItem ID="4" name="Denied"/>
+            </CodeComboField>
+            <ComboField name="LossStatusTypeID" findMode="text" parentField="LossStatusCategoryID">
+                <UpdateFieldRef name="GeneralLossStatusDescription"/>
+                <SampleItem ID="1" name="Open: Active"/>
+                <SampleItem ID="2" name="Open: Inactive"/>
+                <SampleItem ID="3" name="Open: Awaiting Subrogation"/>
+            </ComboField>
+            <ViewField name="GeneralLossStatusDescription" parentField="LossStatusTypeID"/>
+            <MemoField name="SpecificLossStatusDescription" rows="5" cols="75"/>
+            <DateField name="ClosureDate"/>
+        </EditScreen>
+        <EditScreen name="LossLegitimacy" phrase="Legitimacy|Edit summary information about the claim legitimacy">
+            <RecordSummaryFieldsRef/>
+            <CodeComboField name="LegitimacyCategoryID" findMode="text">
+                <UpdateFieldRef name="LossLegitimacyTypeID"/>
+                <SampleItem ID="1" name="Legitimate"/>
+                <SampleItem ID="2" name="Questionable"/>
+                <SampleItem ID="3" name="Abusive"/>
+                <SampleItem ID="4" name="Fraudulent"/>
+            </CodeComboField>
+            <ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+                <UpdateFieldRef name="LegitimacyDesc"/>
+                <SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+                <SampleItem ID="2" name="Clear Liability; Malingering"/>
+            </ComboField>
+            <ViewField name="LegitimacyDesc" parentField="LossLegitimacyTypeID"/>
+        </EditScreen>
+        <EditScreen name="LossCosts" phrase="Claim Costs|Associate claim costs with the claim">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="lco"/>
+        </EditScreen>
+        <EditScreen name="Characteristics" phrase="Characteristics|Associate claim characteristics with the claim">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="lch"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="ClaimID"/>
+        <ViewField name="IncidentReportID"/>
+        <ViewField name="IncidentReport"/>
+        <ViewField name="RelatedModule" link="SourceRecordLink"/>
+        <ViewField name="RelatedRecord"/>
+        <ViewField name="OwnerOrganization"/>
+        <ViewField name="EventDate"/>
+        <ViewField name="IncurredTime"/>
+        <ViewField name="ReportDate"/>
+        <ViewField name="EntryDate"/>
+        <ViewField name="SubmittedBy"/>
+        <ViewField name="ClaimDate"/>
+        <ViewField name="ClosureDate"/>
+        <ViewField name="PersonReporting"/>
+        <ViewField name="Policy"/>
+        <ViewField name="IntegrationKey"/>
+        <ViewField name="ClaimNumber"/>
+        <ViewField name="ClaimsAdjuster"/>
+        <ViewField name="LatestValuationDate"/>
+        <ViewField name="RelatedCosts"/>
+        <ViewField name="TotalCost"/>
+        <ViewField name="TotalIncurred"/>
+        <ViewField name="TotalPayments"/>
+        <ViewField name="TotalOutstanding"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="clm" phrase="Claim Details">
+            <InvisibleField name="ClaimID"/>
+            <ViewField name="IncurredTime" sample="10:22 a.m."/>
+            <ViewField name="ClaimNumber" sample="9928827"/>
+            <ViewField name="ClaimsAdjuster" sample="Willamena Henrietta"/>
+        </ViewGrid>
+        <EditGrid moduleID="clm" phrase="Claim Details">
+            <GridForm>
+                <InvisibleField name="ClaimID"/>
+                <DateField name="IncurredTime"/>
+                <DateField name="ClaimDate"/>
+                <DateField name="ReportDate"/>
+                <PersonComboField name="PersonReportingID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+                <CodeComboField name="InsuranceCategoryID" findMode="text">
+                    <UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+                    <SampleItem ID="1" name="Subrogation (claim made)"/>
+                    <SampleItem ID="2" name="Subrogation (claim received)"/>
+                    <SampleItem ID="3" name="Coverage"/>
+                    <SampleItem ID="4" name="Denial"/>
+                </CodeComboField>
+                <ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+                    <UpdateFieldRef name="PolicyID"/>
+                    <SampleItem ID="1" name="General Liability"/>
+                    <SampleItem ID="3" name="Auto Liability"/>
+                    <SampleItem ID="5" name="Products Liability"/>
+                    <SampleItem ID="7" name="Employment Practices Liability"/>
+                    <SampleItem ID="9" name="Workers' Compensation'"/>
+                    <SampleItem ID="11" name="Pollution Liability"/>
+                </ComboField>
+                <ComboField name="PolicyID" findMode="text" parentField="InsuranceTypeID">
+                    <UpdateFieldRef name="IntegrationKey"/>
+                    <SampleItem ID="1" name="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+                    <SampleItem ID="2" name="General Liability; Zurich; GL-193-03; Active Agenda, HQ; 03-02-2002, 03-02-2003"/>
+                    <SampleItem ID="3" name="General Liability; AIG; GL-39-2003; Active Agenda, HQ; 03-02-2001, 03-02-2002"/>
+                    <SampleItem ID="4" name="General Liability; Fireman's Fund; GL-2003-837; Active Agenda, HQ; 03-02-2000, 03-02-2001"/>
+                </ComboField>
+                <EditField name="ClaimNumber" size="50" maxLength="50"/>
+                <PersonComboField name="ClaimsAdjusterID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+                </PersonComboField>
+            </GridForm>
+            <InvisibleField name="ClaimID"/>
+            <ViewField name="IncurredTime" sample="10:22 a.m."/>
+            <ViewField name="ClaimNumber" sample="9928827"/>
+            <ViewField name="ClaimsAdjuster" sample="Willamena Henrietta"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Claims By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Claims By Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Claims By Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Claims By Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Claims By Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Claims By Policy">
+            <GroupByField name="Policy"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Claims By Local Claim Manager">
+            <GroupByField name="LocalClaimManager"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Claims By Local Claim Manager">
+            <GroupByField name="LocalClaimManager"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Claims By Claims Adjuster">
+            <GroupByField name="ClaimsAdjuster"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Claims By Claims Adjuster">
+            <GroupByField name="ClaimsAdjuster"/>
+            <SummaryField name="ClaimID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

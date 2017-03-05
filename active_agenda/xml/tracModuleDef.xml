@@ -1,0 +1,301 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Certifications" moduleID="trac" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Certification" pluralRecordName="Certifications" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="CertificationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate certifications with training courses" sample="11"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for managing this certification throughout the enterprise" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for managing this certification throughout the enterprise" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="86" phrase="Person Accountable|The individual assigned primary responsibility for maintaining the currency of this certification and its requirements throughout the organization" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary responsibility for maintaining the currency of this certification and its requirements throughout the organization" sample="Mattias Thorslund"/>
+		<TableField name="CertificationTypeID" type="int" validate="RequireSelection" phrase="Certification Type|The type of certification offered by the organization" sample="1"/>
+		<CodeField name="CertificationType" key="CertificationTypeID" phrase="Certification Type|The type of certification offered by the organization" sample="Health and Safety" codeTypeID="33"/>
+		<TableField name="CertificationTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A brief name used to identify the certification offered" sample="CPR and First Aid"/>
+		<TableField name="CertificationDesc" type="text" validate="noValidation" phrase="Description|A detailed description of the certification offered" sample="CPR and First Aid is required by the US Occupational Safety and Health Administration (OSHA). OSHA requires that at least one person be trained in CPR and First Aid for each each shift an employer works. OSHA requires trainees to attend a course offered by the American Red Cross, the American Heart Association or equivalent course"/>
+		<TableField name="CertificationDuration" type="float" validate="Number notEmpty notZero notNegative" phrase="Duration|The value associated with the duration of the certification before retraining or recertification is required" sample="1"/>
+		<TableField name="CertificationDurationUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="CertificationDurationUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="CertificationDurationUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="CertificationDurationUnitCategory" key="CertificationDurationUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="CertificationDurationUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="CertificationDurationUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'trac'" localKey="CertificationID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="CertificationPeriod" phrase="Certification Period|The period of time the certification covers until it must be renewed" sample="CPR and First Aid"><CombinedFieldRef name="CertificationDuration"/>_<CombinedFieldRef name="CertificationDurationUnits"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="CertificationType"/>;_<CombinedFieldRef name="CertificationTitle"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Certification" phrase="Certification|A combined field used to describe this certification when associating it with other records" sample="CPR and First Aid"><CombinedFieldRef name="CertificationTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="CertificationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Certification"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="tracp" name="Training Certification Prerequisites" parentKey="CertificationID" localKey="CertificationID"/>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="CertificationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trac"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="CertificationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="trac"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List training certifications">
+			<ListField name="CertificationID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="CertificationType" phrase="Type"/>
+			<ListField name="CertificationTitle" phrase="Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search training certifications">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CertificationTypeID" findMode="text">
+				<SampleItem ID="1" name="Health and Safety"/>
+				<SampleItem ID="2" name="Hazard Analysis of Critical Control Points"/>
+				<SampleItem ID="3" name="Hazardous Waste"/>
+			</CodeComboField>
+			<EditField name="CertificationTitle" size="75" maxLength="128"/>
+			<MemoField name="CertificationDesc" rows="5" cols="75"/>
+			<EditField name="CertificationDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="CertificationDurationUnitCategoryID">
+					<UpdateFieldRef name="CertificationDurationUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="CertificationDurationUnitsID" parentField="CertificationDurationUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a training certification">
+			<ViewField name="CertificationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="CertificationType"/>
+			<ViewField name="CertificationTitle"/>
+			<ViewField name="CertificationDesc"/>
+			<ViewField name="CertificationPeriod"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewGrid moduleID="tracp"/>
+			<ViewGrid moduleID="rega"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a training certification">
+			<ViewField name="CertificationID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="CertificationTypeID" findMode="text">
+				<SampleItem ID="1" name="Health and Safety"/>
+				<SampleItem ID="2" name="Hazard Analysis of Critical Control Points"/>
+				<SampleItem ID="3" name="Hazardous Waste"/>
+			</CodeComboField>
+			<EditField name="CertificationTitle" size="75" maxLength="128"/>
+			<MemoField name="CertificationDesc" rows="5" cols="75"/>
+			<EditField name="CertificationDuration" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="CertificationDurationUnitCategoryID">
+					<UpdateFieldRef name="CertificationDurationUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="CertificationDurationUnitsID" parentField="CertificationDurationUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+		</EditScreen>
+		<EditScreen name="Prerequisites" phrase="Prerequisites|Associate training course prerequisites with a training certification">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tracp"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with a training certification">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a training certification">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="CertificationID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="CertificationType"/>
+		<ViewField name="CertificationTitle"/>
+		<ViewField name="CertificationDesc"/>
+		<ViewField name="CertificationPeriod"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Certifications By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Certifications By Certification Type">
+			<GroupByField name="CertificationType"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Certifications By Certification Type">
+			<GroupByField name="CertificationType"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Certifications By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Certifications By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Certifications By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Certifications By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="CertificationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

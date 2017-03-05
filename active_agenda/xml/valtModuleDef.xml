@@ -1,0 +1,458 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Values Threats" moduleID="valt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Values Threat" pluralRecordName="Values Threats" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="ThreatID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track reported hazards" sample="11"/>
+		<TableField name="SharedValueID" type="int" listType="allParticipants" validate="RequireSelection" phrase="Threatened Value|A combined field used to describe this shared value when associating it with other records" sample="1"/>
+		<ForeignField name="ValueID" foreignTable="vals" foreignKey="SharedValueID" foreignField="ValueID" key="SharedValueID" joinType="left" phrase="Value|A combined field used to describe this value when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" defaultValue="defaultorgID" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharingOrganizationID" key="SharedValueID" joinType="left" phrase="Threatened Organization|The name of the organization at risk of sustaining a values threat" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Threatened Organization|The name of the organization at risk of sustaining a values threat" sample="Active Agenda, Inc."/>
+		<ForeignField name="SharedValue" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharedValue" key="SharedValueID" joinType="left" phrase="Threatened Value|A combined field used to describe this shared value when associating it with other records" sample="Respect for the Individual; Active Agenda, Inc."/>
+		<ForeignField name="ValueDesc" foreignTable="vals" foreignKey="SharedValueID" foreignField="ValueDesc" key="SharedValueID" joinType="left" phrase="Value Description|A detailed description of the organizational mission, value, and/or belief" sample="Respect for the Individual is the unifying concept of the cultural mission. It is about demonstrating trust and respect for the unique talents and character of each employee. Even when we disagree, we must be able to express ourselves and handle the situation respectfully. People who feel respected and valued enjoy their work and are motivated to do their very best. Valuing our differences in the interest of greater success is everyone's responsibility."/>
+		<ForeignField name="SharingPersonAccountable" foreignTable="vals" foreignKey="SharedValueID" foreignField="SharingPersonAccountable" key="SharedValueID" joinType="left" phrase="Local Values Champion|The individual assigned primary accountability for communicating, celebrating, reinforcing, and defending the organizational mission, value, or belief at the sharing organization" sample="Mattias Thorslund"/>
+		<RemoteField name="ReceivedDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="5" phrase="Received Date|Date the values threat was received by the values threats program administrator" sample="01/01/2004"/>
+		<RemoteField name="PersonReportingID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="77" phrase="Person Reporting|The name of the individual that reported the values threat" sample="1"/>
+		<ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the values threat" sample="Jane Doe"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="110" phrase="Person Accountable|The individual assigned primary accountability for abating the threat to the mission, value, or belief" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for abating the threat to the mission, value, or belief" sample="Mattias Thorslund"/>
+		<TableField name="ThreatTitle" type="varchar(128)" validate="notEmpty" phrase="Threat Title|A brief title used to identify the reported threat to the organizational mission, values and/or beliefs" sample="Excess Overtime"/>
+		<TableField name="ThreatDesc" type="text" validate="notEmpty" phrase="Threat Description|A detailed description of the threat to the organizational mission, values and/or beliefs" sample="An average of 30 hours per week of overtime has been assigned to employees in the production department for eight consecutive weeks. This practice is threatening the organizations value for the home lives of employees."/>
+		<TableField name="SurveyValidation" type="bool" validate="noValidation" dbFlags="default 0" phrase="Survey Validation|Whether the values threat was validated using an organizational survey" sample="Yes"/>
+		<TableField name="SurveyID" type="int" dbFlags="unsigned not null" phrase="Survey|An automatically assigned number used to track surveys" sample="1"/>
+		<ForeignField name="Survey" foreignTable="sur" foreignKey="SurveyID" foreignField="Survey" key="SurveyID" joinType="left" phrase="Survey|A description of the survey used to validate the values threat based on a combination of field values assigned from within the Surveys module" sample="Production Overtime Survey (Dec 2004); Hansen Excellence Scale"/>
+		<TableField name="ThreatAbateStatusID" type="int" validate="RequireSelection" phrase="Threat Status|Status of the activity to abate, resolve, or address the values threat" sample="2"/>
+		<CodeField name="ThreatAbateStatus" key="ThreatAbateStatusID" phrase="Threat Status|Status of the activity to abate, resolve, or address the values threat" sample="Awaiting Assignment" codeTypeID="269"/>
+		<RemoteField name="ResolvedDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="23" phrase="Resolution Date|Date the values threat was abated, resolved, or addressed" sample="01/01/2004"/>
+		<TableField name="ResolutionDesc" type="text" validate="noValidation" phrase="Resoultion Description|A detailed description of the steps or methods used to resolve the reported threat to the organizational mission, values, and/or beliefs" sample="The production department headcount was increased by five to reduce the need for excessive use of overtime within the department. The packaging department has offered to avail five volunteer employees to participate in the overtime pool for the production department until the present production demands can be met."/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'valt'" localKey="ThreatID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ThreatTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="ThreatAbateStatus"/></CombinedField>
+		<CombinedField name="Threat" phrase="Threat|A combined field used to describe this values threat when associating it with other records" sample="Step Ladder Between Roof Tops, Active Agenda, Inc., Packaging Area, Awaiting Assignment"><CombinedFieldRef name="ThreatTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ThreatID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Threat"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="hza" name="Hazard Abatement" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ThreatID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="valt"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List values threats">
+			<ListField name="ThreatID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Threatened Organization"/>
+			<ListField name="SharedValue" phrase="Value at Risk"/>
+			<ListField name="ThreatTitle" phrase="Threat Title"/>
+			<ListField name="ReceivedDate" phrase="Received Date"/>
+			<ListField name="ResolvedDate" phrase="Resolved Date"/>
+			<ListField name="ThreatAbateStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search values threats">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SharedValueID"/>
+				<SampleItem ID="1" name="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+				<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+				<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+				<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+				<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+				<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+				<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+				<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+			</ComboField>
+			<DateField name="ReceivedDate"/>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="ThreatTitle" size="75" maxLength="128"/>
+			<CodeComboField name="ThreatAbateStatusID">
+				<SampleItem ID="1" name="Awaiting Assignment"/>
+				<SampleItem ID="2" name="In Work"/>
+				<SampleItem ID="3" name="Mitigated"/>
+				<SampleItem ID="4" name="Self Resolved"/>
+			</CodeComboField>
+			<DateField name="ResolvedDate"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a mission, values, or beliefs threat">
+			<ViewField name="ThreatID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SharedValue"/>
+			<ViewField name="ThreatTitle"/>
+			<ViewField name="ValueDesc"/>
+			<ViewField name="ThreatDesc"/>
+			<ViewField name="SharingPersonAccountable"/>
+			<ViewField name="ReceivedDate"/>
+			<ViewField name="PersonReporting"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="SurveyValidation"/>
+			<ViewField name="Survey"/>
+			<ViewField name="ThreatAbateStatus"/>
+			<ViewField name="ResolvedDate"/>
+			<ViewField name="ResolutionDesc"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a values threat">
+			<ViewField name="ThreatID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SharedValueID"/>
+				<SampleItem ID="1" name="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="ValueDesc"/>
+				<UpdateFieldRef name="SharingPersonAccountable"/>
+				<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+				<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+				<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+				<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+				<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+				<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+				<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+				<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+			</ComboField>
+			<EditField name="ThreatTitle" size="75" maxLength="128"/>
+			<ViewField name="ValueDesc" parentField="SharedValueID"/>
+			<MemoField name="ThreatDesc" rows="5" cols="75"/>
+			<ViewField name="SharingPersonAccountable" parentField="SharedValueID"/>
+			<DateField name="ReceivedDate"/>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="SurveyValidation"/>
+			<ComboField name="SurveyID" findMode="text">
+				<SampleItem ID="1" name="Production Overtime Survey (Dec 2004); Hansen Excellence Scale"/>
+				<SampleItem ID="2" name="Safety Effectiveness Survey; Hansen Excellence Scale"/>
+				<SampleItem ID="3" name="Cheerfulness Survey; Generic Agreement Scale"/>
+				<SampleItem ID="4" name="Christmas Party Preference Survey (2004); Generic Agreement Scale"/>
+			</ComboField>
+			<CodeComboField name="ThreatAbateStatusID">
+				<SampleItem ID="1" name="Awaiting Assignment"/>
+				<SampleItem ID="2" name="In Work"/>
+				<SampleItem ID="3" name="Mitigated"/>
+				<SampleItem ID="4" name="Self Resolved"/>
+			</CodeComboField>
+			<DateField name="ResolvedDate"/>
+			<MemoField name="ResolutionDesc" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate a values threat with related hazards">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the values threat">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the values threat">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with a physical values threat file">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a values threat">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a values threat" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ThreatID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SharedValue"/>
+		<ViewField name="ValueDesc"/>
+		<ViewField name="SharingPersonAccountable"/>
+		<ViewField name="ReceivedDate"/>
+		<ViewField name="PersonReporting"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="ThreatTitle"/>
+		<ViewField name="ThreatDesc"/>
+		<ViewField name="ThreatAbateStatus"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="valt" phrase="Values Threats">
+			<InvisibleField name="ThreatID"/>
+			<ViewField name="ReceivedDate" sample="02/02/2007"/>
+			<ViewField name="Organization" findMode="Active Agenda, Inc."/>
+			<ViewField name="SharedValue" sample="Scale Everything"/>
+			<ViewField name="ThreatTitle" sample="Design specifications too specific to scale"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="ThreatAbateStatus" sample="Abated"/>
+		</ViewGrid>
+		<!--<EditGrid moduleID="valt" phrase="Values Threats">
+			<GridForm>
+				<InvisibleField name="ThreatID"/>
+				<DateField name="ReceivedDate"/>
+				<PersonComboField name="PersonReportingID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="SharedValueID"/>
+					<SampleItem ID="1" name="Active Agenda, Inc."/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="SharedValueID" findMode="text" parentField="OrganizationID">
+					<UpdateFieldRef name="ValueDesc"/>
+					<UpdateFieldRef name="SharingPersonAccountable"/>
+					<SampleItem ID="1" name="Respect for the Individual; Active Agenda, Inc."/>
+					<SampleItem ID="2" name="Management is People; Active Agenda, Inc."/>
+					<SampleItem ID="3" name="Hire Smart; Active Agenda, Inc."/>
+					<SampleItem ID="4" name="Ownership; Active Agenda, Inc."/>
+					<SampleItem ID="5" name="Learn, Learn, Learn; Active Agenda, Inc."/>
+					<SampleItem ID="6" name="Upside Down Organization; Active Agenda, Inc."/>
+					<SampleItem ID="7" name="People Involvement; Active Agenda, Inc."/>
+					<SampleItem ID="8" name="Ready, Fire, Aim; Active Agenda, Inc."/>
+					<SampleItem ID="9" name="Hoopla; Active Agenda, Inc."/>
+					<SampleItem ID="10" name="Face to Face Communication; Active Agenda, Inc."/>
+				</ComboField>
+				<EditField name="ThreatTitle" size="75" maxLength="128"/>
+				<ViewField name="ValueDesc" parentField="SharedValueID"/>
+				<MemoField name="ThreatDesc" rows="5" cols="75"/>
+				<ViewField name="SharingPersonAccountable" parentField="SharedValueID"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Inc."/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CheckBoxField name="SurveyValidation"/>
+				<ComboField name="SurveyID" findMode="text">
+					<SampleItem ID="1" name="Production Overtime Survey (Dec 2004); Hansen Excellence Scale"/>
+					<SampleItem ID="2" name="Safety Effectiveness Survey; Hansen Excellence Scale"/>
+					<SampleItem ID="3" name="Cheerfulness Survey; Generic Agreement Scale"/>
+					<SampleItem ID="4" name="Christmas Party Preference Survey (2004); Generic Agreement Scale"/>
+				</ComboField>
+				<CodeComboField name="ThreatAbateStatusID">
+					<SampleItem ID="1" name="Awaiting Assignment"/>
+					<SampleItem ID="2" name="In Work"/>
+					<SampleItem ID="3" name="Mitigated"/>
+					<SampleItem ID="4" name="Self Resolved"/>
+				</CodeComboField>
+				<DateField name="ResolvedDate"/>
+				<MemoField name="ResolutionDesc" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="ThreatID"/>
+			<ViewField name="ReceivedDate" sample="02/02/2007"/>
+			<ViewField name="Organization" findMode="Active Agenda, Inc."/>
+			<ViewField name="SharedValue" sample="Scale Everything"/>
+			<ViewField name="ThreatTitle" sample="Design specifications too specific to scale"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="ThreatAbateStatus" sample="Abated"/>
+		</EditGrid>-->
+	</Exports>
+	<Charts>
+		<RadarChart name="Radar01" title="Values Threats By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Values Threats By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Values Threats By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Values Threats By Value">
+			<GroupByField name="SharedValue"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Values Threats By Value">
+			<GroupByField name="SharedValue"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Values Threats By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Values Threats By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Values Threats By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Values Threats By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Values Threats By Status">
+			<GroupByField name="ThreatAbateStatus"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Values Threats By Status">
+			<GroupByField name="ThreatAbateStatus"/>
+			<SummaryField name="ThreatID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

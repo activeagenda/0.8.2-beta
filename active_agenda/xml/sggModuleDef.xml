@@ -1,0 +1,426 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Suggestions" moduleID="sgg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Suggestion" pluralRecordName="Suggestions" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="SuggestionID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track suggestions" sample="1"/>
+		<RemoteField name="SubmittalDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="43" phrase="Submittal Date|The date the suggestion was submitted by the person/s making the suggestion" sample="01/01/2004"/>
+		<RemoteField name="ReceivedDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="5" phrase="Received Date|The date the suggestion was received by the suggestion program coordinator" sample="01/01/2004"/>
+		<CalculatedField name="ReceivingDelay" type="int" calcFunction="timediff" params="ReceivedDate SubmittalDate" validate="" phrase="Receiving Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date the suggestion was received" sample="30"/>
+		<RecordMetaField name="EntryDate" type="datetime" lookupType="created" returnType="date" phrase="System Entry Date|The date and time the suggestion was entered into the system" sample="01/01/2004 12:02:34"/>
+		<CalculatedField name="EntryDelay" type="int" calcFunction="timediff" params="EntryDate SubmittalDate" validate="" phrase="Entry Delay|A calculated field based on the amount of time between the date and time the suggestion was submitted and the date the suggestion was entered into the system" sample="30"/>
+		<RemoteField name="ResponseDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="27" phrase="Response Date|The date the person making the suggestion was provided a decisive response regarding the organization's intentions to implement the suggestion" sample="01/01/2004"/>
+		<CalculatedField name="ResponseDelay" type="int" calcFunction="timediff" params="ResponseDate SubmittalDate" validate="" phrase="Response Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date a response was provided to the person making the suggestion" sample="30"/>
+		<RemoteField name="ImplementationDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="44" phrase="Implementation Date|The date the suggestion was fully implemented" sample="01/01/2004"/>
+		<CalculatedField name="ImplementationDelay" type="int" calcFunction="timediff" params="ImplementationDate SubmittalDate" validate="" phrase="Implementation Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date the suggestion was implemented" sample="30"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization where the suggestion was submitted" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the suggestion was submitted" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonSubmitID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="71" phrase="Person Submitting|The person submitting the suggestion for consideration" sample="1"/>
+		<ForeignField name="PersonSubmit" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonSubmitID" joinType="left" phrase="Person Submitting|The person submitting the suggestion for consideration" sample="Mattias Thorslund"/>
+		<ForeignField name="SupervisorID" foreignTable="pple" foreignKey="PersonID" foreignField="SupervisorID" key="PersonSubmitID" joinType="left" phrase="Supervisor|The immediate supervisor of the person submitting the suggestion" sample="1"/>
+		<ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor|The immediate supervisor of the person submitting the suggestion" sample="Joe Smith"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="81" phrase="Person Accountable|The individual assigned primary accountability for implementing this suggestion and providing progress updates to the person making the suggestion" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for implementing this suggestion and providing progress updates to the person making the suggestion" sample="Larry Hansen"/>
+		<TableField name="SuggestionTitle" type="varchar(128)" validate="notEmpty" phrase="Suggestion Title|A short description used to identify the suggestion" sample="Add time clocks"/>
+		<TableField name="PresentMethod" type="text" validate="notEmpty" phrase="Present Method|Present method or situation which is in need of improvement" sample="Their is presently one time clock to allow employees to clock in. This results in many tardies and requires employees to be at work 30 minutes before the start of their shift to avoid a tardy"/>
+		<TableField name="ProposedImprovement" type="text" validate="notEmpty" phrase="Proposed Improvement|The proposed improvement to the present method or situation" sample="Install two additional time clocks to expedite the process of clocking in and out of a work shift"/>
+		<TableField name="PotentialOpp" type="text" validate="notEmpty" phrase="Potential Opportunity|A description of the organizational opportunity if the suggestion is implemented" sample="Reduced downwtime at the beginning and end of shifts. Fewer corrective actions for tardiness. Improved moralle."/>
+		<TableField name="WorkOrderRequired" type="bool" validate="noValidation" dbFlags="default 0" phrase="Work Order Required|Whether this suggestion requires the issuance of a work order" sample="Yes"/>
+		<!--when the WorkOrderRequired field is 'true' the WorkOrder screen is displayed; otherwise, not. DFZ 06-16-2004-->
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="SuggestionID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'sgg'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the suggestion" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="SuggestionID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'sgg'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the suggestion" sample="702.00"/>
+		<TableField name="ActualBenefit" type="money" validate="Money notNegative" phrase="Actual Benefit|The actual financial benefit recognized by implementing the suggestion, stated in the currency assigned to this installation of the software" sample="$1,000,000.00"/>
+		<TableField name="SuggStatusID" type="int" validate="RequireSelection" phrase="Suggestion Status|Implementation status of the suggestion" sample="2"/>
+		<CodeField name="SuggStatus" key="SuggStatusID" phrase="Suggestion Status|Implementation status of the suggestion" sample="Implemented" codeTypeID="242"/>
+		<SummaryField name="BusinessConsequences" summaryFunction="list" summaryField="ConsequenceCategory" summaryKey="RelatedRecordID" summaryModuleID="bcq" summaryCondition="RelatedModuleID = 'sgg'" localKey="SuggestionID" phrase="Business Consequences|A list of associated business consequences" sample="Increased Productivity, Increased Profit"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'sgg'" localKey="SuggestionID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="ReceivingDelayCalc" phrase="Receiving Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date the suggestion was received" sample="30 Hours"><CombinedFieldRef name="ReceivingDelay"/>_Hours</CombinedField>
+		<CombinedField name="EntryDelayCalc" phrase="Entry Delay|A calculated field based on the amount of time between the date and time the suggestion was submitted and the date the suggestion was entered into the system" sample="30 Hours"><CombinedFieldRef name="EntryDelay"/>_Hours</CombinedField>
+		<CombinedField name="ResponseDelayCalc" phrase="Response Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date a response was provided to the person making the suggestion" sample="30 Hours"><CombinedFieldRef name="ResponseDelay"/>_Hours</CombinedField>
+		<CombinedField name="ImplementationDelayCalc" phrase="Implementation Delay|A calculated field based on the amount of time between the date the suggestion was submitted and the date the suggestion was implemented" sample="30 Hours"><CombinedFieldRef name="ImplementationDelay"/>_Hours</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="SuggestionTitle"/>;_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="SuggStatus"/></CombinedField>
+		<CombinedField name="Suggestion" phrase="Suggestion|A combined field used to describe this suggestion when associating it with other records" sample="09-21-2003; Active Agenda, HQ; Mattias Thorslund; Implemented">
+			<CombinedFieldRef name="SuggestionTitle"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SuggestionID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Suggestion"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="wrk" name="Work Orders" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SuggestionID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sgg"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List suggestions">
+			<ListField name="SuggestionID" phrase="Record ID"/>
+			<ListField name="SubmittalDate" phrase="Submittal Date"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SuggestionTitle" phrase="Suggestion"/>
+			<ListField name="SuggStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search suggestions">
+			<DateField name="SubmittalDate"/>
+			<DateField name="ReceivedDate"/>
+			<DateField name="ResponseDate"/>
+			<DateField name="ImplementationDate"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonSubmitID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="WorkOrderRequired"/>
+			<MoneyField name="ActualBenefit"/>
+			<CodeComboField name="SuggStatusID">
+				<SampleItem ID="1" name="Under Consideration"/>
+				<SampleItem ID="3" name="Accepted"/>
+				<SampleItem ID="5" name="In Progress"/>
+				<SampleItem ID="7" name="Declined"/>
+				<SampleItem ID="9" name="Implemented"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="ConsequenceCategoryID" subModuleID="bcq" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="ConsequenceCategoryID" codeTypeID="190" phrase="Business Consequences|Filter search results by one or more related business consequences"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a suggestion">
+			<ViewField name="SuggestionID"/>
+			<ViewField name="SubmittalDate"/>
+			<ViewField name="ReceivedDate"/>
+			<ViewField name="ResponseDate"/>
+			<ViewField name="ImplementationDate"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonSubmit"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="SuggestionTitle"/>
+			<ViewField name="PresentMethod"/>
+			<ViewField name="ProposedImprovement"/>
+			<ViewField name="PotentialOpp"/>
+			<ViewField name="WorkOrderRequired"/>
+			<ViewField name="ActualBenefit"/>
+			<ViewField name="SuggStatus"/>
+			<ViewField name="BusinessConsequences"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Dates and Delays" phrase="Dates and Delays">
+				<ViewField name="SubmittalDate"/>
+				<ViewField name="ReceivedDate"/>
+				<ViewField name="ReceivingDelayCalc"/>
+				<ViewField name="EntryDate"/>
+				<ViewField name="EntryDelayCalc"/>
+				<ViewField name="ResponseDate"/>
+				<ViewField name="ResponseDelayCalc"/>
+				<ViewField name="ImplementationDate"/>
+				<ViewField name="ImplementationDelayCalc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="wrk"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a suggestion">
+			<ViewField name="SuggestionID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonSubmitID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="SubmittalDate"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="ReceivedDate"/>
+			<EditField name="SuggestionTitle" size="75" maxLength="128"/>
+			<MemoField name="PresentMethod" rows="5" cols="75"/>
+			<MemoField name="ProposedImprovement" rows="5" cols="75"/>
+			<MemoField name="PotentialOpp" rows="5" cols="75"/>
+			<CheckBoxField name="WorkOrderRequired"/>
+			<MoneyField name="ActualBenefit"/>
+			<CodeComboField name="SuggStatusID">
+				<SampleItem ID="1" name="Under Consideration"/>
+				<SampleItem ID="3" name="Accepted"/>
+				<SampleItem ID="5" name="In Progress"/>
+				<SampleItem ID="7" name="Declined"/>
+				<SampleItem ID="9" name="Implemented"/>
+			</CodeComboField>
+			<DateField name="ResponseDate"/>
+			<DateField name="ImplementationDate"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="WorkOrders" phrase="Orders|Associate work orders with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="wrk"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the suggestion">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the suggestion" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SuggestionID"/>
+		<ViewField name="SubmittalDate"/>
+		<ViewField name="ImplementationDate"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SuggestionTitle"/>
+		<ViewField name="PresentMethod"/>
+		<ViewField name="ProposedImprovement"/>
+		<ViewField name="PotentialOpp"/>
+		<ViewField name="ActualBenefit"/>
+		<ViewField name="BusinessConsequences"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Suggestions By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Suggestions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Suggestions By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Suggestions By Person Submitting">
+			<GroupByField name="PersonSubmit"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Suggestions By Person Submitting">
+			<GroupByField name="PersonSubmit"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Suggestions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Suggestions By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Suggestions By Status">
+			<GroupByField name="SuggStatus"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Suggestions By Status">
+			<GroupByField name="SuggStatus"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Suggestions By Supervisor of Person Submitting">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Suggestions By Supervisor of Person Submitting">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</ParetoChart>
+		<BarChart name="Bar01" title="Submittals by Year">
+			<GroupByField name="SubmittalDate" dateInterval="year"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar02" title="Submittals by Quarter">
+			<GroupByField name="SubmittalDate" dateInterval="yearquarter"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar03" title="Submittals by Month">
+			<GroupByField name="SubmittalDate" dateInterval="yearmonth"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar04" title="Submittals by Week">
+			<GroupByField name="SubmittalDate" dateInterval="yearweek"/>
+			<SummaryField name="SuggestionID" type="count"/>
+		</BarChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Thresholds" moduleID="chmth" parentModule="chm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Threshold" pluralRecordName="Chemical Thresholds" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ThresholdID" type="int" dbFlags="unsigned auto_increment not null" phrase="Threshold ID|A unique number assigned to chemical threshold limits which is used to associate limits with chemicals" sample="1"/>
+		<TableField name="ChemicalID" type="int" validate="noValidation" phrase="Chemical ID|The common name of the chemical stored at this location" sample="1"/>
+		<ForeignField name="Chemical" foreignTable="chm" foreignKey="ChemicalID" foreignField="CommonName" key="ChemicalID" joinType="left" phrase="Chemical|The common name of the chemical stored at this location" sample="Methyl Ethyl Goo"/>
+		<TableField name="ThresholdValueTypeID" type="int" validate="RequireSelection" phrase="Threshold Value Type|Weight and/or volume levels which constitute the maximium acceptable level of a substance that a person can be exposed to over a given period of time" sample="1"/>
+		<CodeField name="ThresholdValueType" key="ThresholdValueTypeID" phrase="Threshold Value Type|Weight and/or volume units which constitute the maximium acceptable level of a substance that person can be exposed to over a given period of time" sample="Threshold Limit Value (TLV) ACGIH" codeTypeID="246"/>
+		<TableField name="ThresholdAmount" type="int" validate="Number notNegative notZero notEmpty" phrase="Threshold Amount|The amount of the chemical that cannot be exceeded based on the threshold value assigned" sample="20"/>
+		<TableField name="ConcentrationUnitsID" type="int" validate="RequireSelection" phrase="Concentration|Units associated with concentrations of materials such as chemicals or particles" sample="1"/>
+		<CodeField name="ConcentrationUnits" key="ConcentrationUnitsID" phrase="Concentration|Units associated with concentrations of materials such as chemicals or particles" sample="Parts Per Million" codeTypeID="34"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="ThresholdValueType"/>;_<CombinedFieldRef name="ThresholdAmount"/>_<CombinedFieldRef name="ConcentrationUnits"/></CombinedField>
+		<CombinedField name="Threshold" phrase="Threshold|A combined field used to describe this threshold when associating it with other records" sample="Methyl Ethyl Goo | Threshold Limit Value (TLV) ACGIH | 20"><CombinedFieldRef name="Chemical"/>;_<CombinedFieldRef name="ThresholdValueType"/>;_<CombinedFieldRef name="ThresholdAmount"/>_<CombinedFieldRef name="ConcentrationUnits"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ThresholdID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="Threshold"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemical threshold limit values">
+			<ListField name="ThresholdID" phrase="Threshold ID"/>
+			<ListField name="ChemicalID" phrase="Chemical ID"/>
+			<ListField name="Chemical" phrase="Chemical Name"/>
+			<ListField name="ThresholdValueType" phrase="Threshold Value Type"/>
+			<ListField name="ThresholdAmount" phrase="Threshold Amount"/>
+			<ListField name="ConcentrationUnits" phrase="Concentration"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemical threshold limit values">
+			<ComboField name="ChemicalID" findMode="text">
+				<SampleItem ID="1" name="Methyl Ethyl Goo"/>
+				<SampleItem ID="2" name="Hydrogen Dioxide"/>
+				<SampleItem ID="3" name="Goo SLime"/>
+			</ComboField>
+			<CodeComboField name="ThresholdValueTypeID" findMode="text">
+				<SampleItem ID="1" name="Threshold Limit Value (TLV) ACGIH"/>
+				<SampleItem ID="2" name="Permissible Exposure Limit (PEL) US OSHA"/>
+				<SampleItem ID="3" name="Time Weighted Average (TWA) US OSHA"/>
+			</CodeComboField>
+			<EditField name="ThresholdAmount" size="10">
+				<CodeComboField name="ConcentrationUnitsID">
+					<SampleItem ID="1" name="Parts Per Million"/>
+					<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+					<SampleItem ID="3" name="Parts Per Billion"/>
+				</CodeComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about threshold limit values associated with a chemical">
+			<ViewField name="ThresholdID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<ViewField name="ThresholdValueType"/>
+			<ViewField name="ThresholdAmount">
+				<ViewField name="ConcentrationUnits"/>
+			</ViewField>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about threshold limit values associated with a chemical">
+			<ViewField name="ThresholdID"/>
+			<ViewField name="ChemicalID"/>
+			<ViewField name="Chemical"/>
+			<CodeComboField name="ThresholdValueTypeID" findMode="text">
+				<SampleItem ID="1" name="Threshold Limit Value (TLV) ACGIH"/>
+				<SampleItem ID="2" name="Permissible Exposure Limit (PEL) US OSHA"/>
+				<SampleItem ID="3" name="Time Weighted Average (TWA) US OSHA"/>
+			</CodeComboField>
+			<EditField name="ThresholdAmount" size="10">
+				<CodeComboField name="ConcentrationUnitsID">
+					<SampleItem ID="1" name="Parts Per Million"/>
+					<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+					<SampleItem ID="3" name="Parts Per Billion"/>
+				</CodeComboField>
+			</EditField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="chmth" phrase="Threshold Limit Values">
+			<InvisibleField name="ThresholdID"/>
+			<ViewField name="ThresholdValueType" sample="Threshold Limit Value (TLV) ACGIH"/>
+			<ViewField name="ThresholdAmount" sample="20"/>
+			<ViewField name="ConcentrationUnits" sample="Parts Per Million"/>
+		</ViewGrid>
+		<EditGrid moduleID="chmth" phrase="Threshold Limit Values">
+			<GridForm>
+				<InvisibleField name="ThresholdID"/>
+				<CodeComboField name="ThresholdValueTypeID" findMode="text" sample="Threshold Limit Value (TLV) ACGIH">
+					<SampleItem ID="1" name="Threshold Limit Value (TLV) ACGIH"/>
+					<SampleItem ID="2" name="Permissible Exposure Limit (PEL) US OSHA"/>
+					<SampleItem ID="3" name="Time Weighted Average (TWA) US OSHA"/>
+				</CodeComboField>
+				<EditField name="ThresholdAmount" size="10" sample="20">
+					<CodeComboField name="ConcentrationUnitsID" sample="Parts Per Million">
+						<SampleItem ID="1" name="Parts Per Million"/>
+						<SampleItem ID="2" name="Milligrams Per Cubic Centimeter"/>
+						<SampleItem ID="3" name="Parts Per Billion"/>
+					</CodeComboField>
+				</EditField>
+			</GridForm>
+			<ViewField name="ThresholdValueType" sample="Threshold Limit Value (TLV) ACGIH"/>
+			<ViewField name="ThresholdAmount" sample="20">
+				<ViewField name="ConcentrationUnits" sample="Parts Per Million"/>
+			</ViewField>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Threshold Values By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ThresholdID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Threshold Values By Chemical">
+			<GroupByField name="Chemical"/>
+			<SummaryField name="ThresholdID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Threshold Values By Type">
+			<GroupByField name="ThresholdValueType"/>
+			<SummaryField name="ThresholdID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Threshold Values By Type">
+			<GroupByField name="ThresholdValueType"/>
+			<SummaryField name="ThresholdID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

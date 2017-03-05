@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemical Types" moduleID="chmt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical Type" pluralRecordName="Chemical Types" addNewName="Type" allowAddRecord="yes" isMasterData="yes">
+	<ModuleFields>
+		<TableField name="ChemicalTypeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A unique number assigned to chemical types which is used to associate and track chemicals possessing similar characteristics" sample="1"/>
+		<TableField name="ChemicalCategoryID" type="int" validate="RequireSelection" phrase="Chemical Category|A method of categorizing chemicals with similar characteristics" sample="1"/>
+		<CodeField name="ChemicalCategory" key="ChemicalCategoryID" phrase="Chemical Category|A method of categorizing chemicals with similar characteristics" sample="Pesticide" codeTypeID="17"/>
+		<TableField name="ChemicalTypeName" type="varchar(128)" validate="notEmpty" phrase="Chemical Type Name|A specific name used to identify chemicals of similar types" sample="Fungicide"/>
+		<TableField name="ChemicalTypeDesc" type="text" validate="noValidation" phrase="Chemical Type Description|A detailed description of the chemical category and the criteria for chemicals to belong to this category" sample="The raw ingredient category consists of all chemicals or substances which are ingredients of an end product. All chemicals or substances which are components of a final product belong in this category."/>
+		<TableField name="ChemicalTypeColor" type="varchar(128)" validate="noValidation" phrase="Chemical Type Color|A method of categorizing and tracking chemicals by assigning colors which are rapidly and readibly distinguishable. This practice can be very helpful within work environments which employ people that speak different languages, where rapid chemical type recognition is necessary (i.e. food plants), or where literacy levels make reading labels difficult" sample="#00A5C6"/>
+		<TableField name="ApplyColorToLabel" type="bool" validate="noValidation" dbFlags="" phrase="Apply Color To Label|Whether this category color should be applied to internal chemical control labels" sample="Yes"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Pesticide | Fungicide"><CombinedFieldRef name="ChemicalCategory"/>;_<CombinedFieldRef name="ChemicalTypeName"/></CombinedField>
+		<CombinedField name="ChemicalType" phrase="Chemical Type|A combined field used to describe this chemical type when associating it with other records" sample="Raw Ingredient"><CombinedFieldRef name="ChemicalCategory"/>;_<CombinedFieldRef name="ChemicalTypeName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChemicalTypeID"/>
+		</PrimaryKey>
+		<!--<OwnerField name="OrganizationID"/> Not required-->
+		<RecordDescriptionField name="ChemicalType"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List chemical categories">
+			<ListField name="ChemicalTypeID" phrase="Record ID"/>
+			<ListField name="ChemicalCategory" phrase="Category"/>
+			<ListField name="ChemicalTypeName" phrase="Type"/>
+			<ListField name="ChemicalTypeColor" phrase="Label Color"/>
+			<ListField name="ApplyColorToLabel" phrase="Apply Label?"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search chemical categories">
+			<CodeComboField name="ChemicalCategoryID" findMode="text">
+				<SampleItem ID="1" name="Paint"/>
+				<SampleItem ID="2" name="Deoderizor"/>
+				<SampleItem ID="3" name="Solvent"/>
+				<SampleItem ID="4" name="Oil"/>
+			</CodeComboField>
+			<EditField name="ChemicalTypeName" size="75" maxLength="128"/>
+			<EditField name="ChemicalTypeColor" size="75" maxLength="128"/>
+			<CheckBoxField name="ApplyColorToLabel"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about chemical categories">
+			<ViewField name="ChemicalTypeID"/>
+			<ViewField name="ChemicalCategory"/>
+			<ViewField name="ChemicalTypeName"/>
+			<ViewField name="ChemicalTypeDesc"/>
+			<ViewField name="ChemicalTypeColor"/>
+			<ViewField name="ApplyColorToLabel"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about chemical categories">
+			<ViewField name="ChemicalTypeID"/>
+			<CodeComboField name="ChemicalCategoryID" findMode="text">
+				<SampleItem ID="1" name="Paint"/>
+				<SampleItem ID="2" name="Deoderizor"/>
+				<SampleItem ID="3" name="Solvent"/>
+				<SampleItem ID="4" name="Oil"/>
+			</CodeComboField>
+			<EditField name="ChemicalTypeName" size="75" maxLength="128"/>
+			<MemoField name="ChemicalTypeDesc" rows="5" cols="75"/>
+			<EditField name="ChemicalTypeColor" size="75" maxLength="128"/>
+			<CheckBoxField name="ApplyColorToLabel"/>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Chemical Types By Category">
+			<GroupByField name="ChemicalCategory"/>
+			<SummaryField name="ChemicalTypeID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Chemical Types By Category">
+			<GroupByField name="ChemicalCategory"/>
+			<SummaryField name="ChemicalTypeID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

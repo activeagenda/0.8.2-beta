@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="File Types" moduleID="filt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="File Type" pluralRecordName="File Types" allowAddFile="yes" isMasterData="yes">
+    <ModuleFields>
+        <TableField name="FileTypeID" type="int" dbFlags="unsigned auto_increment not null" phrase="File ID|An automatically assigned number used to track file types encountered throughout the enterprise" sample="1"/>
+        <TableField name="FileCategoryID" type="int" validate="RequireSelection" phrase="Category|A broad categoy used to group files of similar types" sample="1"/>
+        <CodeField name="FileCategory" key="FileCategoryID" phrase="Category|A broad categoy used to group files of similar types" sample="Employment" codeTypeID="266"/>
+        <TableField name="FileTypeTitle" type="varchar(128)" validate="notEmpty" phrase="Type|A title or phrase used to describe the specific type of file" sample="Last Chance File"/>
+        <TableField name="FileTypeDesc" type="text" validate="notEmpty" phrase="Description|A brief but thorough description of the specific type of file" sample="An file between an employee and an employer that establishes criteria for an employee to retain employee. This type of file is typically the last step in the behavior correction process."/>
+        <CombinedField name="FileLabel" phrase="File Label|The short, concise, label of the file for display purposes" sample="Employment | Last Chance File"><CombinedFieldRef name="FileCategory"/>;_<CombinedFieldRef name="FileTypeTitle"/></CombinedField>
+        <CombinedField name="FileType" phrase="File Type|A combined field used to describe this file type when associating it with other files" sample="Last Chance File">
+            <CombinedFieldRef name="FileTypeTitle"/>
+        </CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="FileTypeID"/>
+        </PrimaryKey>
+        <!--<OwnerField name=""/> none required-->
+        <FileDescriptionField name="FileType"/>
+        <FileLabelField name="FileLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="gui" name="Guidance Organizations" parentKey="FileTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="filt"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="FileTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="filt"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="FileTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="filt"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List file types">
+            <ListField name="FileTypeID" phrase="File ID"/>
+            <ListField name="FileCategory" phrase="Category"/>
+            <ListField name="FileTypeTitle" phrase="Type"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search file types">
+            <CodeComboField name="FileCategoryID" findMode="text">
+                <SampleItem ID="1" name="Employment"/>
+                <SampleItem ID="2" name="Medical"/>
+                <SampleItem ID="3" name="Operations"/>
+                <SampleItem ID="4" name="Regulatory"/>
+                <SampleItem ID="5" name="Legal"/>
+            </CodeComboField>
+            <EditField name="FileTypeTitle" size="75" maxLength="128"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the file type">
+            <ViewField name="FileTypeID"/>
+            <ViewField name="FileCategory"/>
+            <ViewField name="FileTypeTitle"/>
+            <ViewField name="FileTypeDesc"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="gui"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the file type">
+            <ViewField name="FileTypeID"/>
+            <CodeComboField name="FileCategoryID" findMode="text">
+                <SampleItem ID="1" name="Employment"/>
+                <SampleItem ID="2" name="Medical"/>
+                <SampleItem ID="3" name="Operations"/>
+                <SampleItem ID="4" name="Regulatory"/>
+                <SampleItem ID="5" name="Legal"/>
+            </CodeComboField>
+            <EditField name="FileTypeTitle" size="75" maxLength="128"/>
+            <MemoField name="FileTypeDesc" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Guidance" phrase="Guidance|Associate guidance with the file type">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="gui"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the file type">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the file type">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="FileTypeID"/>
+        <ViewField name="FileCategory"/>
+        <ViewField name="FileTypeTitle"/>
+        <ViewField name="FileTypeDesc"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="File Types By Category">
+            <GroupByField name="FileCategory"/>
+            <SummaryField name="FileTypeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="File Types By Category">
+            <GroupByField name="FileCategory"/>
+            <SummaryField name="FileTypeID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 503 $" date="$Date: 2007-02-17 04:46:15 -0800 (Sat, 17 Feb 2007) $"/>
+</Module>

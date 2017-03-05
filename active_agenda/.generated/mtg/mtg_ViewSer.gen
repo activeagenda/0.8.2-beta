@@ -1,0 +1,469 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $phrases[0] = array(
+   'MeetingID' => gettext("Record ID|An automatically assigned number used to track meetings held by the organization"),
+   'AssignmentDate' => gettext("Assignment Date|Date the meeting was assigned to the local organizations"),
+   'Organization' => gettext("Organization|The name of the organization associated with the meeting"),
+   'DepartmentMeeting' => gettext("Department Meeting|Whether this meeting is used to satsify deaprtment specific requirements"),
+   'Department' => gettext("Department|The name of the department to be credited with the occurrence of this meeting"),
+   'Location' => gettext("Location|Specific location within the facility where the meeting was held or is scheduled to be held"),
+   'MeetingType' => gettext("Meeting Type|The type of meeting conducted"),
+   'MeetingTitle' => gettext("Meeting Title|A brief name used to identify the meeting"),
+   'MeetingStartTime' => gettext("Start Time|Time this meeting began"),
+   'MeetingEndTime' => gettext("End Time|Time this meeting ended"),
+   'MeetingDuration' => gettext("Duration|The total duration of the meeting. The duration is automatically calculated based on the meeting's begin time and end time"),
+   'Agenda' => gettext("Agenda|The stated purpose and agenda for the meeting"),
+   'MeetingLeader' => gettext("Leader|The person responsible for leading the meeting and accountable for follow-up of meeting recommendations and outcomes"),
+   'MeetingScribe' => gettext("Scribe|The person responsible for recording the meeting content, discussion points and action items"),
+   'IssuesDiscussed' => gettext("Issues Discussed|A detailed description of issues discussed or concerns raised during the meeting"),
+   'LaborCost' => gettext("Labor Cost|The total labor cost, as stated in the currency assigned to this installation of the software"),
+   'MeetingStatus' => gettext("Meeting Status|Status of this meeting"),
+   'RegulatoryRequired' => gettext("Regulatory Required|Whether this meeting is being conducted to satisfy a regulatory requirement"),
+   'RiskImperatives' => gettext("Risk Imperatives|A list of associated Risk Imperatives")
+   );
+$phrases[1] = array(
+   'AssignedMeeting' => gettext("Assigned Meeting|Whether this meeting satisfies a meeting assignment"),
+   'AssignedOrganization' => gettext("Organization|The name of the organization assigned to conduct a meeting"),
+   'MasterAssign' => gettext("Master Assignment|Brief description of the assigned meeting"),
+   'MasterMeetingType' => gettext("Master Meeting Type|The type of meeting assigned to the organization"),
+   'MasterMeetingTitle' => gettext("Meeting Title|A brief name used to identify the meeting"),
+   'MasterAgenda' => gettext("Agenda|The stated purpose and agenda for the meeting"),
+   'AssignedPersonAccountable' => gettext("Person Accountable|The person accountable for ensuring the meeting occurs and satisfies the master meeting agenda"),
+   'AssignmentDate' => gettext("Assignment Date|Date the meeting was assigned to the local organizations"),
+   'AssignmentDetails' => gettext("Assignment Details|A description of any details associated with this meeting assignment; such as, scope, purpose and objectives")
+   );
+
+
+    $sections = unserialize('a:3:{i:0;a:3:{s:6:"phrase";s:7:"Meeting";s:3:"sql";s:3834:"SELECT 
+   `mtg`.MeetingID,
+   `dat1`.RelatedDate AS AssignmentDate,
+   `org3`.Name AS Organization,
+   `mtg`.DepartmentMeeting,
+   NULLIF(CONCAT(IFNULL(`orgdp1`.DepartmentName,\'\')),\'\') AS Department,
+   NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+   `cod3`.Description AS MeetingType,
+   `mtg`.MeetingTitle,
+   `mtg`.MeetingStartTime,
+   `mtg`.MeetingEndTime,
+   TIMEDIFF(`mtg`.MeetingEndTime, `mtg`.MeetingStartTime) AS MeetingDuration,
+   `mtg`.Agenda,
+   `ppl2`.DisplayName AS MeetingLeader,
+   `ppl3`.DisplayName AS MeetingScribe,
+   `mtg`.IssuesDiscussed,
+   `mtga1`.LaborCost AS LaborCost,
+   `cod4`.Description AS MeetingStatus,
+   `mtg`.RegulatoryRequired,
+   `rsk1`.RiskImperatives AS RiskImperatives,
+   NULLIF(CONCAT(IFNULL(`cod3`.Description,\'\'),\' | \',IFNULL(`mtg`.MeetingTitle,\'\'),\' | \',IFNULL(`org3`.Name,\'\'),\' | \',IFNULL(`mtg`.MeetingStartTime,\'\')),\' |  |  | \') AS RecordLabel,
+   `mtg`.OrganizationID
+FROM `mtg`
+   
+     LEFT OUTER JOIN `mtgma` AS mtgma1 
+   ON (`mtg`.MasterAssignID = `mtgma1`.MasterAssignID )
+     LEFT OUTER JOIN `org` AS org3 
+   ON (`mtg`.OrganizationID = `org3`.OrganizationID )
+     LEFT OUTER JOIN `orgdp` AS orgdp1 
+   ON (`mtg`.DepartmentID = `orgdp1`.DepartmentID )
+     LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`mtg`.MeetingID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'mtg\'
+     AND `orgla1`._Deleted = 0)
+     LEFT OUTER JOIN `cod` AS cod3 
+   ON (`mtg`.MeetingTypeID = `cod3`.CodeID 
+     AND `cod3`.CodeTypeID = \'72\')
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`mtg`.MeetingID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'mtg\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'58\')
+     LEFT OUTER JOIN `inv` AS inv2 
+    ON (`mtg`.MeetingID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'mtg\'
+     AND `inv2`._Deleted = 0
+     AND `inv2`.InvolvementDescriptorID = \'59\')
+     LEFT OUTER JOIN (SELECT 
+SUM(IFNULL(`pple1`.HourlyWage,0) * IFNULL(TIMEDIFF(`mtg1`.MeetingEndTime, `mtg1`.MeetingStartTime),0)) AS LaborCost,
+`mtga`.AttendeeID FROM `mtga` 
+
+LEFT OUTER JOIN `mtg` AS mtg1 
+   ON (`mtga`.MeetingID = `mtg1`.MeetingID )
+LEFT OUTER JOIN `inv` AS inv1 
+    ON (`mtga`.AttendeeID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'mtga\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'57\')
+LEFT OUTER JOIN `pple` AS pple1 
+   ON (`inv1`.PersonInvolvedID = `pple1`.PersonID )
+ WHERE `mtga`._Deleted = 0 
+GROUP BY `mtga`.AttendeeID 
+) AS mtga1 
+ON (`mtg`.MeetingID = mtga1.AttendeeID) 
+     LEFT OUTER JOIN `cod` AS cod4 
+   ON (`mtg`.MeetingStatusID = `cod4`.CodeID 
+     AND `cod4`.CodeTypeID = \'193\')
+     LEFT OUTER JOIN (SELECT 
+GROUP_CONCAT(`cod1`.Description ORDER BY `cod1`.Description SEPARATOR \', \') AS RiskImperatives,
+`rsk`.RelatedRecordID FROM `rsk` 
+
+LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsk`.RiskImperativeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'234\')
+ WHERE `rsk`._Deleted = 0 
+ AND RelatedModuleID = \'mtg\' 
+ AND \'mtg\' = `rsk`.RelatedModuleID
+GROUP BY `rsk`.RelatedRecordID 
+) AS rsk1 
+ON (`mtg`.MeetingID = rsk1.RelatedRecordID) 
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`mtgma1`.MasterAssignID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'mtgma\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'2\')
+     LEFT OUTER JOIN `orgl` AS orgl1 
+   ON (`orgla1`.LocationID = `orgl1`.LocationID )
+     LEFT OUTER JOIN `ppl` AS ppl2 
+   ON (`inv1`.PersonInvolvedID = `ppl2`.PersonID )
+     LEFT OUTER JOIN `ppl` AS ppl3 
+   ON (`inv2`.PersonInvolvedID = `ppl3`.PersonID )
+     LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+     LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE
+   mtg.MeetingID=\'/**RecordID**/\'";s:6:"fields";a:19:{s:9:"MeetingID";O:9:"viewfield":16:{s:4:"name";s:9:"MeetingID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:90:"Record ID|An automatically assigned number used to track meetings held by the organization";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"AssignmentDate";O:9:"viewfield":16:{s:4:"name";s:14:"AssignmentDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Assignment Date|Date the meeting was assigned to the local organizations";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Organization|The name of the organization associated with the meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"DepartmentMeeting";O:9:"viewfield":16:{s:4:"name";s:17:"DepartmentMeeting";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"Department Meeting|Whether this meeting is used to satsify deaprtment specific requirements";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"Department";O:9:"viewfield":16:{s:4:"name";s:10:"Department";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Department|The name of the department to be credited with the occurrence of this meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:100:"Location|Specific location within the facility where the meeting was held or is scheduled to be held";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"MeetingType";O:9:"viewfield":16:{s:4:"name";s:11:"MeetingType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:42:"Meeting Type|The type of meeting conducted";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"MeetingTitle";O:9:"viewfield":16:{s:4:"name";s:12:"MeetingTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Meeting Title|A brief name used to identify the meeting";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"MeetingStartTime";O:9:"viewfield":16:{s:4:"name";s:16:"MeetingStartTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:34:"Start Time|Time this meeting began";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"MeetingEndTime";O:9:"viewfield":16:{s:4:"name";s:14:"MeetingEndTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:32:"End Time|Time this meeting ended";s:8:"dataType";s:8:"datetime";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"MeetingDuration";O:9:"viewfield":16:{s:4:"name";s:15:"MeetingDuration";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:131:"Duration|The total duration of the meeting. The duration is automatically calculated based on the meeting\'s begin time and end time";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:6:"Agenda";O:9:"viewfield":16:{s:4:"name";s:6:"Agenda";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:52:"Agenda|The stated purpose and agenda for the meeting";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"MeetingLeader";O:9:"viewfield":16:{s:4:"name";s:13:"MeetingLeader";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:123:"Leader|The person responsible for leading the meeting and accountable for follow-up of meeting recommendations and outcomes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:13:"MeetingScribe";O:9:"viewfield":16:{s:4:"name";s:13:"MeetingScribe";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:99:"Scribe|The person responsible for recording the meeting content, discussion points and action items";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"IssuesDiscussed";O:9:"viewfield":16:{s:4:"name";s:15:"IssuesDiscussed";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Issues Discussed|A detailed description of issues discussed or concerns raised during the meeting";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"LaborCost";O:9:"viewfield":16:{s:4:"name";s:9:"LaborCost";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:104:"Labor Cost|The total labor cost, as stated in the currency assigned to this installation of the software";s:8:"dataType";s:5:"money";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}s:13:"MeetingStatus";O:9:"viewfield":16:{s:4:"name";s:13:"MeetingStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:37:"Meeting Status|Status of this meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"RegulatoryRequired";O:9:"viewfield":16:{s:4:"name";s:18:"RegulatoryRequired";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:95:"Regulatory Required|Whether this meeting is being conducted to satisfy a regulatory requirement";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"RiskImperatives";O:9:"viewfield":16:{s:4:"name";s:15:"RiskImperatives";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:54:"Risk Imperatives|A list of associated Risk Imperatives";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:1;}}}i:1;a:3:{s:6:"phrase";s:36:"Assignment Details (when applicable)";s:3:"sql";s:1741:"SELECT 
+   `mtg`.AssignedMeeting,
+   `org1`.Name AS AssignedOrganization,
+   NULLIF(CONCAT(IFNULL(`cod2`.Description,\'\'),\' By \',IFNULL(`org2`.Name,\'\')),\' By \') AS MasterAssign,
+   `cod1`.Description AS MasterMeetingType,
+   `mtgm1`.MeetingTitle AS MasterMeetingTitle,
+   `mtgm1`.Agenda AS MasterAgenda,
+   `ppl1`.DisplayName AS AssignedPersonAccountable,
+   `dat1`.RelatedDate AS AssignmentDate,
+   `mtgma1`.AssignmentDetails AS AssignmentDetails,
+   `mtg`.OrganizationID
+FROM `mtg`
+   
+     LEFT OUTER JOIN `mtgma` AS mtgma1 
+   ON (`mtg`.MasterAssignID = `mtgma1`.MasterAssignID )
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`mtgma1`.OrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `mtgm` AS mtgm2 
+   ON (`mtgma1`.MasterMeetingID = `mtgm2`.MasterMeetingID )
+     LEFT OUTER JOIN `mtgm` AS mtgm1 
+   ON (`mtgma1`.MasterMeetingID = `mtgm1`.MasterMeetingID )
+     LEFT OUTER JOIN `acc` AS acc1 
+    ON (`mtgma1`.MasterAssignID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'mtgma\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'58\')
+     LEFT OUTER JOIN `ppl` AS ppl1 
+ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`mtgma1`.MasterAssignID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = \'mtgma\'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = \'2\')
+     LEFT OUTER JOIN `org` AS org2 
+   ON (`mtgm2`.OrganizationID = `org2`.OrganizationID )
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`mtgm2`.MeetingTypeID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'72\')
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`mtgm1`.MeetingTypeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'72\')
+WHERE
+   mtg.MeetingID=\'/**RecordID**/\'";s:6:"fields";a:9:{s:15:"AssignedMeeting";O:9:"viewfield":16:{s:4:"name";s:15:"AssignedMeeting";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Assigned Meeting|Whether this meeting satisfies a meeting assignment";s:8:"dataType";s:4:"bool";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AssignedOrganization";O:9:"viewfield":16:{s:4:"name";s:20:"AssignedOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Organization|The name of the organization assigned to conduct a meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"MasterAssign";O:9:"viewfield":16:{s:4:"name";s:12:"MasterAssign";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:59:"Master Assignment|Brief description of the assigned meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"MasterMeetingType";O:9:"viewfield":16:{s:4:"name";s:17:"MasterMeetingType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"Master Meeting Type|The type of meeting assigned to the organization";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"MasterMeetingTitle";O:9:"viewfield":16:{s:4:"name";s:18:"MasterMeetingTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:55:"Meeting Title|A brief name used to identify the meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"MasterAgenda";O:9:"viewfield":16:{s:4:"name";s:12:"MasterAgenda";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:52:"Agenda|The stated purpose and agenda for the meeting";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:25:"AssignedPersonAccountable";O:9:"viewfield":16:{s:4:"name";s:25:"AssignedPersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:113:"Person Accountable|The person accountable for ensuring the meeting occurs and satisfies the master meeting agenda";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"AssignmentDate";O:9:"viewfield":16:{s:4:"name";s:14:"AssignmentDate";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:72:"Assignment Date|Date the meeting was assigned to the local organizations";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"AssignmentDetails";O:9:"viewfield":16:{s:4:"name";s:17:"AssignmentDetails";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:127:"Assignment Details|A description of any details associated with this meeting assignment; such as, scope, purpose and objectives";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}}i:2;a:2:{s:6:"phrase";s:12:"Associations";s:5:"grids";a:8:{s:13:"viewgrid_mtga";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"mtga";s:6:"phrase";s:17:"Meeting Attendees";s:6:"number";N;s:6:"Fields";a:5:{s:10:"AttendeeID";O:14:"invisiblefield":11:{s:4:"name";s:10:"AttendeeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:83:"Attendee ID|An automatically assigned number used to associate people with meetings";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"mtga";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:8:"LastName";O:9:"viewfield":16:{s:4:"name";s:8:"LastName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:9:"Last Name";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"mtga";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"FirstName";O:9:"viewfield":16:{s:4:"name";s:9:"FirstName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:10:"First Name";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"mtga";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"Department";O:9:"viewfield":16:{s:4:"name";s:10:"Department";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:10:"Department";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"mtga";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"Attendance";O:9:"viewfield":16:{s:4:"name";s:10:"Attendance";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:10:"Attendance";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"mtga";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:105:"SELECT 
+    count(*) 
+FROM `mtga`
+   
+WHERE mtga._Deleted = 0
+   AND `mtga`.MeetingID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1045:"SELECT 
+   `mtga`.AttendeeID,
+`mtg1`.OrganizationID AS OrganizationID,
+`ppl1`.LastName AS LastName,
+`ppl1`.FirstName AS FirstName,
+NULLIF(CONCAT(IFNULL(`orgdp1`.DepartmentName,\'\')),\'\') AS Department,
+`cod1`.Description AS Attendance
+FROM `mtga`
+
+   LEFT OUTER JOIN `mtg` AS mtg1 
+   ON (`mtga`.MeetingID = `mtg1`.MeetingID )
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`mtga`.AttendeeID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'mtga\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'57\')
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`mtga`.AttendanceID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'104\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `orgda` AS orgda1 
+    ON (`ppl1`.PersonID = `orgda1`.RelatedRecordID 
+     AND `orgda1`.RelatedModuleID = \'ppl\'
+     AND `orgda1`._Deleted = 0)
+   LEFT OUTER JOIN `orgdp` AS orgdp1 
+ON (`orgda1`.DepartmentID = `orgdp1`.DepartmentID )
+WHERE mtga._Deleted = 0
+AND `mtga`.MeetingID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:9:"MeetingID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:5:{s:10:"AttendeeID";s:3:"int";s:8:"LastName";N;s:9:"FirstName";N;s:10:"Department";N;s:10:"Attendance";N;}s:4:"name";N;s:10:"fieldAlign";a:5:{s:10:"AttendeeID";s:5:"right";s:8:"LastName";s:4:"left";s:9:"FirstName";s:4:"left";s:10:"Department";s:7:"justify";s:10:"Attendance";s:4:"left";}}s:12:"viewgrid_rsk";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"rsk";s:6:"phrase";s:16:"Risk Imperatives";s:6:"number";N;s:6:"Fields";a:3:{s:12:"ImperativeID";O:14:"invisiblefield":11:{s:4:"name";s:12:"ImperativeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Record ID|An automatically assigned number used to track records within modules";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsk";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"RiskImperative";O:9:"viewfield":16:{s:4:"name";s:14:"RiskImperative";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Risk Imperative|The risk imperative which is associated with the related record";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsk";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"RiskDescription";O:9:"viewfield":16:{s:4:"name";s:15:"RiskDescription";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:111:"Description|A detailed description of the manner in which the risk imperative is impacted by the related record";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"rsk";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `rsk`
+   
+WHERE rsk._Deleted = 0
+   AND `rsk`.RelatedModuleID = \'mtg\'
+AND `rsk`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:487:"SELECT 
+   `rsk`.ImperativeID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`cod1`.Description AS RiskImperative,
+`rsk`.RiskDescription
+FROM `rsk`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`rsk`.RelatedRecordID = rdc1.RecordID AND `rsk`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`rsk`.RiskImperativeID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'234\')
+WHERE rsk._Deleted = 0
+AND `rsk`.RelatedModuleID = \'mtg\'
+AND `rsk`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:3:{s:12:"ImperativeID";s:3:"int";s:14:"RiskImperative";N;s:15:"RiskDescription";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:3:{s:12:"ImperativeID";s:5:"right";s:14:"RiskImperative";s:4:"left";s:15:"RiskDescription";s:7:"justify";}}s:13:"viewgrid_eqpa";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"eqpa";s:6:"phrase";s:22:"Equipment Associations";s:6:"number";N;s:6:"Fields";a:4:{s:12:"EquipAssocID";O:14:"invisiblefield":11:{s:4:"name";s:12:"EquipAssocID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"Record ID|An automatically assigned number used to associate equipment with related records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"eqpa";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:13:"EquipmentType";O:9:"viewfield":16:{s:4:"name";s:13:"EquipmentType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:146:"Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"eqpa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"EquipmentInventory";O:9:"viewfield":16:{s:4:"name";s:18:"EquipmentInventory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:112:"Equipment|A combined field used to describe this equipment inventory item when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"eqpa";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"EquipAssocStatus";O:9:"viewfield":16:{s:4:"name";s:16:"EquipAssocStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Status|The present status of the equipment assignment";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"eqpa";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `eqpa`
+   
+WHERE eqpa._Deleted = 0
+   AND `eqpa`.RelatedModuleID = \'mtg\'
+AND `eqpa`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1096:"SELECT 
+   `eqpa`.EquipAssocID,
+`eqpin1`.OrganizationID AS OrganizationID,
+NULLIF(CONCAT(IFNULL(`eqpt1`.EquipmentTypeTitle,\'\')),\'\') AS EquipmentType,
+NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`eqpt2`.EquipmentTypeTitle,\'\')),\'\'),\'\'),\' | \',IFNULL(`eqp2`.EquipmentName,\'\'),\' | No: \',IFNULL(`eqpin1`.TrackingNumber,\'\')),\' |  | No: \') AS EquipmentInventory,
+`cod1`.Description AS EquipAssocStatus
+FROM `eqpa`
+
+   LEFT OUTER JOIN `eqpin` AS eqpin1 
+   ON (`eqpa`.EquipmentInventoryID = `eqpin1`.EquipmentInventoryID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`eqpa`.EquipAssocStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'148\')
+   LEFT OUTER JOIN `eqp` AS eqp1 
+   ON (`eqpin1`.EquipmentID = `eqp1`.EquipmentID )
+   LEFT OUTER JOIN `eqp` AS eqp2 
+   ON (`eqpin1`.EquipmentID = `eqp2`.EquipmentID )
+   LEFT OUTER JOIN `eqpt` AS eqpt1 
+   ON (`eqp1`.EquipmentTypeID = `eqpt1`.EquipmentTypeID )
+   LEFT OUTER JOIN `eqpt` AS eqpt2 
+   ON (`eqp2`.EquipmentTypeID = `eqpt2`.EquipmentTypeID )
+WHERE eqpa._Deleted = 0
+AND `eqpa`.RelatedModuleID = \'mtg\'
+AND `eqpa`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:12:"EquipAssocID";s:3:"int";s:13:"EquipmentType";N;s:18:"EquipmentInventory";N;s:16:"EquipAssocStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:12:"EquipAssocID";s:5:"right";s:13:"EquipmentType";s:7:"justify";s:18:"EquipmentInventory";s:7:"justify";s:16:"EquipAssocStatus";s:4:"left";}}s:14:"viewgrid_traca";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:5:"traca";s:6:"phrase";s:19:"Course Associations";s:6:"number";N;s:6:"Fields";a:6:{s:15:"TrainingAssocID";O:14:"invisiblefield":11:{s:4:"name";s:15:"TrainingAssocID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:114:"Record ID|An automatically assigned number used to associate training courses with organizations and insured risks";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:12:"Organization";O:9:"viewfield":16:{s:4:"name";s:12:"Organization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:140:"Organization|The organization with primary responsibility for the design, development, and support for this course throughout the enterprise";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"TrainingCategory";O:9:"viewfield":16:{s:4:"name";s:16:"TrainingCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Training Category|A word or short phrase used to describe the category of training";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"TrainingType";O:9:"viewfield":16:{s:4:"name";s:12:"TrainingType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:105:"Training Type|A combined field used to describe this training type when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:6:"Course";O:9:"viewfield":16:{s:4:"name";s:6:"Course";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:91:"Course|A combined field used to describe this course when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:14:"MannerAffected";O:9:"viewfield":16:{s:4:"name";s:14:"MannerAffected";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:115:"Manner Affected|A detailed description of the manner in which the related record is affected by the training course";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:5:"traca";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:150:"SELECT 
+    count(*) 
+FROM `traca`
+   
+WHERE traca._Deleted = 0
+   AND `traca`.RelatedModuleID = \'mtg\'
+AND `traca`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1131:"SELECT 
+   `traca`.TrainingAssocID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`org1`.Name AS Organization,
+`cod1`.Description AS TrainingCategory,
+NULLIF(CONCAT(IFNULL(`cod2`.Description,\'\'),\' - \',IFNULL(`trat1`.TrainingTypeTitle,\'\')),\' - \') AS TrainingType,
+NULLIF(CONCAT(IFNULL(`tra1`.CourseTitle,\'\'),\' (\',IFNULL(`tra1`.CourseCode,\'\'),\')\'),\' ()\') AS Course,
+`traca`.MannerAffected
+FROM `traca`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`traca`.RelatedRecordID = rdc1.RecordID AND `traca`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `tra` AS tra1 
+   ON (`traca`.CourseID = `tra1`.CourseID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`tra1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `trat` AS trat1 
+   ON (`tra1`.TrainingTypeID = `trat1`.TrainingTypeID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`trat1`.TrainingCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'59\')
+   LEFT OUTER JOIN `cod` AS cod2 
+   ON (`trat1`.TrainingCategoryID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = \'59\')
+WHERE traca._Deleted = 0
+AND `traca`.RelatedModuleID = \'mtg\'
+AND `traca`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:15:"TrainingAssocID";s:3:"int";s:12:"Organization";N;s:16:"TrainingCategory";N;s:12:"TrainingType";N;s:6:"Course";N;s:14:"MannerAffected";s:4:"text";}s:4:"name";N;s:10:"fieldAlign";a:6:{s:15:"TrainingAssocID";s:5:"right";s:12:"Organization";s:4:"left";s:16:"TrainingCategory";s:4:"left";s:12:"TrainingType";s:7:"justify";s:6:"Course";s:7:"justify";s:14:"MannerAffected";s:7:"justify";}}s:13:"viewgrid_filr";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"filr";s:6:"phrase";s:14:"Physical Files";s:6:"number";N;s:6:"Fields";a:6:{s:12:"FileRecordID";O:14:"invisiblefield":11:{s:4:"name";s:12:"FileRecordID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Record ID|An automatically assigned number used to associate records with physical files";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:18:"FilingOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"FilingOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:94:"Filing Organization|The name of the organization where the  where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"Location";O:9:"viewfield":16:{s:4:"name";s:8:"Location";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"File Location|Specific area within the facility where the physical file is located";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:8:"FileName";O:9:"viewfield":16:{s:4:"name";s:8:"FileName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:68:"File Name|A short title or phrase used to identify the physical file";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"FileNumber";O:9:"viewfield":16:{s:4:"name";s:10:"FileNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:70:"File Number|A number manually assigned to a file for tracking purposes";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:12:"SystemNumber";O:9:"viewfield":16:{s:4:"name";s:12:"SystemNumber";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:262:"System Number|A unique number assigned to the phisical file based on a combination of fields from within the file retention module. The system number is comprised of the filing organization ID, the filing location ID, the file type ID and the record retention ID";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"filr";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `filr`
+   
+WHERE filr._Deleted = 0
+   AND `filr`.RelatedModuleID = \'mtg\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1267:"SELECT 
+   `filr`.FileRecordID,
+`filph1`.FilingOrganizationID AS FilingOrganizationID,
+`org1`.Name AS FilingOrganization,
+NULLIF(CONCAT_WS(\', \',`bui1`.BuildingName,`buir1`.RoomName,`orgl1`.LocationName),\'\') AS Location,
+`filph1`.FileName AS FileName,
+`filph1`.FileNumber AS FileNumber,
+NULLIF(CONCAT(IFNULL(`filph1`.FilingOrganizationID,\'\'),IFNULL(`orgla1`.LocationID,\'\'),IFNULL(`fil1`.FileTypeID,\'\'),IFNULL(`filph1`.FileRetentionID,\'\')),\'\') AS SystemNumber
+FROM `filr`
+
+   LEFT OUTER JOIN `filph` AS filph1 
+   ON (`filr`.FileRetentionID = `filph1`.FileRetentionID )
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`filph1`.FilingOrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `orgla` AS orgla1 
+    ON (`filph1`.FileRetentionID = `orgla1`.SourceRecordID 
+     AND `orgla1`.SourceModuleID = \'filph\'
+     AND `orgla1`._Deleted = 0)
+   LEFT OUTER JOIN `orgl` AS orgl1 
+ON (`orgla1`.LocationID = `orgl1`.LocationID )
+   LEFT OUTER JOIN `fil` AS fil1 
+   ON (`filph1`.FileReqID = `fil1`.FileReqID )
+   LEFT OUTER JOIN `buir` AS buir1 
+   ON (`orgl1`.RoomID = `buir1`.RoomID )
+   LEFT OUTER JOIN `bui` AS bui1 
+   ON (`buir1`.BuildingID = `bui1`.BuildingID )
+WHERE filr._Deleted = 0
+AND `filr`.RelatedModuleID = \'mtg\'
+AND `filr`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:6:{s:12:"FileRecordID";s:3:"int";s:18:"FilingOrganization";N;s:8:"Location";N;s:8:"FileName";N;s:10:"FileNumber";N;s:12:"SystemNumber";N;}s:4:"name";N;s:10:"fieldAlign";a:6:{s:12:"FileRecordID";s:5:"right";s:18:"FilingOrganization";s:4:"left";s:8:"Location";s:7:"justify";s:8:"FileName";s:4:"left";s:10:"FileNumber";s:4:"left";s:12:"SystemNumber";s:7:"justify";}}s:13:"viewgrid_prta";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prta";s:6:"phrase";s:16:"Accountabilities";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantAccID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantAccID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:53:"Person Accountable|The name of the person accountable";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"AccountabilityType";O:9:"viewfield":16:{s:4:"name";s:18:"AccountabilityType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:69:"Accountability Type|The participant\'s specific type of accountability";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:20:"AccountabilityStatus";O:9:"viewfield":16:{s:4:"name";s:20:"AccountabilityStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:82:"Accountability Status|The present status of this participant\'s ongoing involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prta";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prta`
+   
+WHERE prta._Deleted = 0
+   AND `prta`.RelatedModuleID = \'mtg\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1172:"SELECT 
+   `prta`.ParticipantAccID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonAccountable,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS AccountabilityType,
+`cod1`.Description AS AccountabilityStatus
+FROM `prta`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prta`.RelatedRecordID = rdc1.RecordID AND `prta`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`prta`.ParticipantAccID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'prta\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'70\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prta`.AccountabilityTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `acc` AS acc2 
+    ON (`prta`.ParticipantAccID = `acc2`.SourceRecordID 
+     AND `acc2`.SourceModuleID = \'prta\'
+     AND `acc2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`acc2`.AccountabilityStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prta._Deleted = 0
+AND `prta`.RelatedModuleID = \'mtg\'
+AND `prta`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantAccID";s:3:"int";s:17:"PersonAccountable";N;s:18:"AccountabilityType";N;s:20:"AccountabilityStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantAccID";s:5:"right";s:17:"PersonAccountable";s:4:"left";s:18:"AccountabilityType";s:7:"justify";s:20:"AccountabilityStatus";s:4:"left";}}s:13:"viewgrid_prti";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:4:"prti";s:6:"phrase";s:11:"Involvement";s:6:"number";N;s:6:"Fields";a:4:{s:16:"ParticipantInvID";O:14:"invisiblefield":11:{s:4:"name";s:16:"ParticipantInvID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:103:"Participant ID|An automatically assigned number used to track risk control participant accountabilities";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:14:"PersonInvolved";O:9:"viewfield":16:{s:4:"name";s:14:"PersonInvolved";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:47:"Person Involved|The name of the person involved";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:15:"InvolvementType";O:9:"viewfield":16:{s:4:"name";s:15:"InvolvementType";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:63:"Involvement Type|The participant\'s specific type of involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"InvolvementStatus";O:9:"viewfield":16:{s:4:"name";s:17:"InvolvementStatus";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Involvement Status|The present status of this participant\'s involvement";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:4:"prti";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:146:"SELECT 
+    count(*) 
+FROM `prti`
+   
+WHERE prti._Deleted = 0
+   AND `prti`.RelatedModuleID = \'mtg\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:1151:"SELECT 
+   `prti`.ParticipantInvID,
+`rdc1`.OrganizationID AS OwnerOrganizationID,
+`ppl1`.DisplayName AS PersonInvolved,
+NULLIF(CONCAT(IFNULL(`prtt1`.ParticipationTitle,\'\')),\'\') AS InvolvementType,
+`cod1`.Description AS InvolvementStatus
+FROM `prti`
+
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`prti`.RelatedRecordID = rdc1.RecordID AND `prti`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `inv` AS inv1 
+    ON (`prti`.ParticipantInvID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = \'prti\'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = \'78\')
+   LEFT OUTER JOIN `prtt` AS prtt1 
+   ON (`prti`.InvolvementTypeID = `prtt1`.ParticipationTypeID )
+   LEFT OUTER JOIN `inv` AS inv2 
+    ON (`prti`.ParticipantInvID = `inv2`.SourceRecordID 
+     AND `inv2`.SourceModuleID = \'prti\'
+     AND `inv2`._Deleted = 0)
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`inv2`.InvolvementStatusID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'199\')
+WHERE prti._Deleted = 0
+AND `prti`.RelatedModuleID = \'mtg\'
+AND `prti`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:16:"ParticipantInvID";s:3:"int";s:14:"PersonInvolved";N;s:15:"InvolvementType";N;s:17:"InvolvementStatus";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:16:"ParticipantInvID";s:5:"right";s:14:"PersonInvolved";s:4:"left";s:15:"InvolvementType";s:7:"justify";s:17:"InvolvementStatus";s:4:"left";}}s:12:"viewgrid_bpc";O:8:"viewgrid":20:{s:13:"orderByFields";a:0:{}s:6:"isInfo";b:0;s:10:"isGuidance";b:0;s:10:"isVertical";b:0;s:15:"verticalFormats";a:0:{}s:8:"moduleID";s:3:"bpc";s:6:"phrase";s:14:"Best Practices";s:6:"number";N;s:6:"Fields";a:4:{s:14:"BestPracticeID";O:14:"invisiblefield":11:{s:4:"name";s:14:"BestPracticeID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Record ID|An automatically assigned number used to track best practices";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}s:20:"BestPracticeCategory";O:9:"viewfield":16:{s:4:"name";s:20:"BestPracticeCategory";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:79:"Best Practice Category|A method of categorizing best practices of similar types";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"BestPracticeTitle";O:9:"viewfield":16:{s:4:"name";s:17:"BestPracticeTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:71:"Best Practice Title|A descriptive title of the best practice identified";s:8:"dataType";s:12:"varchar(128)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PersonAccountable";O:9:"viewfield":16:{s:4:"name";s:17:"PersonAccountable";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:66:"Evaluator|The individual evaluating and awarding the best practice";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:3:"bpc";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}s:8:"countSQL";s:142:"SELECT 
+    count(*) 
+FROM `bpc`
+   
+WHERE bpc._Deleted = 0
+   AND `bpc`.RelatedModuleID = \'mtg\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+";s:7:"listSQL";s:676:"SELECT 
+   `bpc`.BestPracticeID,
+`cod1`.Description AS BestPracticeCategory,
+`bpc`.BestPracticeTitle,
+`ppl1`.DisplayName AS PersonAccountable
+FROM `bpc`
+
+   LEFT OUTER JOIN `cod` AS cod1 
+   ON (`bpc`.BestPracticeCategoryID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = \'108\')
+   LEFT OUTER JOIN `acc` AS acc1 
+    ON (`bpc`.BestPracticeID = `acc1`.SourceRecordID 
+     AND `acc1`.SourceModuleID = \'bpc\'
+     AND `acc1`._Deleted = 0
+     AND `acc1`.AccountabilityDescriptorID = \'142\')
+   LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`acc1`.PersonAccountableID = `ppl1`.PersonID )
+WHERE bpc._Deleted = 0
+AND `bpc`.RelatedModuleID = \'mtg\'
+AND `bpc`.RelatedRecordID = \'/**RecordID**/\'
+
+";s:12:"listExtended";b:0;s:12:"ParentRowSQL";N;s:8:"localKey";s:15:"RelatedRecordID";s:9:"parentKey";N;s:8:"PKFields";N;s:13:"formatOptions";a:0:{}s:10:"fieldTypes";a:4:{s:14:"BestPracticeID";s:3:"int";s:20:"BestPracticeCategory";N;s:17:"BestPracticeTitle";s:12:"varchar(128)";s:17:"PersonAccountable";N;}s:4:"name";N;s:10:"fieldAlign";a:4:{s:14:"BestPracticeID";s:5:"right";s:20:"BestPracticeCategory";s:4:"left";s:17:"BestPracticeTitle";s:4:"left";s:17:"PersonAccountable";s:4:"left";}}}}}');
+
+?>

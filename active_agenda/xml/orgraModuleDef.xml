@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Requirement Accountabilities" moduleID="orgra" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Requirement Accountability" pluralRecordName="Requirement Accountabilities" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="RequirementAccID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|Automatically assigned number used to track contractors of organizations" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" dbFlags="unsigned" phrase="Organization|The name of the organization associated with the requirement" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the requirement" sample="Bechtel"/>
+		<RemoteField name="PersonAccountableID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="62" phrase="Person Accountable|The individual assigned primary accountability for enforcing this organizational requirement at the local level" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for enforcing this organizational requirement at the local level" sample="Mattias Thorslund"/>
+		<TableField name="RequirementAccTitle" type="varchar(128)" dbFlags="" phrase="Title|A word or short phrase used to describe the organizational requirement accountability" sample="Obtain confidentiality statements from all contractors"/>
+		<TableField name="RequirementAccDesc" type="text" dbFlags="" phrase="Description|Brief but thorough description of the organizational requirement accountability" sample="All contractors performing work for Active Agenda are required to sign a confidentiality agreement before ANY work may commence. Any issues with the confidentiality agreement shall be raised with Active Agenda legal counsel."/>
+		<TableField name="PertinentInfo" type="text" dbFlags="" phrase="Pertinent Information|All information provided by the organization which is pertinent to the organizational requirement" sample="Bechtel provided a signed confidentiality agreement which is attached to this record. Only two changes were suggested to the agreement and legal signed off on the modifications (also attached)."/>
+		<TableField name="RequirementAccStatusID" type="int" dbFlags="unsigned" phrase="Status|The status of the organizational requirement accountability" sample="1"/>
+		<CodeField name="RequirementAccStatus" key="RequirementAccStatusID" phrase="Status|The status of the organizational requirement accountability" sample="Complete" codeTypeID="116"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_
+            <CombinedFieldRef name="RequirementAccTitle"/>;_
+            <CombinedFieldRef name="RequirementAccStatus"/></CombinedField>
+		<CombinedField name="RequirementAcc" phrase="Organizational Requirement|A combined field used to describe this organizational requirement when associating it with other records" sample="Bechtel; Sign Confidentiality Agreement; Complete">
+            <CombinedFieldRef name="RequirementAccTitle"/>
+        </CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="RequirementAccID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="RequirementAcc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List organizational requirement assignments">
+			<ListField name="RequirementAccID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="RequirementAccTitle" phrase="Requirement"/>
+			<ListField name="RequirementAccStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search organizational requirement assignments">
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Bechtel"/>
+				<SampleItem ID="2" name="Emprise, Sweden"/>
+				<SampleItem ID="3" name="Emprise, Latvia"/>
+			</ComboField>
+			<EditField name="RequirementAccTitle" size="75" maxLength="128"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Emprise, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="RequirementAccStatusID">
+				<SampleItem ID="1" name="Complete"/>
+				<SampleItem ID="2" name="Incomplete"/>
+				<SampleItem ID="3" name="Waived"/>
+			</CodeRadioField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an organizational requirement assignment">
+			<ViewField name="RequirementAccID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="RequirementAccTitle"/>
+			<ViewField name="RequirementAccDesc"/>
+			<ViewField name="PertinentInfo"/>
+			<ViewField name="RequirementAccStatus"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an organizational requirement assignment">
+			<ViewField name="RequirementAccID"/>
+			<ViewField name="Organization"/>
+			<EditField name="RequirementAccTitle" size="75" maxLength="128"/>
+			<MemoField name="RequirementAccDesc" rows="5" cols="75"/>
+			<MemoField name="PertinentInfo" rows="5" cols="75"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Emprise, HQ"/>
+			</PersonComboField>
+			<CodeRadioField name="RequirementAccStatusID">
+				<SampleItem ID="1" name="Complete"/>
+				<SampleItem ID="2" name="Incomplete"/>
+				<SampleItem ID="3" name="Waived"/>
+			</CodeRadioField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="orgra" phrase="Requirement Acountabilities">
+			<InvisibleField name="RequirementAccID"/>
+			<ViewField name="RequirementAccTitle" sample="Sign Confidentiality Agreement"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="RequirementAccStatus" sample="Complete"/>
+		</ViewGrid>
+		<EditGrid moduleID="orgra" phrase="Requirement Acountabilities">
+			<GridForm>
+                <InvisibleField name="RequirementAccID"/>
+                <EditField name="RequirementAccTitle" size="75" maxLength="128"/>
+                <MemoField name="RequirementAccDesc" rows="5" cols="75"/>
+                <MemoField name="PertinentInfo" rows="5" cols="75"/>
+                <PersonComboField name="PersonAccountableID" findMode="alpha">
+                    <SampleItem ID="1" name="Jane Doe" orgName="Emprise, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Emprise, HQ"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, HQ"/>
+                    <SampleItem ID="4" name="Mattias Thorlsund" orgName="Emprise, HQ"/>
+                </PersonComboField>
+                <CodeRadioField name="RequirementAccStatusID">
+                    <SampleItem ID="1" name="Complete"/>
+                    <SampleItem ID="2" name="Incomplete"/>
+                    <SampleItem ID="3" name="Waived"/>
+                </CodeRadioField>
+			</GridForm>
+			<InvisibleField name="RequirementAccID"/>
+			<ViewField name="RequirementAccTitle" sample="Sign Confidentiality Agreement"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="RequirementAccStatus" sample="Complete" codeTypeID="99"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,308 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Document Associations" moduleID="doca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Document Association Association" pluralRecordName="Document Association Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="DocumentAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate document associations with equipment and activities requiring a permit to operate" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the document" sample="bui"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the document" sample="Buildings"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A description of the related record based on a combination of field values assigned from within the related module" sample="Manufacturing; Packing House Number 3; Active Agenda, HQ"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization affected by the document association" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization affected by the document association" sample="Active Agenda, Inc."/>
+		<TableField name="DocumentID" type="int" dbFlags="unsigned not null" phrase="Document|A combined field used to describe this document when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="doc" foreignKey="DocumentID" foreignField="OrganizationID" key="DocumentID" joinType="left" phrase="Organization|The organization with primary responsibility for the documentation requirement" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for this documentation requirement" sample="Active Agenda, HQ"/>
+		<ForeignField name="DocumentTypeID" foreignTable="doc" foreignKey="DocumentID" foreignField="DocumentTypeID" key="DocumentID" joinType="left" phrase="Document Type|The specific type of document or form" sample="1"/>
+		<CodeField name="DocumentType" key="DocumentTypeID" phrase="Document Type|The specific type of document or form" sample="Injury Report Form" codeTypeID="18"/>
+		<ForeignField name="DocumentVersion" foreignTable="doc" foreignKey="DocumentID" foreignField="DocumentVersion" key="DocumentID" joinType="left" phrase="Current Version|A unique number or version title used by the document creator to track revisions and currency of the document" sample="California Division of Workers' Comepnsation Form DWC1"/>
+		<ForeignField name="DocumentDesc" foreignTable="doc" foreignKey="DocumentID" foreignField="DocumentDesc" key="DocumentID" joinType="left" phrase="Description|A detailed description of the document or form" sample="The Employer's First Report of Injury or Illness is required by every state in the United States. This form is required by state workers' compensation laws ans must be completed by an employer representative within 24 hours of knowledge of injury"/>
+		<ForeignField name="Document" foreignTable="doc" foreignKey="DocumentID" foreignField="Document" key="DocumentID" joinType="left" phrase="Document|A combined field used to describe this document when associating it with other records" sample="Employer's First Report of Injury or Illness (CA); Mattias Thorslund"/>
+		<TableField name="MannerAssociated" type="text" validate="noValidation" phrase="Manner Related|The manner in which the document is associated with the related record" sample="The Employee Injury Form is to be completed following every injury, irrespective of the severity of the outcome"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Job Analysis | Injury Report Form"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="Document"/></CombinedField>
+		<CombinedField name="DocumentAssoc" phrase="Document Association|A combined field used to describe the document association" sample="Job Analysis | Injury Report Form"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="Document"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="DocumentAssocID"/>
+		</PrimaryKey>
+	</ModuleInfo>
+	<OwnerField name="OwnerOrganizationID"/>
+	<RecordDescriptionField name="DocumentAssoc"/>
+	<RecordLabelField name="RecordLabel"/>
+	<Screens>
+		<ListScreen name="List" phrase="List|List document associations">
+			<ListField name="DocumentAssocID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="Document" phrase="Document"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search document associations">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Buildings"/>
+				<SampleItem ID="2" name="Vehicles"/>
+				<SampleItem ID="3" name="Equipment"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<ComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="DocumentID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="DocumentID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Employer's First Report of Injury (CA)"/>
+				<SampleItem ID="2" name="Doctor's First Report of Injury (CA)"/>
+				<SampleItem ID="3" name="Supervisor's Report of Injury"/>
+				<SampleItem ID="4" name="Employee's Report of Injury"/>
+				<SampleItem ID="5" name="Injury Witness Statement"/>
+			</ComboField>
+			<ComboField name="DocumentTypeID" findMode="text">
+				<SampleItem ID="1" name="Employer Incident Report Form"/>
+				<SampleItem ID="2" name="Agency Incident Report Form"/>
+				<SampleItem ID="3" name="Agency Annual Report Form"/>
+				<SampleItem ID="4" name="Employee Incident Report Form"/>
+				<SampleItem ID="5" name="Supervisor Incident Report Form"/>
+				<SampleItem ID="6" name="Corporate Report Form"/>
+			</ComboField>
+			<EditField name="DocumentVersion" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the document association">
+			<ViewField name="DocumentAssocID"/>
+			<ViewField name="RelatedModuleRecord"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Document"/>
+			<ViewField name="DocumentType"/>
+			<ViewField name="DocumentVersion"/>
+			<ViewField name="DocumentDesc"/>
+			<ViewField name="MannerAssociated"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the document association">
+			<ViewField name="DocumentAssocID"/>
+			<ViewField name="RelatedModuleRecord"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="DocumentID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</ComboField>
+			<ComboField name="DocumentID" findMode="text" parentField="OrganizationID">
+				<UpdateFieldRef name="DocumentType"/>
+				<UpdateFieldRef name="DocumentVersion"/>
+				<UpdateFieldRef name="DocumentDesc"/>
+				<SampleItem ID="1" name="Employer's First Report of Injury (CA)"/>
+				<SampleItem ID="2" name="Doctor's First Report of Injury (CA)"/>
+				<SampleItem ID="3" name="Supervisor's Report of Injury"/>
+				<SampleItem ID="4" name="Employee's Report of Injury"/>
+				<SampleItem ID="5" name="Injury Witness Statement"/>
+			</ComboField>
+			<ViewField name="DocumentType" parentField="DocumentID"/>
+			<ViewField name="DocumentVersion" parentField="DocumentID"/>
+			<ViewField name="DocumentDesc" parentField="DocumentID"/>
+			<MemoField name="MannerAssociated" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="doca" phrase="Document Associations">
+			<InvisibleField name="DocumentAssocID"/>
+			<ViewField name="Document" sample="Employer's First Report of Injury"/>
+			<ViewField name="DocumentVersion" sample="DWC-1 2006-4"/>
+			<ViewField name="MannerAssociated" sample="This document is required to be completed within 24 hours by state law"/>
+		</ViewGrid>
+		<EditGrid moduleID="doca" phrase="Document Associations">
+			<GridForm>
+				<InvisibleField name="DocumentAssocID"/>
+				<ComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="DocumentID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="3" name="Active Agenda, New York"/>
+					<SampleItem ID="4" name="Active Agenda, Munich"/>
+				</ComboField>
+				<ComboField name="DocumentID" findMode="text" parentField="OrganizationID">
+					<UpdateFieldRef name="DocumentType"/>
+					<UpdateFieldRef name="DocumentVersion"/>
+					<UpdateFieldRef name="DocumentDesc"/>
+					<SampleItem ID="1" name="Employer's First Report of Injury (CA)"/>
+					<SampleItem ID="2" name="Doctor's First Report of Injury (CA)"/>
+					<SampleItem ID="3" name="Supervisor's Report of Injury"/>
+					<SampleItem ID="4" name="Employee's Report of Injury"/>
+					<SampleItem ID="5" name="Injury Witness Statement"/>
+				</ComboField>
+				<ViewField name="DocumentType" parentField="DocumentID"/>
+				<ViewField name="DocumentVersion" parentField="DocumentID"/>
+				<ViewField name="DocumentDesc" parentField="DocumentID"/>
+				<MemoField name="MannerAssociated" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="DocumentAssocID"/>
+			<ViewField name="Document" sample="Employer's First Report of Injury"/>
+			<ViewField name="DocumentVersion" sample="DWC-1 2006-4"/>
+			<ViewField name="MannerAssociated" sample="This document is required to be completed within 24 hours by state law"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Document Associations  By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Document Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Document Associations By Permit">
+			<GroupByField name="Document"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Document Associations By Permit">
+			<GroupByField name="Document"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Document Associations By Permit">
+			<GroupByField name="DocumentType"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Document Associations By Permit">
+			<GroupByField name="DocumentType"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Document Associations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Document Associations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Document Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Document Associations By Affected Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="DocumentAssocID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

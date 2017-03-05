@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Waste Systems" moduleID="wassy" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="System Associated With Waste Stream" pluralRecordName="Systems Associated With Waste Streams" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="WasteSystemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Waste Systems ID|An automatically assigned number used to associate waste streams with systems and processes" sample="1"/>
+		<TableField name="WasteID" type="int" validate="noValidation" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="1"/>
+		<ForeignField name="WasteOrganizationID" listType="allParticipants" foreignTable="was" foreignKey="WasteID" foreignField="OrganizationID" key="WasteID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="1"/>
+		<ForeignField name="WasteOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WasteOrganizationID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="Active Agenda, HQ"/>
+		<ForeignField name="Waste" foreignTable="was" foreignKey="WasteID" foreignField="Waste" key="WasteID" joinType="left" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="Ammonium Hydroxide"/>
+		<TableField name="SystemID" type="int" validate="RequireSelection" phrase="Primary System|A combined field used to describe this system when associating it with other records" sample="1"/>
+		<ForeignField name="SystemOrganizationID" listType="allParticipants" foreignTable="sys" foreignKey="SystemID" foreignField="OrganizationID" key="SystemID" joinType="left" phrase="System Organization|The name of the organization where the system or process exists" sample="1"/>
+		<ForeignField name="SystemOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="SystemOrganizationID" joinType="left" phrase="System Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="SystemLocationID" foreignTable="orgla" foreignKey="SourceRecordID" foreignField="LocationID" key="SystemID" listCondition="SourceModuleID = 'sys'" joinType="left" phrase="System Location|Specific location within the facility where the system is located" sample="1"/>
+		<ForeignField name="SystemLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="SystemLocationID" joinType="left" phrase="System Location|Specific location within the facility where the system is located" sample="Engine Room"/>
+		<ForeignField name="System" foreignTable="sys" foreignKey="SystemID" foreignField="System" key="SystemID" joinType="left" phrase="System|A combined field used to describe this system when associating it with other records" sample="Ammonia Refrigeration System; Active Agenda, HQ"/>
+		<ForeignField name="SystemDesc" foreignTable="sys" foreignKey="SystemID" foreignField="SystemDesc" key="SystemID" joinType="left" phrase="System Decsription|A detailed description of the system or process" sample="The ammonia refrigeration spans throughout the entire physical building and is utilized to cool the cold storage building and raw ingredient warehouse. The ammonia refrigeration system contains 100,000 pounds of anhydrous ammonia."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="System"/>;_<CombinedFieldRef name="WasteOrganization"/>;_<CombinedFieldRef name="SystemLocation"/></CombinedField>
+		<CombinedField name="WasteSystem" phrase="Waste System|A combined field used to describe this waste system when associating it with other records" sample="eqp | ID: 1 "><CombinedFieldRef name="System"/>;_<CombinedFieldRef name="SystemLocation"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="WasteSystemID"/>
+		</PrimaryKey>
+		<OwnerField name="WasteOrganizationID"/>
+		<RecordDescriptionField name="WasteSystem"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List systems associated with waste streams">
+			<ListField name="WasteSystemID" phrase="Waste System ID"/>
+			<ListField name="WasteOrganization" phrase="Waste Organization"/>
+			<ListField name="Waste" phrase="Waste Stream"/>
+			<ListField name="System" phrase="System"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search systems associated with waste streams">
+			<OrgComboField name="WasteOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="WasteID" findMode="text">
+				<SampleItem ID="1" name="Ammonium Hydroxide"/>
+				<SampleItem ID="2" name="Cardboard"/>
+				<SampleItem ID="3" name="Process Waste Water"/>
+			</ComboField>
+			<OrgComboField name="SystemOrganizationID" findMode="text">
+				<UpdateFieldRef name="SystemLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemLocationID" findMode="text" parentField="SystemOrganizationID">
+				<UpdateFieldRef name="SystemID"/>
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+			<ComboField name="SystemID" findMode="text" parentField="SystemLocationID">
+				<SampleItem ID="1" name="Ammonia Refrigeration System; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Nitrogen Packaging System; Active Agenda, HQ"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a system associated with a waste stream">
+			<ViewField name="WasteSystemID"/>
+			<ViewField name="Waste"/>
+			<ViewField name="WasteOrganization"/>
+			<ViewField name="System"/>
+			<ViewField name="SystemDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a system associated with a waste stream">
+			<ViewField name="WasteSystemID"/>
+			<ViewField name="Waste"/>
+			<OrgComboField name="SystemOrganizationID" findMode="text">
+				<UpdateFieldRef name="SystemLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemLocationID" findMode="text" parentField="SystemOrganizationID">
+				<UpdateFieldRef name="SystemID"/>
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+			<ComboField name="SystemID" findMode="text" parentField="SystemLocationID">
+				<SampleItem ID="1" name="Ammonia Refrigeration System; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Nitrogen Packaging System; Active Agenda, HQ"/>
+			</ComboField>
+			<ViewField name="SystemDesc"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="wassy" phrase="Generating Systems">
+			<ViewField name="WasteOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="System" sample="Ammonia Refrigeration"/>
+			<ViewField name="SystemDesc" sample="The ammonia refrigeration spans throughout the entire physical building and is utilized to cool the cold storage building and raw ingredient warehouse. The ammonia refrigeration system contains 100,000 pounds of anhydrous ammonia."/>
+		</ViewGrid>
+		<EditGrid moduleID="wassy" phrase="Generating Systems">
+			<GridForm>
+				<InvisibleField name="WasteSystemID"/>
+				<OrgComboField name="SystemOrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="SystemLocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="SystemLocationID" findMode="text" parentField="SystemOrganizationID" sample="Engine Room">
+					<UpdateFieldRef name="SystemID"/>
+					<SampleItem ID="1" name="Engine Room"/>
+					<SampleItem ID="2" name="Shipping Bay #1"/>
+					<SampleItem ID="3" name="Administrative Building, CEO Office, 112"/>
+					<SampleItem ID="4" name="Manufacturing Line 1, Production Building, Processing Room"/>
+				</ComboField>
+				<ComboField name="SystemID" findMode="text" parentField="SystemLocationID" sample="Ammonia Refrigeration System; Active Agenda, HQ">
+					<SampleItem ID="1" name="Ammonia Refrigeration System; Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Nitrogen Packaging System; Active Agenda, HQ"/>
+				</ComboField>
+				<ViewField name="SystemDesc" sample="The ammonia refrigeration spans throughout the entire physical building and is utilized to cool the cold storage building and raw ingredient warehouse. The ammonia refrigeration system contains 100,000 pounds of anhydrous ammonia."/>
+			</GridForm>
+			<ViewField name="SystemOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="SystemLocation" sample="Engine Room"/>
+			<ViewField name="System" sample="Ammonia Refrigeration System; Active Agenda, HQ"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Waste Systems By Waste Organization">
+			<GroupByField name="WasteOrganization"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Waste Systems By Waste Organization">
+			<GroupByField name="WasteOrganization"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Waste Systems By System Organization">
+			<GroupByField name="SystemOrganization"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Waste Systems By System Organization">
+			<GroupByField name="SystemOrganization"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Waste Systems By System Location">
+			<GroupByField name="SystemLocation"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Waste Systems By System Location">
+			<GroupByField name="SystemLocation"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Waste Systems By System">
+			<GroupByField name="System"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Waste Systems By System">
+			<GroupByField name="System"/>
+			<SummaryField name="WasteSystemID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

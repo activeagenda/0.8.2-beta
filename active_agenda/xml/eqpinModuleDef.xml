@@ -1,0 +1,665 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Equipment Inventory" moduleID="eqpin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Equipment Inventory Item" pluralRecordName="Equipment Inventory Items" allowAddRecord="no" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="EquipmentInventoryID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track equipment inventory" sample="1"/>
+        <TableField name="EquipmentID" type="int" validate="noValidation" phrase="Equipment|An automatically assigned number used to track equipment utilized by the organization" sample="1"/>
+        <ForeignField name="EquipmentCategoryID" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentCategoryID" key="EquipmentTypeID" joinType="left" phrase="Equipment Category|A broadly defined title or phrase used to group similar categories of equipment" sample="1"/>
+        <CodeField name="EquipmentCategory" key="EquipmentCategoryID" phrase="Equipment Category|A broadly defined title or phrase used to group similar categories of equipment" sample="Personal Protective Equipment" codeTypeID="284"/>
+        <ForeignField name="EquipmentTypeID" foreignTable="eqp" foreignKey="EquipmentID" foreignField="EquipmentTypeID" key="EquipmentID" joinType="left" phrase="Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type" sample="Respirator"/>
+        <ForeignField name="EquipmentType" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentType" key="EquipmentTypeID" joinType="left" phrase="Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type" sample="Respirator"/>
+        <ForeignField name="Equipment" foreignTable="eqp" foreignKey="EquipmentID" foreignField="EquipmentName" key="EquipmentID" joinType="left" phrase="Equipment|A description of the equipment based on a combination of field values assigned from within the equipment module" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+        <ForeignField name="EquipmentName" foreignTable="eqp" foreignKey="EquipmentID" foreignField="EquipmentName" key="EquipmentID" joinType="left" phrase="Equipment Name|A distinct name or title used to identify the respective piece of equipment" sample="3M 3710 Dust Mask"/>
+        <ForeignField name="ModelNo" foreignTable="eqp" foreignKey="EquipmentID" foreignField="ModelNo" key="EquipmentID" joinType="left" phrase="Model Number|The model number of the equipment which is usually assigned by the equipment manufacturer" sample="3710"/>
+        <ForeignField name="BaseUnit" foreignTable="eqp" foreignKey="EquipmentID" foreignField="BaseUnit" key="EquipmentID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Each"/>
+        <ForeignField name="HazardousEnergy" foreignTable="eqp" foreignKey="EquipmentID" foreignField="HazardousEnergy" key="EquipmentID" joinType="left" phrase="Hazardous Energy|Whether the equipment possesses hazardous energy. If the equipment is checked, the equipment will be made available within the hazardous energy module so that control procedures can be defined for the equipment" sample="No"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalAll" validate="RequireSelection" phrase="Organization|The name of the organization where the equipment is located" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the equipment is located" sample="Active Agenda, HQ"/>
+        <RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|A description of the specific location within the facility where the equipment is located. Specific locations are based on a combination of field values assigned from within the Organizations - Locations module" sample="1"/>
+        <ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|A description of the specific location within the facility where the equipment is located. Specific locations are based on a combination of field values assigned from within the Organizations - Locations module" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="31" phrase="Person Accountable|The individual assigned primary accountability for managing the equipment at this specific location" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the equipment at this specific location" sample="Mattias Thorslund"/>
+        <TableField name="TrackingNumber" type="varchar(10)" validate="noValidation" phrase="Tracking Number|A unique number used by the organization to track specific items of equipment" sample="PPE-APR-3710-5"/>
+        <TableField name="EquipmentStorageMethodID" type="int" validate="RequireSelection" phrase="Storage Method|The specific method used to store the equipment on site" sample="1"/>
+        <CodeField name="EquipmentStorageMethod" key="EquipmentStorageMethodID" phrase="Storage Method|The specific method used to store the equipment on site" sample="Equipment Cage" codeTypeID="149"/>
+        <TableField name="ReOrderQuantity" type="float" validate="noValidation" phrase="Reorder Quantity|The inventory quantity at which the equipment should be ordered to replentish the inventory at this specific location" sample="21"/>
+        <TableField name="ReOrderQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="ReOrderQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ReOrderQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="ReOrderQuantityUoMCategory" key="ReOrderQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="ReOrderQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ReOrderQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <TableField name="StartQuantity" type="float" validate="noValidation" phrase="Start Quantity|The quantity of equipment at this location when tracking begins" sample="23"/>
+        <TableField name="StartQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="StartQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="StartQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="StartQuantityUoMCategory" key="StartQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="StartQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="StartQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <TableField name="StartDate" type="date" validate="notEmpty" phrase="Start Date|The date the start quantity was entered" sample="09-28-2003"/>
+        <TableField name="Issued" type="float" validate="noValidation" phrase="Issued|The number of items issued or checked out from this specific location" sample="25"/>
+        <TableField name="IssuedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="IssuedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="IssuedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="IssuedUoMCategory" key="IssuedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="IssuedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="IssuedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <!--The issued fields are automatically calculated based on transactions occuring and logged within the eqpt table between the BeginningCalculationDate and CalculationDate indicated. DFZ 4-1-2004-->
+        <TableField name="Returned" type="float" validate="noValidation" phrase="Returned|The number of items returned or checked in to iventory at this specific location" sample="25"/>
+        <TableField name="ReturnedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="ReturnedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="ReturnedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="ReturnedUoMCategory" key="ReturnedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="ReturnedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="ReturnedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <!--The Returned fields are automatically calculated based on transactions occuring and logged within the eqpt table between the BeginningCalculationDate and EndingCalculationDate indicated. DFZ 4-1-2004-->
+        <TableField name="Added" type="float" validate="noValidation" phrase="Added|New items of this equipment added to the inventory at this specific location" sample="25"/>
+        <TableField name="AddedUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="AddedUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="AddedUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="AddedUoMCategory" key="AddedUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="AddedUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="AddedUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <!--The Added fields are automatically calculated based on transactions occuring and logged within the eqpt table between the BeginningCalculationDate and EndingCalculationDate indicated. DFZ 4-1-2004-->
+        <TableField name="Transferred" type="float" validate="noValidation" phrase="Transferred|Items of this equipment which were transferred to another location" sample="25"/>
+        <TableField name="TransferredUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="TransferredUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="TransferredUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="TransferredUoMCategory" key="TransferredUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="TransferredUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="TransferredUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <!--The Transferred fields are automatically calculated based on transactions occuring and logged within the eqpt table between the BeginningCalculationDate and EndingCalculationDate indicated. DFZ 4-1-2004-->
+        <TableField name="PresentQuantity" type="float" validate="noValidation" phrase="Present Quantity|The present quantity of equipment at this location. The present quantity is based on a manual count of items in inventory at this specific location" sample="13"/>
+        <TableField name="PresentQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="PresentQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="PresentQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="PresentQuantityUoMCategory" key="PresentQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="PresentQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="PresentQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <TableField name="PresentQuantityDate" type="date" validate="noValidation" phrase="Present Quantity Date|An automatically recorded date when the present quantity was appended" sample="09-28-2003"/>
+        <RemoteField name="PresentQuantityPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="25" phrase="Present Quantity Person|The individual determining and recording the present quantity" sample="1"/>
+        <ForeignField name="PresentQuantityPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PresentQuantityPersonID" joinType="left" phrase="Present Quantity Person|The individual determining and recording the present quantity" sample="Mattias Thorslund"/>
+        <TableField name="BeginningCalculationDate" type="date" validate="noValidation" phrase="Beginning Calculation Date|The beginning date used for calculating pertinent indicators and losses between the beginning calculation date and ending calculation Date" sample="09-28-2003"/>
+        <TableField name="EndingCalculationDate" type="date" validate="noValidation" phrase="Ending Calculation Date|The ending date used for calculating pertinent indicators and losses between the beginning calculation date and ending calculation Date" sample="09-28-2004"/>
+        <TableField name="LossQuantity" type="float" validate="noValidation" phrase="Loss Quantity|The quantity of equipment which cannot be accounted for but is unavailable. Lost equipment is any equipment which cannot be accounted for by equipment which was issued and not returned" sample="6"/>
+        <TableField name="LossQuantityUoMID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <!--<ForeignField name="LossQuantityUoMCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="LossQuantityUoMID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="LossQuantityUoMCategory" key="LossQuantityUoMCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>-->
+        <ForeignField name="LossQuantityUoM" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="LossQuantityUoMID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Millimeter">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <!--LossQuantity is calculated based on "Issues," "Returns," "Adds" and "Transfers" between the BeginningCalculationDate and EndingCalculationDate. DFZ 3-31-2004-->
+        <!--The LossQuantity and LossQuantityUnits are calculated based on the (Start Quantity - Issued + Returned + Added - Transferred - PresentQty) DFZ 10-19-2003-->
+        <TableField name="LossCost" type="money" validate="Money" phrase="Loss Cost|The financial cost of losses associated with this equipment at this specific location as of the Calculation Date" sample="$2,000.00"/>
+        <!--the LossCostToDate is a calculated value based on the (LossQuantity [units based on UnitsofMeasure equivalent analysis] * UnitCost from <eqpsp> when the OrganizationID and EquipmentID=OrganizationID and EquipmentID of the "PrimarySupplier"). DFZ 3-31-2004-->
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Equipment"/>;_<CombinedFieldRef name="Location"/>;_<CombinedFieldRef name="TrackingNumber"/></CombinedField>
+        <CombinedField name="PresentInventoryQuantity" phrase="Present Quantity|A combined field used to describe the present equipment inventory quantity when associating it with other records" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"><CombinedFieldRef name="PresentQuantity"/>_<CombinedFieldRef name="PresentQuantityUoM"/></CombinedField>
+        <CombinedField name="EquipmentInventory" phrase="Equipment|A combined field used to describe this equipment inventory item when associating it with other records" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"><CombinedFieldRef name="EquipmentType"/>;_<CombinedFieldRef name="EquipmentName"/>;_No:_<CombinedFieldRef name="TrackingNumber"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="EquipmentInventoryID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="EquipmentInventory"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <!--<SubModule moduleID="eqptr" name="Equipment Transactions" join="eqpin.InventoryID = eqptr.EquipmentID"/>-->
+        <SubModule moduleID="hze" name="Energy Control Procedures" parentKey="EquipmentInventoryID" localKey="EquipmentInventoryID"/>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+        <SubModule moduleID="aprd" name="Minimum Requirements" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="cosc" name="Cost Considerations" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="cosex" name="Cost Exposures" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="EquipmentInventoryID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqpin"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List the equipment inventory">
+            <ListField name="EquipmentInventoryID" phrase="Record ID"/>
+            <ListField name="Equipment" phrase="Equipment"/>
+            <ListField name="Location" phrase="Location"/>
+            <ListField name="TrackingNumber" phrase="Tracking Number"/>
+            <ListField name="PresentInventoryQuantity" phrase="Present Inventory"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search the equipment inventory">
+            <CodeComboField name="EquipmentCategoryID" findMode="text">
+                <UpdateFieldRef name="EquipmentTypeID"/>
+                <SampleItem ID="1" name="Respirator"/>
+                <SampleItem ID="3" name="Boots"/>
+                <SampleItem ID="5" name="Maintenance"/>
+                <SampleItem ID="7" name="Operations"/>
+            </CodeComboField>
+            <ComboField name="EquipmentTypeID" findMode="text" parentField="EquipmentCategoryID">
+                <SampleItem ID="1" name="Respirator"/>
+                <SampleItem ID="3" name="Boots"/>
+                <SampleItem ID="5" name="Maintenance"/>
+                <SampleItem ID="7" name="Operations"/>
+            </ComboField>
+            <ComboField name="EquipmentID" findMode="text">
+                <SampleItem ID="1" name="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+                <SampleItem ID="2" name="3M 1320 SCBA; Self Contained Breating Apparatus; Minnesota Mining and Manufacturing; 3710"/>
+                <SampleItem ID="3" name="3M 1301 APR; Air Purifying Respirator; Minnesota Mining and Manufacturing; 3710"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+                <SampleItem ID="3" name="Shipping Bay #1"/>
+                <SampleItem ID="5" name="Administrative Office"/>
+                <SampleItem ID="7" name="Production Line #1"/>
+            </ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="TrackingNumber" size="50" maxLength="50"/>
+            <CodeComboField name="EquipmentStorageMethodID" findMode="text">
+                <SampleItem ID="1" name="Equipment Cage (locked)"/>
+                <SampleItem ID="3" name="Cabinet (locked)"/>
+                <SampleItem ID="5" name="Drawer (locked)"/>
+            </CodeComboField>
+            <EditField name="ReOrderQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="ReOrderQuantityUoMCategoryID">
+                    <UpdateFieldRef name="ReOrderQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ReOrderQuantityUoMID" parentField="ReOrderQuantityUoMCategoryID">-->
+                <ComboField name="ReOrderQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <EditField name="StartQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="StartQuantityUoMCategoryID">
+                    <UpdateFieldRef name="StartQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="StartQuantityUoMID" parentField="StartQuantityUoMCategoryID">-->
+                <ComboField name="StartQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="StartDate"/>
+            <EditField name="PresentQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="PresentQuantityUoMCategoryID">
+                    <UpdateFieldRef name="PresentQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PresentQuantityUoMID" parentField="PresentQuantityUoMCategoryID">-->
+                <ComboField name="PresentQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="PresentQuantityDate"/>
+            <PersonComboField name="PresentQuantityPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="LossQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="LossQuantityUoMCategoryID">
+                    <UpdateFieldRef name="LossQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="LossQuantityUoMID" parentField="LossQuantityUoMCategoryID">-->
+                <ComboField name="LossQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <MoneyField name="LossCost"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about an equipment inventory item">
+            <ViewField name="EquipmentInventoryID"/>
+            <ViewField name="EquipmentType"/>
+            <ViewField name="Equipment"/>
+            <ViewField name="Organization"/>
+            <ViewField name="Location"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="TrackingNumber"/>
+            <ViewField name="EquipmentStorageMethod"/>
+            <ViewField name="BaseUnit"/>
+            <ViewField name="ReOrderQuantity">
+                <ViewField name="ReOrderQuantityUoM"/>
+            </ViewField>
+            <ViewField name="StartQuantity">
+                <ViewField name="StartQuantityUoM"/>
+            </ViewField>
+            <ViewField name="StartDate"/>
+            <ViewField name="Issued">
+                <ViewField name="IssuedUoM"/>
+            </ViewField>
+            <ViewField name="Returned">
+                <ViewField name="ReturnedUoM"/>
+            </ViewField>
+            <ViewField name="Added">
+                <ViewField name="AddedUoM"/>
+            </ViewField>
+            <ViewField name="Transferred">
+                <ViewField name="TransferredUoM"/>
+            </ViewField>
+            <ViewField name="PresentQuantity">
+                <ViewField name="PresentQuantityUoM"/>
+            </ViewField>
+            <ViewField name="PresentQuantityPerson"/>
+            <ViewField name="PresentQuantityDate"/>
+            <ViewField name="BeginningCalculationDate"/>
+            <ViewField name="EndingCalculationDate"/>
+            <ViewField name="LossQuantity">
+                <ViewField name="LossQuantityUoM"/>
+            </ViewField>
+            <ViewField name="LossCost"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="hze"/>
+                <ViewGrid moduleID="apr"/>
+                <ViewGrid moduleID="cosex"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about an equipment inventory item">
+            <ViewField name="EquipmentInventoryID"/>
+            <ViewField name="EquipmentType"/>
+            <ViewField name="Equipment"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <UpdateFieldRef name="LocationID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+                <SampleItem ID="1" name="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+                <SampleItem ID="3" name="Shipping Bay #1"/>
+                <SampleItem ID="5" name="Administrative Office"/>
+                <SampleItem ID="7" name="Production Line #1"/>
+            </ComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="TrackingNumber" size="50" maxLength="50"/>
+            <CodeComboField name="EquipmentStorageMethodID" findMode="text">
+                <SampleItem ID="1" name="Equipment Cage (locked)"/>
+                <SampleItem ID="3" name="Cabinet (locked)"/>
+                <SampleItem ID="5" name="Drawer (locked)"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="Levels" phrase="Levels|Edit summary information about the levels of an equipment inventory item">
+            <ViewField name="BaseUnit"/>
+            <EditField name="ReOrderQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="ReOrderQuantityUoMCategoryID">
+                    <UpdateFieldRef name="ReOrderQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="ReOrderQuantityUoMID" parentField="ReOrderQuantityUoMCategoryID">-->
+                <ComboField name="ReOrderQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <EditField name="StartQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="StartQuantityUoMCategoryID">
+                    <UpdateFieldRef name="StartQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="StartQuantityUoMID" parentField="StartQuantityUoMCategoryID">-->
+                <ComboField name="StartQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="StartDate"/>
+            <ViewField name="Issued">
+                <ViewField name="IssuedUoM"/>
+            </ViewField>
+            <ViewField name="Returned">
+                <ViewField name="ReturnedUoM"/>
+            </ViewField>
+            <ViewField name="Added">
+                <ViewField name="AddedUoM"/>
+            </ViewField>
+            <ViewField name="Transferred">
+                <ViewField name="TransferredUoM"/>
+            </ViewField>
+            <EditField name="PresentQuantity" size="5" maxLength="5">
+                <Self/>
+                <!--<ComboField name="PresentQuantityUoMCategoryID">
+                    <UpdateFieldRef name="PresentQuantityUoMID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PresentQuantityUoMID" parentField="PresentQuantityUoMCategoryID">-->
+                <ComboField name="PresentQuantityUoMID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <DateField name="PresentQuantityDate"/>
+            <PersonComboField name="PresentQuantityPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="BeginningCalculationDate"/>
+            <DateField name="EndingCalculationDate"/>
+            <ViewField name="LossQuantity">
+                <ViewField name="LossQuantityUoM"/>
+            </ViewField>
+            <ViewField name="LossCost"/>
+        </EditScreen>
+        <EditScreen name="AssetProtection" phrase="Audits|Associate an equipment inventory item with asset protection methods and criteria">
+            <RecordSummaryFieldsRef/>
+            <InvisibleField name="EquipmentID"/>
+            <ViewGrid moduleID="aprd"/>
+            <EditGrid moduleID="apr"/>
+        </EditScreen>
+        <EditScreen name="CostExposures" phrase="Cost Exposures|Associate cost exposures with the equipment inventory item">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="cosc"/>
+            <EditGrid moduleID="cosex"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the equipment inventory item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the equipment inventory item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical inventory item file">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with an equipment item in inventory" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="EquipmentInventoryID"/>
+        <ViewField name="EquipmentType"/>
+        <ViewField name="Equipment"/>
+        <ViewField name="Organization"/>
+        <ViewField name="Location"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="TrackingNumber"/>
+        <ViewField name="PresentInventoryQuantity"/>
+        <ViewField name="EquipmentStorageMethod"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="eqpin" phrase="Inventory">
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="Location" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="TrackingNumber" sample="PPE-APR-3710-5"/>
+            <ViewField name="PresentInventoryQuantity" sample="13 Each"/>
+        </ViewGrid>
+        <EditGrid moduleID="eqpin" phrase="Inventory">
+            <GridForm>
+                <InvisibleField name="EquipmentInventoryID"/>
+                <OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+                    <UpdateFieldRef name="LocationID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                </OrgComboField>
+                <ComboField name="LocationID" findMode="text" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006" parentField="OrganizationID">
+                    <SampleItem ID="1" name="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+                    <SampleItem ID="3" name="Shipping Bay #1"/>
+                    <SampleItem ID="5" name="Administrative Office"/>
+                    <SampleItem ID="7" name="Production Line #1"/>
+                </ComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <EditField name="TrackingNumber" size="50" maxLength="50" sample="PPE-APR-3710-5"/>
+                <CodeComboField name="EquipmentStorageMethodID" findMode="text" sample="Equipment Cage">
+                    <SampleItem ID="1" name="Equipment Cage (locked)"/>
+                    <SampleItem ID="3" name="Cabinet (locked)"/>
+                    <SampleItem ID="5" name="Drawer (locked)"/>
+                </CodeComboField>
+                <EditField name="PresentQuantity" size="5" maxLength="5">
+                    <Self/>
+                    <!--<ComboField name="PresentQuantityUoMCategoryID">
+                        <UpdateFieldRef name="PresentQuantityUoMID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="PresentQuantityUoMID" parentField="PresentQuantityUoMCategoryID">-->
+                    <ComboField name="PresentQuantityUoMID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+                <DateField name="PresentQuantityDate" sample="09-28-2003"/>
+                <PersonComboField name="PresentQuantityPersonID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+            </GridForm>
+            <ViewField name="Organization" sample="Active Agenda, HQ"/>
+            <ViewField name="Location" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+            <ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+            <ViewField name="TrackingNumber" sample="PPE-APR-3710-5"/>
+            <ViewField name="PresentInventoryQuantity" sample="13 Each"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

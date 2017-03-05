@@ -1,0 +1,240 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Triangle Values" moduleID="inslt" parentModule="inslp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Loss Triangle Value" pluralRecordName="Loss Triangle Values" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="LossTriangleValueID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate loss triangle values with the development of a loss triangle leading to organizational loss development factors" sample="1"/>
+        <TableField name="LossDevelopmentFactorID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to associate loss development factors with insurance policy types and related claims" sample="1"/>
+        <ForeignField name="DevelopmentTypeID" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="DevelopmentTypeID" key="LossDevelopmentFactorID" joinType="left" phrase="Development Type|The type of cost development associated with the factors" sample="1"/>
+        <CodeField name="DevelopmentType" key="DevelopmentTypeID" phrase="Development Type|The type of cost development associated with the factors" sample="Incurred" codeTypeID="275"/>
+        <ForeignField name="PolicyTypeID" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="PolicyTypeID" key="LossDevelopmentFactorID" joinType="left" phrase="Policy Type|The type of insurance policy, and/or claim, to which this loss development factor should be applied" sample="1"/>
+        <CodeField name="PolicyType" key="PolicyTypeID" phrase="Policy Type|The type of insurance policy, and/or claim, to which this loss development factor should be applied" sample="General Liability" codeTypeID="3"/>
+        <ForeignField name="LossDevelopmentFactor" foreignTable="insld" foreignKey="LossDevelopmentFactorID" foreignField="LossDevelopmentFactor" key="LossDevelopmentFactorID" joinType="left" phrase="Loss Development Factor|A combined field used to describe the loss development factors when associating them with other records" sample="Active Agenda, HQ | 2005 Global Incurred LDF's | General Liability | Incurred"/>
+        <TableField name="LossPeriodID" type="int" dbFlags="unsigned not null" phrase="Loss Period|A combined field used to describe this Loss Period when associating it with other records" sample="1"/>
+        <ForeignField name="LossPeriodLabel" foreignTable="inslp" foreignKey="LossPeriodID" foreignField="LossPeriodLabel" key="LossPeriodID" joinType="left" phrase="Year|The Loss Period to be associated with the loss costs used to calculate the loss development factors" sample="2004"/>
+        <ForeignField name="LossPeriod" foreignTable="inslp" foreignKey="LossPeriodID" foreignField="LossPeriod" key="LossPeriodID" joinType="left" phrase="Loss Period|A combined field used to describe this Loss Period when associating it with other records" sample="Loss Period: 2004 | 01/01/2004 to 12/31/2004"/>
+        <RemoteField name="EvaluationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="22" phrase="Evaluation Date|The ending date of the loss period or the date closet to the end of the loss period when loss costs were evaluated" sample="01/01/2004"/>
+        <TableField name="Months" type="float" validate="Number notEmpty notZero notNegative" phrase="Months|The number of months included in the loss period" sample="12"/>
+        <TableField name="LossCosts" type="money" validate="Money notEmpty notNegative" phrase="Loss Costs|The total amount of loss costs based on the development type assigned to the factors under development, stated in the currency assigned to this installation of the software" sample="212,000.00"/>
+        <!--the Loss Costs field is a calculated field which summarizes all costs from <inslc> where LossPeriodLabel and Months fields are the same-->
+        <CombinedField name="LossTriangleValue" phrase="Loss Triangle Value|A combined field used to describe this loss triangle value when associating it with other records" sample="Incurred | General Liability | 1994 at 12 months | $178,000"><CombinedFieldRef name="DevelopmentType"/>;_<CombinedFieldRef name="PolicyType"/>;_<CombinedFieldRef name="LossPeriodLabel"/>_at_<CombinedFieldRef name="Months"/>_months;_<CombinedFieldRef name="LossCosts"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="LossTriangleValueID"/>
+        </PrimaryKey>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="inslc" name="Loss Costs" parentKey="LossTriangleValueID" localKey="LossTriangleValueID"/>
+        <!--the Loss Costs sub module should autopopulate based on the Organizations selected, the DevelopmentType (Incurred, Payments, Outstanding) and the PolicyType and a summary total of costs meeting the following criteria should be entered into the Loss Costs fields of the respective organization records: the most recent entry of all costs of the same Policy Type as of the EvaluationDate - the number of months in the Months field. The data can be retrieved from the <lco> module w/ the only exception being the organization which can be retrieved from the dff-->
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List loss triangle values assigned to loss development factor calculations">
+            <ListField name="LossTriangleValueID" phrase="Record ID"/>
+            <ListField name="LossDevelopmentFactor" phrase="Development Factors Title"/>
+            <ListField name="DevelopmentType" phrase="Development Type"/>
+            <ListField name="PolicyType" phrase="Policy Type"/>
+            <ListField name="LossPeriodLabel" phrase="Loss Period"/>
+            <ListField name="Months" phrase="Months"/>
+            <ListField name="LossCosts" phrase="Loss Costs"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search loss triangle values assigned to loss development factor calculations">
+            <ComboField name="DevelopmentTypeID" findMode="text">
+                <SampleItem ID="1" name="Incurred"/>
+                <SampleItem ID="2" name="Paid"/>
+            </ComboField>
+            <ComboField name="PolicyTypeID" findMode="text">
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="2" name="Auto Liability"/>
+                <SampleItem ID="3" name="Products Liability"/>
+                <SampleItem ID="4" name="Employment Practices Liability"/>
+                <SampleItem ID="5" name="Workers' Compensation'"/>
+                <SampleItem ID="6" name="Pollution Liability"/>
+            </ComboField>
+            <ComboField name="LossPeriodID" findMode="text">
+                <SampleItem ID="1" name="Loss Period: 2004 | 01/01/2004 to 12/31/2004"/>
+                <SampleItem ID="2" name="Loss Period: 2003 | 01/01/2003 to 12/31/2003"/>
+                <SampleItem ID="3" name="Loss Period: 2005 | 01/01/2005 to 12/31/2005"/>
+            </ComboField>
+            <EditField name="LossPeriodLabel" size="5" maxLength="4"/>
+            <DateField name="EvaluationDate"/>
+            <EditField name="Months" size="5" maxLength="5"/>
+            <MoneyField name="LossCosts"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a loss triangle value assigned to a loss development factor calculation">
+            <ViewField name="LossTriangleValueID"/>
+            <ViewField name="LossDevelopmentFactor"/>
+            <ViewField name="DevelopmentType"/>
+            <ViewField name="PolicyType"/>
+            <ViewField name="LossPeriodLabel"/>
+            <ViewField name="EvaluationDate"/>
+            <ViewField name="Months"/>
+            <ViewField name="LossCosts"/>
+            <ViewGrid moduleID="inslc"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a loss triangle value assigned to a loss development factor calculation">
+            <ViewField name="LossTriangleValueID"/>
+            <ViewField name="LossDevelopmentFactor"/>
+            <ViewField name="DevelopmentType"/>
+            <ViewField name="PolicyType"/>
+            <ComboField name="LossPeriodID" findMode="text">
+                <SampleItem ID="1" name="Loss Period: 2004 | 01/01/2004 to 12/31/2004"/>
+                <SampleItem ID="2" name="Loss Period: 2003 | 01/01/2003 to 12/31/2003"/>
+                <SampleItem ID="3" name="Loss Period: 2005 | 01/01/2005 to 12/31/2005"/>
+            </ComboField>
+            <DateField name="EvaluationDate"/>
+            <EditField name="Months" size="5" maxLength="5"/>
+            <ViewField name="LossCosts"/>
+        </EditScreen>
+        <EditScreen name="PeriodLossCosts" phrase="Loss Costs|Associate organizational loss costs with a loss triangle">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="inslc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="LossTriangleValueID"/>
+        <ViewField name="LossDevelopmentFactor"/>
+        <ViewField name="DevelopmentType"/>
+        <ViewField name="PolicyType"/>
+        <ViewField name="LossPeriodLabel"/>
+        <ViewField name="EvaluationDate"/>
+        <ViewField name="Months"/>
+        <ViewField name="LossCosts"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="inslt" phrase="Loss Triangle Values">
+            <InvisibleField name="LossTriangleValueID"/>
+            <ViewField name="LossPeriodID" sample="Loss Period: 2004 | 01/01/2004 to 12/31/2004"/>
+            <ViewField name="EvaluationDate" sample="12/31/2004"/>
+            <ViewField name="Months" sample="12"/>
+            <ViewField name="LossCosts" sample="212,000.00"/>
+        </ViewGrid>
+        <EditGrid moduleID="inslt" phrase="Loss Triangle Values">
+            <GridForm>
+                <InvisibleField name="LossTriangleValueID"/>
+                <ComboField name="LossPeriodID" findMode="text" sample="Loss Period: 2004 | 01/01/2004 to 12/31/2004">
+                    <SampleItem ID="1" name="Loss Period: 2004 | 01/01/2004 to 12/31/2004"/>
+                    <SampleItem ID="2" name="Loss Period: 2003 | 01/01/2003 to 12/31/2003"/>
+                    <SampleItem ID="3" name="Loss Period: 2005 | 01/01/2005 to 12/31/2005"/>
+                </ComboField>
+                <DateField name="EvaluationDate" sample="12/31/2004"/>
+                <EditField name="Months" size="5" maxLength="5" sample="12"/>
+                <ViewField name="LossCosts" sample="212,000.00"/>
+            </GridForm>
+            <InvisibleField name="LossTriangleValueID"/>
+            <ViewField name="LossPeriodLabel" sample="2004"/>
+            <ViewField name="Months" sample="12"/>
+            <ViewField name="LossCosts" sample="212,000.00"/>
+        </EditGrid>
+    </Exports>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

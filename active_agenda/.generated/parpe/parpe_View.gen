@@ -1,0 +1,150 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    /**CUSTOM_CODE|init**/
+
+    //list of objects containing the field information
+    $fields = unserialize('a:5:{s:19:"PolicyExpectationID";O:9:"viewfield":16:{s:4:"name";s:19:"PolicyExpectationID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:98:"Record ID|An automatically assigned number used to track expectations of organization partnerships";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:18:"PolicyOrganization";O:9:"viewfield":16:{s:4:"name";s:18:"PolicyOrganization";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:187:"Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:17:"PartnershipPolicy";O:9:"viewfield":16:{s:4:"name";s:17:"PartnershipPolicy";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:101:"Partnership|A combined field used to describe this partnership when associating it with other records";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:16:"ExpectationGroup";O:9:"viewfield":16:{s:4:"name";s:16:"ExpectationGroup";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:100:"Expectation Group|A method of grouping business imperatives so that section scores can be formualted";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Expectation";O:9:"viewfield":16:{s:4:"name";s:11:"Expectation";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:120:"Expectation|An obligation of those implementing a partnership. Expectations can be scored and performance can be audited";s:8:"dataType";s:4:"text";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}');
+
+
+    //list of grids
+    /**grids**/
+
+    //phrases for field names, in field order
+    $phrases = array(
+   'PolicyExpectationID' => gettext("Record ID|An automatically assigned number used to track expectations of organization partnerships"),
+   'PolicyOrganization' => gettext("Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership"),
+   'PartnershipPolicy' => gettext("Partnership|A combined field used to describe this partnership when associating it with other records"),
+   'ExpectationGroup' => gettext("Expectation Group|A method of grouping business imperatives so that section scores can be formualted"),
+   'Expectation' => gettext("Expectation|An obligation of those implementing a partnership. Expectations can be scored and performance can be audited")
+   );
+
+
+    $ownerField = 'PolicyOrganizationID';
+
+    
+    /**disbleGlobalModules**/
+    /**useBestPractices**/
+
+    //retrieve record
+    $data = array();
+    
+    /**SQL|GET_BEGIN**/
+    $SQL = "SELECT 
+   `parpe`.PolicyExpectationID,
+   `org1`.Name AS PolicyOrganization,
+   NULLIF(CONCAT(IFNULL(`cod1`.Description,'')),'') AS PartnershipPolicy,
+   `cod2`.Description AS ExpectationGroup,
+   `parpe`.Expectation,
+   NULLIF(CONCAT(' Policy Organization: ',IFNULL(`org1`.Name,''),' | ',IFNULL(NULLIF(CONCAT(IFNULL(`cod1`.Description,'')),''),''),' - ',IFNULL(`cod2`.Description,'')),' Policy Organization:  |  - ') AS RecordLabel,
+   `parp1`.PolicyOrganizationID AS PolicyOrganizationID
+FROM `parpe`
+   
+     LEFT OUTER JOIN `parp` AS parp1 
+   ON (`parpe`.PartnershipPolicyID = `parp1`.PartnershipPolicyID )
+     LEFT OUTER JOIN `cod` AS cod2 
+   ON (`parpe`.ExpectationGroupID = `cod2`.CodeID 
+     AND `cod2`.CodeTypeID = '150')
+     LEFT OUTER JOIN `org` AS org1 
+   ON (`parp1`.PolicyOrganizationID = `org1`.OrganizationID )
+     LEFT OUTER JOIN `cod` AS cod1 
+   ON (`parp1`.PolicyTitleID = `cod1`.CodeID 
+     AND `cod1`.CodeTypeID = '201')
+WHERE
+   parpe.PolicyExpectationID='/**RecordID**/'";
+
+    /**CUSTOM_CODE|before_get**/
+
+    //get data
+    $r = $dbh->getAll(str_replace('/**RecordID**/', $recordID, $SQL), DB_FETCHMODE_ASSOC);
+    dbErrorCheck($r);
+
+    
+    /**SQL|GET_END**/
+    //need to repeat for each getSQL........
+    $data = array_merge($data, $r[0]); //assign first (only) row
+    
+    /**CUSTOM_CODE|get**/
+    
+    //check if user has permission to view or edit record - will redirect if no permission at all
+    $allowEdit = $User->CheckViewScreenPermission();
+    //$allowEdit = true;
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //List tab
+    $tabs['List'] = Array("list.php?$qs", gettext("List|View the list of Policy Expectations"));
+
+    if ($allowEdit){
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Policy Expectation") );
+      $tempTabs['Form'] = array( "edit.php?scr=Form&$tabsQS", gettext("Form|Edit a partnership policy expectation") );
+$tabs = array_merge($tabs, $tempTabs);
+    } else {
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Policy Expectation") );
+      $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Policy Expectation") );
+$tabs = array_merge($tabs, $tempTabs);
+    }
+    
+    $recordLabelField = $data['RecordLabel'];
+
+    $content = '';
+    foreach($fields as $key => $field){
+        if (!$field->isSubField()){
+            $content .= $field->render($data, $phrases);
+        }
+    }
+
+    $pageTitle = gettext("Policy Expectation");
+    $screenPhrase = gettext("View|View a partnership policy expectation");
+
+    $backlink = "list.php?$qs";
+
+    $nextScreen = "Form";
+    $editlink = "edit.php?$tabsQS&scr=$nextScreen";
+    $content = renderViewTable($content, $allowEdit, $backlink, $editlink);
+
+    //add byline info on record modification info
+    $content .= "<div class=\"recinfo\">{$phrases['_ModDate']} {$data['_ModDate']}";
+    if ($User->IsAdmin) {
+        $content .= '&nbsp; &nbsp; <a href="audit.php?mdl='.$ModuleID.'&rid='.$recordID.'">'.gettext("Audit Trail").'</a> ';
+    }
+    $content .= "</div>";
+
+    //display view grids here
+
+
+//View Screen Sections here
+/**VIEWSCREENSECTIONS**/
+?>

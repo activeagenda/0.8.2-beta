@@ -1,0 +1,356 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Controls" moduleID="cnt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Control" pluralRecordName="Controls" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="ControlID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate locations with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module ID|The name or title of the module which is associated with the control method" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the control method" sample="Tasks"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Sugar Coating Raisins"/>
+		<TableField name="AssignedOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Assigned Organization|The organization being assigned the control methodology" sample="1"/>
+		<ForeignField name="AssignedOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AssignedOrganizationID" joinType="left" phrase="Assigned Organization|The organization being assigned the control methodology" sample="Active Agenda, Sweden"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="20" phrase="Person Accountable|The individual assigned primary accountability for ensuring adherence to the assigned control method" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for ensuring adherence to the assigned control method" sample="Mattias Thorslund"/>
+		<TableField name="ControlCategoryID" type="int" validate="RequireSelection" phrase="Control Category|A method of grouping control techniques used to avoid, remedy, or mitigate known or anticipated hazards" sample="3"/>
+		<CodeField name="ControlCategory" key="ControlCategoryID" phrase="Control Category|A method of grouping control techniques used to avoid, remedy, or mitigate known or anticipated hazards" sample="Administrative" codeTypeID="121"/>
+		<TableField name="ControlTitle" type="varchar(128)" validate="notEmpty" phrase="Control Title|A short title used to specifically describe the assigned control" sample="Use plastic tools around food products"/>
+		<TableField name="ControlDesc" type="text" validate="noValidation" phrase="Control|A detailed description of the control method to be associated or assigned" sample="ONLY red plastic utility tools shall be used to handle or contact food products or ingredients."/>
+		<TableField name="ControlStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the assigned control method" sample="1"/>
+		<CodeField name="ControlStatus" key="ControlStatusID" phrase="Status|The present status of the assigned control method" sample="Under Evaluation" codeTypeID="30"/>
+		<RemoteField name="ControlStatusDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="15" phrase="Status Date|The specific date of the hazard control" sample="01/01/2004"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="AssignedOrganization"/>;_<CombinedFieldRef name="ControlTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="Control" phrase="Control|A combined field used to describe this control method when associating it with other records" sample="Tasks; Active Agenda, Sweden; Administrative; Under Evaluation"><CombinedFieldRef name="ControlTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ControlID"/>
+		</PrimaryKey>
+		<OwnerField name="AssignedOrganizationID"/>
+		<RecordDescriptionField name="Control"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="eqpa" name="Equipment Associations" parentKey="ControlID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cnt"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="ControlID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cnt"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ControlID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="cnt"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List controls associated with related records">
+			<ListField name="ControlID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="ControlTitle" phrase="Control Title"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search controls associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Partnerships"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Injury Loss"/>
+				<SampleItem ID="4" name="Hazard Reports"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="AssignedOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Active Agenda, HQ"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ControlCategoryID" findMode="text">
+				<SampleItem ID="1" name="Elimination"/>
+				<SampleItem ID="2" name="Substitution"/>
+				<SampleItem ID="3" name="Engineering"/>
+				<SampleItem ID="4" name="Warnings"/>
+				<SampleItem ID="5" name="Administrative Control"/>
+				<SampleItem ID="6" name="Personal Protective Equipment"/>
+			</CodeComboField>
+			<EditField name="ControlTitle" size="75" maxLength="128"/>
+			<MemoField name="ControlDesc" rows="5" cols="75"/>
+			<CodeComboField name="ControlStatusID">
+				<SampleItem ID="1" name="Under Evaluation"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="2" name="Disapproved"/>
+			</CodeComboField>
+			<DateField name="ControlStatusDate"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a control and/or assignment associated with a related record">
+			<ViewField name="ControlID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="AssignedOrganization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ControlCategory"/>
+			<ViewField name="ControlTitle"/>
+			<ViewField name="ControlDesc"/>
+			<ViewField name="ControlStatus"/>
+			<ViewField name="ControlStatusDate"/>
+			<ViewGrid moduleID="eqpa"/>
+			<ViewGrid moduleID="oppa"/>
+			<ViewGrid moduleID="bpc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a control and/or assignment associated with a related record">
+			<ViewField name="ControlID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<OrgComboField name="AssignedOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Active Agenda, HQ"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ControlCategoryID" findMode="text">
+				<SampleItem ID="1" name="Elimination"/>
+				<SampleItem ID="2" name="Substitution"/>
+				<SampleItem ID="3" name="Engineering"/>
+				<SampleItem ID="4" name="Warnings"/>
+				<SampleItem ID="5" name="Administrative Control"/>
+				<SampleItem ID="6" name="Personal Protective Equipment"/>
+			</CodeComboField>
+			<EditField name="ControlTitle" size="75" maxLength="128"/>
+			<MemoField name="ControlDesc" rows="5" cols="75"/>
+			<CodeComboField name="ControlStatusID">
+				<SampleItem ID="1" name="Under Evaluation"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="2" name="Disapproved"/>
+			</CodeComboField>
+			<DateField name="ControlStatusDate"/>
+		</EditScreen>
+		<EditScreen name="Equipment" phrase="Equipment|Associate equipment with the hazard control system">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="eqpa"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate permits with the hazard control system">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the hazard control system" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ControlID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="AssignedOrganization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="ControlCategory"/>
+		<ViewField name="ControlTitle"/>
+		<ViewField name="ControlDesc"/>
+		<ViewField name="ControlStatus"/>
+		<ViewField name="ControlStatusDate"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="cnt" phrase="Control Hierarchy">
+			<InvisibleField name="ControlID"/>
+			<ViewField name="ControlCategory" sample="Administrative"/>
+			<ViewField name="ControlTitle" sample="Only red shovels may be used to contact food products and ingredients."/>
+			<ViewField name="ControlStatus" sample="Under Evaluation"/>
+		</ViewGrid>
+		<SelectGrid moduleID="cnt" primaryListField="ControlCategory" phrase="Control Hierarchy"/>
+		<EditGrid moduleID="cnt" phrase="Control Hierarchy">
+			<GridForm>
+				<InvisibleField name="ControlID"/>
+				<ComboField name="AssignedOrganizationID" findMode="text" sample="Active Agenda, Sweden">
+					<SampleItem ID="1" name="Active Agenda, Sweden"/>
+					<SampleItem ID="2" name="Active Agenda, HQ"/>
+				</ComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="ControlCategoryID" findMode="text">
+					<SampleItem ID="1" name="Elimination"/>
+					<SampleItem ID="2" name="Substitution"/>
+					<SampleItem ID="3" name="Engineering"/>
+					<SampleItem ID="4" name="Warnings"/>
+					<SampleItem ID="5" name="Administrative Control"/>
+					<SampleItem ID="6" name="Personal Protective Equipment"/>
+				</CodeComboField>
+				<EditField name="ControlTitle" size="75" maxLength="128"/>
+				<MemoField name="ControlDesc" rows="5" cols="75" sample="Only red shovels may be used to contact food products and ingredients."/>
+				<CodeComboField name="ControlStatusID" sample="Under Evaluation">
+					<SampleItem ID="1" name="Under Evaluation"/>
+					<SampleItem ID="2" name="Approved"/>
+					<SampleItem ID="2" name="Disapproved"/>
+				</CodeComboField>
+				<DateField name="ControlStatusDate" sample="09-21-1999"/>
+			</GridForm>
+			<InvisibleField name="ControlID"/>
+			<ViewField name="ControlCategory" sample="Administrative"/>
+			<ViewField name="ControlTitle" sample="Only red shovels may be used to contact food products and ingredients."/>
+			<ViewField name="ControlStatus" sample="Under Evaluation"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Controls By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ControlID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Controls By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="ControlID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Controls By Assigned Organization">
+			<GroupByField name="AssignedOrganization"/>
+			<SummaryField name="ControlID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Controls By Assigned Organization">
+			<GroupByField name="AssignedOrganization"/>
+			<SummaryField name="ControlID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Controls By Status">
+			<GroupByField name="ControlStatus"/>
+			<SummaryField name="ControlID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Controls By Status">
+			<GroupByField name="ControlStatus"/>
+			<SummaryField name="ControlID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Controls By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ControlID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Controls By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ControlID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Controls By Category">
+			<GroupByField name="ControlCategory"/>
+			<SummaryField name="ControlID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Controls By Category">
+			<GroupByField name="ControlCategory"/>
+			<SummaryField name="ControlID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

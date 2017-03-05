@@ -1,0 +1,547 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Medical Examinations" moduleID="med" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Medical Examination" pluralRecordName="Medical Examinations" allowAddRecord="yes" dataCollectionForm="yes" addNewName="Exam">
+	<ModuleFields>
+		<TableField name="MedicalExamID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track medical examinations" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization requesting the medical examination" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization requesting the medical examination" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="186" phrase="Person Accountable|The individual assigned primary accountability for managing the medical examination process for the organization" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the medical examination process for the organization" sample="Mattias Thorslund"/>
+		<TableField name="MedicalExamTypeID" type="int" dbFlags="unsigned not null" phrase="Exam Type|The specific type of medical examination to be performed" sample="1"/>
+		<ForeignField name="ExamCategoryID" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="ExamCategoryID" key="MedicalExamTypeID" joinType="left" phrase="Exam Category|A broadly defined title or phrase used to group similar types of medical exams" sample="1"/>
+		<CodeField name="ExamCategory" key="ExamCategoryID" phrase="Exam Category|A broadly defined title or phrase used to group similar types of medical exams" sample="Baseline" codeTypeID="95"/>
+		<ForeignField name="ExamTypeDesc" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="ExamTypeDesc" key="MedicalExamTypeID" joinType="left" phrase="Description|A brief but thorough description of the medical examination type" sample="An examination performed as a part of the employment application process"/>
+		<ForeignField name="MedicalExamType" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="MedicalExamType" key="MedicalExamTypeID" joinType="left" phrase="Exam Type|The specific type of medical examination to be performed" sample="Pre-employment physical exam"/>
+		<TableField name="MedicalExamTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A title or phrase used to describe the medical examination" sample="Pre-employment clerical examination"/>
+		<TableField name="MedicalExamDesc" type="text" validate="notEmpty" phrase="Description|A brief but thorough description of the medical examination" sample="An examination performed as a part of the employment application process"/>
+		<TableField name="MedicalExamCriteria" type="text" validate="notEmpty" phrase="Criteria|A brief but thorough description of the qualification criteria associated with the medical examination" sample="All employees that apply pesticides shall undergo the examination on an annual basis."/>
+        <TableField name="SchedFreq" type="float" validate="Number notEmpty notZero notNegative" phrase="Frequency|The frequency at which the medical examination shall be performed for individuals meeting the examination criteria" sample="1"/>
+        <TableField name="SchedFreqUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="SchedFreqUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SchedFreqUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="SchedFreqUnitCategory" key="SchedFreqUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="SchedFreqUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SchedFreqUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="MedicalProviderID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Medical Provider|The name of the provider currently contracted to perform the medical examination" sample="1"/>
+		<ForeignField name="MedicalProvider" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="MedicalProviderID" joinType="left" phrase="Medical Provider|The name of the provider currently contracted to perform the medical examination" sample="Occupational Health Associates"/>
+        <CombinedField name="ScheduleFrequency" phrase="Schedule Frequency|The frequency at which the medical examination shall be performed for individuals meeting the examination criteria" sample="1 Day(s)"><CombinedFieldRef name="SchedFreq"/>_<CombinedFieldRef name="SchedFreqUnits"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="MedicalExamType"/>;_<CombinedFieldRef name="MedicalExamTitle"/></CombinedField>
+        <CombinedField name="MedicalExam" phrase="Medical Examination|A combined field used to describe this medical examination when associating it with other records" sample="Pre-employment clerical examination"><CombinedFieldRef name="MedicalExamTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="MedicalExamID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="MedicalExam"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+        <SubModule moduleID="medee" name="Exam Elements" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+        <SubModule moduleID="medes" name="Exam Services" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+        <SubModule moduleID="medep" name="Exam Procedures" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+        <SubModule moduleID="medse" name="Scheduled Exams" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="medet"/>
+        </SubModule>
+        <SubModule moduleID="agr" name="Agreements" parentKey="MedicalExamID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="med"/>
+        </SubModule>
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Conitinuity" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="docc" name="Document Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="doca" name="Document Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="orgtc" name="Job Title Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="orgja" name="Job Title Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibility Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="MedicalExamTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medet"/>
+		</SubModule>
+		<SubModule moduleID="traca" name="Training Associations" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="MedicalExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="med"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List medical examinations">
+			<ListField name="MedicalExamID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="MedicalExamType" phrase="Exam Type"/>
+			<ListField name="MedicalExamTitle" phrase="Title"/>
+			<ListField name="ScheduleFrequency" phrase="Frequency"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search medical examinations">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="ExamCategoryID" findMode="text">
+				<UpdateFieldRef name="MedicalExamTypeID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</ComboField>
+			<ComboField name="MedicalExamTypeID" findMode="text" parentField="ExamCategoryID">
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<EditField name="MedicalExamTitle" size="75" maxLength="128"/>
+			<OrgComboField name="MedicalProviderID" findMode="text">
+				<SampleItem ID="1" name="St. Ainthurt"/>
+				<SampleItem ID="2" name="Occupational Health Associates"/>
+			</OrgComboField>
+            <EditField name="SchedFreq" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="SchedFreqUnitCategoryID">
+                    <UpdateFieldRef name="SchedFreqUnitsID"/>
+                    <SampleItem ID="1" name="Time"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="3" name="Distance"/>
+                    <SampleItem ID="4" name="Packaging"/>
+                    <SampleItem ID="5" name="Volume"/>
+                    <SampleItem ID="6" name="Weight"/>
+                </ComboField>
+                <ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+                    <SampleItem ID="1" name="Second"/>
+                    <SampleItem ID="2" name="Minute"/>
+                    <SampleItem ID="3" name="Hour"/>
+                    <SampleItem ID="4" name="Day"/>
+                </ComboField>
+            </EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a medical examination">
+			<ViewField name="MedicalExamID"/>
+            <ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ExamCategory"/>
+			<ViewField name="MedicalExamType"/>
+			<ViewField name="MedicalExamTitle"/>
+			<ViewField name="MedicalExamDesc"/>
+			<ViewField name="MedicalExamCriteria"/>
+            <ViewField name="ScheduleFrequency"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="medee"/>
+				<ViewGrid moduleID="medes"/>
+				<ViewGrid moduleID="medep"/>
+				<ViewGrid moduleID="medse"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="doca"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="orgja"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="traca"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a medical examination">
+			<ViewField name="MedicalExamID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="ExamCategoryID" findMode="text">
+				<UpdateFieldRef name="MedicalExamTypeID"/>
+				<SampleItem ID="1" name="Baseline"/>
+				<SampleItem ID="2" name="Periodic"/>
+				<SampleItem ID="3" name="Exit Examination"/>
+				<SampleItem ID="4" name="Special Circumstances"/>
+			</ComboField>
+			<ComboField name="MedicalExamTypeID" findMode="text" parentField="ExamCategoryID">
+				<UpdateFieldRef name="ExamTypeDesc"/>
+				<SampleItem ID="1" name="Pre-employment clerical examination"/>
+				<SampleItem ID="2" name="Pre-employment pesticide examination"/>
+				<SampleItem ID="3" name="Pre-employment sanitation examination"/>
+			</ComboField>
+			<ViewField name="ExamTypeDesc" parentField="MedicalExamTypeID"/>
+			<EditField name="MedicalExamTitle" size="75" maxLength="128"/>
+			<MemoField name="MedicalExamDesc" rows="5" cols="75"/>
+			<MemoField name="MedicalExamCriteria" rows="5" cols="75"/>
+			<OrgComboField name="MedicalProviderID" findMode="text">
+				<SampleItem ID="1" name="St. Ainthurt"/>
+				<SampleItem ID="2" name="Occupational Health Associates"/>
+			</OrgComboField>
+            <EditField name="SchedFreq" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="SchedFreqUnitCategoryID">
+                    <UpdateFieldRef name="SchedFreqUnitsID"/>
+                    <SampleItem ID="1" name="Time"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="3" name="Distance"/>
+                    <SampleItem ID="4" name="Packaging"/>
+                    <SampleItem ID="5" name="Volume"/>
+                    <SampleItem ID="6" name="Weight"/>
+                </ComboField>
+                <ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+                    <SampleItem ID="1" name="Second"/>
+                    <SampleItem ID="2" name="Minute"/>
+                    <SampleItem ID="3" name="Hour"/>
+                    <SampleItem ID="4" name="Day"/>
+                </ComboField>
+            </EditField>
+		</EditScreen>
+		<EditScreen name="ExamElements" phrase="Elements|Associate elements with the medical examination">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="medee"/>
+        </EditScreen>
+		<EditScreen name="ExamServices" phrase="Services|Associate services with the medical examination">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="medes"/>
+        </EditScreen>
+		<EditScreen name="ExamProcedures" phrase="Procedures|Associate procedures with the medical examination">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="medep"/>
+        </EditScreen>
+		<EditScreen name="ScheduledExams" phrase="Schedule|Associate exam schedules with the medical examination">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="medse"/>
+        </EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate agreements with the medical examination">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="agrc"/>
+            <EditGrid moduleID="agr"/>
+        </EditScreen>
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuity" phrase="Continuity|Associate business continuity requirements with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Documents" phrase="Documents|Associate documents with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="docc"/>
+			<EditGrid moduleID="doca"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance consequences with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="JobTitles" phrase="Job Titles|Associate job titles with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="orgtc"/>
+			<EditGrid moduleID="orgja"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibilities with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate training with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="tracn"/>
+			<EditGrid moduleID="traca"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate physical files with the medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the medical examination" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="Reports" phrase="Reports|View reports for the medical examination"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="MedicalExamID"/>
+		<InvisibleField name="MedicalExamTypeID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="ExamCategory"/>
+        <ViewField name="MedicalExamType"/>
+        <ViewField name="MedicalExamTitle"/>
+        <ViewField name="MedicalExamDesc"/>
+        <ViewField name="MedicalExamCriteria"/>
+        <ViewField name="ScheduleFrequency"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Medical Exams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Medical Exams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Medical Exams By PersonAccountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Medical Exams By PersonAccountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Medical Exams By Category">
+			<GroupByField name="ExamCategory"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Medical Exams By Category">
+			<GroupByField name="ExamCategory"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Medical Exams By Type">
+			<GroupByField name="MedicalExamType"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Medical Exams By Type">
+			<GroupByField name="MedicalExamType"/>
+			<SummaryField name="MedicalExamID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

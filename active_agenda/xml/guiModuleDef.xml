@@ -1,0 +1,509 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Guidance" moduleID="gui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="C:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Guidance" pluralRecordName="Guidance" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="GuidanceOrganizationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track guidance organizations" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the guidance organization" sample="tas"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Types Module|The name or title of the types module that is associated with the guidance" sample="Task Types"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Guidance Type|A short phrase used to describe the type of guidance provided" sample="Cleaning Floors"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants allNonParticipants" validate="RequireSelection" phrase="Guidance Organization|The name of the organization providing guidance" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Guidance Organization|The name of the organization providing guidance" sample="Active Agenda, HQ"/>
+		<ForeignField name="Description" foreignTable="org" foreignKey="OrganizationID" foreignField="Description" key="OrganizationID" joinType="left" phrase="Description|Text description of the organization" sample="Software Development company and risk services provider"/>
+		<ForeignField name="OrganizationType" foreignTable="org" foreignKey="OrganizationID" foreignField="OrganizationType" key="OrganizationID" joinType="left" phrase="Organization Type|A detailed description of the organization type" sample="Manufacturing | Ice Cream Production Facility"/>
+		<RemoteField name="GuidancePersonID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="184" phrase="Guidance Person|The individual providing guidance for consideration" sample="1"/>
+		<ForeignField name="GuidancePerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="GuidancePersonID" joinType="left" phrase="Guidance Person|The individual providing guidance for consideration" sample="Mattias Thorslund"/>
+		<ForeignField name="SkypeName" foreignTable="ppl" foreignKey="PersonID" foreignField="SkypeName" key="GuidancePersonID" joinType="left" phrase="Skype Name|The name used by the person to participate in free worldwide telephone services offered by skype at www.skype.com" sample="zahlis"/>
+        <CombinedField name="SkypeLink" phrase="Skype Link|A link that starts a phone conversation via Skype">special:skype:<CombinedFieldRef name="SkypeName"/>?call</CombinedField>
+        <CombinedField name="SkypeIcon" phrase="Skype Status Icon|An icon that displays the user's availability in Skype"><![CDATA[<img src="http://mystatus.skype.com/smallicon/]]><CombinedFieldRef name="SkypeName"/><![CDATA[" alt="Skype status icon"/>]]></CombinedField>
+        <CombinedField name="SkypeLinkIcon" phrase="Skype Name|The name used by the person to participate in free worldwide telephone services offered by skype at www.skype.com. If you have the client software, you can click on the link to start a conversation."><![CDATA[<a href="skype:]]><CombinedFieldRef name="SkypeName"/><![CDATA[?call"> ]]><CombinedFieldRef name="SkypeName"/><![CDATA[__]]><CombinedFieldRef name="SkypeIcon"/><![CDATA[</a>]]></CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="People Employees | California Wage and Hours Regulation | California facilities should consider local impact">
+			<CombinedFieldRef name="Organization"/>;_
+			<CombinedFieldRef name="GuidancePerson"/>;_
+			<CombinedFieldRef name="RelatedModule"/>;_
+			<CombinedFieldRef name="RelatedRecordDescription"/>
+		</CombinedField>
+		<CombinedField name="GuidanceOrganization" phrase="Guidance Organization|A combined field used to describe the guidance organization when associating it with other records" sample="Task Types | Cleaning Floors | Active Agenda, Inc."><CombinedFieldRef name="Organization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="GuidanceOrganizationID"/>
+		</PrimaryKey>
+		<Index name="Related">
+            <FieldRef name="RelatedModuleID"/>
+            <FieldRef name="RelatedRecordID"/>
+		</Index>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="GuidanceOrganization"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="aprd" name="Minimum Requirements" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="bcqc" name="Consequences" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="busc" name="Business Continuity Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="docc" name="Document Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="cosc" name="Exposure Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="eqpc" name="Equipment Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="orgtc" name="Job Title Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="medc" name="Medical Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="oppc" name="Operating Permit Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="orgr" name="Organizational Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="rtcc" name="Root Cause Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="GuidanceOrganizationID" localKey="GuidanceOrganizationID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List guidance organizations">
+			<ListField name="GuidanceOrganizationID" phrase="Record  ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="Organization" phrase="Guidance Organization"/>
+			<ListField name="GuidancePerson" phrase="Guidance Person"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search guidance organizations">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="GuidancePersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Tasks"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the guidance organization">
+			<ViewField name="GuidanceOrganizationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Description"/>
+			<ViewField name="OrganizationType"/>
+			<ViewField name="GuidancePerson"/>
+            <ViewField name="SkypeLinkIcon"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="agrc" phrase="Agreements">
+					<InvisibleField name="AgreementConsiderationID"/>
+					<ViewField name="AgreementConsiderationTitle" sample="Consider boiler and machinery policy"/>
+					<ViewField name="AgreementConsiderationDescription" sample="Failure to purchase a Boiler and Machinery policy could result in a complete loss of inventory without the ability to recoup loss costs if the ammonia system leaks and destroys the packaging of finished goods."/>
+				</ViewGrid>
+				<ViewGrid moduleID="aprd" phrase="Audits">
+					<InvisibleField name="AssetProtectDefaultID"/>
+					<ViewField name="AssetProtectCategory" sample="Audit"/>
+					<ViewField name="AssetProtectPurpose" sample="Condition"/>
+					<ViewField name="AssetProtectInstruct" sample="Review the thingy and make sure it is in good working condition"/>
+				</ViewGrid>
+				<ViewGrid moduleID="bcqc" phrase="Consequences">
+					<InvisibleField name="BusinessConsequenceConsiderationID"/>
+					<ViewField name="BusinessConsequenceConsiderationTitle" sample="California facilities should consider local impact"/>
+					<ViewField name="BusinessConsequenceConsiderationDescription" sample="Califonria utilizes a state agency called the Department of Fair Employment and Housing to enforce federal Department of Labor regulations. The DFEH has numerous requirements which exceed those of the USDOL"/>
+				</ViewGrid>
+				<ViewGrid moduleID="busc" phrase="Continuity">
+					<InvisibleField name="BusContConsiderID"/>
+					<ViewField name="BusContConsiderTitle" sample="Secure a backup facility in advance of a catastrophic event"/>
+					<ViewField name="BusContConsiderDescription" sample="A backup production location or copacking faclity should be identified and secured by contract in advance of a business disruption event."/>
+				</ViewGrid>
+				<ViewGrid moduleID="docc" phrase="Documents">
+					<InvisibleField name="DocumentConsiderationID"/>
+					<ViewField name="DocumentConsiderationTitle" sample="Use a medical questionnaire"/>
+					<ViewField name="DocumentConsiderationDescription" sample="Using a medical history questionnaire can be very useful to dispute later claims for workers' compensation benefits."/>
+				</ViewGrid>
+				<ViewGrid moduleID="cosc" phrase="Exposures">
+					<InvisibleField name="CostConsiderationID"/>
+					<ViewField name="CostConsiderationTitle" sample="Attorney's fees"/>
+					<ViewField name="Estimate" sample="USD $25,000.00"/>
+				</ViewGrid>
+				<ViewGrid moduleID="optc" phrase="Opportunities">
+					<InvisibleField name="OpportunityConsiderationID"/>
+					<ViewField name="OpportunityConsiderationTitle" sample="Revenues from reputation"/>
+					<ViewField name="OpportunityConsiderationDescription" sample="We estimate an increase in customers by 25% if we invest in a reputation building initiative like Active Agenda"/>
+					<ViewField name="Estimate" sample="USD $25,000.00"/>
+				</ViewGrid>
+				<ViewGrid moduleID="valc" phrase="Culture">
+					<InvisibleField name="ValuesConsiderationID"/>
+					<ViewField name="Value" sample="Respect for the Individual"/>
+					<ViewField name="ValueConsiderationTitle" sample="Hiring another employee may show disrespect for the existing employees"/>
+					<ViewField name="ValueConsiderationDescription" sample="Hiring another employee that is perceived by the current employees to be unnecessary may be perceived to be disrespectful"/>
+				</ViewGrid>
+				<ViewGrid moduleID="eqpc" phrase="Equipment">
+					<InvisibleField name="EquipmentConsiderationID"/>
+					<ViewField name="EquipmentConsiderationTitle" sample="Wear a respirator with this chemical"/>
+					<ViewField name="EquipmentConsiderationDescription" sample="This chemical is highly toxic and requires the use of an air purifying, chemical filter respirator."/>
+				</ViewGrid>
+				<ViewGrid moduleID="hzc" phrase="Hazards">
+					<InvisibleField name="HazardConsiderationID"/>
+					<ViewField name="HazardConsiderationTitle" sample="Second hand smoke causes cancer"/>
+					<ViewField name="HazardConsiderationDescription" sample="Employees working in close proximity to second hand smoke risk contracting cancer over time"/>
+				</ViewGrid>
+				<ViewGrid moduleID="insc" phrase="Insurance">
+					<InvisibleField name="InsuranceConsiderationID"/>
+					<ViewField name="InsuranceConsiderationTitle" sample="Consider boiler and machinery policy"/>
+					<ViewField name="InsuranceConsiderationDescription" sample="Failure to purchase a Boiler and Machinery policy could result in a complete loss of inventory without the ability to recoup loss costs if the ammonia system leaks and destroys the packaging of finished goods."/>
+				</ViewGrid>
+				<ViewGrid moduleID="orgtc" phrase="Job Titles">
+					<InvisibleField name="JobTitleConsiderationID"/>
+					<ViewField name="JobTitleConsiderationTitle" sample="Consider boiler and machinery policy"/>
+					<ViewField name="JobTitleConsiderationDescription" sample="Failure to purchase a Boiler and Machinery policy could result in a complete loss of inventory without the ability to recoup loss costs if the ammonia system leaks and destroys the packaging of finished goods."/>
+				</ViewGrid>
+				<ViewGrid moduleID="medc" phrase="Medical Exams">
+					<InvisibleField name="MedicalConsiderationID"/>
+					<ViewField name="MedicalConsiderationTitle" sample="Consider boiler and machinery policy"/>
+					<ViewField name="MedicalConsiderationDescription" sample="Failure to purchase a Boiler and Machinery policy could result in a complete loss of inventory without the ability to recoup loss costs if the ammonia system leaks and destroys the packaging of finished goods."/>
+				</ViewGrid>
+				<ViewGrid moduleID="oppc" phrase="Permits">
+					<InvisibleField name="PermitConsiderationID"/>
+					<ViewField name="PermitConsiderationTitle" sample="Secure a storm water pollution permit before initiating operations"/>
+					<ViewField name="PermitConsiderationDescription" sample="A storm water discharge permit is required in every state other than Texas"/>
+				</ViewGrid>
+				<ViewGrid moduleID="orgr" phrase="Requirements">
+					<InvisibleField name="RequirementID"/>
+					<ViewField name="RequirementTitle" sample="Obtain confidentiality statements from all contractors"/>
+					<ViewField name="RequirementDesc" sample="Active Agenda requires all contractors to sign confidentiality agreements in order to protect the intellectual property of the company"/>
+				</ViewGrid>
+				<ViewGrid moduleID="pubc" phrase="Publicity">
+					<InvisibleField name="PublicityConsiderationID"/>
+					<ViewField name="PublicityConsiderationTitle" sample="Beware of internet blogs following a publicized environmental incident"/>
+					<ViewField name="PublicityConsiderationDescription" sample="Internet blogs become very active following a publicized environmental incident. All effort should be made to search blogs and limit the distribution of misinformation."/>
+				</ViewGrid>
+				<ViewGrid moduleID="regc" phrase="Regulations">
+					<InvisibleField name="RegulatoryConsiderationID"/>
+					<ViewField name="Regulation" sample="Occupational Noise Exposure; 29 Code of Federal Regulations; 1910.95"/>
+					<ViewField name="RegulatoryConsiderationTitle" sample="California facilities should consider local impact"/>
+					<ViewField name="RegulatoryConsiderationDescription" sample="Califonria utilizes a state agency called the Department of Fair Employment and Housing to enforce federal Department of Labor regulations. The DFEH has numerous requirements which exceed those of the USDOL"/>
+				</ViewGrid>
+				<ViewGrid moduleID="rspc" phrase="Responsibilities">
+					<InvisibleField name="ResponsibilityConsidID"/>
+					<ViewField name="OrgLevel" sample="Leadership"/>
+					<ViewField name="ResponsibilityConsidTitle" sample="Hiring another employee may show disrespect for the existing employees"/>
+					<ViewField name="ResponsibilityConsidDescription" sample="Hiring another employee that is perceived by the current employees to be unnecessary may be perceived to be disrespectful"/>
+				</ViewGrid>
+				<ViewGrid moduleID="rskc" phrase="Imperatives">
+					<InvisibleField name="ImperativeConsidID"/>
+					<ViewField name="RiskImperative" sample="Human Safety"/>
+					<ViewField name="ImperativeConsidTitle" sample="Hiring another employee may show disrespect for the existing employees"/>
+					<ViewField name="ImperativeConsidDescription" sample="Hiring another employee that is perceived by the current employees to be unnecessary may be perceived to be disrespectful"/>
+				</ViewGrid>
+				<ViewGrid moduleID="rtcc" phrase="Causes">
+					<InvisibleField name="RootCauseConsiderationID"/>
+					<ViewField name="RootCauseConsiderationTitle" sample="Evaluate equipment and process design for contributions to incident causation"/>
+					<ViewField name="RootCauseConsiderationDescription" sample="Equipment and process designs can cause or contribute to incidents if safety considerations are not incorporated in original or retrofit designs"/>
+				</ViewGrid>
+				<ViewGrid moduleID="stdc" phrase="Standards">
+					<InvisibleField name="StandardsConsiderationID"/>
+					<ViewField name="Standard" sample="International Labour Organization - ILO - 2001"/>
+					<ViewField name="StandardsConsiderationTitle" sample="ILO 2001 applies to all EU locations"/>
+					<ViewField name="StandardsConsiderationDescription" sample="All locations within the EU are required to comply with ILO 2001 because OSHA EU has adopted the standard as the basis for all safety programs in the EU"/>
+				</ViewGrid>
+				<ViewGrid moduleID="supc" phrase="Suppliers">
+					<InvisibleField name="SupplierConsiderationID"/>
+					<ViewField name="SupplierConsiderationTitle" sample="Utilize only credentialed service providers"/>
+					<ViewField name="SupplierConsiderationDescription" sample="All loss control consultants should be quialified by education, experience, or certification by the American Society of Safety Engineers"/>
+				</ViewGrid>
+				<ViewGrid moduleID="tracn" phrase="Training">
+					<InvisibleField name="TrainingConsiderationID"/>
+					<ViewField name="CourseTitle" sample="Loss Control Services"/>
+					<ViewField name="TrainingConsiderationTitle" sample="California facilities should consider training all employees in HAACP and GMPs"/>
+					<ViewField name="TrainingConsiderationDescription" sample="California utilizes a state agency to enforce federal US Department of Agriculture regulations. California has numerous requirements which exceed those of the USDA"/>
+				</ViewGrid>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the guidance organization">
+			<ViewField name="GuidanceOrganizationID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Description"/>
+			<ViewField name="OrganizationType"/>
+			<PersonComboField name="GuidancePersonID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreement and/or contract considerations with the guidance organization">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="agrc"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="aprd"/>
+		</EditScreen>
+		<EditScreen name="Consequences" phrase="Consequences|Associate business consequence considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bcqc"/>
+		</EditScreen>
+		<EditScreen name="Continuity" phrase="Continuity|Associate business continuity considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="busc"/>
+		</EditScreen>
+		<EditScreen name="Exposures" phrase="Exposures|Associate cost exposure considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="cosc"/>
+		</EditScreen>
+		<EditScreen name="Documents" phrase="Documents|Associate document considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="docc"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunity considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="optc"/>
+		</EditScreen>
+		<EditScreen name="Values" phrase="Culture|Associate values considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="valc"/>
+		</EditScreen>
+		<EditScreen name="Equipment" phrase="Equipment|Associate equipment considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="eqpc"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazard considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="hzc"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="insc"/>
+		</EditScreen>
+		<EditScreen name="JobTitles" phrase="Job Titles|Associate job title considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="orgtc"/>
+		</EditScreen>
+		<EditScreen name="MedicalExams" phrase="Medical Exams|Associate medical examination considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="medc"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate permit considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppc"/>
+		</EditScreen>
+		<EditScreen name="Requirements" phrase="Requirements|Associate organizational requirements with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="orgr"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="pubc"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulatory considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="regc"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibility considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rspc"/>
+		</EditScreen>
+		<EditScreen name="RiskImperatives" phrase="Imperatives|Associate risk imperative considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rskc"/>
+		</EditScreen>
+		<EditScreen name="RootCauses" phrase="Causes|Associate root cause considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rtcc"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate consensus and compliance standard considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="stdc"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate supplier considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="supc"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate trining considerations with the guidance organization and provider">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="tracn"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="GuidanceOrganizationID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+		<ViewField name="RelatedRecordDescription"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Description"/>
+		<ViewField name="OrganizationType"/>
+		<ViewField name="GuidancePerson"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="gui" phrase="Guidance Providers">
+			<InvisibleField name="GuidanceOrganizationID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="GuidancePerson" sample="Mattias Thorslund"/>
+			
+		</ViewGrid>
+		<EditGrid moduleID="gui" phrase="Guidance Providers">
+			<GridForm>
+				<InvisibleField name="GuidanceOrganizationID"/>
+				<OrgComboField name="OrganizationID" findMode="text">
+					<UpdateFieldRef name="Description"/>
+					<UpdateFieldRef name="OrganizationType"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<PersonComboField name="GuidancePersonID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<ViewField name="Description" parentField="OrganizationID"/>
+				<ViewField name="OrganizationType" parentField="OrganizationID"/>
+			</GridForm>
+			<InvisibleField name="GuidanceOrganizationID"/>
+			<ViewField name="Organization" sample="Active Agenda, Inc."/>
+			<ViewField name="GuidancePerson" sample="Mattias Thorslund"/>
+		</EditGrid>
+		
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Guidance Organizations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Guidance Organizations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Guidance Organizations By Guidance Person">
+			<GroupByField name="GuidancePerson"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Guidance Organizations By Guidance Person">
+			<GroupByField name="GuidancePerson"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Guidance Organizations By General Type">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Guidance Organizations By General Type">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Guidance Organizations By Specific Type">
+			<GroupByField name="RelatedRecordDescription"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Guidance Organizations By Specific Type">
+			<GroupByField name="RelatedRecordDescription"/>
+			<SummaryField name="GuidanceOrganizationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 546 $" date="$Date: 2007-02-28 10:43:12 -0800 (Wed, 28 Feb 2007) $"/>
+</Module>

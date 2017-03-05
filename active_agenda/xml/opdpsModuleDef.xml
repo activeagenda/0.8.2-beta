@@ -1,0 +1,681 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Products or Services" moduleID="opdps" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Product or Service" pluralRecordName="Products or Services" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ProdServID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track products and services" sample="1"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Organization|The name of the organization producing the product and/or service" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization producing the product and/or service" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="74" phrase="Person Accountable|The individual assigned primary accountability for managing this product or service" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this product or service" sample="Mattias Thorslund"/>
+		<TableField name="ProductServiceTypeID" type="int" dbFlags="unsigned not null" phrase="Product or Service Type|A combined field used to describe this product or service type when associating it with other records" sample="1"/>
+		<ForeignField name="ProductorServiceID" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductorServiceID" key="ProductServiceTypeID" joinType="left" phrase="Product or Service|Whether this is a product or service" sample="1"/>
+		<CodeField name="ProductorService" key="ProductorServiceID" phrase="Product or Service|Whether this is a product or service" sample="Product" codeTypeID="5"/>
+		<ForeignField name="ProductServiceCategoryID" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceCategoryID" key="ProductServiceTypeID" joinType="left" phrase="Category|A broad categoy used to group products or services of similar types" sample="1"/>
+		<CodeField name="ProductServiceCategory" key="ProductServiceCategoryID" phrase="Category|A broad categoy used to group products or services of similar types" sample="Bulk Retail" codeTypeID="6"/>
+		<ForeignField name="ProductServiceTypeTitle" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceTypeTitle" key="ProductServiceTypeID" joinType="left" phrase="Type|A title or phrase used to describe the specific product or service type" sample="Bulk Skinless Almonds"/>
+		<ForeignField name="ProductServiceTypeDesc" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceTypeDesc" key="ProductServiceTypeID" joinType="left" phrase="Description|A brief but thorough description of the specific type of product or service" sample="Bulk skinless almonds are shipped in a pallet box weighing 1200 pounds."/>
+		<ForeignField name="ProductServiceType" foreignTable="opdpt" foreignKey="ProductServiceTypeID" foreignField="ProductServiceType" key="ProductServiceTypeID" joinType="left" phrase="Product or Service Type|A combined field used to describe this product or service type when associating it with other records" sample="Bulk Skinless Almonds"/>
+		<TableField name="ProdServName" type="varchar(128)" validate="notEmpty" phrase="Name|The name used by the organization to identify the product or service" sample="Monterey Frozen Burrito - Bean"/>
+		<TableField name="ProdServDesc" type="text" validate="noValidation" phrase="Description|A detailed description of the product and/or service" sample="The Monterey Frozen Burrito comes in four variaties: Bean, Beef, Beef and Bean; and, Cheese."/>
+		<TableField name="ProdServOrigDate" type="date" validate="notEmpty" phrase="Origination Date|Date the product or service originated as a product or service of the organization" sample="01/01/2004"/>
+		<TableField name="ProdServTrackingNo" type="varchar(128)" validate="notEmpty" phrase="Tracking Number|The unique tracking number assigned to the product or service" sample="MB-B-2003-P14"/>
+		<TableField name="SKUNo" type="varchar(128)" validate="notEmpty" phrase="SKU Number|Stock Keeping Unit number associated with a product for inventory purposes" sample="3726-8"/>
+		<TableField name="ProductLifeCycleID" type="int" validate="noValidation" phrase="Product Life Cycle|The current product life cycle stage" sample="1"/>
+		<CodeField name="ProductLifeCycle" key="ProductLifeCycleID" phrase="Product Life Cycle|The current product life cycle stage" sample="Introduction" codeTypeID="285"/>
+		<TableField name="ProdServStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the product or service" sample="2"/>
+		<CodeField name="ProdServStatus" key="ProdServStatusID" phrase="Status|The present status of the product or service" sample="Discontinued" codeTypeID="215"/>
+		<TableField name="ProdServDiscontinued" type="bool" validate="noValidation" dbFlags="default 0" phrase="Discontinued|Check this box if this product or service has been discontinued" sample="Yes"/>
+		<TableField name="DiscontinuedDate" type="date" validate="noValidation" phrase="Discontinued Date|Date the product or service was discontinued" sample="01/01/2004"/>
+		<!--The Discontinued Date field should only appear if the Discontinued checkbox is checked-->
+		<!--Recall Infomation-->
+		<TableField name="TraceMarkings" type="text" validate="noValidation" phrase="Trace Markings|Describe how trace markings are applied to the product or packaging and how they would be identified by a customer or consumer" sample="Each package has a label printed by the packaging machine before it is palletized. The trace marking is located on the bottom of the box and is easily identified by the consumer"/>
+		<TableField name="TraceMarkingDestructibility" type="bool" validate="noValidation" dbFlags="default 0" phrase="Marking Indestructible|Whether the trace markings are indestructible" sample="Yes"/>
+		<TableField name="ProductionRecords" type="text" validate="noValidation" phrase="Production Identity Records|Describe how production records identify component parts and raw materials by batch or lot number, serial number, or supplier" sample="Production Run Sheets record batch numbers, serial numbers produced and supplier ingredients for each lot."/>
+		<TableField name="ProcessRecords" type="text" validate="noValidation" phrase="Process Identity Records|Describe how process records are maintained by each process participant (e.g. production, shipping and sales) and which trace markings (Batch/lot/serial numbers; Model Number; SKU Number; Shipping Date; Customer; etc.) are recorded by each participants" sample="Production records X, Shipping records Y, and Sales records Z."/>
+		<TableField name="TraceMarkingSample" type="bool" validate="noValidation" dbFlags="default 0" phrase="Trace Sample|Whether a sample of the trace marking method has been scanned and attached to this record" sample="Yes"/>
+		<TableField name="ProductionRecordSample" type="bool" validate="noValidation" dbFlags="default 0" phrase="Production Sample|Whether a sample of the production record tracking method has been scanned and attached to this record" sample="Yes"/>
+		<TableField name="ShippingRecordSample" type="bool" validate="noValidation" dbFlags="default 0" phrase="Shipping Sample|Whether a sample of the shipping record tracking method has been scanned and attached to this record" sample="Yes"/>
+		<TableField name="SalesRecordSample" type="bool" validate="noValidation" dbFlags="default 0" phrase="Sales Sample|Whether a sample of the sales record tracking method has been scanned and attached to this record" sample="Yes"/>
+		<!--Recall Infomation-->
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="ProdServID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'opdps'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the product or service" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="ProdServID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'opdps'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the product or service" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="ProductServiceCategory"/>_-_<CombinedFieldRef name="ProductServiceType"/>_-_<CombinedFieldRef name="ProdServName"/>_-_<CombinedFieldRef name="ProdServTrackingNo"/></CombinedField>
+		<CombinedField name="ProdServ" phrase="Product or Service|A combined field used to describe this product or service when associating it with other records" sample="Product - Retail Food - Monterey Frozen Burrito - Bean; MB-B-2003-P14"><CombinedFieldRef name="ProdServName"/>;_<CombinedFieldRef name="ProdServTrackingNo"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ProdServID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="ProdServ"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="ireps" name="Products and/or Service Incidents" parentKey="ProdServID" localKey="ProdServID"/>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="busc" name="Business Conitinuity Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Conitinuity" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="oppc" name="Permit Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="oppa" name="Permit Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibility Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="rskc" name="Risk Imperative Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="rskcl" name="Risk Classifications" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="tracn" name="Training Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="traca" name="Training Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="ProductServiceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdpt"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="res" name="Resources Available" parentKey="OrganizationID" localKey="ResourceOrganizationID">
+			<SubModuleCondition field="ResourceModuleID" value="opdps"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ProdServID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opdps"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List products and services">
+			<ListField name="ProdServID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="ProductorService" phrase="Classification"/>
+			<ListField name="ProductServiceCategory" phrase="Category"/>
+			<ListField name="ProductServiceType" phrase="Type"/>
+			<ListField name="ProdServName" phrase="Name"/>
+			<ListField name="ProductLifeCycle" phrase="Life Cycle"/>
+			<ListField name="ProdServStatus" phrase="Status"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search products and services">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda Sweden"/>
+				<SampleItem ID="3" name="Active Agenda Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceCategoryID" listParentField="ProductorServiceID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+				<SampleItem ID="3" name="Product and Service"/>
+			</CodeComboField>
+			<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+				<SampleItem ID="1" name="Product: Retail Food"/>
+				<SampleItem ID="2" name="Service: Internet"/>
+				<SampleItem ID="3" name="Product: Industrial Supply"/>
+			</ComboField>
+			<EditField name="ProdServName" size="75" maxLength="128"/>
+			<DateField name="ProdServOrigDate"/>
+			<EditField name="ProdServTrackingNo" size="75" maxLength="128"/>
+			<EditField name="SKUNo" size="75" maxLength="128"/>
+			<CodeRadioField name="ProductLifeCycleID" findMode="text">
+				<SampleItem ID="1" name="Introduction"/>
+				<SampleItem ID="2" name="Growth"/>
+				<SampleItem ID="3" name="Maturity"/>
+				<SampleItem ID="4" name="Decline"/>
+			</CodeRadioField>
+			<CodeComboField name="ProdServStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="3" name="On Hold"/>
+				<SampleItem ID="3" name="Recalled"/>
+			</CodeComboField>
+			<CheckBoxField name="ProdServDiscontinued"/>
+			<DateField name="DiscontinuedDate"/>
+			<CheckBoxField name="TraceMarkingDestructibility"/>
+			<CheckBoxField name="TraceMarkingSample"/>
+			<CheckBoxField name="ProductionRecordSample"/>
+			<CheckBoxField name="ShippingRecordSample"/>
+			<CheckBoxField name="SalesRecordSample"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a products and/or service">
+			<ViewField name="ProdServID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ProductorService"/>
+			<ViewField name="ProductServiceCategory"/>
+			<ViewField name="ProductServiceType"/>
+			<ViewField name="ProdServName"/>
+			<ViewField name="ProdServDesc"/>
+			<ViewField name="ProdServOrigDate"/>
+			<ViewField name="ProdServTrackingNo"/>
+			<ViewField name="SKUNo"/>
+			<ViewField name="ProductLifeCycle"/>
+			<ViewField name="ProdServStatus"/>
+			<ViewField name="ProdServDiscontinued"/>
+			<ViewField name="DiscontinuedDate"/>
+			<ViewField name="TraceMarkings"/>
+			<ViewField name="TraceMarkingDestructibility"/>
+			<ViewField name="ProductionRecords"/>
+			<ViewField name="ProcessRecords"/>
+			<ViewField name="TraceMarkingSample"/>
+			<ViewField name="ProductionRecordSample"/>
+			<ViewField name="ShippingRecordSample"/>
+			<ViewField name="SalesRecordSample"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="ireps" phrase="Incident Involvement">
+					<InvisibleField name="IRProductOrServiceID"/>
+					<ViewField name="IncidentReportID" sample="12"/>
+					<ViewField name="IncidentReport" sample="Thorslund Discrimination Claim; Active Agenda, HQ; 10-28-2003; 1"/>
+					<ViewField name="MannerAffected" sample="The customer bit down on a Monterey Burrito and claims she broke her tooth."/>
+				</ViewGrid>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="oppa"/>
+				<ViewGrid moduleID="pub"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="rsk"/>
+				<ViewGrid moduleID="rskcl"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="traca"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a product and/or service">
+			<ViewField name="ProdServID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda Sweden"/>
+				<SampleItem ID="3" name="Active Agenda Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceCategoryID" listParentField="ProductorServiceID"/>
+				<SampleItem ID="1" name="Product"/>
+				<SampleItem ID="2" name="Service"/>
+			</CodeComboField>
+			<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+				<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+				<SampleItem ID="1" name="Retail Bulk"/>
+				<SampleItem ID="2" name="Retail Direct"/>
+				<SampleItem ID="3" name="Consumer"/>
+			</CodeComboField>
+			<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+				<SampleItem ID="1" name="Product: Retail Food"/>
+				<SampleItem ID="2" name="Service: Internet"/>
+				<SampleItem ID="3" name="Product: Industrial Supply"/>
+			</ComboField>
+			<EditField name="ProdServName" size="75" maxLength="128"/>
+			<MemoField name="ProdServDesc" rows="5" cols="75"/>
+			<DateField name="ProdServOrigDate"/>
+			<EditField name="ProdServTrackingNo" size="75" maxLength="128"/>
+			<EditField name="SKUNo" size="75" maxLength="128"/>
+			<CodeRadioField name="ProductLifeCycleID" findMode="text">
+				<SampleItem ID="1" name="Introduction"/>
+				<SampleItem ID="2" name="Growth"/>
+				<SampleItem ID="3" name="Maturity"/>
+				<SampleItem ID="4" name="Decline"/>
+			</CodeRadioField>
+			<CodeComboField name="ProdServStatusID">
+				<SampleItem ID="1" name="Active"/>
+				<SampleItem ID="3" name="On Hold"/>
+				<SampleItem ID="3" name="Recalled"/>
+			</CodeComboField>
+			<CheckBoxField name="ProdServDiscontinued"/>
+			<DateField name="DiscontinuedDate"/>
+		</EditScreen>
+		<EditScreen name="Recall" phrase="Recall|Edit summary information about product recall preparation">
+			<RecordSummaryFieldsRef/>
+			<MemoField name="TraceMarkings" rows="5" cols="75"/>
+			<CheckBoxField name="TraceMarkingDestructibility"/>
+			<MemoField name="ProductionRecords" rows="5" cols="75"/>
+			<MemoField name="ProcessRecords" rows="5" cols="75"/>
+			<CheckBoxField name="TraceMarkingSample"/>
+			<CheckBoxField name="ProductionRecordSample"/>
+			<CheckBoxField name="ShippingRecordSample"/>
+			<CheckBoxField name="SalesRecordSample"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate agreements with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuity" phrase="Continuity|Associate business continuity requirements with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="busc"/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the gap analysis item">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance consequences with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="Permits" phrase="Permits|Associate operating permits with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="oppc"/>
+			<EditGrid moduleID="oppa"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="pubc"/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Associate responsibilities with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Classifications" phrase="Classifications|Associate risk classifications with the product or service">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rskcl"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rskc"/>
+			<EditGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Training" phrase="Training|Associate training with the product or service">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="tracn"/>
+			<EditGrid moduleID="traca"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with the product or service">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the product or service">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the product or service">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the product or service" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ProdServID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="ProductorService"/>
+		<ViewField name="ProductServiceCategory"/>
+		<ViewField name="ProductServiceType"/>
+		<ViewField name="ProdServName"/>
+		<ViewField name="ProdServDesc"/>
+		<ViewField name="ProdServTrackingNo"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Products or Services By Category">
+			<GroupByField name="ProductServiceCategory"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Products or Services By Category">
+			<GroupByField name="ProductServiceCategory"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Products or Services By Classification">
+			<GroupByField name="ProductorService"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Products or Services By Classification">
+			<GroupByField name="ProductorService"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Products or Services By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Products or Services By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Products or Services By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Products or Services By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Products or Services Types By Type">
+			<GroupByField name="ProductServiceType"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Products or Services Types By Type">
+			<GroupByField name="ProductServiceType"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Products or Services Types By Status">
+			<GroupByField name="ProdServStatus"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Products or Services Types By Status">
+			<GroupByField name="ProdServStatus"/>
+			<SummaryField name="ProdServID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Exports>
+		<ViewGrid moduleID="opdps" phrase="Products and/or Services">
+			<InvisibleField name="ProdServID"/>
+			<ViewField name="ProductorService" sample="Product"/>
+			<ViewField name="ProductServiceCategory" sample="Bulk Retail"/>
+			<ViewField name="ProductServiceType" sample="Product: Retail Food"/>
+			<ViewField name="ProdServName" sample="Monterey Frozen Burrito - Bean"/>
+		</ViewGrid>
+		<EditGrid moduleID="opdps" phrase="Products and/or Services">
+			<GridForm>
+				<InvisibleField name="ProdServID"/>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Emprise, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+				</PersonComboField>
+				<CodeComboField name="ProductorServiceID">
+					<UpdateFieldRef name="ProductServiceCategoryID" listParentField="ProductorServiceID"/>
+					<SampleItem ID="1" name="Product"/>
+					<SampleItem ID="2" name="Service"/>
+				</CodeComboField>
+				<CodeComboField name="ProductServiceCategoryID" findMode="text" parentField="ProductorServiceID">
+					<UpdateFieldRef name="ProductServiceTypeID" listParentField="ProductServiceCategoryID"/>
+					<SampleItem ID="1" name="Retail Bulk"/>
+					<SampleItem ID="2" name="Retail Direct"/>
+					<SampleItem ID="3" name="Consumer"/>
+				</CodeComboField>
+				<ComboField name="ProductServiceTypeID" findMode="text" parentField="ProductServiceCategoryID">
+					<SampleItem ID="1" name="Product: Retail Food"/>
+					<SampleItem ID="2" name="Service: Internet"/>
+					<SampleItem ID="3" name="Product: Industrial Supply"/>
+				</ComboField>
+				<EditField name="ProdServName" size="75" maxLength="128" sample="Monterey Frozen Burrito - Bean"/>
+				<MemoField name="ProdServDesc" rows="5" cols="75" sample="The Monterey Frozen Burrito comes in four variaties: Bean, Beef, Beef and Bean; and, Cheese."/>
+				<DateField name="ProdServOrigDate" sample="01/01/2004"/>
+				<EditField name="ProdServTrackingNo" size="75" maxLength="128" sample="MB-B-2003-P14"/>
+				<EditField name="SKUNo" size="75" maxLength="128" sample="3726-8"/>
+				<CodeRadioField name="ProductLifeCycleID" findMode="text">
+					<SampleItem ID="1" name="Introduction"/>
+					<SampleItem ID="2" name="Growth"/>
+					<SampleItem ID="3" name="Maturity"/>
+					<SampleItem ID="4" name="Decline"/>
+				</CodeRadioField>
+				<CodeComboField name="ProdServStatusID" sample="Discontinued">
+					<SampleItem ID="1" name="Active"/>
+					<SampleItem ID="3" name="On Hold"/>
+					<SampleItem ID="3" name="Recalled"/>
+				</CodeComboField>
+				<CheckBoxField name="ProdServDiscontinued" sample="Yes"/>
+				<DateField name="DiscontinuedDate" sample="01/01/2004"/>
+			</GridForm>
+			<ViewField name="ProductorService" sample="Product"/>
+			<ViewField name="ProductServiceCategory" sample="Bulk Retail"/>
+			<ViewField name="ProductServiceType" sample="Product: Retail Food"/>
+			<ViewField name="ProdServName" sample="Monterey Frozen Burrito - Bean"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

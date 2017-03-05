@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Asset Protection Checklists" moduleID="aprc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Checklist" pluralRecordName="Checklists" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ChecklistID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track asset protection checklists" sample="1"/>
+		<TableField name="ChecklistTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A brief title used to identify the checklist" sample="Malaga Raisin Processing HAACP Checklist"/>
+		<TableField name="ChecklistDesc" type="text" validate="notEmpty" phrase="Description|A detailed description of the checklist, its scope, purpose and objective" sample="This checklist is designed for the Malaga Raisin Processing Lines. The checklist is designed to ensure all HAACP elements are in place and operating effectively."/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization with primary responsibility for developing the contents of this checklist and assigning related review requirements" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization with primary responsibility for developing the contents of this checklist and assigning related review requirements" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="13" phrase="Person Accountable|The name of the person with primary responsibility for developing the contents of this checklist and assigning related review requirements" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The name of the person with primary responsibility for developing the contents of this checklist and assigning related review requirements" sample="Mattias Thorslund"/>
+		<TableField name="SchedFreq" type="float" validate="Integer notNegative notZero notEmpty" phrase="Frequency|The frequency at which the checklist review shall be implemented" sample="1"/>
+		<TableField name="SchedFreqUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="SchedFreqUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SchedFreqUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="SchedFreqUnitCategory" key="SchedFreqUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="SchedFreqUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SchedFreqUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<TableField name="ChecklistInstruct" type="text" validate="notEmpty" phrase="Instructions|Brief instructions for the person performing the checklist review" sample="Wear appropriate personal and product protective equipment while conducting this review. Report all deficiencies at the conclusion of the review unless the deficiencies are of an emergency nature; in which case, report the respective deficiency immediately. Report all deficiencies to the person assigned accountability for this checklist. All deficiencies identified should be mitigated immediately if possible."/>
+		<TableField name="ChecklistSpecialEquip" type="text" validate="noValidation" phrase="Special Equipment|Any special equipment, other than personal or product protective equipment, which is required to perform this checklist review" sample="Steel shot container (3mg), Steel shot container (30mg), steel shot container (100mg), tape measure, writing tablet, ruler, digital camera, hazard report forms"/>
+		<TableField name="ChecklistStatusID" type="int" validate="RequireSelection" phrase="Checklist Status|Present status of this checklist" sample="1"/>
+		<CodeField name="ChecklistStatus" key="ChecklistStatusID" phrase="Checklist Status|Present status of this checklist" sample="Under Development" codeTypeID="113"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'aprc'" localKey="ChecklistID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Malaga Raisin Processing HAACP Checklist | Active Agenda, Inc."><CombinedFieldRef name="ChecklistTitle"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="Frequency" phrase="Frequency|A combined field used to describe the schedule frequency when associating it with other records" sample="1 Day(s)"><CombinedFieldRef name="SchedFreq"/>_<CombinedFieldRef name="SchedFreqUnits"/></CombinedField>
+		<CombinedField name="Checklist" phrase="Checklist|A combined field used to describe this record when associating it with other records" sample="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID 1"><CombinedFieldRef name="ChecklistTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChecklistID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Checklist"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="aprci" name="Asset Protection Checklist Items" parentKey="ChecklistID" localKey="ChecklistID"/>
+		<SubModule moduleID="aprch" name="Checklist Review History" parentKey="ChecklistID" localKey="ChecklistID"/>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ChecklistID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="aprc"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List checklists">
+			<ListField name="ChecklistID" phrase="Record ID"/>
+			<ListField name="ChecklistTitle" phrase="Title"/>
+			<ListField name="Frequency" phrase="Schedule Frequency"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PersonAccountable" phrase="Person Accountable"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search checklists">
+			<EditField name="ChecklistTitle" size="50" maxLength="50"/>
+			<EditField name="SchedFreq" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="SchedFreqUnitCategoryID">
+					<UpdateFieldRef name="SchedFreqUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="ChecklistStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="3" name="Not Approved"/>
+			</CodeComboField>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about asset protection checklists">
+			<ViewField name="ChecklistID"/>
+			<ViewField name="ChecklistTitle"/>
+			<ViewField name="ChecklistDesc"/>
+			<ViewField name="SchedFreq">
+				<ViewField name="SchedFreqUnits"/>
+			</ViewField>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ChecklistInstruct"/>
+			<ViewField name="ChecklistSpecialEquip"/>
+			<ViewField name="ChecklistStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="aprci"/>
+				<ViewGrid moduleID="aprch"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the equipment inventory">
+			<ViewField name="ChecklistID"/>
+			<EditField name="ChecklistTitle" size="50"/>
+			<MemoField name="ChecklistDesc" rows="5" cols="75"/>
+			<EditField name="SchedFreq" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="SchedFreqUnitCategoryID">
+					<UpdateFieldRef name="SchedFreqUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<MemoField name="ChecklistInstruct" rows="10" cols="75"/>
+			<MemoField name="ChecklistSpecialEquip" rows="10" cols="75"/>
+			<CodeComboField name="ChecklistStatusID">
+				<SampleItem ID="1" name="Under Development"/>
+				<SampleItem ID="2" name="Approved"/>
+				<SampleItem ID="3" name="Not Approved"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Items" phrase="Items|Associate checklist items with a checklist">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="aprci"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with checklists">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate consensus and compliance standards with checklists">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities associated with the checklist">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the corrective action">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate physical file retention methods with a checklist">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the checklist">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the checklist" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="ChecklistID"/>
+		<ViewField name="ChecklistTitle"/>
+		<ViewField name="ChecklistDesc"/>
+		<ViewField name="SchedFreq">
+			<ViewField name="SchedFreqUnits"/>
+		</ViewField>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Checklists By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Checklists By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Checklists By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Checklists By Status">
+			<GroupByField name="ChecklistStatus"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Checklists By Status">
+			<GroupByField name="ChecklistStatus"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Checklists By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Checklists By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ChecklistID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

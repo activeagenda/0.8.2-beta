@@ -1,0 +1,455 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Scheduled Examinations" moduleID="medse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Scheduled Examination" pluralRecordName="Scheduled Examinations" allowAddRecord="no" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="ScheduledExamID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track medical examinations" sample="1"/>
+		<TableField name="MedicalExamID" type="int" dbFlags="unsigned not null" phrase="Medical Exam|The title of the scheduled examination" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="med" foreignKey="MedicalExamID" foreignField="OrganizationID" key="MedicalExamID" joinType="left" phrase="Organization|The name of the organization requesting the medical examination" sample="Active Agenda, HQ"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization requesting the medical examination" sample="Active Agenda, HQ"/>
+		<ForeignField name="PersonAccountableID" foreignTable="med" foreignKey="MedicalExamID" foreignField="PersonAccountableID" key="MedicalExamID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the medical examination process for the organization" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the medical examination process for the organization" sample="Mattias Thorslund"/>
+		<ForeignField name="MedicalExamTypeID" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalExamTypeID" key="MedicalExamID" joinType="left" phrase="Exam Type|The specific type of medical examination to be performed" sample="1"/>
+		<ForeignField name="ExamCategoryID" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="ExamCategoryID" key="MedicalExamTypeID" joinType="left" phrase="Exam Category|A broadly defined title or phrase used to group similar types of medical exams" sample="1"/>
+		<CodeField name="ExamCategory" key="ExamCategoryID" phrase="Exam Category|A broadly defined title or phrase used to group similar types of medical exams" sample="Baseline" codeTypeID="95"/>
+		<ForeignField name="ExamTypeDesc" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="ExamTypeDesc" key="MedicalExamTypeID" joinType="left" phrase="Description|A brief but thorough description of the medical examination type" sample="An examination performed as a part of the employment application process"/>
+		<ForeignField name="MedicalExamType" foreignTable="medet" foreignKey="MedicalExamTypeID" foreignField="MedicalExamType" key="MedicalExamTypeID" joinType="left" phrase="Exam Type|The specific type of medical examination to be performed" sample="Pre-employment physical exam"/>
+		<ForeignField name="MedicalExamTitle" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalExamTitle" key="MedicalExamID" joinType="left" phrase="Title|A title or phrase used to describe the medical examination" sample="Pre-employment clerical examination"/>
+		<ForeignField name="MedicalExamDesc" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalExamDesc" key="MedicalExamID" joinType="left" phrase="Description|A brief but thorough description of the medical examination" sample="An examination performed as a part of the employment application process"/>
+		<ForeignField name="MedicalExamCriteria" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalExamCriteria" key="MedicalExamID" joinType="left" phrase="Criteria|A brief but thorough description of the qualification criteria associated with the medical examination" sample="All employees that apply pesticides shall undergo the examination on an annual basis."/>
+		<ForeignField name="SchedFreq" foreignTable="med" foreignKey="MedicalExamID" foreignField="SchedFreq" key="MedicalExamID" joinType="left" phrase="Frequency|The frequency at which the medical examination shall be performed for individuals meeting the examination criteria" sample="1"/>
+		<ForeignField name="SchedFreqUnitsID" foreignTable="med" foreignKey="MedicalExamID" foreignField="SchedFreqUnitsID" key="MedicalExamID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="SchedFreqUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SchedFreqUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="SchedFreqUnitCategory" key="SchedFreqUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="SchedFreqUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SchedFreqUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<ForeignField name="MedicalProviderID" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalProviderID" key="MedicalExamID" joinType="left" phrase="Medical Provider|The name of the provider currently contracted to perform the medical examination" sample="1"/>
+		<ForeignField name="MedicalProvider" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="MedicalProviderID" joinType="left" phrase="Medical Provider|The name of the provider currently contracted to perform the medical examination" sample="Occupational Health Associates"/>
+		<ForeignField name="MedicalExam" foreignTable="med" foreignKey="MedicalExamID" foreignField="MedicalExam" key="MedicalExamID" joinType="left" phrase="Medical Exam|The title of the scheduled examination" sample="Pre-employment clerical examination"/>
+		<!-- Examinee Section below -->
+		<RemoteField name="ExamineeID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="86" phrase="Examinee|The individual scheduled for medical examination" sample="1"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignKey="PersonID" foreignField="LastName" key="ExamineeID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignKey="PersonID" foreignField="FirstName" key="ExamineeID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="WorkAddress" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkAddress" key="ExamineeID" joinType="left" phrase="Work Address|Physical street address where the person can be located at work" sample="836 Cherry Lane, Clovis, CA 93611"/>
+		<ForeignField name="FullWorkPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="ExamineeID" joinType="left" phrase="Work Phone|Telephone number of the individual at their place of work with a lable to identify the number" sample="(559)299-8054, ext. 2112"/>
+		<ForeignField name="MobilePhone" foreignTable="ppl" foreignKey="PersonID" foreignField="MobilePhone" key="ExamineeID" joinType="left" phrase="Mobile Phone|Mobile telephone number of the individual" sample="(559)289-4921"/>
+		<ForeignField name="WorkFax" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkFax" key="ExamineeID" joinType="left" phrase="Work Fax|Facsimile telephone number of the individual at work" sample="(559)299-8054"/>
+		<ForeignField name="WorkEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="WorkEmail" key="ExamineeID" joinType="left" phrase="Work Email|Email address used by the individual at work" sample="dzahlis@activeagenda.net"/>
+		<ForeignField name="HomeAddress" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeAddress" key="ExamineeID" joinType="left" phrase="Home Address|Physical street address where the person can be located at home" sample="937 N. Adler Ave., Clovis, CA 93611"/>
+		<ForeignField name="HomePhone" foreignTable="ppl" foreignKey="PersonID" foreignField="HomePhone" key="ExamineeID" joinType="left" phrase="Home Phone|Telephone number of the individual at home" sample="(559)299-0479"/>
+		<ForeignField name="HomeFax" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeFax" key="ExamineeID" joinType="left" phrase="Home Fax|Facsimile telephone number of the individual at home" sample="(559)299-8054"/>
+		<ForeignField name="HomeEmail" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeEmail" key="ExamineeID" joinType="left" phrase="Home Email|Email address used by the individual at home" sample="dan@zahlis.com"/>
+		<ForeignField name="Birthdate" foreignTable="pple" foreignKey="PersonID" foreignField="Birthdate" key="ExamineeID" joinType="left" phrase="Birthdate|The date of the person's birth" sample="01/01/2004"/>
+		<ForeignField name="Age" foreignTable="pple" foreignKey="PersonID" foreignField="Age" key="ExamineeID" joinType="left" phrase="Age|The automatically calculated age of the employee based on the birthdate and the present date" sample="32 years 3 Months"/>
+		<ForeignField name="OrgJobTitle" foreignTable="pple" foreignKey="PersonID" foreignField="OrgJobTitle" key="ExamineeID" joinType="left" phrase="Job Title|A description of the job title based on a combination of field values assigned from within the Job Titles module" sample="Risk Manager, Active Agenda, HQ, Under Consideration"/>
+		<ForeignField name="EmployeeNo" foreignTable="pple" foreignKey="PersonID" foreignField="EmployeeNo" key="ExamineeID" joinType="left" phrase="Employee Number|A uniques number assigned by the organization to each employee for tracking purposes" sample="2710"/>
+		<ForeignField name="SocialSecNo" foreignTable="pple" foreignKey="PersonID" foreignField="SocialSecNo" key="ExamineeID" joinType="left" phrase="Social Security Number|The identification number assigned to individuals by the individual's country" sample="776-22-9928"/>
+		<ForeignField name="DriversLicenseNo" foreignTable="pple" foreignKey="PersonID" foreignField="DriversLicenseNo" key="ExamineeID" joinType="left" phrase="Driver's License Number|The license number assigned to the individual granting the person the privilage to drive" sample="C0827726"/>
+		<ForeignField name="OpsCoVeh" foreignTable="pple" foreignKey="PersonID" foreignField="OpsCoVeh" key="ExamineeID" joinType="left" phrase="Operates Company Vehicle|Check this box if this employee operates a company vehicle" sample="Yes"/>
+		<ForeignField name="OpsCommVeh" foreignTable="pple" foreignKey="PersonID" foreignField="OpsCommVeh" key="ExamineeID" joinType="left" phrase="Operates Commercial Vehicle|Check this box if this employee operates a commercial vehicle" sample="No"/>
+		<ForeignField name="Gender" foreignTable="pple" foreignKey="PersonID" foreignField="Gender" key="ExamineeID" joinType="left" phrase="Gender|Gender of the employee" sample="Male"/>
+		<ForeignField name="HireDate" foreignTable="pple" foreignKey="PersonID" foreignField="HireDate" key="ExamineeID" joinType="left" phrase="Hire Date|The date the employee was hired by the organization" sample="01/01/2004"/>
+		<ForeignField name="Shift" foreignTable="pple" foreignKey="PersonID" foreignField="Shift" key="ExamineeID" joinType="left" phrase="Shift|The shift during which the employee performs duties" sample="1st - Day"/>
+		<ForeignField name="Department" foreignTable="pple" foreignKey="PersonID" foreignField="Department" key="ExamineeID" joinType="left" phrase="Department|Department of the local organization which the employee belongs to" sample="Human Resources, Local, Human Resources, 77282"/>
+		<ForeignField name="Supervisor" foreignTable="pple" foreignKey="PersonID" foreignField="Supervisor" key="ExamineeID" joinType="left" phrase="Supervisor|The immediate supervisor of the employee" sample="Joe Smith"/>
+		<ForeignField name="Examinee" foreignTable="pple" foreignKey="PersonID" foreignField="DisplayName" key="ExamineeID" joinType="left" phrase="Examinee|The individual scheduled for medical examination" sample="Dan Zahlis"/>
+		<!-- Schedule Section below -->
+		<TableField name="ScheduledProviderID" type="int" defaultValue="MedicalProviderID" listType="allParticipants" validate="RequireSelection" phrase="Scheduled Provider|The name of the provider scheduled to perform the medical examination" sample="1"/>
+		<ForeignField name="ScheduledProvider" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ScheduledProviderID" joinType="left" phrase="Scheduled Provider|The name of the provider scheduled to perform the medical examination" sample="Occupational Health Associates"/>
+        <RemoteField name="ScheduledDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="51" phrase="Schedule Date|The date the medical examination is scheduled to occur" sample="01/01/2004"/>
+        <RemoteField name="ActualExamDate" type="datetime" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="24" phrase="Exam Date|The date the medical examination actually occurred" sample="01/01/2004"/>
+        <CalculatedField name="NextExamDate" type="datetime" calcFunction="add" params="ActualExamDate ScheduleFrequency" phrase="Next Exam Date|The date of the next required examination based on the actual exam date and the schedule frequency associated with the examination"/>
+		<TableField name="ExamResultsID" type="int" validate="noValidation" phrase="Exam Results|The results of the medical examination" sample="1"/>
+		<CodeField name="ExamResults" key="ExamResultsID" phrase="Exam Results|The results of the medical examination" sample="Passed" codeTypeID="282"/>
+		<TableField name="ExamResultsDetail" type="text" validate="noValidation" phrase="Details|A detailed description of the examination results" sample="Dan passed with no additional requirements of concerns"/>
+        <CombinedField name="ScheduleFrequency" phrase="Schedule Frequency|The frequency at which the medical examination shall be performed for individuals meeting the examination criteria" sample="1 Day(s)"><CombinedFieldRef name="SchedFreq"/>_<CombinedFieldRef name="SchedFreqUnits"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="LastName"/>,_<CombinedFieldRef name="FirstName"/>;_<CombinedFieldRef name="MedicalExamTitle"/>;_<CombinedFieldRef name="ActualExamDate"/></CombinedField>
+        <CombinedField name="ScheduledExam" phrase="Scheduled Examination|A combined field used to describe the medical examination when associating it with other records" sample="Pre-employment clerical examination"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="LastName"/>,_<CombinedFieldRef name="FirstName"/>;_<CombinedFieldRef name="MedicalExamTitle"/>;_<CombinedFieldRef name="ActualExamDate"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ScheduledExamID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="ScheduledExam"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+        <SubModule moduleID="medee" name="Exam Elements" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+        <SubModule moduleID="medep" name="Exam Procedures" parentKey="MedicalExamID" localKey="MedicalExamID"/>
+		<SubModule moduleID="filr" name="File Records" parentKey="ScheduledExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medse"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ScheduledExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medse"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="ScheduledExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medse"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="ScheduledExamID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="medse"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List scheduled medical examinations">
+			<ListField name="ScheduledExamID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="LastName" phrase="Last Name"/>
+			<ListField name="FirstName" phrase="First Name"/>
+			<ListField name="MedicalExamTitle" phrase="Exam Title"/>
+			<ListField name="ExamResults" phrase="Results"/>
+			<ListField name="NextExamDate" phrase="Next Exam"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search scheduled medical examinations">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<ComboField name="ExamCategoryID" findMode="text">
+				<UpdateFieldRef name="MedicalExamTypeID"/>
+				<SampleItem ID="1" name="Disease"/>
+				<SampleItem ID="2" name="Complaint"/>
+				<SampleItem ID="3" name="Illness"/>
+				<SampleItem ID="4" name="Injury"/>
+				<SampleItem ID="5" name="Publicity"/>
+				<SampleItem ID="6" name="Theft"/>
+			</ComboField>
+			<ComboField name="MedicalExamTypeID" findMode="text" parentField="ExamCategoryID">
+				<SampleItem ID="1" name="Employee (Leadership)"/>
+				<SampleItem ID="2" name="Employee (Management)"/>
+				<SampleItem ID="3" name="Employee (Staff)"/>
+				<SampleItem ID="4" name="Employee (Line)"/>
+				<SampleItem ID="5" name="Employee (Administration)"/>
+				<SampleItem ID="6" name="Employee (Contractor)"/>
+			</ComboField>
+			<EditField name="MedicalExamTitle" size="75" maxLength="128"/>
+			<PersonComboField name="ExamineeID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="MedicalProviderID" findMode="text">
+				<SampleItem ID="1" name="St. Ainthurt"/>
+				<SampleItem ID="2" name="Occupational Health Associates"/>
+			</OrgComboField>
+			<OrgComboField name="ScheduledProviderID" findMode="text">
+				<SampleItem ID="1" name="St. Ainthurt"/>
+				<SampleItem ID="2" name="Occupational Health Associates"/>
+			</OrgComboField>
+			<DateField name="ScheduledDate"/>
+			<DateField name="ActualExamDate"/>
+			<DateField name="NextExamDate"/>
+			<CodeRadioField name="ExamResultsID">
+				<SampleItem ID="1" name="Passed"/>
+				<SampleItem ID="2" name="Failed"/>
+				<SampleItem ID="3" name="Other"/>
+			</CodeRadioField>
+            <EditField name="SchedFreq" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="SchedFreqUnitCategoryID">
+                    <UpdateFieldRef name="SchedFreqUnitsID"/>
+                    <SampleItem ID="1" name="Time"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="3" name="Distance"/>
+                    <SampleItem ID="4" name="Packaging"/>
+                    <SampleItem ID="5" name="Volume"/>
+                    <SampleItem ID="6" name="Weight"/>
+                </ComboField>
+                <ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+                    <SampleItem ID="1" name="Second"/>
+                    <SampleItem ID="2" name="Minute"/>
+                    <SampleItem ID="3" name="Hour"/>
+                    <SampleItem ID="4" name="Day"/>
+                </ComboField>
+            </EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the scheduled medical examination">
+			<ViewField name="ScheduledExamID"/>
+			<ViewField name="MedicalExamType"/>
+			<ViewField name="MedicalExamTitle"/>
+			<ViewField name="MedicalExamDesc"/>
+			<ViewField name="MedicalExamCriteria"/>
+            <ViewField name="ScheduleFrequency"/>
+			<ViewField name="Examinee"/>
+			<ViewField name="ScheduledProvider"/>
+			<ViewField name="ScheduledDate"/>
+			<ViewField name="ActualExamDate"/>
+			<ViewField name="NextExamDate"/>
+			<ViewField name="ExamResults"/>
+			<ViewField name="ExamResultsDetail"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="medee"/>
+				<ViewGrid moduleID="medep"/>
+				<!--<ViewGrid moduleID="medsr"/>-->
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the scheduled medical examination">
+			<ViewField name="ScheduledExamID"/>
+			<ViewField name="ScheduledExamID"/>
+			<ViewField name="MedicalExamType"/>
+			<ViewField name="MedicalExamTitle"/>
+			<ViewField name="MedicalExamDesc"/>
+			<ViewField name="MedicalExamCriteria"/>
+            <ViewField name="ScheduleFrequency"/>
+			<PersonComboField name="ExamineeID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="ScheduledProviderID" findMode="text">
+				<SampleItem ID="1" name="St. Ainthurt"/>
+				<SampleItem ID="2" name="Occupational Health Associates"/>
+			</OrgComboField>
+			<DateField name="ScheduledDate"/>
+			<DateField name="ActualExamDate"/>
+			<CodeRadioField name="ExamResultsID">
+				<SampleItem ID="1" name="Passed"/>
+				<SampleItem ID="2" name="Failed"/>
+				<SampleItem ID="3" name="Other"/>
+			</CodeRadioField>
+			<MemoField name="ExamResultsDetail" rows="5" cols="75"/>
+		</EditScreen>
+		<!--<EditScreen name="ExamServiceResults" phrase="Results|Associate examination service results with the scheduled medical examination">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="medsr"/>
+        </EditScreen>-->
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the scheduled medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the scheduled medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate physical files with the scheduled medical examination">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the scheduled medical examination" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="Reports" phrase="Reports|View reports for the scheduled medical examination"/>
+	</Screens>
+	<RecordSummaryFields>
+        <ViewField name="ScheduledExamID"/>
+        <ViewField name="MedicalExamType"/>
+        <ViewField name="MedicalExamTitle"/>
+        <ViewField name="MedicalExamDesc"/>
+        <ViewField name="MedicalExamCriteria"/>
+        <ViewField name="ScheduleFrequency"/>
+        <ViewField name="Examinee"/>
+        <ViewField name="ScheduledProvider"/>
+        <ViewField name="ScheduledDate"/>
+        <ViewField name="ActualExamDate"/>
+        <ViewField name="NextExamDate"/>
+        <ViewField name="ExamResults"/>
+        <ViewField name="ExamResultsDetail"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="medse" phrase="Scheduled Exams">
+			<InvisibleField name="ScheduledExamID"/>
+			<ViewField name="Examinee" sample="Mattias Thorslund"/>
+			<ViewField name="ScheduledDate" sample="Jan. 23, 2007 10:15:00"/>
+			<ViewField name="ActualExamDate" sample="Jan. 23, 2007 10:15:00"/>
+			<ViewField name="ExamResults" sample="Passed"/>
+			<ViewField name="NextExamDate" sample="Jan. 23, 2008 10:15:00"/>
+		</ViewGrid>
+		<EditGrid moduleID="medse" phrase="Scheduled Exams">
+			<GridForm>
+				<InvisibleField name="ScheduledExamID"/>
+                <PersonComboField name="ExamineeID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <OrgComboField name="ScheduledProviderID" findMode="text">
+                    <SampleItem ID="1" name="St. Ainthurt"/>
+                    <SampleItem ID="2" name="Occupational Health Associates"/>
+                </OrgComboField>
+                <DateField name="ScheduledDate"/>
+                <DateField name="ActualExamDate"/>
+                <CodeRadioField name="ExamResultsID">
+                    <SampleItem ID="1" name="Passed"/>
+                    <SampleItem ID="2" name="Failed"/>
+                    <SampleItem ID="3" name="Other"/>
+                </CodeRadioField>
+                <MemoField name="ExamResultsDetail" rows="5" cols="75"/>
+			</GridForm>
+			<InvisibleField name="ScheduledExamID"/>
+			<ViewField name="Examinee" sample="Mattias Thorslund"/>
+			<ViewField name="ScheduledDate" sample="Jan. 23, 2007 10:15:00"/>
+			<ViewField name="ActualExamDate" sample="Jan. 23, 2007 10:15:00"/>
+			<ViewField name="ExamResults" sample="Passed"/>
+			<ViewField name="NextExamDate" sample="Jan. 23, 2008 10:15:00"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Scheduled Medical Exams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Scheduled Medical Exams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Scheduled Medical Exams By PersonAccountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Scheduled Medical Exams By PersonAccountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Scheduled Medical Exams By Category">
+			<GroupByField name="ExamCategory"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Scheduled Medical Exams By Category">
+			<GroupByField name="ExamCategory"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Scheduled Medical Exams By Type">
+			<GroupByField name="MedicalExamType"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Scheduled Medical Exams By Type">
+			<GroupByField name="MedicalExamType"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Scheduled Medical Exams By Examinee">
+			<GroupByField name="Examinee"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Scheduled Medical Exams By Examinee">
+			<GroupByField name="Examinee"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Scheduled Medical Exams By Scheduled Provider">
+			<GroupByField name="ScheduledProvider"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Scheduled Medical Exams By Scheduled Provider">
+			<GroupByField name="ScheduledProvider"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Scheduled Medical Exams By Exam Results">
+			<GroupByField name="ExamResults"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Scheduled Medical Exams By Exam Results">
+			<GroupByField name="ExamResults"/>
+			<SummaryField name="ScheduledExamID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

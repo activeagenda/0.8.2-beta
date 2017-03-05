@@ -1,0 +1,69 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:981:"INSERT INTO rdc (ModuleID, RecordID, Value, _ModDate)
+SELECT 
+   \'pkg\' AS ModuleID,
+   pkg.PackagingUnitEquivalentID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | ID: \',IFNULL(`rdc1`.Value,\'\'),\' | \',IFNULL(`pkg`.FirstUnitValue,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\'),\' = \',IFNULL(`pkg`.SecondUnitValue,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts2`.UnitName,\'\')),\'\'),\'\')),\' | ID:  |   =  \') AS Value,
+    NOW() AS _ModDate
+FROM 
+   `pkg`
+LEFT OUTER JOIN `rdc` ON (pkg.PackagingUnitEquivalentID = rdc.RecordID AND rdc.ModuleID = \'pkg\')
+   
+   LEFT OUTER JOIN `uts` AS uts2 
+   ON (`pkg`.SecondUnitID = `uts2`.UnitID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`pkg`.FirstUnitID = `uts1`.UnitID )
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`pkg`.RelatedRecordID = rdc1.RecordID AND `pkg`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`pkg`.RelatedModuleID = `mod1`.ModuleID )
+WHERE pkg.PackagingUnitEquivalentID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:865:"UPDATE rdc
+INNER JOIN pkg ON (rdc.RecordID = pkg.PackagingUnitEquivalentID AND rdc.ModuleID = \'pkg\')
+   
+   LEFT OUTER JOIN `uts` AS uts2 
+   ON (`pkg`.SecondUnitID = `uts2`.UnitID )
+   LEFT OUTER JOIN `uts` AS uts1 
+   ON (`pkg`.FirstUnitID = `uts1`.UnitID )
+   LEFT OUTER JOIN `rdc` AS rdc1 ON (`pkg`.RelatedRecordID = rdc1.RecordID AND `pkg`.RelatedModuleID = rdc1.ModuleID)
+   LEFT OUTER JOIN `mod` AS mod1 
+   ON (`pkg`.RelatedModuleID = `mod1`.ModuleID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`mod1`.Name,\'\'),\' | ID: \',IFNULL(`rdc1`.Value,\'\'),\' | \',IFNULL(`pkg`.FirstUnitValue,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts1`.UnitName,\'\')),\'\'),\'\'),\' = \',IFNULL(`pkg`.SecondUnitValue,\'\'),\' \',IFNULL(NULLIF(CONCAT(IFNULL(`uts2`.UnitName,\'\')),\'\'),\'\')),\' | ID:  |   =  \'),
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'pkg\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

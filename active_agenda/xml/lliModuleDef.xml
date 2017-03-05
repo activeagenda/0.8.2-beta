@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Legitimacies" moduleID="lli" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLoss="ModuleDef.xsd" singularRecordName="Loss Legitimacy" pluralRecordName="Loss Legitimacies" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LossLegitimacyID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate loss legitimacies with related records" sample="1"/>
+		<TableField name="SourceModuleID" type="varchar(5)" validate="noValidation" phrase="Source Module|The name of the module which is the source of the loss legitimacy" sample="lin"/>
+		<ForeignField name="SourceModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="SourceModuleID" joinType="left" phrase="Source Module|The name of the module which is the source of the loss legitimacy" sample="Loss Injury"/>
+		<TableField name="SourceRecordID" type="int" validate="noValidation" phrase="Source Record ID|Numerical ID to identify the Source Record" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="SourceRecordID" moduleIDField="SourceModuleID" foreignField="RecordDescription" joinType="left" phrase="Record Description|A group of fields used to describe the source record" sample="Zahlis Ankle Injury"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="SourceRecordID" moduleIDField="SourceModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The primary organization affected by the legitimacy of the loss" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The primary organization affected by the legitimacy of the loss" sample="Active Agenda, Inc."/>
+		<TableField name="LossLegitimacyTypeID" type="int" dbFlags="unsigned not null" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="1"/>
+		<ForeignField name="LegitimacyCategoryID" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyCategoryID" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="1"/>
+		<CodeField name="LegitimacyCategory" key="LegitimacyCategoryID" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="Legitimate" codeTypeID="191"/>
+		<ForeignField name="LegitimacyDesc" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyDesc" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Description|A brief, but detailed, description of the legitimacy type" sample="Any loss claim that results from an indisputable, work-related, injury and the injured person is actively engaged in proactive treatment towards revovery."/>
+		<ForeignField name="LossLegitimacyType" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LossLegitimacyType" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="Legitimate | Clear Liability; Active Treatment"/>
+		<RecordMetaField name="LastModified" returnType="date" lookupType="modified" phrase="Last Modified|The date the legitimacy of the loss was last modified"/>
+		<RecordMetaField name="LastModifiedByID" returnType="userID" lookupType="modified" phrase="Last Modified By|The name of the person that last modified the legitimacy type"/>
+		<ForeignField name="LastModifiedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LastModifiedByID" joinType="left" phrase="Last Modified By|The name of the person that last modified the legitimacy type" sample="Jane Doe"/>
+		<CombinedField name="SourceID" phrase="Related Loss Record|A combined field used to describe the source of the related loss record" sample="Loss Injury ID:5"><CombinedFieldRef name="SourceModule"/>;_ID:_<CombinedFieldRef name="SourceRecordID"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, HQ | Clear Liability; Active Treatment"><CombinedFieldRef name="SourceModule"/>_ID:_<CombinedFieldRef name="SourceRecordID"/>;_<CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="LossLegitimacyType"/></CombinedField>
+		<CombinedField name="LossLegitimacy" phrase="Loss Legitimacy|A combined field used to describe this loss legitimacy when associating it with other records" sample="Active Agenda, HQ | Clear Liability; Active Treatment"><CombinedFieldRef name="SourceModule"/>_ID:_<CombinedFieldRef name="SourceRecordID"/>;_<CombinedFieldRef name="OwnerOrganization"/>;_<CombinedFieldRef name="LossLegitimacyType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LossLegitimacyID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="LossLegitimacy"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List loss legitimacies">
+			<ListField name="LossLegitimacyID" phrase="Record ID"/>
+			<ListField name="SourceID" phrase="Related Loss Record"/>
+			<ListField name="OwnerOrganization" phrase="Organization"/>
+			<ListField name="RelatedRecordDescription" phrase="Record Description"/>
+			<ListField name="LegitimacyCategory" phrase="Category"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search loss legitimacies">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SourceModuleID" findMode="text">
+				<SampleItem ID="1" name="Postings"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="3" name="Chemicals"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<CodeComboField name="LegitimacyCategoryID" findMode="text">
+				<UpdateFieldRef name="LossLegitimacyTypeID"/>
+				<SampleItem ID="1" name="Legitimate"/>
+				<SampleItem ID="2" name="Questionable"/>
+				<SampleItem ID="3" name="Abusive"/>
+				<SampleItem ID="4" name="Fraudulent"/>
+			</CodeComboField>
+			<ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+				<SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+				<SampleItem ID="2" name="Clear Liability; Malingering"/>
+			</ComboField>
+			<PersonComboField name="LastModifiedByID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="LastModified"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the loss legitimacy">
+			<ViewField name="LossLegitimacyID"/>
+			<ViewField name="SourceModule"/>
+			<ViewField name="SourceRecordID"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<ViewField name="LegitimacyCategory"/>
+			<ViewField name="LossLegitimacyType"/>
+			<ViewField name="LegitimacyDesc"/>
+			<ViewField name="LastModifiedBy"/>
+			<ViewField name="LastModified"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the loss legitimacy">
+			<ViewField name="LossLegitimacyID"/>
+			<ViewField name="SourceModule"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="OwnerOrganization"/>
+			<CodeComboField name="LegitimacyCategoryID" findMode="text">
+				<UpdateFieldRef name="LossLegitimacyTypeID"/>
+				<SampleItem ID="1" name="Legitimate"/>
+				<SampleItem ID="2" name="Questionable"/>
+				<SampleItem ID="3" name="Abusive"/>
+				<SampleItem ID="4" name="Fraudulent"/>
+			</CodeComboField>
+			<ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+				<UpdateFieldRef name="LegitimacyDesc"/>
+				<SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+				<SampleItem ID="2" name="Clear Liability; Malingering"/>
+			</ComboField>
+			<ViewField name="LegitimacyDesc" parentField="LossLegitimacyTypeID"/>
+			<ViewField name="LastModifiedBy"/>
+			<ViewField name="LastModified"/>
+		</EditScreen>
+	</Screens>
+	<Charts>
+		<PieChart name="Pie01" title="Loss Legitimacies By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Loss Legitimacies By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Loss Legitimacies By Module">
+			<GroupByField name="SourceModule"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Loss Legitimacies By Module">
+			<GroupByField name="SourceModule"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Loss Legitimacies By Category">
+			<GroupByField name="LegitimacyCategory"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Loss Legitimacies By Category">
+			<GroupByField name="LegitimacyCategory"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Loss Legitimacies By Type">
+			<GroupByField name="LossLegitimacyType"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Loss Legitimacies By Type">
+			<GroupByField name="LossLegitimacyType"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Loss Legitimacies By Person Modifying">
+			<GroupByField name="LastModifiedBy"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Loss Legitimacies By Person Modifying">
+			<GroupByField name="LastModifiedBy"/>
+			<SummaryField name="LossLegitimacyID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

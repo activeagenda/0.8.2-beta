@@ -1,0 +1,748 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Chemicals" moduleID="chm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Chemical" pluralRecordName="Chemicals" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="ChemicalID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track chemicals used by the organization. This number can also used as an internal tracking number for documents; such as: Material Safety Data Sheets, manufacturer labels, waste profile sheets, etc." sample="1"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization with primary responsibility for chemical oversight for this specific chemical throughout the organization" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with primary responsibility for chemical oversight for this specific chemical throughout the organization" sample="Active Agenda, HQ">
+            <ListCondition fieldName="Participant" mode="equals">
+                <StaticValue value="true"/>
+            </ListCondition>
+        </ForeignField>
+        <RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="16" phrase="Person Accountable|The individual assigned primary accountability for chemical oversight for this specific chemical throughout the organization" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for chemical oversight for this specific chemical throughout the organization" sample="Mattias Thorslund"/>
+        <TableField name="ProductName" type="varchar(128)" validate="noValidation" phrase="Product Name|A name assigned to a chemical or chemical compound by its manufacturer for product marketing and trademarking purposes" sample="Sierra Springs Natural Spring Water"/>
+        <TableField name="CommonName" type="varchar(128)" validate="notEmpty" phrase="Common Name|A common name assigned to a chemical by the organization using it. Common names are more easily recognized than chemical names and can include code names used by an organization to quickly and accurately identify a chemical" sample="Water"/>
+        <TableField name="ChemicalName" type="varchar(128)" validate="notEmpty" phrase="Chemical Name|The technical name for a chemical" sample="Hydrogen Dioxide"/>
+        <TableField name="CASNumber" type="varchar(50)" validate="notEmpty" phrase="CAS Number|Chemical Abstracts Service Registry Number. CAS Registry Numbers (often referred to as CAS RNs or CAS Numbers) are unique identifiers for chemical substances" sample="1336-21-6"/>
+        <RemoteField name="DateReceived" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="12" phrase="Date Received|Date the organization first received and/or used the chemical" sample="01/01/2004"/>
+        <TableField name="ChemicalStatusID" type="int" validate="RequireSelection" phrase="Chemical Status|Present use status of this chemical throughout the organization" sample="1"/>
+        <CodeField name="ChemicalStatus" key="ChemicalStatusID" phrase="Chemical Status|Present use status of this chemical throughout the organization" sample="Discontinued" codeTypeID="114"/>
+        <RemoteField name="DateDiscontinued" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="13" phrase="Date Discontinued|The date on which the organization assigned primary responsibility for enterprise use of this chemical elected to discontinue use of the chemical" sample="01/01/2004"/>
+        <TableField name="ManufacturerID" type="int" listType="special=2" validate="RequireSelection" phrase="Manufacturer|The name of the manufacturer of the chemical" sample="1"/>
+        <ForeignField name="Manufacturer" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ManufacturerID" joinType="left" phrase="Manufacturer|The name of the manufacturer of the chemical" sample="DuPont"/>
+        <TableField name="MSDSAvailable" type="bool" validate="noValidation" dbFlags="default 0" phrase="Material Safety Data Sheet|Whether a material safety data sheet is available for this chemical and is attached to the record or has a Material Safety Data Sheet (MSDS) Internet Uniform Resource Locater (URL - Internet address) entered" sample="Yes"/>
+        <TableField name="MSDSURL" type="varchar(128)" validate="noValidation" phrase="MSDS Address|Material Safety Data Sheet - Uniform Resource Locater. This is the Internt address where the manufacturer's material safety data sheet or other general information about the chemical is posted and updated" sample="www.dupont.com/water"/>
+        <TableField name="RTECSNumber" type="varchar(15)" validate="noValidation" phrase="RTECS Number|Registry of Toxic Effects of Chemical Substances Number" sample="AB2800000"/>
+        <TableField name="RTECSURL" type="varchar(128)" validate="noValidation" phrase="RTECS Address|Registry of Toxic Effects of Chemical Substances Internet address" sample="http://www.cdc.gov/niosh/rtecs/ai3d6aa8.html"/>
+        <TableField name="ICSCNumber" type="varchar(15)" validate="noValidation" phrase="ICSC Number|International Chemical Safety Card number" sample="0414"/>
+        <TableField name="ICSCURL" type="varchar(128)" validate="noValidation" phrase="ICSC Address|International Chemical Safety Card address" sample="http://www.ilo.org/public/english/protection/safework/cis/products/icsc/dtasht/_icsc04/icsc0414.htm"/>
+        <TableField name="Processed" type="bool" validate="noValidation" dbFlags="default 0" phrase="Processed?|Whether this chemical is used in a system or process" sample="No"/>
+        <TableField name="TradeSecret" type="bool" validate="noValidation" dbFlags="default 0" phrase="Trade Secret?|Whether this chemical represents an organizational trade secret; such as, a component ingredient in a proprietary product mixture" sample="Yes"/>
+        <TableField name="ExtremelyHazardous" type="bool" validate="noValidation" dbFlags="default 0" phrase="Extremely Hazardous?|Whether this chemical is identified as extremely hazardous by a regulatory agency" sample="Yes"/>
+        <TableField name="PotVolatile" type="bool" validate="noValidation" dbFlags="default 0" phrase="Potentially Volatile?|Whether this chemical is potentially volatile when mixed with other chemicals or substances" sample="No"/>
+        <TableField name="ExceedCoLimits" type="bool" validate="noValidation" dbFlags="default 0" phrase="Exceeds Company Limits?|Whether this chemical or composition exceeds established company limits" sample="No"/>
+        <TableField name="ProductIngred" type="bool" validate="noValidation" dbFlags="default 0" phrase="Product Ingredient?|Whether this chemical is identified as a product ingredient" sample="Yes"/>
+        <TableField name="ContGuarOnFile" type="bool" validate="noValidation" dbFlags="default 0" phrase="Continuing Guarantee On File?|Whether this chemical is a product ingredient and the organization has a continuing guarantee on file and/or attached to the record" sample="Yes"/>
+        <RemoteField name="GuarExpirDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Guarantee Expiration Date|The date the continuing guarantee expires" sample="01/01/2004"/>
+        <TableField name="ActiveIngredient" type="varchar(50)" validate="noValidation" phrase="Active Ingredient|The primary active ingredient which gives the chemical its differentiating properties" sample="Goo Slime"/>
+        <TableField name="HealthID" type="int" validate="noValidation" phrase="Health Rating|A rating value used to distinguish the chemical's health hazard properties based on severity of risk" sample="2"/>
+        <CodeField name="Health" key="HealthID" phrase="Health Rating|A rating value used to distinguish the chemical's health hazard properties based on severity of risk" sample="2" codeTypeID="164"/>
+        <TableField name="FireID" type="int" validate="noValidation" phrase="Fire Rating|A rating value used to distinguish the chemical's fire hazard properties based on severity of risk" sample="1"/>
+        <CodeField name="Fire" key="FireID" phrase="Fire Rating|A rating value used to distinguish the chemical's fire hazard properties based on severity of risk" sample="1" codeTypeID="154"/>
+        <TableField name="ReactivityID" type="int" validate="noValidation" phrase="Instability Rating|A rating value used to distinguish the chemical's instability hazard properties based on severity of risk" sample="3"/>
+        <CodeField name="Reactivity" key="ReactivityID" phrase="Instability Rating|A rating value used to distinguish the chemical's instability hazard properties based on severity of risk" sample="3" codeTypeID="223"/>
+        <TableField name="SpecialHazardID" type="int" validate="noValidation" phrase="Special Hazard Rating|A unique description of the chemicals special hazard properties" sample="1"/>
+        <CodeField name="SpecialHazard" key="SpecialHazardID" phrase="Special Hazard Rating|A unique description of the chemicals special hazard properties" sample="Corrosive" codeTypeID="239"/>
+        <TableField name="SpecialHand" type="text" validate="noValidation" phrase="Special Handling|A detailed description of any special handling requirements associated with this chemical" sample="Avoid any contact with milk products when handling this chemical. Avoid any shaking or rapid mixing to avoid explosion."/>
+        <TableField name="FlashPoint" type="int" validate="noValidation" phrase="Flash Point|The lowest temperature at which the material will flash or ignite when exposed to flame" sample="211"/>
+        <TableField name="TempUnitsID" type="int" validate="noValidation" phrase="Temperature Units|The units associated with the chemical's flash point" sample="1"/>
+        <CodeField name="TempUnits" key="TempUnitsID" phrase="Temperature Units|The units associated with the chemical's flash point" sample="Fahrenheit" codeTypeID="245"/>
+        <TableField name="pH" type="int" validate="noValidation" phrase="pH|Measure of the hydrogen ion concentration in a solution" sample="7"/>
+        <TableField name="ReportableQuantity" type="int" validate="noValidation" phrase="Reportable Quantity|The amount of a material which triggers release reporting requirements" sample="100"/>
+        <TableField name="WeightVolUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="WeightVolUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="WeightVolUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="WeightVolUnitCategory" key="WeightVolUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37">
+            <ListCondition fieldName="CodeID" mode="in">
+                <StaticValue value="5"/>
+                <!-- Volume -->
+                <StaticValue value="6"/>
+                <!-- Weight -->
+            </ListCondition>
+        </CodeField>
+        <ForeignField name="WeightVolUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="WeightVolUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="FederalWasteID" type="varchar(128)" validate="noValidation" phrase="Federal Waste ID|Federal waste ID number/s" sample="F003"/>
+        <TableField name="Solid" type="bool" validate="noValidation" dbFlags="" phrase="Solid?|Whether this chemical is present on site as a solid" sample="No"/>
+        <TableField name="Liquid" type="bool" validate="noValidation" dbFlags="" phrase="Liquid?|Whether this chemical is present on site as a liquid" sample="Yes"/>
+        <TableField name="Gas" type="bool" validate="noValidation" dbFlags="" phrase="Gas?|Whether this chemical is present on site as a gas" sample="No"/>
+        <TableField name="Responsibilitiesdf" type="text" validate="noValidation" phrase="Assigned Responsibilities|A detailed description of the responsibilities associated with using the chemical" sample="The person accountable is the ultimate authority regarding purchase and use of this chemical"/>
+        <TableField name="Verificationdf" type="text" validate="noValidation" phrase="Assigned Verification|A detailed description of the verification procedures associated with using the chemical" sample="Labels from original containers must be checked against the transport label to verify proper handling warnings"/>
+        <TableField name="Preparationdf" type="text" validate="noValidation" phrase="Assigned Preparation|A detailed description of the preparation procedures associated with using the chemical" sample="1. Secure required protective equipment prior to use of this chemical. 2. Notify the Sanitation Supervisor and one member of the emergency response team prior to using this chemical. 3. Flood the application site with water before application"/>
+        <TableField name="Applicationdf" type="text" validate="noValidation" phrase="Assigned Application|A detailed description of the application procedures associated with using the chemical" sample="1. Mix the chemical with water at a ratio of 2 parts water to 1 part Chemical. 2. Apply the chemical to the effected site liberally through an industrial sprayer"/>
+        <TableField name="PostApplicationdf" type="text" validate="noValidation" phrase="Assigned Post Application|A detailed description of the post application procedures associated with using the chemical" sample="1. Decontaminate all protective equipment by rinsing thoroughly with water. 2. return protective equipment to sanitation supply room. 2. Notify the Sanitation Supervisor and the emergency response team member that use is being discontinued. 3. Dilute unused chemical with water 10:1 and flush down sanitation drain"/>
+        <TableField name="Precautionsdf" type="text" validate="noValidation" phrase="Assigned Precautions|A detailed description of the precautions to be taken when using the chemical" sample="1. Avoid direct skin contact. 2. Avoid contact with eyes. 3. Avoid overspray"/>
+        <TableField name="FirstAiddf" type="text" validate="noValidation" phrase="Assigned First Aid|A detailed description of the first aid response to be taken if exposed to the chemical" sample="1. Eye contact: proceed to emergency eyewash unit and flush eyes liberally with water for 15 minutes. 2. Skin contact: proceed to emergency shower unit and flush effected area liberally with water for 5 minutes."/>
+        <SummaryField name="ExposureRoutes" summaryFunction="list" summaryField="ChemicalExposureRoute" summaryKey="ChemicalID" summaryModuleID="chmer" localKey="ChemicalID" phrase="Routes of Exposure|The specific routes of exposure associated with the chemical" sample="Inhalation"/>
+        <SummaryField name="ChemicalCategories" summaryFunction="list" summaryField="ChemicalCategory" summaryKey="ChemicalID" summaryModuleID="chmta" localKey="ChemicalID" phrase="Chemical Categories|A list of categories used to identify a chemical" sample="Combustible Liquid, Carcinogen"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="CommonName"/>;_<CombinedFieldRef name="ChemicalName"/>;_CAS:_<CombinedFieldRef name="CASNumber"/></CombinedField>
+        <CombinedField name="Chemical" phrase="Chemical|A combined field used to describe this chemical when associating it with other records" sample="Water | Hydrogen Dioxide | CAS: 1336-21-6 | Discontinued"><CombinedFieldRef name="CommonName"/>;_CAS:_<CombinedFieldRef name="CASNumber"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="ChemicalID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Chemical"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="chmca" name="Chemical Hazard Classifications" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmco" name="Chemical Components" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmta" name="Chemical Type Associations" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmer" name="Chemical Exposure Routes" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmh" name="Chemical Handling Procedures" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmpa" name="Chemical Phrase Associations" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmin" name="Chemical Inventory" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="chmth" name="Chemical Thresholds" parentKey="ChemicalID" localKey="ChemicalID"/>
+        <SubModule moduleID="gui" name="Guidance Organizations" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+        <SubModule moduleID="pkg" name="Packaging Units and Equivalents" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="ChemicalID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="chm"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List chemicals">
+            <ListField name="ChemicalID" phrase="Record ID"/>
+            <ListField name="ProductName" phrase="Product Name"/>
+            <ListField name="CommonName" phrase="Common Name"/>
+            <ListField name="ChemicalName" phrase="Chemical Name"/>
+            <ListField name="Manufacturer" phrase="Manufacturer"/>
+            <ListField name="MSDSAvailable" phrase="MSDS?"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search chemicals">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CheckBoxField name="MSDSAvailable"/>
+            <EditField name="MSDSURL" size="75" maxLength="128"/>
+            <EditField name="RTECSNumber" size="15" maxLength="15"/>
+            <EditField name="RTECSURL" size="75" maxLength="128"/>
+            <EditField name="ICSCNumber" size="15" maxLength="15"/>
+            <EditField name="ICSCURL" size="75" maxLength="128"/>
+            <EditField name="ProductName" size="75" maxLength="128"/>
+            <EditField name="CommonName" size="75" maxLength="128"/>
+            <EditField name="ChemicalName" size="75" maxLength="128"/>
+            <EditField name="CASNumber" size="50" maxLength="100"/>
+            <EditField name="ActiveIngredient" size="50" maxLength="50"/>
+            <DateField name="DateReceived"/>
+            <DateField name="DateDiscontinued"/>
+            <OrgComboField name="ManufacturerID" findMode="text">
+                <SampleItem ID="1" name="Dupont"/>
+                <SampleItem ID="3" name="Merck"/>
+                <SampleItem ID="5" name="Squibb"/>
+                <SampleItem ID="7" name="Bristol Meyers"/>
+            </OrgComboField>
+            <DateField name="GuarExpirDate"/>
+            <EditField name="FlashPoint" size="5" maxLength="5">
+                <CodeComboField name="TempUnitsID">
+                    <SampleItem ID="1" name="Fahrenheit"/>
+                    <SampleItem ID="3" name="Celcius"/>
+                </CodeComboField>
+            </EditField>
+            <EditField name="pH" size="5"/>
+            <EditField name="ReportableQuantity" size="5" maxLength="5">
+                <Self/>
+                <CodeComboField name="WeightVolUnitCategoryID">
+                    <UpdateFieldRef name="WeightVolUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </CodeComboField>
+                <ComboField name="WeightVolUnitsID" parentField="WeightVolUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <CheckBoxField name="Solid"/>
+            <CheckBoxField name="Liquid"/>
+            <CheckBoxField name="Gas"/>
+            <CheckBoxField name="Processed"/>
+            <CheckBoxField name="TradeSecret"/>
+            <CheckBoxField name="ExtremelyHazardous"/>
+            <CheckBoxField name="PotVolatile"/>
+            <CheckBoxField name="ExceedCoLimits"/>
+            <CheckBoxField name="ProductIngred"/>
+            <CheckBoxField name="ContGuarOnFile"/>
+            <DateField name="GuarExpirDate"/>
+            <CodeRadioField name="HealthID" orientation="horizontal">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a blue background color. DFZ 10-23-2003-->
+            <CodeRadioField name="FireID" orientation="horizontal">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a red background color. DFZ 10-23-2003-->
+            <CodeRadioField name="ReactivityID" orientation="horizontal">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a yellow background color. DFZ 10-23-2003-->
+            <CodeComboField name="SpecialHazardID" findMode="text">
+                <SampleItem ID="1" name="Corrosive"/>
+                <SampleItem ID="2" name="Ignitable"/>
+                <SampleItem ID="3" name="Water Reactive"/>
+                <SampleItem ID="4" name="Carcinogen"/>
+            </CodeComboField>
+            <CodeComboField name="ChemicalStatusID">
+                <SampleItem ID="1" name="Discontinued"/>
+                <SampleItem ID="2" name="Active"/>
+                <SampleItem ID="3" name="Inactive"/>
+            </CodeComboField>
+            <CodeCheckSearchField name="ExposureRouteID" subModuleID="chmer" subModuleRecordIDField="ChemicalID" codeIDField="ChemicalExposureRouteID" codeTypeID="35" phrase="Routes of Exposure|The specific routes of exposure associated with the chemical" sample="Inhalation"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a chemical">
+            <ViewField name="ChemicalID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="MSDSAvailable"/>
+            <ViewField name="MSDSURL" link="MSDSURL"/>
+            <ViewField name="RTECSNumber"/>
+            <ViewField name="RTECSURL" link="RTECSURL"/>
+            <ViewField name="ICSCNumber"/>
+            <ViewField name="ICSCURL" link="ICSCURL"/>
+            <ViewField name="ProductName"/>
+            <ViewField name="CommonName"/>
+            <ViewField name="ChemicalName"/>
+            <ViewField name="CASNumber"/>
+            <ViewField name="ActiveIngredient"/>
+            <ViewField name="DateReceived"/>
+            <ViewField name="DateDiscontinued"/>
+            <ViewField name="ChemicalStatus"/>
+            <ViewField name="Manufacturer"/>
+            <ViewField name="FlashPoint">
+                <ViewField name="TempUnits"/>
+            </ViewField>
+            <ViewField name="pH"/>
+            <ViewField name="ReportableQuantity">
+                <ViewField name="WeightVolUnits"/>
+            </ViewField>
+            <ViewField name="Solid"/>
+            <ViewField name="Liquid"/>
+            <ViewField name="Gas"/>
+            <ViewField name="ExposureRoutes"/>
+            <ViewField name="ChemicalCategories"/>
+            <ViewScreenSection name="SpecialCharacteristics" phrase="Special Characteristics">
+                <ViewField name="Processed"/>
+                <ViewField name="TradeSecret"/>
+                <ViewField name="ExtremelyHazardous"/>
+                <ViewField name="PotVolatile"/>
+                <ViewField name="ExceedCoLimits"/>
+                <ViewField name="ProductIngred"/>
+                <ViewField name="ContGuarOnFile"/>
+                <ViewField name="GuarExpirDate"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="PlacardRequirements" phrase="Placard Requirements">
+                <ViewField name="Health"/>
+                <ViewField name="Fire"/>
+                <ViewField name="Reactivity"/>
+                <ViewField name="SpecialHazard"/>
+                <ViewField name="SpecialHand"/>
+                <ViewGrid moduleID="chmca"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="DefaultHandling" phrase="Default Handling Procedures">
+                <ViewField name="Responsibilitiesdf"/>
+                <ViewField name="Verificationdf"/>
+                <ViewField name="Preparationdf"/>
+                <ViewField name="Applicationdf"/>
+                <ViewField name="PostApplicationdf"/>
+                <ViewField name="Precautionsdf"/>
+                <ViewField name="FirstAiddf"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="pkg"/>
+                <ViewGrid moduleID="chmin"/>
+                <ViewGrid moduleID="chmco"/>
+                <ViewGrid moduleID="chmh"/>
+                <ViewGrid moduleID="chmpa"/>
+                <ViewGrid moduleID="chmth"/>
+                <ViewGrid moduleID="gui"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit basic information about a chemical">
+            <ViewField name="ChemicalID"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="MSDSURL" size="75" maxLength="128"/>
+            <EditField name="RTECSNumber" size="15" maxLength="15"/>
+            <EditField name="RTECSURL" size="75" maxLength="128"/>
+            <EditField name="ICSCNumber" size="15" maxLength="15"/>
+            <EditField name="ICSCURL" size="75" maxLength="128"/>
+            <EditField name="ProductName" size="75" maxLength="128"/>
+            <EditField name="CommonName" size="75" maxLength="128"/>
+            <EditField name="ChemicalName" size="75" maxLength="128"/>
+            <EditField name="CASNumber" size="50" maxLength="100"/>
+            <EditField name="ActiveIngredient" size="50" maxLength="50"/>
+            <DateField name="DateReceived"/>
+            <DateField name="DateDiscontinued"/>
+            <OrgComboField name="ManufacturerID" findMode="text">
+                <SampleItem ID="1" name="Dupont"/>
+                <SampleItem ID="3" name="Merck"/>
+                <SampleItem ID="5" name="Squibb"/>
+                <SampleItem ID="7" name="Bristol Meyers"/>
+            </OrgComboField>
+            <DateField name="GuarExpirDate"/>
+            <EditField name="FlashPoint" size="5" maxLength="5">
+                <CodeComboField name="TempUnitsID">
+                    <SampleItem ID="1" name="Fahrenheit"/>
+                    <SampleItem ID="3" name="Celcius"/>
+                </CodeComboField>
+            </EditField>
+            <EditField name="pH" size="5"/>
+            <EditField name="ReportableQuantity" size="5" maxLength="5">
+                <Self/>
+                <CodeComboField name="WeightVolUnitCategoryID">
+                    <UpdateFieldRef name="WeightVolUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </CodeComboField>
+                <ComboField name="WeightVolUnitsID" parentField="WeightVolUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <CheckBoxField name="MSDSAvailable"/>
+            <CheckBoxField name="Solid"/>
+            <CheckBoxField name="Liquid"/>
+            <CheckBoxField name="Gas"/>
+            <CodeComboField name="ChemicalStatusID">
+                <SampleItem ID="1" name="Discontinued"/>
+                <SampleItem ID="2" name="Active"/>
+                <SampleItem ID="3" name="Inactive"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="ExposureRoutes" phrase="Routes|Associate routes of chemical exposure">
+            <RecordSummaryFieldsRef/>
+            <SelectGrid moduleID="chmer"/>
+        </EditScreen>
+        <EditScreen name="SpecialCharacteristics" phrase="Special|Edit the special characteristics of a chemical">
+            <RecordSummaryFieldsRef/>
+            <CheckBoxField name="Processed"/>
+            <CheckBoxField name="TradeSecret"/>
+            <CheckBoxField name="ExtremelyHazardous"/>
+            <CheckBoxField name="PotVolatile"/>
+            <CheckBoxField name="ExceedCoLimits"/>
+            <CheckBoxField name="ProductIngred"/>
+            <CheckBoxField name="ContGuarOnFile"/>
+            <DateField name="GuarExpirDate"/>
+        </EditScreen>
+        <EditScreen name="PlacardRequirements" phrase="Placard|Edit placarding requirements associated with a chemical">
+            <RecordSummaryFieldsRef/>
+            <CodeRadioField name="HealthID">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a blue background color. DFZ 10-23-2003-->
+            <CodeRadioField name="FireID">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a red background color. DFZ 10-23-2003-->
+            <CodeRadioField name="ReactivityID">
+                <SampleItem ID="1" name="1"/>
+                <SampleItem ID="2" name="2"/>
+                <SampleItem ID="3" name="3"/>
+                <SampleItem ID="4" name="4"/>
+            </CodeRadioField>
+            <!--this field should have a yellow background color. DFZ 10-23-2003-->
+            <CodeComboField name="SpecialHazardID" findMode="text">
+                <SampleItem ID="1" name="Corrosive"/>
+                <SampleItem ID="2" name="Ignitable"/>
+                <SampleItem ID="3" name="Water Reactive"/>
+                <SampleItem ID="4" name="Carcinogen"/>
+            </CodeComboField>
+            <MemoField name="SpecialHand" rows="5" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Guidance" phrase="Guidance|Associate guidance organizations with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="gui"/>
+        </EditScreen>
+        <EditScreen name="HazardClassifications" phrase="Classifications|Associate hazard classifications with the chemical ">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmca"/>
+        </EditScreen>
+        <EditScreen name="PackagingEquivalents" phrase="Equivalents|Associate packaging unit equivalents with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="pkg"/>
+        </EditScreen>
+        <EditScreen name="ChemicalInventory" phrase="Inventory|Associate inventory levels with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmin"/>
+        </EditScreen>
+        <EditScreen name="ChemicalComponents" phrase="Components|Associate chemical components with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmco"/>
+        </EditScreen>
+        <EditScreen name="ChemicalTypes" phrase="Types|Associate chemical categories and types with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmta"/>
+        </EditScreen>
+        <EditScreen name="HandlingDefaults" phrase="Handling|Generate a default chemical handling procedure which can be adopted by others and/or modified to reflect local requirements">
+            <RecordSummaryFieldsRef/>
+            <MemoField name="SpecialHand" rows="5" cols="75"/>
+            <MemoField name="Responsibilitiesdf" rows="5" cols="75"/>
+            <MemoField name="Verificationdf" rows="5" cols="75"/>
+            <MemoField name="Preparationdf" rows="5" cols="75"/>
+            <MemoField name="Applicationdf" rows="5" cols="75"/>
+            <MemoField name="PostApplicationdf" rows="5" cols="75"/>
+            <MemoField name="Precautionsdf" rows="5" cols="75"/>
+            <MemoField name="FirstAiddf" rows="5" cols="75"/>
+        </EditScreen>
+        <EditScreen name="HandlingProcedures" phrase="Procedures|Assign a chemical handling procedure to an organization and the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmh"/>
+        </EditScreen>
+        <EditScreen name="ChemicalPhrases" phrase="Phrases|Associate one or more chemical risk or safety phrases with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmpa"/>
+        </EditScreen>
+        <EditScreen name="ThresholdValues" phrase="Thresholds|Associate threshold limits values with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="chmth"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the chemical">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical chemical file">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the chemical" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="ChemicalID"/>
+        <ViewField name="CommonName"/>
+        <ViewField name="ChemicalName"/>
+        <ViewField name="CASNumber"/>
+        <ViewField name="Manufacturer"/>
+        <ViewField name="MSDSAvailable"/>
+        <ViewField name="ExposureRoutes"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Chemicals By Chemical Status">
+            <GroupByField name="ChemicalStatus"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Chemicals By Chemical Status">
+            <GroupByField name="ChemicalStatus"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Chemicals By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Chemicals By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Chemicals By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Chemicals By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Chemicals By Manufacturer">
+            <GroupByField name="Manufacturer"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Chemicals By Manufacturer">
+            <GroupByField name="Manufacturer"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Chemicals By Exposure Routes">
+            <GroupByField name="ExposureRoutes"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Chemicals By Exposure Routes">
+            <GroupByField name="ExposureRoutes"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Chemicals By Health Rating">
+            <GroupByField name="Health"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <BarChart name="Bar06" title="Chemcals By Health Rating" mode="categorize">
+            <GroupByField name="Health"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </BarChart>
+        <PieChart name="Pie07" title="Chemicals By Fire Rating">
+            <GroupByField name="Fire"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Chemcals By Fire Rating">
+            <GroupByField name="Fire"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Chemicals By Reactivity Rating">
+            <GroupByField name="Reactivity"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Chemcals By Reactivity Rating">
+            <GroupByField name="Reactivity"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie09" title="Chemicals By Health Special Hazard Rating">
+            <GroupByField name="SpecialHazard"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto09" title="Chemcals By Special Hazard Rating">
+            <GroupByField name="SpecialHazard"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie10" title="Chemicals Which Are Processed">
+            <GroupByField name="Processed"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto10" title="Chemicals Which Are Processed">
+            <GroupByField name="Processed"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie11" title="Chemicals Which Are Trade Secrets">
+            <GroupByField name="TradeSecret"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto11" title="Chemicals Which Are Trade Secrets">
+            <GroupByField name="TradeSecret"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie12" title="Chemicals Which Are Extremely Hazardous">
+            <GroupByField name="ExtremelyHazardous"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto12" title="Chemicals Which Are Extremely Hazardous">
+            <GroupByField name="ExtremelyHazardous"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie13" title="Chemicals Which Are Potentially Volatile">
+            <GroupByField name="PotVolatile"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto13" title="Chemicals Which Are Potentially Volatile">
+            <GroupByField name="PotVolatile"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie14" title="Chemicals Which Exceed Company Limits">
+            <GroupByField name="ExceedCoLimits"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto14" title="Chemicals Which Exceed Company Limits">
+            <GroupByField name="ExceedCoLimits"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie15" title="Chemicals Which Are Product Ingredients">
+            <GroupByField name="ProductIngred"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto15" title="Chemicals Which Are Product Ingredients">
+            <GroupByField name="ProductIngred"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie16" title="Chemicals Which Are Solid">
+            <GroupByField name="Solid"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto16" title="Chemicals Which Are Solid">
+            <GroupByField name="Solid"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie17" title="Chemicals Which Are Liquid">
+            <GroupByField name="Liquid"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto17" title="Chemicals Which Are Liquid">
+            <GroupByField name="Liquid"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie18" title="Chemicals Which Are Gas">
+            <GroupByField name="Gas"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto18" title="Chemicals Which Are Gas">
+            <GroupByField name="Gas"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie19" title="Chemicals Which Have A Material Safety Data Sheet Available">
+            <GroupByField name="MSDSAvailable"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto20" title="Chemicals categorized by Exposure Routes" subModuleID="chmer" mode="categorize">
+            <GroupByField name="ChemicalExposureRoute"/>
+            <SummaryField name="ChemicalID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

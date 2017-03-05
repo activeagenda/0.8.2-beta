@@ -1,0 +1,292 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permits Equipment Affected" moduleID="oppea" parentModule="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Equipment Affected By Permit" pluralRecordName="Equipment Affected By Permit" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PermitEqptID" type="int" dbFlags="unsigned auto_increment not null" phrase="Permit Equipment ID|A unique number assigned to equipment so that multiple pieces of equipment can be associated with a single operating permits" sample="1"/>
+		<TableField name="OppPermitID" type="int" validate="noValidation" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="11"/>
+		<ForeignField name="OppPermit" foreignTable="opp" foreignKey="OppPermitID" foreignField="OppPermit" key="OppPermitID" joinType="left" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+		<TableField name="EquipmentInventoryID" type="int" validate="RequireSelection" phrase="Equipment|A combined field used to describe this equipment inventory item when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants internalNonParticipants" foreignTable="eqpin" foreignKey="EquipmentInventoryID" foreignField="OrganizationID" key="EquipmentInventoryID" joinType="left" phrase="Organization|The name of the organization where the equipment is located" sample="1"/>
+		<ForeignField name="EquipmentID" foreignTable="eqpin" foreignKey="EquipmentInventoryID" foreignField="EquipmentID" key="EquipmentInventoryID" joinType="left" phrase="Equipment|The particular equipment" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the equipment is located" sample="Active Agenda, HQ"/>
+		<!--<ForeignField name="EquipmentTypeID" foreignTable="eqpin" foreignKey="EquipmentInventoryID" foreignField="EquipmentTypeID" key="EquipmentInventoryID" joinType="left" phrase="Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type" sample="Respirator"/>-->
+		<ForeignField name="EquipmentTypeID" foreignTable="eqp" foreignKey="EquipmentID" foreignField="EquipmentTypeID" key="EquipmentID" joinType="left" phrase="Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type" sample="Respirator"/>
+		<ForeignField name="EquipmentType" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentType" key="EquipmentTypeID" joinType="left" phrase="Equipment Type|A method of grouping equipment of similar types so that asset protection measures can be assigned to all equipment of the same type" sample="Respirator"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where the equipment is located" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the equipment is located" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+		<ForeignField name="EquipmentInventory" foreignTable="eqpin" foreignKey="EquipmentInventoryID" foreignField="EquipmentInventory" key="EquipmentInventoryID" joinType="left" phrase="Equipment|A combined field used to describe this equipment inventory item when associating it with other records" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		<TableField name="PermitEqptAffect" type="text" validate="notEmpty" phrase="Affect of Permit|A detailed description of how the operating permit affects the status and use of the equipment" sample="Emergency evacuation respirators are required to be available at the location of all storm water drains or a permit violation may result."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OppPermit"/>;_
+            <CombinedFieldRef name="EquipmentInventory"/></CombinedField>
+		<CombinedField name="PermitEqpt" phrase="Permit Equipment|A combined field used to describe this permit equipment when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; 3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"><CombinedFieldRef name="OppPermit"/>;_
+            <CombinedFieldRef name="EquipmentInventory"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PermitEqptID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="PermitEqpt"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List equipment affected by operating permits">
+			<ListField name="PermitEqptID" phrase="Equipment ID"/>
+			<ListField name="OppPermit" phrase="Permit"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="EquipmentType" phrase="Equipment Type"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="EquipmentInventory" phrase="Equipment"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search equipment affected by operating permits">
+			<ViewField name="PermitEqptID"/>
+			<ViewField name="OppPermit"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="EquipmentTypeID" findMode="text">
+				<UpdateFieldRef name="EquipmentInventoryID" findMode="text"/>
+				<SampleItem ID="1" name="Respirator"/>
+				<SampleItem ID="3" name="Boots"/>
+				<SampleItem ID="5" name="Maintenance"/>
+				<SampleItem ID="7" name="Operations"/>
+			</ComboField>
+			<ComboField name="EquipmentInventoryID" findMode="text" parentField="EquipmentTypeID">
+				<SampleItem ID="1" name="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+				<SampleItem ID="3" name="North Neoprene Glove - 19 inch; Glove; North; 8827"/>
+			</ComboField>
+			<MemoField name="PermitEqptAffect" rows="5" cols="75"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an equipment item affected by an operating permit">
+			<ViewField name="PermitEqptID"/>
+			<ViewField name="OppPermit"/>
+			<ViewField name="Organization"/>
+			<ViewField name="EquipmentType"/>
+			<ViewField name="Location"/>
+			<ViewField name="EquipmentInventory"/>
+			<ViewField name="PermitEqptAffect"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an equipment item affected by an operating permit">
+			<ViewField name="PermitEqptID"/>
+			<ViewField name="OppPermit"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Chemical Storage Area"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Office"/>
+				<SampleItem ID="7" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="EquipmentTypeID" findMode="text">
+				<UpdateFieldRef name="EquipmentInventoryID"/>
+				<SampleItem ID="1" name="Respirator"/>
+				<SampleItem ID="3" name="Boots"/>
+				<SampleItem ID="5" name="Maintenance"/>
+				<SampleItem ID="7" name="Operations"/>
+			</ComboField>
+			<ComboField name="EquipmentInventoryID" findMode="text" parentField="EquipmentTypeID">
+				<SampleItem ID="1" name="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+				<SampleItem ID="3" name="North Neoprene Glove - 19 inch; Glove; North; 8827"/>
+			</ComboField>
+			<MemoField name="PermitEqptAffect" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="oppea" phrase="Equipment Affected">
+			<InvisibleField name="PermitEqptID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="EquipmentType" sample="Respirator"/>
+			<ViewField name="Location" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+			<ViewField name="EquipmentInventory" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+		</ViewGrid>
+		<EditGrid moduleID="oppea" phrase="Equipment Affected">
+			<GridForm>
+				<InvisibleField name="PermitEqptID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="LocationID" findMode="text" parentField="OrganizationID" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006">
+					<SampleItem ID="1" name="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Office"/>
+					<SampleItem ID="7" name="Production Line #1"/>
+				</ComboField>
+				<ComboField name="EquipmentTypeID" findMode="text" sample="Respirator">
+					<UpdateFieldRef name="EquipmentInventoryID"/>
+					<SampleItem ID="1" name="Respirator"/>
+					<SampleItem ID="3" name="Boots"/>
+					<SampleItem ID="5" name="Maintenance"/>
+					<SampleItem ID="7" name="Operations"/>
+				</ComboField>
+				<ComboField name="EquipmentInventoryID" findMode="text" parentField="EquipmentTypeID" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710">
+					<SampleItem ID="1" name="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+					<SampleItem ID="3" name="North Neoprene Glove - 19 inch; Glove; North; 8827"/>
+				</ComboField>
+				<MemoField name="PermitEqptAffect" rows="5" cols="75" sample="Emergency evacuation respirators are required to be available at the location of all storm water drains or a permit violation may result."/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="EquipmentType" sample="Respirator"/>
+			<ViewField name="Location" sample="Cold Storage Receiving Area; Packing House Number 3; Cold Storage No. 6; 006"/>
+			<ViewField name="EquipmentInventory" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"/>
+			<ViewField name="PermitEqptAffect" sample="Emergency evacuation respirators are required to be available at the location of all storm water drains or a permit violation may result."/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Equipment Affected By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Equipment Affected By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Equipment Affected By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Equipment Affected By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Equipment Affected By Equipment Type">
+			<GroupByField name="EquipmentType"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Equipment Affected By Equipment Type">
+			<GroupByField name="EquipmentType"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Equipment Affected By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Equipment Affected By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="PermitEqptID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

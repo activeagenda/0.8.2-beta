@@ -1,0 +1,79 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    $RDCinsert = unserialize('s:904:"INSERT INTO rdc (ModuleID, RecordID, Value, OrganizationID, _ModDate)
+SELECT 
+   \'twna\' AS ModuleID,
+   twna.TownHallAnswerID AS RecordID,
+   NULLIF(CONCAT(IFNULL(`ppl3`.DisplayName,\'\'),IFNULL(`org1`.Name,\'\')),\'\') AS Value,
+`twn1`.OrganizationID,
+    NOW() AS _ModDate
+FROM 
+   `twna`
+LEFT OUTER JOIN `rdc` ON (twna.TownHallAnswerID = rdc.RecordID AND rdc.ModuleID = \'twna\')
+   
+   LEFT OUTER JOIN `twn` AS twn1 
+   ON (`twna`.TownHallQuestionID = `twn1`.TownHallQuestionID )
+   LEFT OUTER JOIN `inv` AS inv3 
+    ON (`twna`.TownHallAnswerID = `inv3`.SourceRecordID 
+     AND `inv3`.SourceModuleID = \'twna\'
+     AND `inv3`._Deleted = 0
+     AND `inv3`.InvolvementDescriptorID = \'66\')
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`twn1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `ppl` AS ppl3 
+   ON (`inv3`.PersonInvolvedID = `ppl3`.PersonID )
+WHERE twna.TownHallAnswerID IN ([*insertIDs*])";');
+    $RDCupdate = unserialize('s:809:"UPDATE rdc
+INNER JOIN twna ON (rdc.RecordID = twna.TownHallAnswerID AND rdc.ModuleID = \'twna\')
+   
+   LEFT OUTER JOIN `twn` AS twn1 
+   ON (`twna`.TownHallQuestionID = `twn1`.TownHallQuestionID )
+   LEFT OUTER JOIN `inv` AS inv3 
+    ON (`twna`.TownHallAnswerID = `inv3`.SourceRecordID 
+     AND `inv3`.SourceModuleID = \'twna\'
+     AND `inv3`._Deleted = 0
+     AND `inv3`.InvolvementDescriptorID = \'66\')
+   LEFT OUTER JOIN `org` AS org1 
+   ON (`twn1`.OrganizationID = `org1`.OrganizationID )
+   LEFT OUTER JOIN `ppl` AS ppl3 
+   ON (`inv3`.PersonInvolvedID = `ppl3`.PersonID )
+SET
+   rdc.Value = NULLIF(CONCAT(IFNULL(`ppl3`.DisplayName,\'\'),IFNULL(`org1`.Name,\'\')),\'\'),
+rdc.OrganizationID = `twn1`.OrganizationID,
+   rdc._ModDate = NOW()
+WHERE
+   rdc.ModuleID = \'twna\'
+   AND rdc.RecordID IN ([*updateIDs*]);
+";');
+?>

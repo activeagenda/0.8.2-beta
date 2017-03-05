@@ -1,0 +1,284 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Policy Expectations" moduleID="parpe" parentModule="parp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Policy Expectation" pluralRecordName="Policy Expectations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PolicyExpectationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track expectations of organization partnerships" sample="1"/>
+		<TableField name="PartnershipPolicyID" type="int" validate="noValidation" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="1"/>
+		<ForeignField name="PolicyOrganizationID" listType="allParticipants internalNonParticipants" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyOrganizationID" key="PartnershipPolicyID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="1"/>
+		<ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="Active Agenda, HQ"/>
+		<ForeignField name="PartnershipPolicy" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PartnershipPolicy" key="PartnershipPolicyID" joinType="left" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="Family and Medical Leave | Policy Number: 10.0 | Active Agenda, HQ"/>
+		<TableField name="ExpectationGroupID" type="int" validate="RequireSelection" phrase="Expectation Group|A method of grouping business imperatives so that section scores can be formualted" sample="2"/>
+		<CodeField name="ExpectationGroup" key="ExpectationGroupID" phrase="Expectation Group|A method of grouping business imperatives so that section scores can be formualted" sample="Objective and Purpose" codeTypeID="150"/>
+		<TableField name="Expectation" type="text" validate="notEmpty" phrase="Expectation|An obligation of those implementing a partnership. Expectations can be scored and performance can be audited" sample="Corrective action is taken within one day of precipitating events"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">_Policy_Organization:_<CombinedFieldRef name="PolicyOrganization"/>;_<CombinedFieldRef name="PartnershipPolicy"/>_-_<CombinedFieldRef name="ExpectationGroup"/></CombinedField>
+		<CombinedField name="PolicyExpectation" phrase="Policy Expectation|A combined field used to describe this policy expectation when associating it with other records" sample="Family and Medical Leave | Policy Number: 10.0 | Active Agenda, HQ | Objective and Purpose | Corrective action is taken within one day of precipitating events">_Policy_Organization:_<CombinedFieldRef name="PolicyOrganization"/>;_<CombinedFieldRef name="PartnershipPolicy"/>_-_<CombinedFieldRef name="ExpectationGroup"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PolicyExpectationID"/>
+		</PrimaryKey>
+		<OwnerField name="PolicyOrganizationID"/>
+		<RecordDescriptionField name="PolicyExpectation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List partnership policy expectations and related scores">
+			<ListField name="PolicyExpectationID" phrase="Record ID"/>
+			<ListField name="PolicyOrganization" phrase="Policy Organization"/>
+			<ListField name="PartnershipPolicy" phrase="Policy"/>
+			<ListField name="ExpectationGroup" phrase="Expectation Group"/>
+			<ListField name="Expectation" phrase="Expectation"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search partnership policy expectations and related scores">
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="PartnershipPolicyID" findMode="text">
+				<SampleItem ID="1" name="Family and Medical Leave; Under Development"/>
+				<SampleItem ID="2" name="Incentives; Complete"/>
+				<SampleItem ID="3" name="Accident Investigations; Incomplete"/>
+				<SampleItem ID="4" name="Training Records; Cancelled"/>
+				<SampleItem ID="5" name="Hazard Abatement; Complete"/>
+				<SampleItem ID="6" name="Asset Protection; Complete"/>
+			</ComboField>
+			<CodeComboField name="ExpectationGroupID" findMode="text">
+				<SampleItem ID="1" name="Objective and Purpose"/>
+				<SampleItem ID="2" name="Scope"/>
+				<SampleItem ID="3" name="Responsibilities"/>
+				<SampleItem ID="4" name="Regulatory References"/>
+				<SampleItem ID="5" name="Cross References"/>
+				<SampleItem ID="6" name="Definitions"/>
+				<SampleItem ID="7" name="Tools and Equipment"/>
+				<SampleItem ID="8" name="Materials and Supplies"/>
+				<SampleItem ID="9" name="Protective Equipment"/>
+				<SampleItem ID="10" name="Permits Required"/>
+				<SampleItem ID="11" name="Risk Assessment"/>
+				<SampleItem ID="12" name="Trend Analysis"/>
+				<SampleItem ID="13" name="Communication"/>
+				<SampleItem ID="14" name="Training and Awareness"/>
+				<SampleItem ID="15" name="Systematic Surveilance"/>
+				<SampleItem ID="16" name="Management Review and Monitoring"/>
+				<SampleItem ID="17" name="Compliance Audits"/>
+				<SampleItem ID="18" name="Family and Medical Leave Planning"/>
+				<SampleItem ID="19" name="Contractor Briefing"/>
+				<SampleItem ID="20" name="Detailed Procedures"/>
+				<SampleItem ID="21" name="Compliance Audits"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View a partnership policy expectation">
+			<ViewField name="PolicyExpectationID"/>
+			<ViewField name="PolicyOrganization"/>
+			<ViewField name="PartnershipPolicy"/>
+			<ViewField name="ExpectationGroup"/>
+			<ViewField name="Expectation"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit a partnership policy expectation">
+			<ViewField name="PolicyExpectationID"/>
+			<ViewField name="PolicyOrganization"/>
+			<ViewField name="PartnershipPolicy"/>
+			<CodeComboField name="ExpectationGroupID" findMode="text">
+				<SampleItem ID="1" name="Objective and Purpose"/>
+				<SampleItem ID="2" name="Scope"/>
+				<SampleItem ID="3" name="Responsibilities"/>
+				<SampleItem ID="4" name="Regulatory References"/>
+				<SampleItem ID="5" name="Cross References"/>
+				<SampleItem ID="6" name="Definitions"/>
+				<SampleItem ID="7" name="Tools and Equipment"/>
+				<SampleItem ID="8" name="Materials and Supplies"/>
+				<SampleItem ID="9" name="Protective Equipment"/>
+				<SampleItem ID="10" name="Permits Required"/>
+				<SampleItem ID="11" name="Risk Assessment"/>
+				<SampleItem ID="12" name="Trend Analysis"/>
+				<SampleItem ID="13" name="Communication"/>
+				<SampleItem ID="14" name="Training and Awareness"/>
+				<SampleItem ID="15" name="Systematic Surveilance"/>
+				<SampleItem ID="16" name="Management Review and Monitoring"/>
+				<SampleItem ID="17" name="Compliance Audits"/>
+				<SampleItem ID="18" name="Family and Medical Leave Planning"/>
+				<SampleItem ID="19" name="Contractor Briefing"/>
+				<SampleItem ID="20" name="Detailed Procedures"/>
+				<SampleItem ID="21" name="Compliance Audits"/>
+			</CodeComboField>
+			<MemoField name="Expectation" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="parpe" phrase="Policy Expectations">
+			<InvisibleField name="PolicyExpectationID"/>
+			<ViewField name="ExpectationGroup" sample="Objective and Purpose"/>
+			<ViewField name="Expectation" sample="Corrective action is taken within one day of precipitating events"/>
+		</ViewGrid>
+		<EditGrid moduleID="parpe" phrase="Policy Expectations">
+			<GridForm>
+				<InvisibleField name="PolicyExpectationID"/>
+				<CodeComboField name="ExpectationGroupID" findMode="text" sample="Objective and Purpose">
+					<SampleItem ID="1" name="Objective and Purpose"/>
+					<SampleItem ID="2" name="Scope"/>
+					<SampleItem ID="3" name="Responsibilities"/>
+					<SampleItem ID="4" name="Regulatory References"/>
+					<SampleItem ID="5" name="Cross References"/>
+					<SampleItem ID="6" name="Definitions"/>
+					<SampleItem ID="7" name="Tools and Equipment"/>
+					<SampleItem ID="8" name="Materials and Supplies"/>
+					<SampleItem ID="9" name="Protective Equipment"/>
+					<SampleItem ID="10" name="Permits Required"/>
+					<SampleItem ID="11" name="Risk Assessment"/>
+					<SampleItem ID="12" name="Trend Analysis"/>
+					<SampleItem ID="13" name="Communication"/>
+					<SampleItem ID="14" name="Training and Awareness"/>
+					<SampleItem ID="15" name="Systematic Surveilance"/>
+					<SampleItem ID="16" name="Management Review and Monitoring"/>
+					<SampleItem ID="17" name="Compliance Audits"/>
+					<SampleItem ID="18" name="Family and Medical Leave Planning"/>
+					<SampleItem ID="19" name="Contractor Briefing"/>
+					<SampleItem ID="20" name="Detailed Procedures"/>
+					<SampleItem ID="21" name="Compliance Audits"/>
+				</CodeComboField>
+				<!--this cb list should delete items as the are assigned. DFZ 2-20-2004-->
+				<MemoField name="Expectation" rows="5" cols="75" sample="Corrective action is taken within one day of precipitating events"/>
+			</GridForm>
+			<ViewField name="ExpectationGroup" sample="Objective and Purpose"/>
+			<ViewField name="Expectation" sample="Corrective action is taken within one day of precipitating events"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Policy Expectations By Policy">
+			<GroupByField name="PartnershipPolicy"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Policy Expectations By Policy">
+			<GroupByField name="PartnershipPolicy"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Policy Expectations By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Policy Expectations By Policy Organization">
+			<GroupByField name="PolicyOrganization"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Policy Expectations By Expectation Group">
+			<GroupByField name="ExpectationGroup"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Policy Expectations By Expectation Group">
+			<GroupByField name="ExpectationGroup"/>
+			<SummaryField name="PolicyExpectationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Risk Severities" moduleID="rsks" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Risk Severity" pluralRecordName="Risk Severities" allowAddRecord="yes" isMasterData="yes">
+    <ModuleFields>
+        <TableField name="SeverityID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track risk severities for purposes of assigning and associating risk indices" sample="1"/>
+        <TableField name="RiskSeverityTerm" type="varchar(50)" validate="notEmpty" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+        <TableField name="RiskSeverity" type="varchar(128)" validate="notEmpty" phrase="Risk Severity|A detailed phrase used to describe the severity of a loss or risk of a loss" sample="Minor First Aid Injury"/>
+        <TableField name="SeverityLowCost" type="money" validate="Money notEmpty notNegative" phrase="Severity Low Cost|The minimum cost of risk required to result in the assignment of this risk severity, stated in the currency assigned to this installation of the software" sample="900.00"/>
+        <TableField name="SeverityHighCost" type="money" validate="Money notEmpty notNegative" phrase="Severity High Cost|The maximum cost of risk allowed to result in the assignment of this risk severity, stated in the currency assigned to this installation of the software" sample="9,000.00"/>
+        <TableField name="SeverityValue" type="int" validate="notEmpty" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="1"/>
+        <CombinedField name="SeverityRange" phrase="Severity Range|A combined field used to describe the risk severity range when associating it with other records" sample="900.00 to 9,000.00"><CombinedFieldRef name="SeverityLowCost"/>_to_<CombinedFieldRef name="SeverityHighCost"/></CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="SeverityValue"/>_-_<CombinedFieldRef name="RiskSeverityTerm"/>:_<CombinedFieldRef name="RiskSeverity"/>_and/or_a_loss_cost_of_<CombinedFieldRef name="SeverityLowCost"/>_to_<CombinedFieldRef name="SeverityHighCost"/></CombinedField>
+        <CombinedField name="Severity" phrase="Severity|A combined field used to describe the risk severity when associating it with other records" sample="1 - SLIGHT: Minor First Aid Injury and/or loss cost of 900.00 to 9,000.00"><CombinedFieldRef name="SeverityValue"/>_-_<CombinedFieldRef name="RiskSeverityTerm"/>:_Loss_cost_of_<CombinedFieldRef name="SeverityLowCost"/>_to_<CombinedFieldRef name="SeverityHighCost"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="SeverityID"/>
+        </PrimaryKey>
+        <!--<OwnerField name="OrganizationID"/> Not required-->
+        <RecordDescriptionField name="Severity"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List risk severities">
+            <ListField name="SeverityID" phrase="Record ID"/>
+            <ListField name="RiskSeverityTerm" phrase="Risk Severity Term"/>
+            <ListField name="RiskSeverity" phrase="Risk Severity"/>
+            <ListField name="SeverityLowCost" phrase="Low"/>
+            <ListField name="SeverityHighCost" phrase="High"/>
+            <ListField name="SeverityValue" phrase="Index Value"/>
+        </ListScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a risk severity">
+            <ViewField name="SeverityID"/>
+            <ViewField name="RiskSeverityTerm"/>
+            <ViewField name="RiskSeverity"/>
+            <ViewField name="SeverityLowCost"/>
+            <ViewField name="SeverityHighCost"/>
+            <ViewField name="SeverityValue"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a risk severity">
+            <ViewField name="SeverityID"/>
+            <EditField name="RiskSeverityTerm" size="50" maxLength="50"/>
+            <EditField name="RiskSeverity" size="75" maxLength="128"/>
+            <MoneyField name="SeverityLowCost"/>
+            <MoneyField name="SeverityHighCost"/>
+            <EditField name="SeverityValue" size="5" maxLength="5"/>
+        </EditScreen>
+    </Screens>
+    <Documentation useSupportDoc="rskx"/>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

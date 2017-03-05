@@ -1,0 +1,482 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Visitations" moduleID="irev" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Visitation" pluralRecordName="Visitations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="VisitationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track visitations associated with reported incidents" sample="1"/>
+		<TableField name="IncidentReportID" type="int" validate="noValidation" phrase="Incident Report|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="11"/>
+		<ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Reported|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="Clovis; 10-28-2003; Discrimination Claim"/>
+		<TableField name="ContactTypeID" type="int" validate="RequireSelection" phrase="Contact Type|The specific type of contact related to the reported incident" sample="1"/>
+		<CodeField name="ContactType" key="ContactTypeID" phrase="Contact Type|The specific type of contact related to the reported incident" sample="Government Agency" codeTypeID="286"/>
+		<TableField name="VisitingOrganizationID" type="int" validate="RequireSelection" phrase="Visiting Organization|Name of the organization conducting the visitation" sample="1"/>
+		<ForeignField name="VisitingOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="VisitingOrganizationID" joinType="left" phrase="Visiting Organization|Name of the organization conducting the visitation" sample="USDOL"/>
+		<RemoteField name="VisitationLeaderID" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="79" phrase="Visitation Leader|The name of the person leading the visitation for visiting organization" sample="1"/>
+		<ForeignField name="VisitationLeader" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="VisitationLeaderID" joinType="left" phrase="Visitation Leader|The name of the person leading the visitation for visiting organization" sample="Larry Hansen"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants internalNonParticipants" validate="RequireSelection" phrase="Organization|The name of the organization hosting the visitation" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization hosting the visitation" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="4" phrase="Person Accountable|The individual assigned primary accountability for managing the visitation process" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing the visitation process" sample="Mattias Thorslund"/>
+		<TableField name="MultiEmployer" type="bool" validate="noValidation" dbFlags="default 0" phrase="Multi-Employer Worksite|Whether the organization site is a multi-employer worksite" sample="Yes"/>
+		<TableField name="TradeSecret" type="bool" validate="noValidation" dbFlags="default 0" phrase="Trade Secret Notification Provided|Whether the organization provided a trade secret notification form to the visitor and received a signed acknowledgement prior to a physical review of the facility" sample="Yes"/>
+		<TableField name="ContractorInspect" type="bool" validate="noValidation" dbFlags="default 0" phrase="Contractor Inspection|Whether the investigation involves an onsite contractor" sample="Yes"/>
+		<TableField name="ContractorID" type="int" listType="special=1" validate="noValidation" phrase="Contractor|The name of the onsite contractor being investigated" sample="1"/>
+		<ForeignField name="Contractor" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ContractorID" joinType="left" phrase="Contractor|The name of the onsite contractor being investigated" sample="Bechtel"/>
+		<RemoteField name="VisitDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="8" phrase="Visit Date|Date the visit occurred" sample="01/01/2004 2:32:02"/>
+		<TableField name="VisitReasonID" type="int" validate="RequireSelection" phrase="Reason for Visit|The reason for the visit to, or investigation of, the organization" sample="1"/>
+		<CodeField name="VisitReason" key="VisitReasonID" phrase="Reason for Visit|The reason for the visit to, or investigation of, the organization" sample="Employee Complaint" codeTypeID="255"/>
+		<TableField name="VisitReasonDesc" type="text" validate="notEmpty" phrase="Visit Reason Description|A detailed description of the reason for the visit to, or investigation of, the organization" sample="An employee of the organization filed a complaint against the organization for failure to abate a dust inhalation hazard within the cold storage area"/>
+		<TableField name="ConfBeginTime" type="datetime" validate="notEmpty" phrase="Conference Begin Time|Time the opening conference began" sample="09:31 am PST"/>
+		<TableField name="ConfEndTime" type="datetime" validate="notEmpty" phrase="Conference End Time|Time the opening conference ended" sample="09:31 am PST"/>
+		<TableField name="OpenConfRemarks" type="text" validate="notEmpty" phrase="Significant Remarks|A detailed description of any significant remarks made during the opening conference" sample="The investigator indicated that her industrial hygiene monitoring equipment had been 'acting up'"/>
+		<TableField name="WalkBeginTime" type="datetime" validate="noValidation" phrase="Walk Around Begin Time|Time the physical walk-through began" sample="09:31 am PST"/>
+		<TableField name="WalkEndTime" type="datetime" validate="noValidation" phrase="Walk Around End Time|Time the physical walk-through ended" sample="09:31 am PST"/>
+		<TableField name="WalkRoute" type="text" validate="noValidation" phrase="Route Taken|A detailed description of the route taken during the walk-through of the physical location. Provide a very detailed explanation of all start and stop points and a geographic chronology of the investigation path" sample="The inspector began in the conference room and was escourted through the back door of the administration building. The tour group walked along the south side of the facility and re-entered the facility through the shipping and receiving gate. The group walked directly to the cold storage building, entered the person door and began the monitoring"/>
+		<TableField name="WalkRemarks" type="text" validate="noValidation" phrase="Walk Through Remarks|A detailed description of any significant remarks made during the walk through" sample="The investigator indicated that her industrial hygiene monitoring equipment would be 'less than reliable' in the cold temperatures of the cold storage room. The investigator indicated that the shipping bay looked very well organized and extremely clean"/>
+		<TableField name="WalkSamples" type="text" validate="noValidation" phrase="Walk Through Samples|A detailed description of any samples or measurements taken by the visitor during the walk through" sample="The investigator took an air sample by her air sampling pump placed atop the cold storage evaporator. The sample was taken over a two hour period. The investigator waited on the storage dock because it was too cold inside the cold storage room where the sample was being taken"/>
+		<TableField name="Samples" type="bool" validate="noValidation" dbFlags="default 0" phrase="Parallel Samples|Whether parallel samples were taken by the organization. Results should be attached to this record as soon as they are available" sample="Yes"/>
+		<TableField name="WalkPhotos" type="text" validate="noValidation" phrase="Walk Through Photos|A detailed description of any photographs taken during the walk through" sample="The investigator took three photographs: 1. photo of delivery truck because she was intrigued by the shape of the trailer. 2. photo of the inside of the cold storage from the cold storage south door looking across the room to the south. 3. photo of her air sampling pump sitting atop the evaporator"/>
+		<TableField name="Photos" type="bool" validate="noValidation" dbFlags="default 0" phrase="Parallel Photos|Whether parallel photos were taken by the organization. Digital photos should be attached to this record as soon as they are available" sample="Yes"/>
+		<TableField name="CloseBeginTime" type="datetime" validate="notEmpty" phrase="Closing Conference Begin Time|Time the closing conference bagan" sample="09:31 am PST"/>
+		<TableField name="CloseEndTime" type="datetime" validate="notEmpty" phrase="Closing Conference End Time|Time the closing conference ended" sample="09:31 am PST"/>
+		<TableField name="ClosingDesc" type="text" validate="notEmpty" phrase="Describe Closing|A detailed description of the closing conference and any pertinent statements made by the visitor or the organization attendees" sample="The investigator spent about 10 minutes collecting her equipment and didn't make any statements about the complaint or her findings. While preparing to leave, the inspector dropped her sample and the closure cap on one end of her sampling media fell of. The inspector said 'shoot, that could wreck the entire sample. No, it looks okay'"/>
+		<TableField name="MaterialExchange" type="text" validate="noValidation" phrase="Material Exchange|A detailed description of any materials that were exchanged between the visitor and the organization; such as, documents, pictures, business cards, etc. All materials which can be scanned should be attached to this record as soon as possible" sample="The investigator accepted two gallons of free ice cream. The inspector left a copy of her business card and a photocopy of her license was made and retained. All items have been attached"/>
+		<TableField name="Citations" type="bool" validate="noValidation" dbFlags="default 0" phrase="Citations Recommended|Check this box if the vsistor suggested that a citation or penalty might be issued against the organization" sample="No"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="OSHA visited Active Agenda, Inc. on 01-01-2006"><CombinedFieldRef name="VisitingOrganization"/>_visited_<CombinedFieldRef name="Organization"/>_on_<CombinedFieldRef name="VisitDate"/></CombinedField>
+		<CombinedField name="Visitation" phrase="Visitation|A combined field used to describe this visitation when associating it with other records" sample="OSHA; Active Agenda, HQ; 01/01/2004"><CombinedFieldRef name="VisitingOrganization"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="VisitationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Visitation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="VisitationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="irev"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="VisitationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="irev"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="VisitationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="irev"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="VisitationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="irev"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List visitations associated with reported incidents">
+			<ListField name="VisitationID" phrase="Record ID"/>
+			<ListField name="IncidentReportID" phrase="Report ID" align="center"/>
+			<ListField name="ContactType" phrase="Contact Type"/>
+			<ListField name="VisitingOrganization" phrase="Visiting Organization"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="VisitDate" phrase="Visit Date and Time"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search visitations associated with reported incidents">
+			<ComboField name="IncidentReportID" findMode="text">
+				<SampleItem ID="1" name="Clovis; 10-28-2003; Discrimination Claim"/>
+				<SampleItem ID="2" name="Clovis; 10-18-2004; Ammonia Release"/>
+				<SampleItem ID="3" name="Latvia; 10-08-2003; Severe Injury from Forklift"/>
+				<SampleItem ID="4" name="Sweden; 10-12-2002; Hostile Workplace Claim"/>
+				<SampleItem ID="5" name="Sweden; 10-24-2001; Theft of LCD Projector"/>
+			</ComboField>
+			<CodeComboField name="ContactTypeID" findMode="text">
+				<SampleItem ID="1" name="Government Agency"/>
+				<SampleItem ID="2" name="Insurance Broker"/>
+				<SampleItem ID="3" name="Insurance Carrier"/>
+				<SampleItem ID="4" name="Investigator (private)"/>
+				<SampleItem ID="5" name="Law Firm (defense)"/>
+				<SampleItem ID="5" name="Law Firm (plaintiff)"/>
+			</CodeComboField>
+			<OrgComboField name="VisitingOrganizationID" findMode="text">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Health Department"/>
+			</OrgComboField>
+			<PersonComboField name="VisitationLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sweden"/>
+				<SampleItem ID="5" name="Active Agenda, Latvia"/>
+				<SampleItem ID="7" name="Active Agenda, Norway"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="MultiEmployer"/>
+			<CheckBoxField name="TradeSecret"/>
+			<CheckBoxField name="ContractorInspect"/>
+			<OrgComboField name="ContractorID" findMode="text">
+				<SampleItem ID="1" name="Bechtel"/>
+				<SampleItem ID="2" name="URS"/>
+				<SampleItem ID="3" name="Dames and Moore"/>
+				<SampleItem ID="4" name="L2HSOS"/>
+			</OrgComboField>
+			<CodeComboField name="VisitReasonID" findMode="text">
+				<SampleItem ID="1" name="Employee Complaint"/>
+				<SampleItem ID="2" name="Random Inspection"/>
+				<SampleItem ID="3" name="Routine Inspection"/>
+				<SampleItem ID="4" name="Special Emphasis Inspection"/>
+				<SampleItem ID="1" name="Response to Reported Incident"/>
+				<SampleItem ID="2" name="Follow-Up Inspection"/>
+			</CodeComboField>
+			<DateField name="VisitDate"/>
+			<DateField name="ConfBeginTime"/>
+			<DateField name="ConfEndTime"/>
+			<DateField name="WalkBeginTime"/>
+			<DateField name="WalkEndTime"/>
+			<DateField name="CloseBeginTime"/>
+			<DateField name="CloseEndTime"/>
+			<CheckBoxField name="Citations"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a visitation associated with a reported incident">
+			<ViewField name="VisitationID"/>
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="ContactType"/>
+			<ViewField name="VisitingOrganization"/>
+			<ViewField name="VisitationLeader"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="MultiEmployer"/>
+			<ViewField name="TradeSecret"/>
+			<ViewField name="ContractorInspect"/>
+			<ViewField name="Contractor"/>
+			<ViewField name="VisitDate"/>
+			<ViewField name="VisitReason"/>
+			<ViewField name="VisitReasonDesc"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Opening" phrase="Opening Conference">
+				<ViewField name="ConfBeginTime"/>
+				<ViewField name="ConfEndTime"/>
+				<ViewField name="OpenConfRemarks"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="WalkAround" phrase="Walk Around Inspection">
+				<ViewField name="WalkBeginTime"/>
+				<ViewField name="WalkEndTime"/>
+				<ViewField name="WalkRoute"/>
+				<ViewField name="WalkRemarks"/>
+				<ViewField name="WalkSamples"/>
+				<ViewField name="Samples"/>
+				<ViewField name="WalkPhotos"/>
+				<ViewField name="Photos"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Closing" phrase="Closing Conference">
+				<ViewField name="CloseBeginTime"/>
+				<ViewField name="CloseEndTime"/>
+				<ViewField name="ClosingDesc"/>
+				<ViewField name="MaterialExchange"/>
+				<ViewField name="Citations"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="OpeningConference" phrase="Opening|Edit summary information about an opening conference of a visitation associated with a reported incident">
+			<ViewField name="VisitationID"/>
+			<ViewField name="IncidentReport"/>
+			<CodeComboField name="ContactTypeID" findMode="text">
+				<SampleItem ID="1" name="Government Agency"/>
+				<SampleItem ID="2" name="Insurance Broker"/>
+				<SampleItem ID="3" name="Insurance Carrier"/>
+				<SampleItem ID="4" name="Investigator (private)"/>
+				<SampleItem ID="5" name="Law Firm (defense)"/>
+				<SampleItem ID="5" name="Law Firm (plaintiff)"/>
+			</CodeComboField>
+			<OrgComboField name="VisitingOrganizationID" findMode="text">
+				<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+				<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+				<SampleItem ID="3" name="International Standards Organization"/>
+				<SampleItem ID="4" name="Fresno County Health Department"/>
+			</OrgComboField>
+			<PersonComboField name="VisitationLeaderID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sweden"/>
+				<SampleItem ID="5" name="Active Agenda, Latvia"/>
+				<SampleItem ID="7" name="Active Agenda, Norway"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CheckBoxField name="MultiEmployer"/>
+			<CheckBoxField name="TradeSecret"/>
+			<CheckBoxField name="ContractorInspect"/>
+			<OrgComboField name="ContractorID" findMode="text">
+				<SampleItem ID="1" name="Bechtel"/>
+				<SampleItem ID="2" name="URS"/>
+				<SampleItem ID="3" name="Dames and Moore"/>
+				<SampleItem ID="4" name="L2HSOS"/>
+			</OrgComboField>
+			<DateField name="VisitDate"/>
+			<CodeComboField name="VisitReasonID" findMode="text">
+				<SampleItem ID="1" name="Employee Complaint"/>
+				<SampleItem ID="2" name="Random Inspection"/>
+				<SampleItem ID="3" name="Routine Inspection"/>
+				<SampleItem ID="4" name="Special Emphasis Inspection"/>
+				<SampleItem ID="1" name="Response to Reported Incident"/>
+				<SampleItem ID="2" name="Follow-Up Inspection"/>
+			</CodeComboField>
+			<MemoField name="VisitReasonDesc" rows="5" cols="75"/>
+			<DateField name="ConfBeginTime"/>
+			<DateField name="ConfEndTime"/>
+			<MemoField name="OpenConfRemarks" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="WalkAroundInspection" phrase="Inspection|Edit summary information about a walk around inspection associated with a reported incident">
+			<RecordSummaryFieldsRef/>
+			<DateField name="WalkBeginTime"/>
+			<DateField name="WalkEndTime"/>
+			<MemoField name="WalkRoute" rows="10" cols="75"/>
+			<MemoField name="WalkRemarks" rows="10" cols="75"/>
+			<MemoField name="WalkSamples" rows="10" cols="75"/>
+			<CheckBoxField name="Samples"/>
+			<MemoField name="WalkPhotos" rows="10" cols="75"/>
+			<CheckBoxField name="Photos"/>
+		</EditScreen>
+		<EditScreen name="ClosingConference" phrase="Closing|Edit summary information about a closing conference of a visitation associated with a reported incident">
+			<RecordSummaryFieldsRef/>
+			<DateField name="CloseBeginTime"/>
+			<DateField name="CloseEndTime"/>
+			<MemoField name="ClosingDesc" rows="10" cols="75"/>
+			<MemoField name="MaterialExchange" rows="10" cols="75"/>
+			<CheckBoxField name="Citations"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for a visitation associated with a reported incident">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with a visitation associated with a reported incident">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a visitation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a visitation" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="VisitationID"/>
+		<ViewField name="IncidentReportID"/>
+		<ViewField name="IncidentReport"/>
+		<ViewField name="ContactType"/>
+		<ViewField name="VisitingOrganization"/>
+		<ViewField name="VisitationLeader"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="MultiEmployer"/>
+		<ViewField name="TradeSecret"/>
+		<ViewField name="ContractorInspect"/>
+		<ViewField name="Contractor"/>
+		<ViewField name="VisitDate"/>
+		<ViewField name="VisitReason"/>
+		<ViewField name="VisitReasonDesc"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="irev" phrase="Visitations">
+			<InvisibleField name="VisitationID"/>
+			<ViewField name="ContactType" sample="Government Agency"/>
+			<ViewField name="VisitingOrganization" sample="USDOL"/>
+			<ViewField name="VisitDate" sample="01/01/2004"/>
+			<ViewField name="VisitReason" sample="Employee Complaint"/>
+			<ViewField name="VisitReasonDesc" sample="An employee of the organization filed a complaint against the organization for failure to abate a dust inhalation hazard within the cold storage area"/>
+		</ViewGrid>
+		<EditGrid moduleID="irev" phrase="Visitations">
+			<GridForm>
+				<InvisibleField name="VisitationID"/>
+				<CodeComboField name="ContactTypeID" findMode="text" sample="Government Agency">
+					<SampleItem ID="1" name="Government Agency"/>
+					<SampleItem ID="2" name="Insurance Broker"/>
+					<SampleItem ID="3" name="Insurance Carrier"/>
+					<SampleItem ID="4" name="Investigator (private)"/>
+					<SampleItem ID="5" name="Law Firm (defense)"/>
+					<SampleItem ID="5" name="Law Firm (plaintiff)"/>
+				</CodeComboField>
+				<OrgComboField name="VisitingOrganizationID" findMode="text" sample="USDOL">
+					<SampleItem ID="1" name="U.S. Occupational Safety and Health Administration"/>
+					<SampleItem ID="2" name="U.S. Environmental Protection Agency"/>
+					<SampleItem ID="3" name="International Standards Organization"/>
+					<SampleItem ID="4" name="Fresno County Health Department"/>
+				</OrgComboField>
+				<PersonComboField name="VisitationLeaderID" findMode="alpha" sample="Larry Hansen">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sweden"/>
+					<SampleItem ID="5" name="Active Agenda, Latvia"/>
+					<SampleItem ID="7" name="Active Agenda, Norway"/>
+				</OrgComboField>
+				<PersonComboField name="PersonAccountableID" findMode="alpha" sample="Mattias Thorslund">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<CheckBoxField name="MultiEmployer" sample="Yes"/>
+				<CheckBoxField name="TradeSecret" sample="Yes"/>
+				<CheckBoxField name="ContractorInspect" sample="Yes"/>
+				<OrgComboField name="ContractorID" findMode="text" sample="Bechtel">
+					<SampleItem ID="1" name="Bechtel"/>
+					<SampleItem ID="2" name="URS"/>
+					<SampleItem ID="3" name="Dames and Moore"/>
+					<SampleItem ID="4" name="L2HSOS"/>
+				</OrgComboField>
+				<DateField name="VisitDate" sample="01/01/2004"/>
+				<CodeComboField name="VisitReasonID" findMode="text" sample="Employee Complaint">
+					<SampleItem ID="1" name="Employee Complaint"/>
+					<SampleItem ID="2" name="Random Inspection"/>
+					<SampleItem ID="3" name="Routine Inspection"/>
+					<SampleItem ID="4" name="Special Emphasis Inspection"/>
+					<SampleItem ID="1" name="Response to Reported Incident"/>
+					<SampleItem ID="2" name="Follow-Up Inspection"/>
+				</CodeComboField>
+				<MemoField name="VisitReasonDesc" rows="5" cols="75" sample="An employee of the organization filed a complaint against the organization for failure to abate a dust inhalation hazard within the cold storage area"/>
+			</GridForm>
+			<InvisibleField name="VisitationID"/>
+			<ViewField name="ContactType" sample="Government Agency"/>
+			<ViewField name="VisitingOrganization" sample="USDOL"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="VisitDate" sample="01/01/2004"/>
+			<ViewField name="VisitReason" sample="Employee Complaint"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

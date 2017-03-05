@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Employee Qualifications" moduleID="ppleq" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Employee Qualification" pluralRecordName="Employee Qualifications" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="QualificationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Qualification ID|A unique number used to associate and track employee qualifications" sample="1"/>
+		<TableField name="PersonID" type="int" dbFlags="unsigned" phrase="Person ID|A unique number assigned to each employee" sample="3"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignKey="PersonID" foreignField="OrganizationID" key="PersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Emprise, HQ"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignKey="PersonID" foreignField="LastName" key="PersonID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignKey="PersonID" foreignField="FirstName" key="PersonID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="EmployeeNo" foreignTable="pple" foreignKey="PersonID" foreignField="EmployeeNo" key="PersonID" joinType="left" phrase="Employee Number|A uniques number assigned by the organization to each employee for tracking purposes" sample="2710"/>
+		<TableField name="InstitutionName" type="varchar(128)" dbFlags="" phrase="Institution|The name of the institution or organization" sample="California State University Fresno"/>
+		<TableField name="LearningLevelID" type="int" dbFlags="unsigned" phrase="Learning Level|The level of education or experience associated with the respective institution or organization" sample="1"/>
+		<CodeField name="LearningLevel" key="LearningLevelID" phrase="Learning Level|The level of education or experience associated with the respective institution or organization" sample="College" codeTypeID="179"/>
+		<TableField name="DegreeEarnedID" type="int" dbFlags="unsigned" phrase="Degree Earned|The degree of certificate earned from the institution or organization" sample="1"/>
+		<CodeField name="DegreeEarned" key="DegreeEarnedID" phrase="Degree Earned|The degree of certificate earned from the institution or organization" sample="Bachelor's of Science (BA)" codeTypeID="132"/>
+		<TableField name="CredentialName" type="varchar(128)" dbFlags="" phrase="Credential|The specific title of the degree or credential earned as a result of this learning experience" sample="Health Science; Occupational Safety and Health"/>
+		<TableField name="YearsAttended" type="float" dbFlags="" phrase="Years Attended|The number of years the person attended the institution or was associated with the organization" sample="4"/>
+		<TableField name="SpecialSkills" type="varchar(128)" dbFlags="" phrase="Special Skills|Any special skills or experience acquired during this person's association with the institution or organization" sample="Zahlis learned skills in the calibration and use of industrial hygiene equipment."/>
+		<TableField name="QualificationStatusID" type="int" dbFlags="unsigned" phrase="Status|Qualification status" sample="1"/>
+		<CodeField name="QualificationStatus" key="QualificationStatusID" phrase="Status|Qualification status" sample="Graduated" codeTypeID="217"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="FirstName"/>_<CombinedFieldRef name="LastName"/>;_<CombinedFieldRef name="CredentialName"/></CombinedField>
+		<CombinedField name="Qualification" phrase="Qualification|A combined field used to describe this qualification when associating it with other records" sample="Zahlis, Daniel, 2710 | Cheryl Zahlis | Spouse"><CombinedFieldRef name="FirstName"/>_<CombinedFieldRef name="LastName"/>;_<CombinedFieldRef name="CredentialName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="QualificationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Qualification"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List employee qualifications">
+			<ListField name="QualificationID" phrase="Qualification ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="LastName" phrase="Last Name"/>
+			<ListField name="FirstName" phrase="First Name"/>
+			<ListField name="EmployeeNo" phrase="Employee Number"/>
+			<ListField name="QualificationStatus" phrase="QualificationStatus"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search employee qualifications">
+			<EditField name="InstitutionName" size="75" maxLength="128"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise, HQ"/>
+				<SampleItem ID="2" name="Emprise, Sweden."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<CodeComboField name="LearningLevelID" findMode="text">
+				<SampleItem ID="1" name="College"/>
+				<SampleItem ID="2" name="High School"/>
+				<SampleItem ID="3" name="Graduate School"/>
+				<SampleItem ID="4" name="Trade School"/>
+				<SampleItem ID="5" name="On The Job Experience"/>
+			</CodeComboField>
+			<CodeComboField name="DegreeEarnedID" findMode="text">
+				<SampleItem ID="1" name="Bachelor's of Science (BA)"/>
+				<SampleItem ID="2" name="Bachelor's of Administration (BA)"/>
+				<SampleItem ID="3" name="Educational Doctorate (EdD)"/>
+				<SampleItem ID="4" name="Master of Business Administration (MBA)"/>
+				<SampleItem ID="5" name="Medical Doctorate (MD)"/>
+			</CodeComboField>
+			<EditField name="CredentialName" size="75" maxLength="128"/>
+			<EditField name="YearsAttended" size="5" maxLength="5"/>
+			<CodeComboField name="QualificationStatusID" findMode="text">
+				<SampleItem ID="1" name="Graduated"/>
+				<SampleItem ID="2" name="In Prgoress"/>
+				<SampleItem ID="3" name="Discontinued"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an employee qualification">
+			<ViewField name="QualificationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="EmployeeNo"/>
+			<ViewField name="InstitutionName"/>
+			<ViewField name="LearningLevel"/>
+			<ViewField name="DegreeEarned"/>
+			<ViewField name="CredentialName"/>
+			<ViewField name="YearsAttended"/>
+			<ViewField name="SpecialSkills"/>
+			<ViewField name="QualificationStatus"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an employee qualification">
+			<ViewField name="QualificationID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LastName"/>
+			<ViewField name="FirstName"/>
+			<ViewField name="EmployeeNo"/>
+			<EditField name="InstitutionName" size="75" maxLength="128"/>
+			<ComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Emprise, HQ"/>
+				<SampleItem ID="2" name="Emprise, Sweden."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<CodeComboField name="LearningLevelID" findMode="text">
+				<SampleItem ID="1" name="College"/>
+				<SampleItem ID="2" name="High School"/>
+				<SampleItem ID="3" name="Graduate School"/>
+				<SampleItem ID="4" name="Trade School"/>
+				<SampleItem ID="5" name="On The Job Experience"/>
+			</CodeComboField>
+			<CodeComboField name="DegreeEarnedID" findMode="text">
+				<SampleItem ID="1" name="Bachelor's of Science (BA)"/>
+				<SampleItem ID="2" name="Bachelor's of Administration (BA)"/>
+				<SampleItem ID="3" name="Educational Doctorate (EdD)"/>
+				<SampleItem ID="4" name="Master of Business Administration (MBA)"/>
+				<SampleItem ID="5" name="Medical Doctorate (MD)"/>
+			</CodeComboField>
+			<EditField name="CredentialName" size="75" maxLength="128"/>
+			<EditField name="YearsAttended" size="5" maxLength="5"/>
+			<MemoField name="SpecialSkills" rows="5" cols="75"/>
+			<CodeComboField name="QualificationStatusID" findMode="text">
+				<SampleItem ID="1" name="Graduated"/>
+				<SampleItem ID="2" name="In Prgoress"/>
+				<SampleItem ID="3" name="Discontinued"/>
+			</CodeComboField>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="ppleq" phrase="Qualifications">
+			<InvisibleField name="QualificationID"/>
+			<ViewField name="LearningLevel" sample="College"/>
+			<ViewField name="DegreeEarned" sample="Bachelor's of Science (BA)"/>
+			<ViewField name="CredentialName" sample="Health Science; Occupational Safety and Health"/>
+			<ViewField name="YearsAttended" sample="4"/>
+			<ViewField name="SpecialSkills" sample="4"/>
+			<ViewField name="QualificationStatus" sample="Graduated"/>
+		</ViewGrid>
+		<EditGrid moduleID="ppleq" phrase="Qualifications">
+			<GridForm>
+				<InvisibleField name="QualificationID"/>
+				<EditField name="InstitutionName" size="75" maxLength="128" sample="California State University Fresno"/>
+				<CodeComboField name="LearningLevelID" findMode="text" sample="College">
+					<SampleItem ID="1" name="College"/>
+					<SampleItem ID="2" name="High School"/>
+					<SampleItem ID="3" name="Graduate School"/>
+					<SampleItem ID="4" name="Trade School"/>
+					<SampleItem ID="5" name="On The Job Experience"/>
+				</CodeComboField>
+				<CodeComboField name="DegreeEarnedID" findMode="text" sample="Bachelor's of Science (BA)">
+					<SampleItem ID="1" name="Bachelor's of Science (BA)"/>
+					<SampleItem ID="2" name="Bachelor's of Administration (BA)"/>
+					<SampleItem ID="3" name="Educational Doctorate (EdD)"/>
+					<SampleItem ID="4" name="Master of Business Administration (MBA)"/>
+					<SampleItem ID="5" name="Medical Doctorate (MD)"/>
+				</CodeComboField>
+				<EditField name="CredentialName" size="75" maxLength="128" sample="Health Science; Occupational Safety and Health"/>
+				<EditField name="YearsAttended" size="5" maxLength="5" sample="4"/>
+				<MemoField name="SpecialSkills" rows="5" cols="75" sample="Zahlis learned skills in the calibration and use of industrial hygiene equipment."/>
+				<CodeComboField name="QualificationStatusID" findMode="text" sample="Graduated">
+					<SampleItem ID="1" name="Graduated"/>
+					<SampleItem ID="2" name="In Prgoress"/>
+					<SampleItem ID="3" name="Discontinued"/>
+				</CodeComboField>
+			</GridForm>
+			<ViewField name="LearningLevel" sample="College"/>
+			<ViewField name="DegreeEarned" sample="Bachelor's of Science (BA)"/>
+			<ViewField name="CredentialName" sample="Health Science; Occupational Safety and Health"/>
+			<ViewField name="YearsAttended" sample="4"/>
+			<ViewField name="SpecialSkills" sample="Graduated"/>
+			<ViewField name="QualificationStatus" sample="Graduated"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

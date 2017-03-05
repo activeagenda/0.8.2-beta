@@ -1,0 +1,461 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Waste Transfer" moduleID="wastf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Waste Transfer" pluralRecordName="Waste Transfers" allowAddRecord="yes">
+    <ModuleFields>
+        <TableField name="WasteTransferID" type="int" dbFlags="unsigned auto_increment not null" phrase="Waste Transport|An automatically assigned number used to track shipments of organizational waste" sample="1"/>
+        <TableField name="WasteID" type="int" validate="noValidation" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="1"/>
+        <ForeignField name="WasteOrganizationID" listType="allParticipants" foreignTable="was" foreignKey="WasteID" foreignField="OrganizationID" key="WasteID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="1"/>
+        <ForeignField name="WasteOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="WasteOrganizationID" joinType="left" phrase="Organization|The name of the organization where the waste is generated" sample="Active Agenda, HQ"/>
+        <ForeignField name="WasteTypeID" foreignTable="was" foreignKey="WasteID" foreignField="WasteTypeID" key="WasteID" joinType="left" phrase="Waste Type|A combined field used to describe this waste disposal type when associating it with other records" sample="1"/>
+        <ForeignField name="WasteCategoryID" foreignTable="wast" foreignKey="WasteTypeID" foreignField="WasteCategoryID" key="WasteTypeID" joinType="left" phrase="Category|A broad category used to group waste streams of similar types" sample="1"/>
+        <CodeField name="WasteCategory" key="WasteCategoryID" phrase="Category|A broad category used to group waste streams of similar types" sample="Liquid (hazardous)" codeTypeID="13"/>
+        <ForeignField name="WasteGenerationMethodID" foreignTable="was" foreignKey="WasteID" foreignField="WasteGenerationMethodID" key="WasteID" joinType="left" phrase="Waste Generation Method|The method by which the waste stream was generated" sample="1"/>
+        <CodeField name="WasteGenerationMethod" key="WasteGenerationMethodID" phrase="Waste Generation Method|The method by which the waste stream was generated" sample="Closed System" codeTypeID="14"/>
+        <ForeignField name="WasteTypeID" foreignTable="was" foreignKey="WasteID" foreignField="WasteTypeID" key="WasteID" joinType="left" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="1"/>
+        <CodeField name="WasteType" key="WasteTypeID" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="Cardboard" codeTypeID="11"/>
+        <ForeignField name="Waste" foreignTable="was" foreignKey="WasteID" foreignField="Waste" key="WasteID" joinType="left" phrase="Waste Stream|A combined field used to describe this waste when associating it with other records" sample="Ammonium Hydroxide"/>
+        <TableField name="WasteTransporterID" type="int" listType="special=11" validate="RequireSelection" phrase="Waste Transporter|A combined field used to describe this waste transporter when associating it with other records" sample="1"/>
+        <ForeignField name="WasteTransporter" foreignTable="wastp" foreignKey="TransporterID" foreignField="Transporter" key="WasteTransporterID" joinType="left" phrase="Waste Transporter|A combined field used to describe this waste transporter when associating it with other records" sample="Chemical Waste Management, Inc."/>
+        <RemoteField name="TransferPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="92" phrase="Transfer Person|The name of the person transfering the waste to the transporter on behalf of the organization" sample="1"/>
+        <ForeignField name="TransferPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TransferPersonID" joinType="left" phrase="Transfer Person|The name of the person transfering the waste to the transporter on behalf of the organization" sample="Mattias Thorslund"/>
+        <RemoteField name="WasteShipDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="46" phrase="Shipment Date|The date the waste was shipped from the organization" sample="01/01/2004"/>
+        <TableField name="WasteShipAmt" type="float" validate="Number notNegative notZero notEmpty" phrase="Amount Shipped|The amount of waste that was shiped on the waste shipment date" sample="100"/>
+        <TableField name="WasteShipAmtUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="WasteShipAmtUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="WasteShipAmtUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="WasteShipAmtUnitCategory" key="WasteShipAmtUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="WasteShipAmtUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="WasteShipAmtUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="Price" type="money" validate="Money" phrase="Price|The price per unit paid for this waste stream stated in the currency established for the site installation of the software" sample="827.00"/>
+        <TableField name="PriceUnitID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="PriceUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="PriceUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="PriceUnitCategory" key="PriceUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="PriceUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="PriceUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <TableField name="Revenue" type="money" validate="Money" phrase="Revenue|An automatically calculated value based on the price per unit of this waste and the number of units shipped, stated in the currency established for the site installation of the software" sample="82,700.00"/>
+        <!--the revenue fields are automatically calculated based on the WasteShipAmt/WasteShipAmtUnits*Price/PriceUnit. DFZ 6-18-2004-->
+        <TableField name="WasteDisposalFacilityID" type="int" listType="special=10" validate="RequireSelection" phrase="Waste Disposal Facility|A combined field used to describe this waste disposal facility when associating it with other records" sample="1"/>
+        <ForeignField name="WasteDisposalFacility" foreignTable="wasdf" foreignKey="WasteDisposalFacilityID" foreignField="DisposalFacility" key="WasteDisposalFacilityID" joinType="left" phrase="Waste Disposal Facility|A combined field used to describe this waste disposal facility when associating it with other records" sample="Chemical Waste Management, Inc."/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="WasteOrganization"/>;_<CombinedFieldRef name="WasteType"/>;_<CombinedFieldRef name="Waste"/>;_<CombinedFieldRef name="WasteTransporter"/>;_<CombinedFieldRef name="WasteShipDate"/></CombinedField>
+        <CombinedField name="WasteTransfer" phrase="Waste Transfer|A combined field used to describe this waste transfer when associating it with other records" sample="Active Agenda, HQ; Cardboard; Ammonium Hydroxide; Chemical Waste Management, Inc.; 09-21-2003"><CombinedFieldRef name="WasteOrganization"/>;_<CombinedFieldRef name="WasteType"/>;_<CombinedFieldRef name="Waste"/>;_<CombinedFieldRef name="WasteTransporter"/>;_<CombinedFieldRef name="WasteShipDate"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="WasteTransferID"/>
+        </PrimaryKey>
+        <OwnerField name="WasteOrganizationID"/>
+        <RecordDescriptionField name="WasteTransfer"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List waste transfers">
+            <ListField name="WasteTransferID" phrase="Record ID"/>
+            <ListField name="WasteOrganization" phrase="WasteOrganization"/>
+            <ListField name="Waste" phrase="Waste"/>
+            <ListField name="WasteTransporter" phrase="Transporter"/>
+            <ListField name="WasteShipDate" phrase="Date"/>
+            <ListField name="Revenue" phrase="Revenue"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search waste transfers">
+            <OrgComboField name="WasteOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sacramento"/>
+                <SampleItem ID="3" name="Active Agenda, New York"/>
+                <SampleItem ID="4" name="Active Agenda, Munich"/>
+            </OrgComboField>
+            <CodeRadioField name="WasteCategoryID">
+                <SampleItem ID="1" name="Hazardous"/>
+                <SampleItem ID="2" name="Non-hazardous"/>
+                <SampleItem ID="3" name="Hazardous and Non-hazardous"/>
+            </CodeRadioField>
+            <CodeComboField name="WasteGenerationMethodID" findMode="text">
+                <SampleItem ID="1" name="Closed System"/>
+                <SampleItem ID="2" name="Production Process"/>
+                <SampleItem ID="3" name="Packaging Operation"/>
+                <SampleItem ID="4" name="Receiving Operation"/>
+            </CodeComboField>
+            <CodeComboField name="WasteTypeID" findMode="text">
+                <SampleItem ID="1" name="Refrigeration"/>
+                <SampleItem ID="2" name="Process Water"/>
+                <SampleItem ID="3" name="Air Emmissions"/>
+                <SampleItem ID="4" name="Sludge"/>
+                <SampleItem ID="5" name="Raw Ingredient"/>
+                <SampleItem ID="6" name="Product"/>
+            </CodeComboField>
+            <ComboField name="WasteID" findMode="text">
+                <SampleItem ID="1" name="Ammonium Hydroxide"/>
+                <SampleItem ID="2" name="Cardboard"/>
+                <SampleItem ID="3" name="Process Waste Water"/>
+            </ComboField>
+            <OrgComboField name="WasteTransporterID" findMode="text">
+                <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                <SampleItem ID="2" name="TOSCO Refineries"/>
+                <SampleItem ID="3" name="Greenfield Environmental"/>
+                <SampleItem ID="4" name="SafetyKleen"/>
+            </OrgComboField>
+            <PersonComboField name="TransferPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="WasteShipDate"/>
+            <EditField name="WasteShipAmt" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="WasteShipAmtUnitCategoryID">
+                    <UpdateFieldRef name="WasteShipAmtUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="WasteShipAmtUnitsID" parentField="WasteShipAmtUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <MoneyField name="Price">
+                <Self/>
+                <ComboField name="PriceUnitCategoryID">
+                    <UpdateFieldRef name="PriceUnitID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PriceUnitID" parentField="PriceUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+            <MoneyField name="Revenue"/>
+            <OrgComboField name="WasteDisposalFacilityID" findMode="text">
+                <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                <SampleItem ID="2" name="TOSCO Refineries"/>
+                <SampleItem ID="3" name="Greenfield Environmental"/>
+                <SampleItem ID="4" name="SafetyKleen"/>
+            </OrgComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a waste transfer">
+            <ViewField name="WasteTransferID"/>
+            <ViewField name="Waste"/>
+            <ViewField name="WasteTransporter"/>
+            <ViewField name="TransferPerson"/>
+            <ViewField name="WasteShipDate"/>
+            <ViewField name="WasteShipAmt">
+                <ViewField name="WasteShipAmtUnits"/>
+            </ViewField>
+            <ViewField name="Price">
+                <ViewField name="PriceUnit"/>
+            </ViewField>
+            <ViewField name="Revenue"/>
+            <ViewField name="WasteDisposalFacility"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a waste transfer">
+            <ViewField name="WasteTransferID"/>
+            <ViewField name="Waste"/>
+            <OrgComboField name="WasteTransporterID" findMode="text">
+                <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                <SampleItem ID="2" name="TOSCO Refineries"/>
+                <SampleItem ID="3" name="Greenfield Environmental"/>
+                <SampleItem ID="4" name="SafetyKleen"/>
+            </OrgComboField>
+            <PersonComboField name="TransferPersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <DateField name="WasteShipDate"/>
+            <EditField name="WasteShipAmt" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="WasteShipAmtUnitCategoryID">
+                    <UpdateFieldRef name="WasteShipAmtUnitsID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="WasteShipAmtUnitsID" parentField="WasteShipAmtUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </EditField>
+            <MoneyField name="Price">
+                <Self/>
+                <ComboField name="PriceUnitCategoryID">
+                    <UpdateFieldRef name="PriceUnitID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PriceUnitID" parentField="PriceUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+            <MoneyField name="Revenue"/>
+            <OrgComboField name="WasteDisposalFacilityID" findMode="text">
+                <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                <SampleItem ID="2" name="TOSCO Refineries"/>
+                <SampleItem ID="3" name="Greenfield Environmental"/>
+                <SampleItem ID="4" name="SafetyKleen"/>
+            </OrgComboField>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="wastf" phrase="Transfers">
+            <InvisibleField name="WasteTransferID"/>
+            <ViewField name="WasteTransporter" sample="Chemical Waste Management, Inc."/>
+            <ViewField name="TransferPerson" sample="Mattias Thorslund"/>
+            <ViewField name="WasteShipDate" sample="09-21-2003"/>
+            <ViewField name="Revenue" sample="82,700.00"/>
+            <ViewField name="WasteDisposalFacility" sample="CWM, Inc. - Kettleman Hills TSDF"/>
+        </ViewGrid>
+        <EditGrid moduleID="wastf" phrase="Transfers">
+            <GridForm>
+                <InvisibleField name="WasteTransferID"/>
+                <OrgComboField name="WasteTransporterID" findMode="text" sample="Chemical Waste Management, Inc.">
+                    <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                    <SampleItem ID="2" name="TOSCO Refineries"/>
+                    <SampleItem ID="3" name="Greenfield Environmental"/>
+                    <SampleItem ID="4" name="SafetyKleen"/>
+                </OrgComboField>
+                <PersonComboField name="TransferPersonID" findMode="alpha" sample="Mattias Thorslund">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <DateField name="WasteShipDate" sample="09-21-2003"/>
+                <EditField name="WasteShipAmt" size="5" maxLength="5">
+                    <Self/>
+                    <ComboField name="WasteShipAmtUnitCategoryID">
+                        <UpdateFieldRef name="WasteShipAmtUnitsID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="WasteShipAmtUnitsID" parentField="WasteShipAmtUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </EditField>
+                <MoneyField name="Price">
+                    <Self/>
+                    <ComboField name="PriceUnitCategoryID">
+                        <UpdateFieldRef name="PriceUnitID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="PriceUnitID" parentField="PriceUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </MoneyField>
+                <MoneyField name="Revenue" sample="82,700.00"/>
+                <OrgComboField name="WasteDisposalFacilityID" findMode="text" sample="CWM, Inc. - Kettleman Hills TSDF">
+                    <SampleItem ID="1" name="Chemical Waste Management, Inc."/>
+                    <SampleItem ID="2" name="TOSCO Refineries"/>
+                    <SampleItem ID="3" name="Greenfield Environmental"/>
+                    <SampleItem ID="4" name="SafetyKleen"/>
+                </OrgComboField>
+            </GridForm>
+            <ViewField name="WasteTransporter" sample="Chemical Waste Management, Inc."/>
+            <ViewField name="TransferPerson" sample="Mattias Thorslund"/>
+            <ViewField name="WasteShipDate" sample="09-21-2003"/>
+            <ViewField name="Revenue" sample="82,700.00"/>
+            <ViewField name="WasteDisposalFacility" sample="CWM, Inc. - Kettleman Hills TSDF"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Waste Transfers By Waste Stream">
+            <GroupByField name="Waste"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Waste Transfers By Waste Stream">
+            <GroupByField name="Waste"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Waste Transfers By Waste Organization">
+            <GroupByField name="WasteOrganization"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Waste Transfers By Waste Organization">
+            <GroupByField name="WasteOrganization"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Waste Transfers By Waste Category">
+            <GroupByField name="WasteCategory"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Waste Transfers By Waste Category">
+            <GroupByField name="WasteCategory"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Waste Transfers By Waste Generation Method">
+            <GroupByField name="WasteGenerationMethod"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Waste Transfers By Waste Generation Method">
+            <GroupByField name="WasteGenerationMethod"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Waste Transfers By Waste Type">
+            <GroupByField name="WasteType"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Waste Transfers By Waste Type">
+            <GroupByField name="WasteType"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Waste Transfers By Waste Transporter">
+            <GroupByField name="WasteTransporter"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Waste Transfers By Waste Transporter">
+            <GroupByField name="WasteTransporter"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Waste Transfers By Transfer Person">
+            <GroupByField name="TransferPerson"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Waste Transfers By Transfer Person">
+            <GroupByField name="TransferPerson"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Waste Transfers By Waste DisposalFacility">
+            <GroupByField name="WasteDisposalFacility"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Waste Transfers By Waste Disposal Facility">
+            <GroupByField name="WasteDisposalFacility"/>
+            <SummaryField name="WasteTransferID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Shared Expectation Scores" moduleID="parss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Shared Expectation Score" pluralRecordName="Shared Expectation Scores" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="SharedExpectationScoreID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track shared expectations of organizational partnerships" sample="1"/>
+		<TableField name="SharedPartnerExpectationID" type="int" dbFlags="unsigned not null" phrase="Shared Partnership Expectation|An automatically assigned number used to track shared expectations of organizational partnerships" sample="1"/>
+		<ForeignField name="PolicyExpectationID" foreignTable="parse" foreignKey="SharedPartnerExpectationID" foreignField="PolicyExpectationID" key="SharedPartnerExpectationID" joinType="left" phrase="Policy Expectation|An automatically assigned number used to track expectations of organization partnerships"/>
+		<!--<TableField name="PolicyExpectationID" type="int" dbFlags="unsigned not null" phrase="Policy Expectation|An automatically assigned number used to track expectations of organization partnerships" sample="1"/>
+        -->
+		<ForeignField name="PartnershipPolicyID" foreignTable="parpe" foreignKey="PolicyExpectationID" foreignField="PartnershipPolicyID" key="PolicyExpectationID" joinType="left" phrase="Partnership Policy|A combined field used to describe this partnership when associating it with other records"/>
+		<ForeignField name="PolicyOrganizationID" listType="allParticipants internalNonParticipants" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PolicyOrganizationID" key="PartnershipPolicyID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="1"/>
+		<ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization with primary responsibility for initiating this partnership requirement and communicating new laws and internal requirements affecting the partnership" sample="Active Agenda, HQ"/>
+		<ForeignField name="PartnershipPolicy" foreignTable="parp" foreignKey="PartnershipPolicyID" foreignField="PartnershipPolicy" key="PartnershipPolicyID" joinType="left" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="Incentives | Policy Number: 10.0 | Active Agenda, HQ"/>
+		<ForeignField name="ExpectationGroupID" foreignTable="parpe" foreignKey="PolicyExpectationID" foreignField="ExpectationGroupID" key="PolicyExpectationID" joinType="left" phrase="Expectation Group|A method of grouping business imperatives so that section scores can be formualted" sample="Objective and Purpose"/>
+		<CodeField name="ExpectationGroup" key="ExpectationGroupID" phrase="Expectation Group|A method of grouping business imperatives so that section scores can be formualted" sample="Objective and Purpose" codeTypeID="150"/>
+		<ForeignField name="Expectation" foreignTable="parpe" foreignKey="PolicyExpectationID" foreignField="Expectation" key="PolicyExpectationID" joinType="left" phrase="Policy Expectation|An obligation of those implementing a partnership. Expectations can be scored and performance can be audited" sample="Corrective action is taken within one day of precipitating events"/>
+		<RemoteField name="ReviewDate" type="datetime" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="9" phrase="Review Date|Date and time the partnership expectation was audited" sample="01/01/2004"/>
+		<RemoteField name="AuditorID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="81" phrase="Audited By|The name of the individual that audited the expectation" sample="1"/>
+		<ForeignField name="Auditor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="AuditorID" joinType="left" phrase="Audited By|The name of the individual that audited the expectation" sample="Jane Doe"/>
+		<TableField name="Findings" type="text" validate="notEmpty" phrase="Findings|A detailed description of the shared expectation audit findings" sample="Great job implementing this element. Blue ribbons all-around."/>
+		<TableField name="Score" type="float" validate="Number notNegative notEmpty" phrase="Score|The performance score associated with the partnership expectation based on a scale defined by the organization" sample="6.5"/>
+		<TableField name="PartnershipAuditID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to track partnership audits" sample="1"/>
+		<ForeignField name="PartnershipID" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="PartnershipID" key="PartnershipAuditID" joinType="left" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="Incentives; Under Development"/>
+		<ForeignField name="OrganizationID" foreignTable="par" foreignKey="PartnershipID" foreignField="OrganizationID" key="PartnershipID" joinType="left" phrase="Implementing Organization|The organization with primary responsibility for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Implementing Organization|The organization with primary responsibility for implementing this partnership and maintaining currency with existing laws and internal requirements" sample="Active Agenda, HQ"/>
+		<ForeignField name="PolicyTitle" foreignTable="par" foreignKey="PartnershipID" foreignField="PolicyTitle" key="PartnershipID" joinType="left" phrase="Partnership Title|The name of the partnership to be implemented at the local organization" sample="Incentives"/>
+		<ForeignField name="Partnership" foreignTable="par" foreignKey="PartnershipID" foreignField="Partnership" key="PartnershipID" joinType="left" phrase="Partnership|A combined field used to describe this partnership when associating it with other records" sample="Incentives; Under Development"/>
+		<ForeignField name="AuditingOrganizationID" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="AuditingOrganizationID" key="PartnershipAuditID" joinType="left" phrase="Auditing Organization|The name of the organization responsible for conducting the audit" sample="1"/>
+		<ForeignField name="AuditingOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AuditingOrganizationID" joinType="left" phrase="Auditing Organization|The name of the organization responsible for conducting the audit" sample="Deloitte and Touche Consulting"/>
+		<ForeignField name="AuditBeginDate" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="AuditBeginDate" key="PartnershipAuditID" joinType="left" phrase="Audit Begin Date|Date and time the audit started" sample="01/01/2004"/>
+		<ForeignField name="AuditEndDate" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="AuditEndDate" key="PartnershipAuditID" joinType="left" phrase="Audit End Date|Date and time the audit ended" sample="01/04/2004"/>
+		<ForeignField name="AuditPurpose" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="AuditPurpose" key="PartnershipAuditID" joinType="left" phrase="Purpose|A detailed description of the purpose for the audit" sample="The audit was conducted in compliance with corporate requirements to conduct an annual internal audit."/>
+		<ForeignField name="PartnershipAudit" foreignTable="para" foreignKey="PartnershipAuditID" foreignField="PartnershipAudit" key="PartnershipAuditID" joinType="left" phrase="Partnership Audit|A combined field used to describe this partnership audit when associating it with other records" sample="Incentives - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Partnership"/>_at_<CombinedFieldRef name="Organization"/>_audited_by_<CombinedFieldRef name="AuditingOrganization"/>;_<CombinedFieldRef name="Score"/></CombinedField>
+		<CombinedField name="SharedExpectationScore" phrase="Score|A combined field used to describe this shared expectation score when associating it with other records" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Partnership"/>_at_<CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="Score"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SharedExpectationScoreID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="SharedExpectationScore"/>
+		<RecordLabelField name="RecordLabel"/>
+		<ExtendModule moduleID="parse" localKey="SharedPartnerExpectationID" filterField="PartnershipID" filterValue="[*PartnershipID*]"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List partnership audit scores">
+			<ListField name="SharedExpectationScoreID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PolicyTitle" phrase="Partnership Title"/>
+			<ListField name="ExpectationGroup" phrase="Expectation Group"/>
+			<ListField name="Expectation" phrase="Expectation"/>
+			<ListField name="AuditingOrganization" phrase="Auditing Organization"/>
+			<ListField name="ReviewDate" phrase="Review Date"/>
+			<ListField name="Auditor" phrase="Auditor"/>
+			<ListField name="Score" phrase="Score"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search partnership audit scores">
+			<OrgComboField name="PolicyOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="PartnershipAuditID" findMode="text">
+				<SampleItem ID="1" name="Incentives - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+				<SampleItem ID="2" name="Corrective Actions - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+				<SampleItem ID="3" name="Investigations and Root Cause Analysis - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+				<SampleItem ID="4" name="Incident Reporting - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+				<SampleItem ID="5" name="Town Hall - Active Agenda, HQ - Audited by: Deloitte and Touche on 10-28-2003"/>
+			</ComboField>
+			<ComboField name="PartnershipID" findMode="text">
+				<SampleItem ID="1" name="Incentives | Complete"/>
+				<SampleItem ID="2" name="Accident Investigations | Incomplete"/>
+				<SampleItem ID="3" name="Training Records | Cancelled"/>
+				<SampleItem ID="4" name="Hazard Abatement | Complete"/>
+				<SampleItem ID="5" name="Asset Protection | Complete"/>
+			</ComboField>
+			<OrgComboField name="AuditingOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<DateField name="ReviewDate"/>
+			<PersonComboField name="AuditorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<EditField name="Score" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View a partnership audit score">
+			<ViewField name="SharedExpectationScoreID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PolicyTitle"/>
+			<ViewField name="ExpectationGroup"/>
+			<ViewField name="Expectation"/>
+			<ViewField name="AuditingOrganization"/>
+			<ViewField name="ReviewDate"/>
+			<ViewField name="Auditor"/>
+			<ViewField name="Findings"/>
+			<ViewField name="Score"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit a partnership audit score">
+			<ViewField name="SharedExpectationScoreID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PolicyTitle"/>
+			<ViewField name="ExpectationGroup"/>
+			<ViewField name="Expectation"/>
+			<ViewField name="AuditingOrganization"/>
+			<DateField name="ReviewDate"/>
+			<PersonComboField name="AuditorID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<MemoField name="Findings" rows="5" cols="50"/>
+			<EditField name="Score" size="5" maxLength="5"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="parss" phrase="Shared Audit Scores" listExtended="yes" isInfo="yes">
+			<InvisibleField name="SharedExpectationScoreID"/>
+			<ViewField name="ExpectationGroup" sample="Objective and Purpose"/>
+			<ViewField name="Expectation" sample="Corrective action is taken within one day of precipitating events"/>
+			<ViewField name="ReviewDate" sample="10-23-2005"/>
+			<ViewField name="Auditor" sample="Mattias Thorslund"/>
+			<ViewField name="Findings" sample="Awesome! Blue ribbon performance!"/>
+			<ViewField name="Score" sample="6.5"/>
+		</ViewGrid>
+		<EditGrid moduleID="parss" phrase="Shared Audit Scores" listExtended="yes">
+			<GridForm>
+				<InvisibleField name="SharedExpectationScoreID"/>
+				<InvisibleField name="PartnershipID"/>
+				<DateField name="ReviewDate"/>
+				<PersonComboField name="AuditorID" findMode="alpha">
+					<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+					<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+					<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+				</PersonComboField>
+				<MemoField name="Findings" rows="5" cols="50"/>
+				<EditField name="Score" size="5" maxLength="5"/>
+			</GridForm>
+			<InvisibleField name="SharedExpectationScoreID"/>
+			<ViewField name="ExpectationGroup" sample="Objective and Purpose"/>
+			<ViewField name="Expectation" sample="Corrective action is taken within one day of precipitating events"/>
+			<ViewField name="ReviewDate" sample="10-23-2005"/>
+			<ViewField name="Auditor" sample="Mattias Thorslund"/>
+			<ViewField name="Findings" sample="Awesome! Blue ribbon performance!"/>
+			<ViewField name="Score" sample="6.5"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

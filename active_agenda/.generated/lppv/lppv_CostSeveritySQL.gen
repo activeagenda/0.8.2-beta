@@ -1,0 +1,101 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+  $csSQL = 'SELECT `rsks1`.SeverityValue AS CostSeverityValue, IFNULL(ROUND(`clm2`.ClaimCosts, 2), 0) + IFNULL(ROUND(`cos1`.RollupCosts, 2), 0) + IFNULL(ROUND(`cos2`.LocalCosts, 2), 0) AS TotalCost FROM `lppv`
+
+LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`cos`.Incurred, 2)) AS LocalCosts,
+`cos`.RelatedRecordID FROM `cos` 
+ WHERE `cos`._Deleted = 0 
+ AND RelatedModuleID = \'len\' 
+GROUP BY `cos`.RelatedRecordID 
+) AS cos2 
+ON (`lppv`.LossVehicleID = cos2.RelatedRecordID) 
+LEFT OUTER JOIN (SELECT
+   SUM(`cos_r`.Incurred) AS RollupCosts,
+   `smc`.ModuleID,
+   `smc`.RecordID
+FROM 
+   `smc`
+    INNER JOIN `cos` AS cos_r
+    ON `smc`.SubModuleID = `cos_r`.RelatedModuleID
+    AND `smc`.SubRecordID = `cos_r`.RelatedRecordID
+WHERE
+    `cos_r`._Deleted = 0
+GROUP BY `smc`.ModuleID, `smc`.RecordID
+   ) AS `cos1` ON 
+    cos1.RecordID = `lppv`.LossVehicleID
+    AND cos1.ModuleID = \'len\'
+
+
+LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`lcod1`.TotalIncurred, 2)) AS ClaimCosts,
+`clm`.RelatedRecordID FROM `clm` 
+
+LEFT OUTER JOIN (SELECT
+   `lco_sub1`.LossCostID AS LatestLossCostID,
+   `lco_sub1`.ClaimID
+FROM 
+   `lco` AS `lco_sub1`
+WHERE
+    `lco_sub1`._Deleted = 0
+   AND `lco_sub1`.LossCostID = (
+      select `lco_sub2`.LossCostID
+      from `lco` AS `lco_sub2`
+      where `lco_sub2`._Deleted = 0
+        and `lco_sub2`.ClaimID = `lco_sub1`.ClaimID
+      order by `lco_sub2`.ValuationDate DESC
+      limit 1
+   )) AS `lco1` ON 
+            `clm`.ClaimID = lco1.ClaimID
+
+LEFT OUTER JOIN (SELECT 
+SUM(ROUND(`lcod`.Incurred, 2)) AS TotalIncurred,
+SUM(ROUND(`lcod`.Payments, 2)) AS TotalPayments,
+`lcod`.LossCostID FROM `lcod` 
+ WHERE `lcod`._Deleted = 0 
+GROUP BY `lcod`.LossCostID 
+) AS lcod1 
+ON (`lco1`.LatestLossCostID = lcod1.LossCostID) 
+ WHERE `clm`._Deleted = 0 
+ AND \'lppv\' = `clm`.RelatedModuleID
+GROUP BY `clm`.RelatedRecordID 
+) AS clm2 
+ON (`lppv`.LossVehicleID = clm2.RelatedRecordID) 
+LEFT OUTER JOIN `rsks` AS rsks1 
+   ON ((SELECT SeverityID
+FROM rsks
+WHERE `rsks`.SeverityLowCost <= ROUND(IFNULL(ROUND(`clm2`.ClaimCosts, 2), 0) + IFNULL(ROUND(`cos1`.RollupCosts, 2), 0) + IFNULL(ROUND(`cos2`.LocalCosts, 2), 0), 2)
+ORDER BY `rsks`.SeverityLowCost DESC
+LIMIT 1) = `rsks1`.SeverityID )WHERE `lppv`.LossVehicleID = \'/**RecordID**/\'';
+?>

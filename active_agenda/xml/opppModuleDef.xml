@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permit Penalties" moduleID="oppp" parentModule="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Penalty Associated With A Permit " pluralRecordName="Penalties Associated With A Permit" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="PermitPenaltyID" type="int" dbFlags="unsigned auto_increment not null" phrase="Permit Penalty ID|A unique number assigned to penalties so that multiple penalties can be associated with a single opperating permit" sample="1"/>
+        <TableField name="OppPermitID" type="int" validate="noValidation" phrase="Operating Permit ID|An automatically assigned number used to operating permits" sample="11"/>
+        <ForeignField name="OrganizationID" foreignTable="opp" foreignKey="OppPermitID" foreignField="OrganizationID" key="OppPermitID" joinType="left" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="Active Agenda, HQ"/>
+        <ForeignField name="OppPermit" foreignTable="opp" foreignKey="OppPermitID" foreignField="OppPermit" key="OppPermitID" joinType="left" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+        <TableField name="PenaltyTypeID" type="int" validate="RequireSelection" phrase="Penalty Type|Types of penalties associated with operating permits" sample="3"/>
+        <CodeField name="PenaltyType" key="PenaltyTypeID" phrase="Penalty Type|Types of penalties associated with operating permits" sample="Non Reporting" codeTypeID="203"/>
+        <TableField name="PenaltyDesc" type="text" validate="notEmpty" phrase="Penalty Description|A brief description of the penalty and conditions leading to penalty assignments" sample="A $15,000 penalty is assigned to organizations failing to report stormwater discharges immediately upon learning of a stormwater contamination event"/>
+        <TableField name="PenaltyAmount" type="money" validate="Money notEmpty notNegative" phrase="Penalty Amount|The automatically calculated amount of the penalty associated with this permit violation stated in the currency choosen for the application" sample="702.00"/>
+        <TableField name="PenaltyUnitID" type="int" validate="RequireSelection" phrase="Penalty Units|The units associated with the permit penalty" sample="1"/>
+        <ForeignField name="PenaltyUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="PenaltyUnitID" joinType="left" phrase="Penalty Unit Category|A broadly defined title or phrase used to group penalty unit categories" sample="1"/>
+        <CodeField name="PenaltyUnitCategory" key="PenaltyUnitCategoryID" phrase="Penalty Unit Category|A broadly defined title or phrase used to group penalty unit categories" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="PenaltyUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="PenaltyUnitID" joinType="left" phrase="Penalty Units|The units associated with the permit penalty" sample="Millimeter"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PenaltyAmount"/>_per_<CombinedFieldRef name="PenaltyUnit"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+        <CombinedField name="PermitPenaltyAmount" phrase="Permit Penalty Amount|A combined field used to describe the permit penalty amount when associating it with other records" sample="Discharge, Storm Water Discharge - 002 | U.S. Environmental Protection Agency | Active Agenda, HQ | Concrete Mix Building"><CombinedFieldRef name="PenaltyAmount"/>_per_<CombinedFieldRef name="PenaltyUnit"/></CombinedField>
+        <CombinedField name="PermitPenalty" phrase="Permit Penalty|A combined field used to describe this permit penalty when associating it with other records" sample="Discharge, Storm Water Discharge - 002 | U.S. Environmental Protection Agency | Active Agenda, HQ | Concrete Mix Building"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="PenaltyType"/>;_<CombinedFieldRef name="PenaltyAmount"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="PermitPenaltyID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="PermitPenalty"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List penalties associated with operating permits">
+            <ListField name="PermitPenaltyID" phrase="Record ID"/>
+            <ListField name="OppPermit" phrase="Permit"/>
+            <ListField name="PenaltyType" phrase="Penalty Type"/>
+            <ListField name="PermitPenaltyAmount" phrase="Penalty Amount"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search penalties associated with operating permits">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <CodeComboField name="PenaltyTypeID" findMode="text">
+                <SampleItem ID="1" name="Non Reporting"/>
+                <SampleItem ID="2" name="Permit Condition Violation"/>
+                <SampleItem ID="3" name="Late Reporting"/>
+                <SampleItem ID="4" name="Operating Without Permit"/>
+            </CodeComboField>
+            <MoneyField name="PenaltyAmount">
+                <Self/>
+                <ComboField name="PenaltyUnitCategoryID">
+                    <UpdateFieldRef name="PenaltyUnitID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PenaltyUnitID" parentField="PenaltyUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a penalty associated with an operating permit">
+            <ViewField name="PermitPenaltyID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OppPermit"/>
+            <ViewField name="PenaltyType"/>
+            <ViewField name="PenaltyDesc"/>
+            <ViewField name="PenaltyAmount">
+                <ViewField name="PenaltyUnit"/>
+            </ViewField>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a penalty associated with an operating permit">
+            <ViewField name="PermitPenaltyID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="OppPermit"/>
+            <CodeComboField name="PenaltyTypeID" findMode="text">
+                <SampleItem ID="1" name="Non Reporting"/>
+                <SampleItem ID="2" name="Permit Condition Violation"/>
+                <SampleItem ID="3" name="Late Reporting"/>
+                <SampleItem ID="4" name="Operating Without Permit"/>
+            </CodeComboField>
+            <MemoField name="PenaltyDesc" rows="5" cols="75"/>
+            <MoneyField name="PenaltyAmount">
+                <Self/>
+                <ComboField name="PenaltyUnitCategoryID">
+                    <UpdateFieldRef name="PenaltyUnitID"/>
+                    <SampleItem ID="1" name="Weight"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="6" name="Distance"/>
+                    <SampleItem ID="3" name="Packaging"/>
+                    <SampleItem ID="4" name="Time"/>
+                    <SampleItem ID="5" name="Volume"/>
+                </ComboField>
+                <ComboField name="PenaltyUnitID" parentField="PenaltyUnitCategoryID">
+                    <SampleItem ID="1" name="Milligram"/>
+                    <SampleItem ID="2" name="Centigram"/>
+                    <SampleItem ID="3" name="Decigram"/>
+                    <SampleItem ID="4" name="Gram"/>
+                </ComboField>
+            </MoneyField>
+        </EditScreen>
+    </Screens>
+    <Exports>
+        <ViewGrid moduleID="oppp" phrase="Penalties">
+            <InvisibleField name="PermitPenaltyID"/>
+            <ViewField name="PenaltyType" sample="Non Reporting"/>
+            <ViewField name="PenaltyDesc" sample="You get in big, big, trouble for this and you will pay dearly"/>
+            <ViewField name="PermitPenaltyAmount" sample="702.00 per Day(s)"/>
+        </ViewGrid>
+        <EditGrid moduleID="oppp" phrase="Penalties">
+            <GridForm>
+                <InvisibleField name="PermitPenaltyID"/>
+                <CodeComboField name="PenaltyTypeID" findMode="text" sample="Non Reporting">
+                    <SampleItem ID="1" name="Non Reporting"/>
+                    <SampleItem ID="2" name="Permit Condition Violation"/>
+                    <SampleItem ID="3" name="Late Reporting"/>
+                    <SampleItem ID="4" name="Operating Without Permit"/>
+                </CodeComboField>
+                <MemoField name="PenaltyDesc" rows="5" cols="75" sample="A $15,000 penalty is assigned to organizations failing to report stormwater discharges immediately upon learning of a stormwater contamination event"/>
+                <MoneyField name="PenaltyAmount">
+                    <Self/>
+                    <ComboField name="PenaltyUnitCategoryID">
+                        <UpdateFieldRef name="PenaltyUnitID"/>
+                        <SampleItem ID="1" name="Weight"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="6" name="Distance"/>
+                        <SampleItem ID="3" name="Packaging"/>
+                        <SampleItem ID="4" name="Time"/>
+                        <SampleItem ID="5" name="Volume"/>
+                    </ComboField>
+                    <ComboField name="PenaltyUnitID" parentField="PenaltyUnitCategoryID">
+                        <SampleItem ID="1" name="Milligram"/>
+                        <SampleItem ID="2" name="Centigram"/>
+                        <SampleItem ID="3" name="Decigram"/>
+                        <SampleItem ID="4" name="Gram"/>
+                    </ComboField>
+                </MoneyField>
+            </GridForm>
+            <ViewField name="PenaltyType" sample="Non Reporting"/>
+            <ViewField name="PenaltyDesc" sample="You get in big, big, trouble for this and you will pay dearly"/>
+            <ViewField name="PermitPenaltyAmount" sample="702.00 per Day(s)"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Permit Penalties By Operating Permit">
+            <GroupByField name="OppPermit"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Permit Penalties By Operating Permit">
+            <GroupByField name="OppPermit"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Permit Penalties By Penalty Type">
+            <GroupByField name="PenaltyType"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Permit Penalties By Penalty Type">
+            <GroupByField name="PenaltyType"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Permit Penalties By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Permit Penalties By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="PermitPenaltyID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

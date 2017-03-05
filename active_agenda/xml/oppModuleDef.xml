@@ -1,0 +1,560 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permits" moduleID="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Operating Permit" pluralRecordName="Operating Permits" addNewName="Permit" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="OppPermitID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to operating permits" sample="11"/>
+		<TableField name="PermitName" type="varchar(128)" validate="notEmpty" phrase="Permit Name|The name of the operational permit" sample="Storm Water Discharge Permit"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization responsible for application for, and maintenance of, the operating permit" sample="Active Agenda, HQ"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="59" phrase="Person Accountable|The individual assigned primary accountability for managing this permit" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this permit" sample="Mattias Thorslund"/>
+		<TableField name="PermitTypeID" type="int" dbFlags="unsigned not null" phrase="Record ID|An automatically assigned number used to track permit types required throughout the enterprise" sample="1"/>
+		<ForeignField name="PermitCategoryID" foreignTable="oppt" foreignKey="PermitTypeID" foreignField="PermitCategoryID" key="PermitTypeID" joinType="left" phrase="Category|A broad category used to group permits of similar types" sample="1"/>
+		<CodeField name="PermitCategory" key="PermitCategoryID" phrase="Category|A broad category used to group permits of similar types" sample="Environmental: Waste" codeTypeID="207"/>
+		<ForeignField name="PermitTypeName" foreignTable="oppt" foreignKey="PermitTypeID" foreignField="PermitTypeName" key="PermitTypeID" joinType="left" phrase="Permit Type|A title or phrase used to describe a specific type of operating permit" sample="Storm Water Pollution Permit"/>
+		<ForeignField name="PermitTypeDesc" foreignTable="oppt" foreignKey="PermitTypeID" foreignField="PermitTypeDesc" key="PermitTypeID" joinType="left" phrase="Permit Type Description|A detailed description of the operating permit type" sample="Storm water pollution permits are required by all organizations that produce effluent to a public water way."/>
+		<ForeignField name="PermitType" foreignTable="oppt" foreignKey="PermitTypeID" foreignField="PermitType" key="PermitTypeID" joinType="left" phrase="Permit Type|A combined field used to describe this permit type when associating it with other records" sample="Storm Water Discharge"/>
+		<TableField name="PermitDesc" type="text" validate="notEmpty" phrase="Permit Description|A brief description of the scope, purpose and conditions of the permit and any other pertinent information" sample="The SWDP enables the facility to operate based on the storm water handling measures taken by the organization"/>
+		<TableField name="AgencyLevelID" type="int" validate="RequireSelection" phrase="Agency Level|The heirarchial level of the agency issuing this permit from an international perspective" sample="1"/>
+		<CodeField name="AgencyLevel" key="AgencyLevelID" phrase="Agency Level|The heirarchial level of the agency issuing this permit from an international perspective" sample="U.S. Federal" codeTypeID="7"/>
+		<TableField name="AgencyID" type="int" listType="special=9" validate="RequireSelection" phrase="Agency|Name of the government agency or internal entity issuing this permit" sample="1"/>
+		<ForeignField name="Agency" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AgencyID" joinType="left" phrase="Agency|Name of the government agency or internal entity issuing this permit" sample="U.S. Environmental Protection Agency"/>
+		<ForeignField name="ShortName" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="AgencyID" joinType="left" phrase="Short Name|A short name used to identify the organization" sample="US E.P.A."/>
+		<!--screened based on organizations with the Agency cb selected as "true" DFZ 1-28-2004-->
+		<TableField name="CriticalPermit" type="bool" validate="noValidation" dbFlags="default 0" phrase="Critical Permit|Check this box if this permit is required to operate the facility or enables a significant function at the facility which would result in significant financial imact if the permit were not current" sample="Yes"/>
+		<TableField name="ActivePermit" type="bool" validate="noValidation" dbFlags="default 0" phrase="Active|Check this box if this permit is presently active and in force" sample="Yes"/>
+		<TableField name="TransferRestrict" type="bool" validate="noValidation" dbFlags="default 0" phrase="Transfer Restrictions|Check this box if transfer restrictions have been placed on this permit" sample="Yes"/>
+		<TableField name="ModifyRestrict" type="bool" validate="noValidation" dbFlags="default 0" phrase="Modification Restrictions|Check this box if modification restrictions have been placed on this permit" sample="Yes"/>
+		<RemoteField name="EffectiveDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="17" phrase="Effective Date|The date the operating permit first went into into effect" sample="01/01/2004"/>
+		<RemoteField name="ExpirationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|The date the operating permit is scheduled to expire if it is not renewed" sample="01/01/2004"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'opp'" localKey="OppPermitID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="OppPermitID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'opp'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the operating permit" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="OppPermitID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'opp'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the operating permit" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="PermitType"/>;_<CombinedFieldRef name="PermitName"/></CombinedField>
+		<CombinedField name="OppPermit" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Type: Discharge | Agency: US E.P.A. | Storm Water Discharge - 002 |  "><CombinedFieldRef name="PermitName"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="OppPermitID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="OppPermit"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="oppap" name="Operating Permits - Applications" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="opppf" name="Operating Permit Fees" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppp" name="Operating Permit Penalties" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppoa" name="Operating Permit Organizations" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppno" name="Operating Permit Numbers" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppcr" name="Operating Permits - Conditions and Requirements" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="opppc" name="Operating Permits - Permitted Categories" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="opprr" name="Operating Permits - Reporting Requirements" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppba" name="Operating Permits - Buildings Affected" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppca" name="Operating Permits - Chemicals Affected" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppea" name="Operating Permits - Equipment Affected" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppsa" name="Operating Permits - Systems Affected" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="oppwa" name="Operating Permits - Waste Affected" parentKey="OppPermitID" localKey="OppPermitID"/>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="PermitTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="oppt"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="busa" name="Business Continuation" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="OppPermitID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="opp"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List operating permits">
+			<ListField name="OppPermitID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="PermitType" phrase="Permit Type"/>
+			<ListField name="PermitName" phrase="Permit Name"/>
+			<ListField name="ExpirationDate" phrase="Expiration Date"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search operating permits">
+			<EditField name="PermitName" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="PermitCategoryID" findMode="text">
+				<UpdateFieldRef name="PermitTypeID" listParentField="PermitCategoryID"/>
+				<SampleItem ID="1" name="Environmental"/>
+				<SampleItem ID="2" name="Human Safety"/>
+				<SampleItem ID="3" name="Operating"/>
+			</CodeComboField>
+			<ComboField name="PermitTypeID" findMode="text" parentField="PermitCategoryID">
+				<SampleItem ID="1" name="Stormwater Discharge"/>
+				<SampleItem ID="1" name="Process"/>
+				<SampleItem ID="3" name="Building"/>
+				<SampleItem ID="5" name="Operation"/>
+				<SampleItem ID="7" name="Release"/>
+			</ComboField>
+			<CodeComboField name="AgencyLevelID">
+				<UpdateFieldRef name="AgencyID"/>
+				<SampleItem ID="1" name="State"/>
+				<SampleItem ID="2" name="International"/>
+				<SampleItem ID="3" name="National"/>
+				<SampleItem ID="4" name="County"/>
+				<SampleItem ID="5" name="City"/>
+			</CodeComboField>
+			<OrgComboField name="AgencyID" findMode="text" parentField="AgencyLevelID">
+				<SampleItem ID="1" name="Ca. Environmental Protection Agency"/>
+				<SampleItem ID="2" name="US Department of Agriculture"/>
+				<SampleItem ID="3" name="US Occupational Safety and Health Administration"/>
+			</OrgComboField>
+			<CheckBoxField name="CriticalPermit"/>
+			<CheckBoxField name="ActivePermit"/>
+			<CheckBoxField name="TransferRestrict"/>
+			<CheckBoxField name="ModifyRestrict"/>
+			<DateField name="EffectiveDate"/>
+			<DateField name="ExpirationDate"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an operating permit">
+			<ViewField name="OppPermitID"/>
+			<ViewField name="PermitName"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="PermitType"/>
+			<ViewField name="PermitTypeDesc"/>
+			<ViewField name="PermitDesc"/>
+			<ViewField name="AgencyLevel"/>
+			<ViewField name="Agency"/>
+			<ViewField name="CriticalPermit"/>
+			<ViewField name="ActivePermit"/>
+			<ViewField name="TransferRestrict"/>
+			<ViewField name="ModifyRestrict"/>
+			<ViewField name="EffectiveDate"/>
+			<ViewField name="ExpirationDate"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="oppap"/>
+				<ViewGrid moduleID="opppf"/>
+				<ViewGrid moduleID="oppp"/>
+				<ViewGrid moduleID="oppoa"/>
+				<ViewGrid moduleID="oppno"/>
+				<ViewGrid moduleID="oppcr"/>
+				<ViewGrid moduleID="opppc"/>
+				<ViewGrid moduleID="opprr"/>
+				<ViewGrid moduleID="oppba"/>
+				<ViewGrid moduleID="oppca"/>
+				<ViewGrid moduleID="oppea"/>
+				<ViewGrid moduleID="oppsa"/>
+				<ViewGrid moduleID="oppwa"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="busa"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an operating permit">
+			<ViewField name="OppPermitID"/>
+			<EditField name="PermitName" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<CodeComboField name="PermitCategoryID" findMode="text">
+				<UpdateFieldRef name="PermitTypeID" listParentField="PermitCategoryID"/>
+				<SampleItem ID="1" name="Environmental"/>
+				<SampleItem ID="2" name="Human Safety"/>
+				<SampleItem ID="3" name="Operating"/>
+			</CodeComboField>
+			<ComboField name="PermitTypeID" findMode="text" parentField="PermitCategoryID">
+				<UpdateFieldRef name="PermitTypeDesc"/>
+				<SampleItem ID="1" name="Stormwater Discharge"/>
+				<SampleItem ID="1" name="Process"/>
+				<SampleItem ID="3" name="Building"/>
+				<SampleItem ID="5" name="Operation"/>
+				<SampleItem ID="7" name="Release"/>
+			</ComboField>
+			<ViewField name="PermitTypeDesc" ParentField="PermitTypeID"/>
+			<MemoField name="PermitDesc" rows="5" cols="75"/>
+			<CodeComboField name="AgencyLevelID">
+				<UpdateFieldRef name="AgencyID"/>
+				<SampleItem ID="1" name="State"/>
+				<SampleItem ID="2" name="International"/>
+				<SampleItem ID="3" name="National"/>
+				<SampleItem ID="4" name="County"/>
+				<SampleItem ID="5" name="City"/>
+			</CodeComboField>
+			<OrgComboField name="AgencyID" findMode="text" parentField="AgencyLevelID">
+				<SampleItem ID="1" name="Ca. Environmental Protection Agency"/>
+				<SampleItem ID="2" name="US Department of Agriculture"/>
+				<SampleItem ID="3" name="US Occupational Safety and Health Administration"/>
+			</OrgComboField>
+			<CheckBoxField name="CriticalPermit"/>
+			<CheckBoxField name="ActivePermit"/>
+			<CheckBoxField name="TransferRestrict"/>
+			<CheckBoxField name="ModifyRestrict"/>
+			<DateField name="EffectiveDate"/>
+			<DateField name="ExpirationDate"/>
+		</EditScreen>
+		<EditScreen name="Application" phrase="Application|Associate permit applications with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppap"/>
+		</EditScreen>
+		<EditScreen name="Fees" phrase="Fees|Associate permit fees with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opppf"/>
+		</EditScreen>
+		<EditScreen name="Numbers" phrase="Numbers|Associate permit numbers with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppno"/>
+		</EditScreen>
+		<EditScreen name="Categories" phrase="Categories|Associate permit categories with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opppc"/>
+		</EditScreen>
+		<EditScreen name="Conditions" phrase="Conditions|Associate permit conditions with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppcr"/>
+		</EditScreen>
+		<EditScreen name="Reporting" phrase="Reporting|Associate reporting requirements with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="opprr"/>
+		</EditScreen>
+		<EditScreen name="Penalties" phrase="Penalties|Associate penalties with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppp"/>
+		</EditScreen>
+		<EditScreen name="Organizations" phrase="Organizations|Associate organizations affected with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppoa"/>
+		</EditScreen>
+		<EditScreen name="Buildings" phrase="Buildings|Associate buildings with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppba"/>
+		</EditScreen>
+		<EditScreen name="Chemicals" phrase="Chemicals|Associate chemicals affected by the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppca"/>
+		</EditScreen>
+		<EditScreen name="Equipment" phrase="Equipment|Associate equipment affected by the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppea"/>
+		</EditScreen>
+		<EditScreen name="Systems" phrase="Systems|Associate systems affected by the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppsa"/>
+		</EditScreen>
+		<EditScreen name="Waste" phrase="Waste|Associate waste streams by the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="oppwa"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit requirements with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessContinuation" phrase="Continuity|Associate an operating permit with business continuation requirements">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="busa"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate business agreements and/or contracts with an operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the operating permit">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with a physical operating permit file">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with an operating permit">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with an operating permit" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="OppPermitID"/>
+		<InvisibleField name="PermitTypeID"/>
+		<ViewField name="PermitName"/>
+		<ViewField name="Organization"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="PermitType"/>
+		<ViewField name="PermitTypeDesc"/>
+		<ViewField name="PermitDesc"/>
+		<ViewField name="EffectiveDate"/>
+		<ViewField name="ExpirationDate"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Operating Permits By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Operating Permits By Type">
+			<GroupByField name="PermitType"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Operating Permits By Type">
+			<GroupByField name="PermitType"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Operating Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Operating Permits By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Operating Permits By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Operating Permits By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Operating Permits By Agency Level">
+			<GroupByField name="AgencyLevel"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Operating Permits By Agency Level">
+			<GroupByField name="AgencyLevel"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Operating Permits By Agency">
+			<GroupByField name="Agency"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Operating Permits By Agency">
+			<GroupByField name="Agency"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Operating Permits Which Are Critical">
+			<GroupByField name="CriticalPermit"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Operating Permits Which Are Critical">
+			<GroupByField name="CriticalPermit"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Operating Permits By Category">
+			<GroupByField name="PermitCategory"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Operating Permits By Category">
+			<GroupByField name="PermitCategory"/>
+			<SummaryField name="OppPermitID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

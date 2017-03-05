@@ -1,0 +1,334 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Asset Protection Checklist Items" moduleID="aprci" parentModule="aprc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="C:\Emprise\ActiveAgenda\ModuleDef.xsd" singularRecordName="Checklist Item" pluralRecordName="Checklist Items" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="ChecklistItemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Checklist Item ID|An automatically assigned number used to associate checklist items with checklists" sample="1"/>
+		<TableField name="ChecklistID" type="int" validate="noValidation" phrase="Checklist|A combined field used to describe this checklist when associating it with other records" sample="1"/>
+		<ForeignField name="Checklist" foreignTable="aprc" foreignKey="ChecklistID" foreignField="Checklist" key="ChecklistID" joinType="left" phrase="Checklist|A combined field used to describe this checklist when associating it with other records" sample="Malaga Raisin Processing HAACP Checklist"/>
+		<ForeignField name="ChecklistTitle" foreignTable="aprc" foreignKey="ChecklistID" foreignField="ChecklistTitle" key="ChecklistID" joinType="left" phrase="Title|A brief title used to identify the checklist" sample="Malaga Raisin Processing HAACP Checklist"/>
+		<ForeignField name="ChecklistDesc" foreignTable="aprc" foreignKey="ChecklistID" foreignField="ChecklistDesc" key="ChecklistID" joinType="left" phrase="Description|A detailed description of the checklist, its scope, purpose and objective" sample="This checklist is designed for the Malaga Raisin Processing Lines. The checklist is designed to ensure all HAACP elements are in place and operating effectively."/>
+		<ForeignField name="ChecklistOrganizationID" foreignTable="aprc" foreignKey="ChecklistID" foreignField="OrganizationID" key="ChecklistID" joinType="left" phrase="Checklist Organization|The name of the organization associated with the checklist" sample="1"/>
+		<ForeignField name="ChecklistOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Organization" key="ChecklistOrganizationID" joinType="left" phrase="Checklist Organization|The name of the organization associated with the checklist" sample="Active Agenda, HQ"/>
+		<ForeignField name="PersonAccountableID" foreignTable="aprc" foreignKey="ChecklistID" foreignField="PersonAccountableID" key="ChecklistID" joinType="left" phrase="Person Accountable|The individual assigned accountability for the creation, modification, update and currency of the checklist" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned accountability for the creation, modification, update and currency of the checklist" sample="Mattias Thorslund"/>
+		<TableField name="AssetProtectID" type="int" validate="noValidation" phrase="Item|A combined field used to describe this checklist item when associating it with other records" sample="1"/>
+		<ForeignField name="AssetProtect" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtect" key="AssetProtectID" joinType="left" phrase="Item|A combined field used to describe this checklist item when associating it with other records" sample="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+		<ForeignField name="ReviewOrganizationID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="ReviewOrganizationID" key="AssetProtectID" joinType="left" phrase="Review Organization|The organization where this item is located and can be reviewed" sample="1"/>
+		<ForeignField name="ReviewOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ReviewOrganizationID" joinType="left" phrase="Review Organization|The organization where this item is located and can be reviewed" sample="Active Agenda, HQ"/>
+		<ForeignField name="ReviewLocationID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="ReviewLocationID" key="AssetProtectID" joinType="left" phrase="Review Location|Specific location within the facility where the item is located and can be reviewed" sample="1"/>
+		<ForeignField name="ReviewLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="ReviewLocationID" joinType="left" phrase="Review Location|Specific location within the facility where the item is located and can be reviewed" sample="Packaging Area"/>
+		<ForeignField name="AssetProtectCategoryID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtectCategoryID" key="AssetProtectID" joinType="left" phrase="Category|A general category used to catgorize asset protective measures for greater flexibility in developing checklists" sample="1"/>
+		<CodeField name="AssetProtectCategory" key="AssetProtectCategoryID" phrase="Category|A general category used to catgorize asset protection measures for greater flexibility in developing checklists" sample="Audit" codeTypeID="50"/>
+		<ForeignField name="AssetProtectPurposeID" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtectPurposeID" key="AssetProtectID" joinType="left" phrase="Purpose|The purpose of the asset protection method or measure" sample="1"/>
+		<CodeField name="AssetProtectPurpose" key="AssetProtectPurposeID" phrase="Purpose|The purpose of the asset protection method or measure" sample="Inventory" codeTypeID="101"/>
+		<ForeignField name="SchedFreq" foreignTable="apr" foreignKey="AssetProtectID" foreignField="SchedFreq" key="AssetProtectID" joinType="left" phrase="Frequency|The frequency at which the protective measure shall be applied" sample="1"/>
+		<TableField name="SchedFreqUnitsID" type="int" validate="RequireSelection" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+		<ForeignField name="SchedFreqUnitCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="SchedFreqUnitsID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+		<CodeField name="SchedFreqUnitCategory" key="SchedFreqUnitCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+		<ForeignField name="SchedFreqUnits" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="SchedFreqUnitsID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+		<ForeignField name="AssetProtectInstruct" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AssetProtectInstruct" key="AssetProtectID" joinType="left" phrase="Instructions|Brief instructions for the person performing the asset protection activity" sample="Perform an inventory count, record the results, and update the inventory balance within the equipment inventory module. If the count does not balance, the Accounting Deaprtment should be apprised of all discrepencies."/>
+		<ForeignField name="AcceptableCriteria" foreignTable="apr" foreignKey="AssetProtectID" foreignField="AcceptableCriteria" key="AssetProtectID" joinType="left" phrase="Acceptable Criteria|A brief description of the acceptable criteria for this asset" sample="Inventory counts should balance with the existing inventory level entered into the equipment inventory module."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Malaga Raisin Processing HAACP Checklist | Inventory of  Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"><CombinedFieldRef name="ChecklistTitle"/>;_<CombinedFieldRef name="AssetProtectPurpose"/>_of_<CombinedFieldRef name="AssetProtect"/></CombinedField>
+		<CombinedField name="ChecklistItem" phrase="Checklist Item|A combined field used to describe this record when associating it with other records" sample="Malaga Raisin Processing HAACP Checklist| Equipment | Active Agenda, HQ | 3M 3710 Air Purifying Respirator"><CombinedFieldRef name="ChecklistTitle"/>;_<CombinedFieldRef name="AssetProtect"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="ChecklistItemID"/>
+		</PrimaryKey>
+		<OwnerField name="ChecklistOrganizationID"/>
+		<RecordDescriptionField name="ChecklistItem"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List checklist items">
+			<ListField name="ChecklistItemID" phrase="Item ID"/>
+			<ListField name="ChecklistID" phrase="Checklist ID"/>
+			<ListField name="Checklist" phrase="Checklist Title"/>
+			<ListField name="AssetProtect" phrase="Item"/>
+			<ListField name="ReviewLocation" phrase="Review Location"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search checklist items">
+			<ComboField name="ChecklistID" findMode="text">
+				<SampleItem ID="1" name="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID 1"/>
+				<SampleItem ID="3" name="Malaga Raisin Processing Safety Checklist; Active Agenda, HQ; ID 2"/>
+				<SampleItem ID="5" name="Malaga Raisin Processing Quality Checklist; Active Agenda, HQ; ID 3"/>
+				<SampleItem ID="7" name="Malaga Raisin Processing Operations Checklist; Active Agenda, HQ; ID 4"/>
+			</ComboField>
+			<OrgComboField name="ChecklistOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="ReviewOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ReviewLocationID" findMode="text">
+				<SampleItem ID="1" name="Packaging Area"/>
+				<SampleItem ID="2" name="Zahlis Home| Front Room Nook |Development Zone"/>
+				<SampleItem ID="3" name="Zahlis Home| Kitchen |Break Room"/>
+				<SampleItem ID="4" name="Zahlis Home| Downstairs Bathroom |Restroom"/>
+			</ComboField>
+			<ComboField name="AssetProtectID" findMode="text">
+				<SampleItem ID="1" name="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+				<SampleItem ID="2" name="Equipment | ID:2 | Miller | Fall Arrest System"/>
+				<SampleItem ID="3" name="Equipment | ID:3 | Dynatek | Air Sampling Device"/>
+				<SampleItem ID="4" name="Equipment | ID:4 | Frick | Ammonia Screw Compressor"/>
+			</ComboField>
+			<CodeComboField name="AssetProtectCategoryID">
+				<SampleItem ID="1" name="Audit"/>
+				<SampleItem ID="2" name="Calibration"/>
+				<SampleItem ID="3" name="Inspection"/>
+				<SampleItem ID="4" name="Maintenance"/>
+				<SampleItem ID="5" name="Testing"/>
+			</CodeComboField>
+			<CodeComboField name="AssetProtectPurposeID">
+				<SampleItem ID="1" name="Inventory"/>
+				<SampleItem ID="2" name="Availability"/>
+				<SampleItem ID="3" name="Condition"/>
+				<SampleItem ID="4" name="Security"/>
+			</CodeComboField>
+			<EditField name="SchedFreq" size="5" maxLength="5">
+				<Self/>
+				<ComboField name="SchedFreqUnitCategoryID">
+					<UpdateFieldRef name="SchedFreqUnitsID"/>
+					<SampleItem ID="1" name="Time"/>
+					<SampleItem ID="2" name="Area"/>
+					<SampleItem ID="3" name="Distance"/>
+					<SampleItem ID="4" name="Packaging"/>
+					<SampleItem ID="5" name="Volume"/>
+					<SampleItem ID="6" name="Weight"/>
+				</ComboField>
+				<ComboField name="SchedFreqUnitsID" parentField="SchedFreqUnitCategoryID">
+					<SampleItem ID="1" name="Second"/>
+					<SampleItem ID="2" name="Minute"/>
+					<SampleItem ID="3" name="Hour"/>
+					<SampleItem ID="4" name="Day"/>
+				</ComboField>
+			</EditField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about checklist items">
+			<ViewField name="ChecklistItemID"/>
+			<ViewField name="ChecklistOrganization"/>
+			<ViewField name="Checklist"/>
+			<ViewField name="ChecklistDesc"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ReviewOrganization"/>
+			<ViewField name="ReviewLocation"/>
+			<ViewField name="AssetProtect"/>
+			<ViewField name="AssetProtectCategory"/>
+			<ViewField name="AssetProtectPurpose"/>
+			<ViewField name="SchedFreq">
+				<ViewField name="SchedFreqUnits"/>
+			</ViewField>
+			<ViewField name="AssetProtectInstruct"/>
+			<ViewField name="AcceptableCriteria"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Edit|Edit summary information about checklist items">
+			<ViewField name="ChecklistItemID"/>
+			<OrgComboField name="ChecklistOrganizationID" findMode="text">
+				<UpdateFieldRef name="ChecklistID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ChecklistID" findMode="text" parentField="ChecklistOrganizationID">
+				<SampleItem ID="1" name="Malaga Raisin Processing HAACP Checklist; Active Agenda, HQ; ID 1"/>
+				<SampleItem ID="3" name="Malaga Raisin Processing Safety Checklist; Active Agenda, HQ; ID 2"/>
+				<SampleItem ID="5" name="Malaga Raisin Processing Quality Checklist; Active Agenda, HQ; ID 3"/>
+				<SampleItem ID="7" name="Malaga Raisin Processing Operations Checklist; Active Agenda, HQ; ID 4"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<OrgComboField name="ReviewOrganizationID" findMode="text">
+				<UpdateFieldRef name="ReviewLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="5" name="Active Agenda, New York"/>
+				<SampleItem ID="7" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<ComboField name="ReviewLocationID" findMode="text" parentField="ReviewOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="AssetProtectID"/>
+				<SampleItem ID="1" name="Packaging Area"/>
+				<SampleItem ID="2" name="Zahlis Home| Front Room Nook |Development Zone"/>
+				<SampleItem ID="3" name="Zahlis Home| Kitchen |Break Room"/>
+				<SampleItem ID="4" name="Zahlis Home| Downstairs Bathroom |Restroom"/>
+			</ComboField>
+			<ComboField name="AssetProtectID" findMode="text" parentField="ReviewLocationID">
+				<SampleItem ID="1" name="Equipment | ID:1 | 3M | 3710 Air Purifying Respirator"/>
+				<SampleItem ID="2" name="Equipment | ID:2 | Miller | Fall Arrest System"/>
+				<SampleItem ID="3" name="Equipment | ID:3 | Dynatek | Air Sampling Device"/>
+				<SampleItem ID="4" name="Equipment | ID:4 | Frick | Ammonia Screw Compressor"/>
+			</ComboField>
+			<ViewField name="AssetProtectCategory"/>
+			<ViewField name="AssetProtectPurpose"/>
+			<ViewField name="SchedFreq">
+				<ViewField name="SchedFreqUnits"/>
+			</ViewField>
+			<ViewField name="AssetProtectInstruct"/>
+			<ViewField name="AcceptableCriteria"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="aprci" phrase="Checklist Items">
+			<InvisibleField name="ChecklistItemID"/>
+			<ViewField name="ReviewOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ReviewLocation" sample="Packaging Area"/>
+			<ViewField name="AssetProtect" sample="Equipment; Active Agenda, HQ; 3M 3710 Air Purifying Respirator"/>
+		</ViewGrid>
+		<EditGrid moduleID="aprci" phrase="Checklist Items">
+			<GridForm>
+				<InvisibleField name="ChecklistItemID"/>
+				<OrgComboField name="ReviewOrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="ReviewLocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="5" name="Active Agenda, New York"/>
+					<SampleItem ID="7" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<ComboField name="ReviewLocationID" findMode="text" parentField="ReviewOrganizationID" parentListModuleField="OrganizationID" sample="Packaging Area">
+					<UpdateFieldRef name="AssetProtectID"/>
+					<SampleItem ID="1" name="Packaging Area"/>
+					<SampleItem ID="2" name="Zahlis Home| Front Room Nook |Development Zone"/>
+					<SampleItem ID="3" name="Zahlis Home| Kitchen |Break Room"/>
+					<SampleItem ID="4" name="Zahlis Home| Downstairs Bathroom |Restroom"/>
+				</ComboField>
+				<ComboField name="AssetProtectID" findMode="text" parentField="ReviewLocationID" sample="Equipment; Active Agenda, HQ; 3M 3710 Air Purifying Respirator">
+					<SampleItem ID="1" name="Equipment; Active Agenda, HQ; 3M 3710 Air Purifying Respirator"/>
+					<SampleItem ID="1" name="Equipment; Active Agenda, HQ; Scott 8110 Self Contained Breathing Apparatus"/>
+					<SampleItem ID="3" name="Equipment; Active Agenda, HQ; Bullard  256 Hooded Tyvek Coverall"/>
+					<SampleItem ID="5" name="Equipment; Active Agenda, HQ; North 672 Neoprene steel toed Boot"/>
+					<SampleItem ID="7" name="Equipment; Active Agenda, HQ; Bullard 8823 Vinyl Bump Cap - Blue"/>
+				</ComboField>
+			</GridForm>
+			<ViewField name="ReviewOrganization" sample="Active Agenda, HQ"/>
+			<ViewField name="ReviewLocation" sample="Packaging Area"/>
+			<ViewField name="AssetProtect" sample="Equipment; Active Agenda, HQ; 3M 3710 Air Purifying Respirator"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,1742 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Injury Losses" moduleID="lin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Injury Loss" pluralRecordName="Injury Losses" allowAddRecord="no" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="LossInjuryID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track injuries resulting in loss" sample="11"/>
+		<ForeignField name="EventDate" type="datetime" foreignTable="ire" foreignKey="IncidentReportID" foreignField="EventDate" key="IncidentReportID" joinType="left" phrase="Event Date|Date the situation or incident occurred" sample="01/01/2004"/>
+		<ForeignField name="IncidentReport" foreignTable="ire" foreignKey="IncidentReportID" foreignField="IncidentReport" key="IncidentReportID" joinType="left" phrase="Incident Reported|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="Clovis; 10-28-2003; Thorslund Injury; Back Strain"/>
+		<!-- LOSS SPECIFIC FIELDS (BEGIN) -->
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization responsible for the location where this injury occurred" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for the location where this injury occurred" sample="Active Agenda, HQ"/>
+		<ForeignField name="City" foreignTable="org" foreignKey="OrganizationID" foreignField="City" key="OrganizationID" joinType="left" phrase="City|The name of the city where this organization is located" sample="Fresno"/>
+		<ForeignField name="State" foreignTable="org" foreignKey="OrganizationID" foreignField="State" key="OrganizationID" joinType="left" phrase="State|The name of the state where this organization is located" sample="California (CA)"/>
+		<ForeignField name="StateAbbreviation" foreignTable="org" foreignKey="OrganizationID" foreignField="StateAbbreviation" key="OrganizationID" joinType="left" phrase="State Abbreviation|A commonly used abbreviation" sample="CA"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="29" phrase="Person Accountable|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this incident and mitigating the associated loss" sample="Mattias Thorslund"/>
+		<RemoteField name="InjuredPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="44" phrase="Injured Person|The name of the injured or ill person" sample="1"/>
+		<ForeignField name="InjuredPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="InjuredPersonID" joinType="left" phrase="Injured Person|The name of the injured or ill person" sample="Jane Doe"/>
+		<ForeignField name="HomeAddress1" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeAddress1" key="InjuredPersonID" joinType="left" phrase="Home Address|First physical street address of the location where the individual lives" sample="937 N. Adler Ave."/>
+		<ForeignField name="HomeCity" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeCity" key="InjuredPersonID" joinType="left" phrase="Home City|City where the individual lives" sample="Clovis"/>
+		<ForeignField name="HomeState" foreignTable="ppl" foreignKey="PersonID" foreignField="HomeState" key="InjuredPersonID" joinType="left" phrase="State Abbreviation|The common abbreviation of a state, as used in a mailing address" sample="CA"/>
+		<ForeignField name="HomePostalCode" foreignTable="ppl" foreignKey="PersonID" foreignField="HomePostalCode" key="InjuredPersonID" joinType="left" phrase="Home Postal Code|Postal code used to direct mail to the individual's home address" sample="93611"/>
+		<ForeignField name="BirthDate" foreignTable="pple" foreignKey="PersonID" foreignField="Birthdate" key="InjuredPersonID" joinType="left" phrase="Birth Date|The date of the person's birth" sample="09-15-1965"/>
+		<CalculatedField name="Age" calcFunction="datediff_year_month" params="IncurredTime BirthDate" phrase="Age|The automatically calculated age of the employee as of the date of injury or illness" sample="32 years 3 Months"/>
+		<ForeignField name="HireDate" foreignTable="pple" foreignKey="PersonID" foreignField="HireDate" key="InjuredPersonID" joinType="left" phrase="Hire Date|The date the employee was hired by the organization" sample="01/01/2004"/>
+		<ForeignField name="Service" foreignTable="pple" foreignKey="PersonID" foreignField="Service" key="InjuredPersonID" joinType="left" phrase="Term of Employment|The automatically calculated amount of time the employee has worked for the company" sample="0 Years 3 Months"/>
+		<ForeignField name="GenderID" foreignTable="pple" foreignKey="PersonID" foreignField="GenderID" key="InjuredPersonID" joinType="left" phrase="Gender|Gender of the employee" sample="1"/>
+		<CodeField name="Gender" key="GenderID" phrase="Gender|Gender of the employee" sample="Male" codeTypeID="160"/>
+		<TableField name="JobTitleID" type="int" validate="RequireSelection" phrase="Job Title|The job title of the person injured at the time of this claim of injury" sample="1"/>
+		<ForeignField name="JobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="JobTitleName" key="JobTitleID" joinType="left" phrase="Job Title|The job title of the person injured at the time of this claim of injury" sample="1"/>
+		<RemoteField name="SupervisorID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="55" phrase="Supervisor|The name of the injured person's supervisor at the time of the injury" sample="1"/>
+		<ForeignField name="Supervisor" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SupervisorID" joinType="left" phrase="Supervisor|The name of the injured person's supervisor at the time of the injury or onset of illness" sample="Jane Doe"/>
+		<TableField name="HrsPerDay" type="float" validate="noValidation" phrase="Hours Worked Per Day|The average number of hours the injured person works per day" sample="8"/>
+		<TableField name="DaysPerWeek" type="float" validate="noValidation" phrase="Days Worked Per Week|The average amount of time the injured person works per week" sample="5"/>
+		<TableField name="EarningsCalculationMethodID" type="int" validate="noValidation" phrase="Calculation Method|The method used to calculate average earnings" sample="1"/>
+		<CodeField name="EarningsCalculationMethod" key="EarningsCalculationMethodID" phrase="Calculation Method|The method used to calculate average earnings" sample="Payroll Report (internal)" codeTypeID="141"/>
+		<TableField name="EarningsStartDate" type="date" validate="noValidation" phrase="Start Date|The start date used to calculate average earnings" sample="01/01/2004"/>
+		<TableField name="EarningsEndDate" type="date" validate="noValidation" phrase="End Date|The end date used to calculate average earnings" sample="02/01/2004"/>
+		<TableField name="LocalAvgDailyEarnings" type="money" validate="Money notZero notNegative" phrase="Daily Earnings (Local Currency)|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the currency of the local user" sample="80.00"/>
+		<TableField name="AvgDailyEarnings" type="money" validate="Money notZero notNegative" phrase="Daily Earnings|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the default currency for this site installation of the software" sample="80.00"/>
+		<TableField name="LocalAvgWeeklyEarnings" type="money" validate="Money notZero notNegative" phrase="Weekly Earnings (Local Currency)|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the currency of the local user" sample="400.00"/>
+		<TableField name="AvgWeeklyEarnings" type="money" validate="Money notZero notNegative" phrase="Weekly Earnings|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the default currency for this site installation of the software" sample="400.00"/>
+		<TableField name="LocalAvgMonthlyEarnings" type="money" validate="Money notZero notNegative" phrase="Monthly Earnings (Local Currency)|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the currency of the local user" sample="1,600.00"/>
+		<TableField name="AvgMonthlyEarnings" type="money" validate="Money notZero notNegative" phrase="Monthly Earnings|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the default currency for this site installation of the software" sample="1,600.00"/>
+		<TableField name="LocalAvgAnnualEarnings" type="money" validate="Money notZero notNegative" phrase="Annual Earnings (Local Currency)|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the currency of the local user" sample="19,200.00"/>
+		<TableField name="AvgAnnualEarnings" type="money" validate="Money notZero notNegative" phrase="Annual Earnings|An automatically calculated average amount of earnings based on the amount of time between the earnings start date and end date. This amount is stated in the default currency for this site installation of the software" sample="19,200.00"/>
+		<TableField name="EarningsAttached" type="bool" validate="noValidation" dbFlags="default 0" phrase="Earnings Calculation Attached|Whether the earnings calculations are attached to this record for review" sample="Yes"/>
+		<ForeignField name="EventDate" type="datetime" foreignTable="ire" foreignKey="IncidentReportID" foreignField="EventDate" key="IncidentReportID" joinType="left" phrase="Event Date|Date the situation or incident occurred" sample="01/01/2004"/>
+		<TableField name="ShiftID" type="int" validate="RequireSelection" phrase="Shift|The shift during which the injury occurred" sample="1"/>
+		<CodeField name="Shift" key="ShiftID" phrase="Shift|The shift during which the injury occurred" sample="1st - Day" codeTypeID="25"/>
+		<TableField name="TaskID" type="int" validate="RequireSelection" phrase="Task|A combined field used to describe this task when associating it with other records" sample="1"/>
+		<ForeignField name="TaskOrganizationID" listType="allParticipants" foreignTable="tas" foreignKey="TaskID" foreignField="OrganizationID" key="TaskID" joinType="left" phrase="Task Organization|The organization associated with the task being performed at the time of injury" sample="1"/>
+		<ForeignField name="TaskOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="TaskOrganizationID" joinType="left" phrase="Task Organization|The organization associated with the task being performed at the time of injury" sample="Active Agenda, HQ"/>
+		<ForeignField name="FunctionID" foreignTable="tas" foreignKey="TaskID" foreignField="FunctionID" key="TaskID" joinType="left" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="1"/>
+		<CodeField name="Function" key="FunctionID" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="Operations (Raisin)" codeTypeID="4"/>
+		<ForeignField name="TaskTypeID" listType="allParticipants" foreignTable="tas" foreignKey="TaskID" foreignField="TaskTypeID" key="TaskID" joinType="left" phrase="Task Type|A combined field used to describe this task type when associating it with other records" sample="1"/>
+		<ForeignField name="TaskCategoryID" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskCategoryID" key="TaskTypeID" joinType="left" phrase="Category|A broad categoy used to group tasks of similar types" sample="1"/>
+		<CodeField name="TaskCategory" key="TaskCategoryID" phrase="Category|A broad categoy used to group tasks of similar types" sample="Operating Machinery" codeTypeID="45"/>
+		<ForeignField name="TaskType" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskType" key="TaskTypeID" joinType="left" phrase="Task Type|A combined field used to describe this task type when associating it with other records" sample="Operating | Operating Bin Dump"/>
+		<ForeignField name="Task" foreignTable="tas" foreignKey="TaskID" foreignField="Task" key="TaskID" joinType="left" phrase="Task|A combined field used to describe this task when associating it with other records" sample="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area, Under Review"/>
+		<TableField name="InjuryTaskDesc" type="text" validate="notEmpty" phrase="Task Description|A detailed description of the task being performed at the time of injury" sample="Mr. Thorslund was washing bins using a high pressure hose and powered detergent."/>
+		<TableField name="InjuryExposureID" type="int" validate="RequireSelection" phrase="Exposure|A broad description of the exposure which led to the injury or illness" sample="1"/>
+		<ForeignField name="InjuryExposureCategoryID" foreignTable="linet" foreignKey="InjuryExposureTypeID" foreignField="InjuryExposureCategoryID" key="InjuryExposureID" joinType="left" phrase="Injury Exposure Type|A combined field used to describe this injury or illness exposure type when associating it with other records" sample="1"/>
+		<CodeField name="InjuryExposureCategory" key="InjuryExposureCategoryID" phrase="Exposure Category|A generic term or phrase used to group exposures to injury or illness" sample="Contact with Objects and Equipment" codeTypeID="195"/>
+		<ForeignField name="InjuryExposureTypeID" foreignTable="linex" foreignKey="InjuryExposureID" foreignField="InjuryExposureTypeID" key="InjuryExposureID" joinType="left" phrase="Injury Exposure Type|A combined field used to describe this injury or illness exposure type when associating it with other records" sample="1"/>
+		<ForeignField name="InjuryExposureType" foreignTable="linet" foreignKey="InjuryExposureTypeID" foreignField="InjuryExposureType" key="InjuryExposureTypeID" joinType="left" phrase="Injury Exposure Type|A combined field used to describe this injury or illness exposure type when associating it with other records" sample="Struck Against Object | Stepped on object"/>
+		<ForeignField name="InjuryExposure" foreignTable="linex" foreignKey="InjuryExposureID" foreignField="InjuryExposure" key="InjuryExposureID" joinType="left" phrase="Exposure|A broad description of the exposure which led to the injury or illness" sample="Contact with Objects and Equipment | Struck Against Object | Stepped on object"/>
+		<TableField name="InjuryExposureDesc" type="text" validate="noValidation" phrase="Exposure Description|A detailed description of the exposure which led to the injury or illness" sample="Mr. Thorslund was carrying sanitation pipes from the sanitation cage to the production floor when he strained his back"/>
+		<TableField name="InjurySource1ID" type="int" validate="RequireSelection" phrase="Primary Source|A term or phrase used to describe the primary source of the injury or illness" sample="1"/>
+		<ForeignField name="InjurySourceCategory1ID" foreignTable="linst" foreignKey="InjurySourceTypeID" foreignField="InjurySourceCategoryID" key="InjurySource1ID" joinType="left" phrase="Primary Source Category|A generic term or phrase used to group sources of injury or illness" sample="1"/>
+		<CodeField name="InjurySourceCategory1" key="InjurySourceCategory1ID" phrase="Primary Source Category|A generic term or phrase used to group sources of injury or illness" sample="Chemicals and Chemical Products" codeTypeID="27"/>
+		<ForeignField name="InjurySourceType1ID" foreignTable="linsc" foreignKey="InjurySourceID" foreignField="InjurySourceTypeID" key="InjurySource1ID" joinType="left" phrase="Primary Source Type|A combined field used to describe this source of injury or illness source type when associating it with other records" sample="1"/>
+		<ForeignField name="InjurySourceType1" foreignTable="linst" foreignKey="InjurySourceTypeID" foreignField="InjurySourceType" key="InjurySourceType1ID" joinType="left" phrase="Primary Source Type|A combined field used to describe this source of injury or illness source type when associating it with other records" sample="Chemicals and Chemical Products | Acids"/>
+		<ForeignField name="InjurySource1" foreignTable="linsc" foreignKey="InjurySourceID" foreignField="InjurySource" key="InjurySource1ID" joinType="left" phrase="Primary Source|A term or phrase used to describe the primary source of the injury or illness" sample="Machines; Drilling Machine"/>
+		<TableField name="InjurySource2ID" type="int" validate="noValidation" phrase="Secondary Source|A term or phrase used to describe the secondary source of the injury or illness" sample="1"/>
+		<ForeignField name="InjurySourceCategory2ID" foreignTable="linst" foreignKey="InjurySourceTypeID" foreignField="InjurySourceCategoryID" key="InjurySource2ID" joinType="left" phrase="Secondary Source Category|A generic term or phrase used to group sources of injury or illness" sample="1"/>
+		<CodeField name="InjurySourceCategory2" key="InjurySourceCategory2ID" phrase="Secondary Source Category|A generic term or phrase used to group sources of injury or illness" sample="Chemicals and Chemical Products" codeTypeID="27"/>
+		<ForeignField name="InjurySourceType2ID" foreignTable="linsc" foreignKey="InjurySourceID" foreignField="InjurySourceTypeID" key="InjurySource2ID" joinType="left" phrase="Secondary Source Type|A combined field used to describe this source of injury or illness source type when associating it with other records" sample="1"/>
+		<ForeignField name="InjurySourceType2" foreignTable="linst" foreignKey="InjurySourceTypeID" foreignField="InjurySourceType" key="InjurySourceType2ID" joinType="left" phrase="Secondary Source Type|A combined field used to describe this source of injury or illness source type when associating it with other records" sample="Chemicals and Chemical Products | Acids"/>
+		<ForeignField name="InjurySource2" foreignTable="linsc" foreignKey="InjurySourceID" foreignField="InjurySource" key="InjurySource2ID" joinType="left" phrase="Secondary Source|A term or phrase used to describe the secodary source of the injury or illness" sample="Machines; Drilling Machine"/>
+		<TableField name="InjurySourceDesc" type="text" validate="noValidation" phrase="Source Description|A detailed description of the source of the injury and/or illness" sample="Mr. Thorslund was operating the drilling machine in the Maintenance Department when he drilled through his finger. The guide on the drilling machine had been removed."/>
+		<TableField name="InjuryObject" type="varchar(128)" validate="notEmpty" phrase="Object|A short phrase used to describe the specific onject causing injury" sample="Maintenance Shop Drill Press #2"/>
+		<TableField name="ObjectDesc" type="text" validate="noValidation" phrase="Object Description|A detailed description of the the object causing injury or illness and any special characteristics of the object at the time of the incident" sample="This drill press was out of service when Mr. Thorslund was using it. Mr. Thorslund detached the key fob and lock used to secure power to the drill press during maintenance."/>
+		<!-- US Federal OSHA fields required for recordkeeping purposes-->
+		<TableField name="RegulatoryRecordable" type="bool" validate="noValidation" dbFlags="default 0" phrase="Recordable?|Whether the injury is recordable based on a regulatory requirement" sample="Yes"/>
+		<TableField name="PrivacyCase" type="bool" validate="noValidation" dbFlags="default 0" phrase="Privacy Case?|Whether the injury is a privacy case and should not include the employee name on the record keeping log" sample="Yes"/>
+		<CalculatedField name="InjuredPersonWPrivacy" calcFunction="if" params="PrivacyCase +Privacy_Case InjuredPerson" phrase="Injured Person|The name of the injured or ill person" sample="Jim Doe"/>
+		<TableField name="Rationale" type="text" validate="noValidation" phrase="Rationale|A detailed description of the rationale for identifying this injury as a regulatory recordable injury" sample="The injury resulted in days of lost work which meets the OSHA definition for recordability."/>
+		<TableField name="WorkBegan" type="datetime" validate="noValidation" phrase="Began Work|The time the person began work on the date the injury or illness occurred" sample="8:00 am"/>
+		<TableField name="DateofDeath" type="date" validate="noValidation" phrase="Date of Death|If person died, the date that death occurred" sample="01/01/2004"/>
+		<TableField name="InjuryIllnessCategoryID" type="int" dbFlags="unsigned not null" phrase="Injury or Illness Category|Select one of these categories. Categorize the injury by selecting the most serious outcome of the injury" sample="1"/>
+		<ForeignField name="InjIllCategoryID" foreignTable="linc" foreignKey="InjuryIllnessCategoryID" foreignField="InjIllCategoryID" key="InjuryIllnessCategoryID" joinType="left" phrase="Category|A broadly defined title or phrase used to group similar categories of injuries and illnesses" sample="1"/>
+		<CodeField name="InjIllCategory" key="InjIllCategoryID" phrase="Category|A broadly defined title or phrase used to group similar categories of injuries and illnesses" sample="Other Recordable" codeTypeID="168"/>
+		<ForeignField name="CategoryDesc" foreignTable="linc" foreignKey="InjuryIllnessCategoryID" foreignField="CategoryDesc" key="InjuryIllnessCategoryID" joinType="left" phrase="Category Description|A brief but thorough description of the injury or illness category" sample="All illnesses resulting in medical treatment beyond first aid but not resulting in days away from work or days of restricted work"/>
+		<ForeignField name="InjuryIllnessCategory" foreignTable="linc" foreignKey="InjuryIllnessCategoryID" foreignField="InjuryIllnessCategory" key="InjuryIllnessCategoryID" joinType="left" phrase="Injury or Illness Category|Select one of these categories. Categorize the injury by selecting the most serious outcome of the injury" sample="Other Recordable"/>
+		<TableField name="InjuryIllnessTypeID" type="int" dbFlags="unsigned not null" phrase="Injury or Illness Type|Note whether the case involves an injury or an illness. If more than one type is true of the injury, please select the type of injury or illness having the most pronounced impact on the health of the injured person" sample="1"/>
+		<ForeignField name="InjIllTypeID" foreignTable="lint" foreignKey="InjuryIllnessTypeID" foreignField="InjIllTypeID" key="InjuryIllnessTypeID" joinType="left" phrase="Injury or Illness Type|A title or phrase used to describe a specific type of injury or illness" sample="1"/>
+		<CodeField name="InjIllType" key="InjIllTypeID" phrase="Injury or Illness Type|A title or phrase used to describe a specific type of injury or illness" sample="All other illnesses" codeTypeID="169"/>
+		<ForeignField name="InjuryIllnessTypeDesc" foreignTable="lint" foreignKey="InjuryIllnessTypeID" foreignField="InjuryIllnessTypeDesc" key="InjuryIllnessTypeID" joinType="left" phrase="Type Description|A brief but thorough description of the specific type of injury or illness type" sample="All illnesses resulting in medical treatment beyond first aid but not resulting in days away from work or days of restricted work"/>
+		<ForeignField name="InjuryIllnessType" foreignTable="lint" foreignKey="InjuryIllnessTypeID" foreignField="InjuryIllnessType" key="InjuryIllnessTypeID" joinType="left" phrase="Injury or Illness Type|Note whether the case involves an injury or an illness. If more than one type is true of the injury, please select the type of injury or illness having the most pronounced impact on the health of the injured person" sample="Other Recordable"/>
+		<TableField name="PrimaryTreatingFacilityID" type="int" listType="allParticipants" validate="noValidation" phrase="Treating Facility|The organization providing primary treatment for the injury or illness" sample="1"/>
+		<ForeignField name="PrimaryTreatingFacility" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PrimaryTreatingFacilityID" joinType="left" phrase="Treating Facility|The organization providing primary treatment for the injury or illness" sample="Dr. Makum Holegain"/>
+		<ForeignField name="TreatingAddress1" foreignTable="org" foreignKey="OrganizationID" foreignField="Address1" key="PrimaryTreatingFacilityID" joinType="left" phrase="Address|The physical street address where the treating facility is located" sample="937 N. Adler Ave."/>
+		<ForeignField name="TreatingStateAbbreviation" foreignTable="org" foreignKey="OrganizationID" foreignField="StateAbbreviation" key="PrimaryTreatingFacilityID" joinType="left" phrase="State|The state where the treating facility is located" sample="CA"/>
+		<ForeignField name="TreatingCity" foreignTable="org" foreignKey="OrganizationID" foreignField="City" key="PrimaryTreatingFacilityID" joinType="left" phrase="City|The name of the city where the treating facility is located" sample="Fresno"/>
+		<ForeignField name="TreatingPostalCode" foreignTable="org" foreignKey="OrganizationID" foreignField="PostalCode" key="PrimaryTreatingFacilityID" joinType="left" phrase="Postal Code|The numerical postal code where the treating facility is located" sample="93612"/>
+		<RemoteField name="TreatingPhysicianID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="84" phrase="Treating Physician|The name of the primary treating physician" sample="1"/>
+		<ForeignField name="TreatingPhysician" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TreatingPhysicianID" joinType="left" phrase="Treating Physician|The name of the primary treating physician" sample="Jane Doe"/>
+		<TableField name="EmergencyRoom" type="bool" validate="noValidation" dbFlags="default 0" phrase="Emergency Room?|Whether the employee received treatment in an emergency room" sample="Yes"/>
+		<TableField name="Hospitalized" type="bool" validate="noValidation" dbFlags="default 0" phrase="Hospitalized?|Whether the employee was hospitalized overnight" sample="Yes"/>
+		<!--automatically calculated based on the number of ActualDays away entered into the <linm> table. The calculation should include ALL "DaysAway(ct)" with the same [*LossInjuryID*]. DaysAway [i.e. value=2] and Days Modified [i.e. value=1] in the ModificationType codeTypeID. DFZ 12-17-2003-->
+		<SummaryField name="DaysAway" summaryFunction="sum" summaryField="ActualDays" summaryKey="LossInjuryID" summaryModuleID="linm" summaryCondition="ModificationTypeID = 1" localKey="LossInjuryID" phrase="Days Away|An automatic calculation of the total number of days the injured or ill person was away from work as a result of this injury or illness" sample="20"/>
+		<!--automatically calculated based on the number of ActualDays modified entered into the <linm> table. The calculation should include ALL "DaysModified(ct)" with the same [*LossInjuryID*]. DaysAway [i.e. value=2] and Days Modified [i.e. value=1] in the ModificationType codeTypeID. DFZ 12-17-2003-->
+		<SummaryField name="DaysModified" summaryFunction="sum" summaryField="ActualDays" summaryKey="LossInjuryID" summaryModuleID="linm" summaryCondition="ModificationTypeID = 2" localKey="LossInjuryID" phrase="Days Modified|An automatic calculation of the total number of days the injured or ill person was performing modified work as a result of this injury or illness" sample="36"/>
+		<SummaryField name="InjuryDescription" summaryFunction="list" summaryField="InjuryDescription" summaryKey="LossInjuryID" summaryModuleID="lini" localKey="LossInjuryID" phrase="Injury Description|An automatic summary of the classified injuries" sample="36"/>
+		<CombinedField name="IncidentDescription" phrase="Incident Description|A description of what the injury or illness was, and how it happened"><CombinedFieldRef name="InjuryDescription"/>;_
+            <CombinedFieldRef name="InjuryObject"/></CombinedField>
+		<TableField name="RecorderJobTitleID" type="int" validate="noValidation" phrase="Recorder Job Title|The job title of the person recording this injury or illness on the OSHA form 301" sample="1"/>
+		<ForeignField name="RecorderJobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="JobTitleName" key="RecorderJobTitleID" joinType="left" phrase="Recorder Job Title|The job title of the person recording this injury or illness on the OSHA form 301" sample="1"/>
+		<RemoteField name="RecordingPersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="146" phrase="Recording Person|The individual responsible for identifying the injury as recordable and entering the injury on the recordable injury log" sample="1"/>
+		<ForeignField name="RecordingPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="RecordingPersonID" joinType="left" phrase="Recording Person|The individual responsible for identifying the injury as recordable and entering the injury on the recordable injury log" sample="Mattias Thorslund"/>
+		<ForeignField name="RecordingPersonPhone" foreignTable="ppl" foreignKey="PersonID" foreignField="FullWorkPhone" key="RecordingPersonID" joinType="left" phrase="Work Phone|Telephone number of the individual at their place of work" sample="(559)299-8054, ext. 2112"/>
+		<RecordMetaField name="ModifiedDate" returnType="date" lookupType="modified" phrase="Modified Date|Date the record was last modified"/>
+		<CombinedField name="301TaskDesc" phrase="Task Description|A combined field used to describe the task being performed by the employee at the time of injury and used to populate the OSHA Form 301" sample=""><CombinedFieldRef name="Task"/>:_
+            <CombinedFieldRef name="InjuryTaskDesc"/></CombinedField>
+		<CombinedField name="301ExposureDesc" phrase="Exposure Description|A combined field used to describe the exposure leading to the injury and used to populate the OSHA Form 301" sample=""><CombinedFieldRef name="InjuryExposure"/>:_
+            <CombinedFieldRef name="InjuryExposureDesc"/></CombinedField>
+		<CombinedField name="301ObjectDesc" phrase="Object Description|A combined field used to describe the object injuring the employee and populate the OSHA Form 301" sample=""><CombinedFieldRef name="InjuryObject"/>:_
+            <CombinedFieldRef name="ObjectDesc"/></CombinedField>
+		<!--US Federal OSHA fields required for recordkeeping purposes ends-->
+		<!-- LOSS SPECIFIC FIELDS (END) -->
+		<!-- CLAIM DATA (BEGIN)-->
+		<RemoteFields remoteModuleID="clm" remoteModuleIDField="RelatedModuleID" remoteRecordIDField="RelatedRecordID">
+			<!-- picks up ClaimID from clm. Do not use an editable field -->
+			<RemoteField name="IncidentReportID" type="int" remoteField="IncidentReportID" phrase="Incident Report|A description of the incident reported based on a combination of field values assigned from within the Incident Reports module" sample="11"/>
+			<RemoteField name="ClaimID" type="int" remoteField="ClaimID" phrase="Claim ID|The record ID field of the Claims module" sample="01/01/2004"/>
+			<!-- REMOTE REMOTEFIELDS IN clm (Begin)-->
+			<RemoteField name="ReportDate" type="datetime" remoteField="ReportDate" phrase="Report Date|Date the loss was reported" sample="01/01/2004"/>
+			<RemoteField name="ClaimDate" type="date" remoteField="ClaimDate" phrase="Claim Date|Date the claim was officially submitted to an insurance carrier or third party administrator" sample="01/01/2004"/>
+			<RemoteField name="ClosureDate" type="date" remoteField="ClosureDate" phrase="Claim Closure Date|The date the claim was closed" sample="01/01/2004"/>
+			<RemoteField name="IncurredTime" type="datetime" validate="RequireSelection" remoteField="IncurredTime" phrase="Incurred Date|Date the injury occurred or the first day the illness was noticed" sample="01/01/2004"/>
+			<RemoteField name="TimeDeterminable" type="bool" validate="RequireSelection" remoteField="TimeDeterminable" phrase="Time Determinable?|Whether the time the loss occurred is determinable" sample="Yes"/>
+			<RemoteField name="LocationID" type="int" remoteField="LocationID" phrase="Location|Specific location within the facility where the injury or illness occurred" sample="1"/>
+			<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where the injury or illness  occurred" sample="Packaging Area"/>
+			<ForeignField name="LocationName" foreignTable="orgl" foreignKey="LocationID" foreignField="LocationName" key="LocationID" joinType="left" phrase="Location Name|Name of a specific location of a specific organization" sample="Cold Storage Receiving Area"/>
+			<RemoteField name="LossLegitimacyTypeID" type="int" remoteField="LossLegitimacyTypeID" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="1"/>
+			<ForeignField name="LegitimacyCategoryID" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyCategoryID" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="1"/>
+			<CodeField name="LegitimacyCategory" key="LegitimacyCategoryID" phrase="Legitimacy Category|A broadly defined title or phrase used to group claims of similar loss legitimacy" sample="Legitimate" codeTypeID="191"/>
+			<ForeignField name="LegitimacyDesc" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LegitimacyDesc" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Description|A brief, but detailed, description of the legitimacy type" sample="Any loss claim that results from an indisputable, work-related, injury and the injured person is actively engaged in proactive treatment towards revovery."/>
+			<ForeignField name="LossLegitimacyType" foreignTable="llit" foreignKey="LossLegitimacyTypeID" foreignField="LossLegitimacyType" key="LossLegitimacyTypeID" joinType="left" phrase="Legitimacy Type|A combined field used to describe the legitimacy type when associating it with other records" sample="Legitimate | Clear Liability; Active Treatment"/>
+			<!-- REMOTE REMOTEFIELDS IN clm (End)-->
+			<!-- REMOTE TABLEFIELDS IN clm (Begin)-->
+			<RemoteField name="PersonReportingID" type="int" remoteField="PersonReportingID" phrase="Person Reporting|The name of the individual that reported the injury loss" sample="1"/>
+			<ForeignField name="PersonReporting" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonReportingID" joinType="left" phrase="Person Reporting|The name of the individual that reported the injury loss" sample="Jane Doe"/>
+			<RemoteField name="EntryDate" remoteField="EntryDate" type="datetime" phrase="Entry Date|Date the loss was first entered into the system" sample="01/01/2004"/>
+			<RemoteField name="SubmittedByID" remoteField="SubmittedByID" type="int" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="1"/>
+			<ForeignField name="SubmittedBy" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="SubmittedByID" joinType="left" phrase="Submitted By|The name of the individual that submitted this report into the system" sample="Jane Doe"/>
+			<RemoteField name="PolicyID" remoteField="PolicyID" validate="noValidation" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="1"/>
+			<ForeignField name="InsuranceTypeID" foreignTable="ins" foreignKey="PolicyID" foreignField="InsuranceTypeID" key="PolicyID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="1"/>
+			<ForeignField name="InsuranceCategoryID" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceCategoryID" key="InsuranceTypeID" joinType="left" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="1"/>
+			<CodeField name="InsuranceCategory" key="InsuranceCategoryID" phrase="Insurance Category|A short but descriptive phrase used to group similar insurances" sample="Property" codeTypeID="3"/>
+			<ForeignField name="InsuranceType" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceType" key="InsuranceTypeID" joinType="left" phrase="Policy Type|The type of insurance policy associated with the related record" sample="Active Agenda, HQ"/>
+			<ForeignField name="IntegrationKey" foreignTable="ins" foreignKey="PolicyID" foreignField="IntegrationKey" key="PolicyID" joinType="left" phrase="Integration Key|An alpha, numeric, or alphanumeric value assigned by the claims administration company to enable data sharing between the claims administrator and the organization" sample="DFC2004DFN001"/>
+			<ForeignField name="Policy" foreignTable="ins" foreignKey="PolicyID" foreignField="Policy" key="PolicyID" joinType="left" phrase="Policy|A description of the insurance policy based on a combination of field values assigned from within the Insurance Policies module" sample="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+			<RemoteField name="ClaimNumber" remoteField="ClaimNumber" type="varchar(50)" validate="noValidation" phrase="Claim Number|A unique number assigned by an insurance company or third party administrator responsible for managing the claim" sample="03-001-6717"/>
+			<RemoteField name="ClaimsAdjusterID" type="int" remoteField="ClaimsAdjusterID" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="1"/>
+			<ForeignField name="ClaimsAdjuster" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="ClaimsAdjusterID" joinType="left" phrase="Claims Adjuster|The individual assigned primary accountability for adjusting this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+			<RemoteField name="LossStatusTypeID" remoteField="LossStatusTypeID" type="int" validate="RequireSelection" phrase="Status Type|A combined field used to describe this loss status type when associating it with other records" sample="1"/>
+			<ForeignField name="LossStatusCategoryID" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusCategoryID" key="LossStatusTypeID" joinType="left" phrase="Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="1"/>
+			<CodeField name="LossStatusCategory" key="LossStatusCategoryID" phrase="Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="Open" codeTypeID="9"/>
+			<ForeignField name="LossStatusType" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusType" key="LossStatusTypeID" joinType="left" phrase="Status Type|A combined field used to describe this loss status type when associating it with other records" sample="Open: Active"/>
+			<ForeignField name="GeneralLossStatusDescription" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusDescription" key="LossStatusTypeID" joinType="left" phrase="General Status Description|A detailed description of the loss status type" sample="Claims of loss that are open and the claimant is actively seeking treatment and/or engaging the adjuster towards a resolution"/>
+			<RemoteField name="SpecificLossStatusDescription" remoteField="SpecificLossStatusDescription" type="text" validate="noValidation" phrase="Specific Status Description|A detailed description of the status of the specific claim of loss" sample="The settlement offer is under consideration by the claimant. We offer a settlement every six months and the claimant has indicated a desire to settle the claim this time."/>
+			<RemoteField name="OnCoPropID" remoteField="OnCoPropID" type="int" validate="noValidation" phrase="On Company Property|This box should be checked if the injury or illness occurred on company property" sample="1"/>
+			<CodeField name="OnCoProp" key="OnCoPropID" phrase="On Company Property|This box should be checked if the injury or illness occurred on company property" sample="Yes" codeTypeID="8"/>
+			<RemoteField name="LocalClaimManagerID" type="int" remoteField="LocalClaimManagerID" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="1"/>
+			<ForeignField name="LocalClaimManager" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="LocalClaimManagerID" joinType="left" phrase="Local Claim Manager|The individual assigned primary accountability for managing this claim and mitigating the associated loss" sample="Mattias Thorslund"/>
+			<RemoteField name="IncurredLocationDesc" remoteField="IncurredLocationDesc" type="text" validate="noValidation" phrase="Location Description|A detailed description of the location where the injury or illness occurred" sample="7-Eleven retail establishment. Backstock freezer"/>
+			<RemoteField name="IncurredAddress1" remoteField="IncurredAddress1" type="varchar(50)" validate="noValidation" phrase="Incurred Address|First physical street address of the location where the injury loss occurred" sample="836 Cherry Lane"/>
+			<RemoteField name="IncurredAddress2" remoteField="IncurredAddress2" type="varchar(50)" validate="noValidation" phrase="Incurred Address|Second physical street address of the location where the injury loss occurred; such as, suite number or p.o. box" sample="Suite 101"/>
+			<RemoteField name="IncurredCountyID" remoteField="IncurredCountyID" type="int" validate="noValidation" phrase="Incurred County|A combined field used to track and associate counties" sample="1"/>
+			<ForeignField name="IncurredCountryID" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="CountryID" key="IncurredStateID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="1"/>
+			<ForeignField name="IncurredCountry" foreignTable="ctr" foreignKey="CountryID" foreignField="CountryName" key="IncurredCountryID" joinType="left" phrase="Incurred Country|The name of the country where the loss was incurred" sample="United States of America (USA)"/>
+			<ForeignField name="IncurredStateID" foreignTable="cti" foreignKey="CountyID" foreignField="StateID" key="IncurredCountyID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="1"/>
+			<ForeignField name="IncurredState" foreignTable="sta" foreignTableAlias="sta1a" foreignKey="StateID" foreignField="StateName" key="IncurredStateID" joinType="left" phrase="Incurred State|The name of the state where the loss was incurred" sample="California (CA)"/>
+			<ForeignField name="IncurredCounty" foreignTable="cti" foreignKey="CountyID" foreignField="CountyName" key="IncurredCountyID" joinType="left" phrase="Incurred County|A combined field used to track and associate counties" sample="Fresno"/>
+			<RemoteField name="IncurredCity" remoteField="IncurredCity" type="varchar(50)" validate="noValidation" phrase="Incurred City|City where the injury or illness occurred" sample="Clovis"/>
+			<RemoteField name="IncurredPostalCode" remoteField="IncurredPostalCode" type="varchar(50)" validate="noValidation" phrase="Incurred Postal Code|Postal code used to direct mail to the physical street address where the injury or illness occurred" sample="93612"/>
+			<RemoteField name="LossStatusTypeID" remoteField="LossStatusTypeID" type="int" validate="noValidation" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="1"/>
+			<ForeignField name="LossStatusCategoryID" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusCategoryID" key="LossStatusTypeID" joinType="left" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="1"/>
+			<CodeField name="LossStatusCategory" key="LossStatusCategoryID" phrase="Loss Status Category|A broadly defined title or phrase used to group similar categories of loss status types" sample="Open" codeTypeID="9"/>
+			<ForeignField name="LossStatusType" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusType" key="LossStatusTypeID" joinType="left" phrase="Loss Status Type|A combined field used to describe this loss status type when associating it with other records" sample="Open: Active"/>
+			<ForeignField name="GeneralLossStatusDescription" foreignTable="lstt" foreignKey="LossStatusTypeID" foreignField="LossStatusDescription" key="LossStatusTypeID" joinType="left" phrase="General Status Description|A detailed description of the loss status type" sample="Claims of loss that are open and the claimant is actively seeking treatment and/or engaging the adjuster towards a resolution"/>
+			<RemoteField name="SpecificLossStatusDescription" remoteField="SpecificLossStatusDescription" type="text" validate="noValidation" phrase="Specific Status Description|A detailed description of the status of the specific claim of loss" sample="The settlement offer is under consideration by the claimant. We offer a settlement every six months and the claimant has indicated a desire to settle the claim this time."/>
+			<!-- REMOTE TABLEFIELDS IN clm (End)-->
+		</RemoteFields>
+		<!-- CLAIM DATA (END)-->
+		<!--COSTS AND SEVERITY SECTION (BEGIN)-->
+		<!-- These fields should ideally NOT be used on screens in the module itself. They are part of the calculation of TotalCost and CostSeverity, and add (quite) a bit of overhead to the SQL that retrieves a record. Rather, use the "cached" counterparts below, which are updated whenever the cost changes.-->
+		<SummaryField name="ClaimCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="TotalIncurred" localKey="LossInjuryID" summaryKey="RelatedRecordID" summaryModuleID="clm" phrase="Claim Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+		<SummaryField name="RollupCosts" type="money" validate="noValidation" summaryFunction="cos_rollup_sum" summaryField="Incurred" localKey="LossInjuryID" summaryKey="RecordID" summaryModuleID="cos" summaryCondition="ModuleID = 'len'" isGlobal="yes" phrase="Rollup Costs|The total estimated amount of the cost to manage and mitigate claims related to this incident" sample="702.00"/>
+		<SummaryField name="LocalCosts" type="money" validate="noValidation" summaryFunction="sum" summaryField="Incurred" localKey="LossInjuryID" summaryKey="RelatedRecordID" summaryModuleID="cos" summaryCondition="RelatedModuleID = 'len'" isGlobal="yes" phrase="Local Costs|The estimated amount of costs attached directly to this record" sample="702.00"/>
+		<CalculatedField name="TotalCost" type="money" calcFunction="sum" params="ClaimCosts RollupCosts LocalCosts" phrase="Total Cost|The automatically calculated cost associated with this incident. Costs are derived by compiling all claim costs and those costs associated with managing this incident and tracked within the Costs module" sample="702.00"/>
+		<RangeField name="CostSeverityID" foreignTable="rsks" foreignKey="SeverityLowCost" foreignField="SeverityID" key="TotalCost" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<ForeignField name="CostSeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<ForeignField name="CostSeverity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="CostSeverityID" joinType="left" phrase="Cost Severity|An automatically calculated severity category, based on the threshold values for Severity" sample="1"/>
+		<!-- The CachedTotalCost and CachedSeverityValue fields should replace their counterparts in ViewFields on the screens below. Their "non-cached" counterparts  -->
+		<RemoteField name="CachedTotalCost" type="money" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="TotalCost" phrase="Total Cost|The total cost of this incident" sample="1.00"/>
+		<RemoteField name="CachedSeverityValue" type="int" remoteModuleID="csc" remoteModuleIDField="ModuleID" remoteRecordIDField="RecordID" remoteField="SeverityValue" phrase="Cost Severity|The severity this incident" sample="1.00"/>
+		<!-- now uses the cached cost severity value -->
+		<CalculatedField name="CalculatedSeverityValue" type="int" calcFunction="max" params="CachedSeverityValue SeverityValue" phrase="Calculated Severity Value|The greater of the User-assigned severity value and the acutomaticlly assigned Cost Severity value" sample="3"/>
+		<RemoteField name="LikelihoodID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodID" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="1"/>
+		<ForeignField name="LikelihoodValue" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="LikelihoodValue" key="LikelihoodID" joinType="left" phrase="Likelihood Value|A numerical value assigned to the likelihood of risk occurrence. The likelihood value is used in combination with the severity value to calculate a risk index score and an associated recommendation to mitigate the risk" sample="3"/>
+		<ForeignField name="RiskLikelihoodTerm" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="RiskLikelihoodTerm" key="LikelihoodID" joinType="left" phrase="Risk Likelihood Term|A one word description of the risk likelihood level" sample="Remote"/>
+		<ForeignField name="Likelihood" foreignTable="rskl" foreignKey="LikelihoodID" foreignField="Likelihood" key="LikelihoodID" joinType="left" phrase="Risk Likelihood|A description of the risk likelihood based on a combination of field values assigned from within the Risk Likelihoods module" sample="REMOTE: Extremely unlikely to occur"/>
+		<RemoteField name="LikelihoodStatusID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="1"/>
+		<CodeField name="LikelihoodStatus" key="LikelihoodStatusID" phrase="Likelihood Status|The present status of efforts to resolve the likelihood that this risk will occur, continue, or repeat" sample="Resolved" codeTypeID="112"/>
+		<RemoteField name="LikelihoodFactors" validate="notEmpty" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LikelihoodFactors" phrase="Likelihood Factors|A detailed description of the factors affecting the likelihood that this risk will occur, continue, or repeat" sample="SCBAs were purchased for all First Responders and all responders have been trained by the Fire Department"/>
+		<RemoteField name="SeverityID" validate="RequireSelection" remoteModuleID="rskxa" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="SeverityID" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="1"/>
+		<ForeignField name="SeverityValue" foreignTable="rsks" foreignKey="SeverityID" foreignField="SeverityValue" key="SeverityID" joinType="left" phrase="Severity Value|A numerical value assigned to the severity of risk or loss. The severity value is used in combination with the likelihood value to calculate a risk index score and an associated recommendation to mitigate the risk of loss" sample="6"/>
+		<ForeignField name="RiskSeverityTerm" foreignTable="rsks" foreignKey="SeverityID" foreignField="RiskSeverityTerm" key="SeverityID" joinType="left" phrase="Risk Severity Term|A one word description of the risk severity level" sample="SLIGHT"/>
+		<ForeignField name="Severity" foreignTable="rsks" foreignKey="SeverityID" foreignField="Severity" key="SeverityID" joinType="left" phrase="Risk Severity|A description of the risk severity based on a combination of field values assigned from within the Risk Severities module" sample="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+		<CalculatedField name="IndexValue" type="int" calcFunction="multiply" params="LikelihoodValue CalculatedSeverityValue" phrase="Index Value|A calculated field based on the risk likelihood and risk severity. The resulting risk index value is compared against the assigned risk index recommendations entered into the Risk Index module and the respective recommendation is displayed" sample="15"/>
+		<RangeField name="RiskRecommendation" foreignTable="rskx" foreignKey="IndexValue" foreignField="RiskRecommendation" key="IndexValue" phrase="Recommended Action|An automatically assigned recommendation, based on the values assigned for Likelihood and Severity" sample="Take action if and when appropriate"/>
+		<!--COSTS AND SEVERITY SECTION (END)-->
+		<!-- COMBINED FIELDS (BEGIN)-->
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Jane Doe | Active Agenda, HQ | 01-01-2004 02:37:00"><CombinedFieldRef name="InjuredPerson"/>_of_<CombinedFieldRef name="Organization"/>_was_injured_ on_<CombinedFieldRef name="IncurredTime"/></CombinedField>
+		<CombinedField name="LossInjury" phrase="Loss Injury|A combined field used to describe this injury loss when associating it with other records" sample="Jane Doe; Active Agenda, HQ; Packaging Area; 01-01-2004"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="InjuredPerson"/></CombinedField>
+		<!-- COMBINED FIELDS (END)-->
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LossInjuryID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="LossInjury"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="lini" name="Injury and/or Illness" parentKey="LossInjuryID" localKey="LossInjuryID"/>
+		<SubModule moduleID="line" name="Average Earnings Module" parentKey="LossInjuryID" localKey="LossInjuryID"/>
+		<SubModule moduleID="linm" name="Work Modification" parentKey="LossInjuryID" localKey="LossInjuryID"/>
+		<SubModule moduleID="clm" name="Claims" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="lco" name="Loss Costs" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="docs" name="Document Status" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="evt" name="Events" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="agrc" name="Agreement Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="agr" name="Agreements" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Audit Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Audits" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="pubc" name="Publicity Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="pub" name="Publicity Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="insc" name="Insurance Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="insa" name="Insurance Policies" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="rspc" name="Responsibility Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="rsp" name="Responsibilities" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="supc" name="Supplier Considerations" parentKey="InjuryIllnessTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lint"/>
+		</SubModule>
+		<SubModule moduleID="sup" name="Supplier Associations" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="LossInjuryID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="lin"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List injury and/or illness losses">
+			<ListField name="LossInjuryID" phrase="Record ID"/>
+			<ListField name="InjuredPerson" phrase="Injured Person"/>
+			<ListField name="JobTitle" phrase="Job Title"/>
+			<ListField name="IncurredTime" phrase="Incurred"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="Location" phrase="Location"/>
+			<ListField name="InjuryIllnessType" phrase="Type"/>
+			<ListField name="DaysAway" phrase="Days Away" align="right"/>
+			<ListField name="DaysModified" phrase="Days Modified" align="right"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search injury and/or illness losses">
+			<CheckBoxField name="RegulatoryRecordable"/>
+			<CheckBoxField name="PrivacyCase"/>
+			<CodeComboField name="InjIllCategoryID" findMode="text" suppressItemAdd="yes">
+				<SampleItem ID="1" name="Other Recordable"/>
+				<SampleItem ID="2" name="Job transfer or restriction"/>
+				<SampleItem ID="3" name="Days away from work"/>
+				<SampleItem ID="4" name="Death"/>
+			</CodeComboField>
+			<DateField name="DateofDeath"/>
+			<CodeComboField name="InjIllTypeID" findMode="text" suppressItemAdd="yes">
+				<SampleItem ID="1" name="Injury"/>
+				<SampleItem ID="2" name="Skin Disorder"/>
+				<SampleItem ID="3" name="Respiratory Condition"/>
+				<SampleItem ID="4" name="Poisoning"/>
+				<SampleItem ID="5" name="All other illnesses"/>
+			</CodeComboField>
+			<ComboField name="IncidentReportID" findMode="text">
+				<SampleItem ID="1" name="Clovis; 10-28-2003; Thorslund Injury; Back Srain"/>
+				<SampleItem ID="2" name="Clovis; 10-18-2004; Ammonia Release"/>
+				<SampleItem ID="3" name="Latvia; 10-08-2003; Severe Injury from Forklift"/>
+				<SampleItem ID="4" name="Sweden; 10-12-2002; Hostile Workplace Claim"/>
+				<SampleItem ID="5" name="Sweden; 10-24-2001; Theft of LCD Projector"/>
+			</ComboField>
+			<DateField name="EventDate"/>
+			<CheckBoxField name="TimeDeterminable"/>
+			<DateField name="IncurredTime"/>
+			<MoneyField name="TotalCost"/>
+			<CodeRadioField name="OnCoPropID" orientation="vertical">
+				<SampleItem ID="1" name="Yes"/>
+				<SampleItem ID="2" name="No"/>
+				<SampleItem ID="3" name="On and Off Company Property"/>
+			</CodeRadioField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<ComboField name="JobTitleID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="3" name="Shipping Clerk"/>
+				<SampleItem ID="5" name="Claims Administrator"/>
+				<SampleItem ID="7" name="Chief Executive Officer"/>
+			</ComboField>
+			<PersonComboField name="InjuredPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<OrgComboField name="PrimaryTreatingFacilityID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="TreatingPhysicianID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CheckBoxField name="EmergencyRoom"/>
+			<CheckBoxField name="Hospitalized"/>
+			<ComboField name="LocationID" parentField="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Document Storage Room"/>
+				<SampleItem ID="3" name="Shipping Office"/>
+				<SampleItem ID="5" name="Administration Break Room"/>
+				<SampleItem ID="7" name="Dry Warehouse"/>
+			</ComboField>
+			<EditField name="IncurredAddress1" size="30" maxLength="50"/>
+			<EditField name="IncurredAddress2" size="30" maxLength="50"/>
+			<ComboField name="IncurredCountryID" findMode="text">
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="IncurredStateID" findMode="text">
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="IncurredCountyID" findMode="text">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="IncurredCity" size="30" maxLength="50"/>
+			<EditField name="IncurredPostalCode" size="30" maxLength="50"/>
+			<CodeRadioField name="ShiftID" orientation="vertical">
+				<SampleItem ID="1" name="1st - Day"/>
+				<SampleItem ID="3" name="2nd - Night"/>
+				<SampleItem ID="5" name="3rd - Graveyard"/>
+			</CodeRadioField>
+			<DateField name="WorkBegan"/>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="ReportDate"/>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<PersonComboField name="SubmittedByID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<OrgComboField name="TaskOrganizationID" findMode="text">
+				<UpdateFieldRef name="TaskCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" parentField="TaskOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="TaskID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Processing"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="3" name="Machine Operating"/>
+				<SampleItem ID="3" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskID" findMode="text" parentField="TaskCategoryID">
+				<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+			</ComboField>
+			<CodeComboField name="InjuryExposureCategoryID" findMode="text">
+				<UpdateFieldRef name="InjuryExposureTypeID"/>
+				<SampleItem ID="1" name="Contact with Objects and Equipment"/>
+				<SampleItem ID="2" name="Falls"/>
+				<SampleItem ID="3" name="Bodily Reaction and Exertion"/>
+			</CodeComboField>
+			<ComboField name="InjuryExposureTypeID" findMode="text" parentField="InjuryExposureCategoryID">
+				<UpdateFieldRef name="InjuryExposureID"/>
+				<SampleItem ID="1" name="Struck Against Object"/>
+				<SampleItem ID="2" name="Struck By Object"/>
+				<SampleItem ID="3" name="Stuck Object"/>
+			</ComboField>
+			<ComboField name="InjuryExposureID" findMode="text" parentField="InjuryExposureTypeID">
+				<SampleItem ID="1" name="Contact with Objects and Equipment | Struck Against Object | Stepped on object"/>
+				<SampleItem ID="3" name="Contact with Objects and Equipment | Struck Against Object | Struck against stationary object"/>
+				<SampleItem ID="5" name="Contact with Objects and Equipment | Struck Against Object | Struck against a moving object"/>
+			</ComboField>
+			<CodeComboField name="InjurySourceCategory1ID" findMode="text">
+				<UpdateFieldRef name="InjurySourceType1ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</CodeComboField>
+			<ComboField name="InjurySourceType1ID" findMode="text" parentField="InjurySourceCategory1ID">
+				<UpdateFieldRef name="InjurySource1ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</ComboField>
+			<ComboField name="InjurySource1ID" findMode="text" parentField="InjurySourceType1ID">
+				<SampleItem ID="1" name="Machine(s): Drill Press"/>
+				<SampleItem ID="2" name="Machine(s): Grinding Machine"/>
+				<SampleItem ID="3" name="Machine(s): Lathe"/>
+				<SampleItem ID="4" name="Machine(s): Milling Machine"/>
+				<SampleItem ID="5" name="Machine(s): Press"/>
+				<SampleItem ID="6" name="Machine(s): Printing Machine"/>
+				<SampleItem ID="7" name="Machine(s): Drill Press"/>
+			</ComboField>
+			<CodeComboField name="InjurySourceCategory2ID" findMode="text">
+				<UpdateFieldRef name="InjurySourceType2ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</CodeComboField>
+			<ComboField name="InjurySourceType2ID" findMode="text" parentField="InjurySourceCategory2ID">
+				<UpdateFieldRef name="InjurySource2ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</ComboField>
+			<ComboField name="InjurySource2ID" findMode="text" parentField="InjurySourceType2ID">
+				<SampleItem ID="1" name="Machine(s): Drill Press"/>
+				<SampleItem ID="2" name="Machine(s): Grinding Machine"/>
+				<SampleItem ID="3" name="Machine(s): Lathe"/>
+				<SampleItem ID="4" name="Machine(s): Milling Machine"/>
+				<SampleItem ID="5" name="Machine(s): Press"/>
+				<SampleItem ID="6" name="Machine(s): Printing Machine"/>
+				<SampleItem ID="7" name="Machine(s): Drill Press"/>
+			</ComboField>
+			<EditField name="InjuryObject" size="75" maxLength="128"/>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<EditField name="IndexValue" size="5" maxLength="5"/>
+			<EditField name="RiskRecommendation" size="75" maxLength="128"/>
+			<PersonComboField name="RecordingPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="RecorderJobTitleID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="3" name="Shipping Clerk"/>
+				<SampleItem ID="5" name="Claims Administrator"/>
+				<SampleItem ID="7" name="Chief Executive Officer"/>
+			</ComboField>
+			<EditField name="DaysAway" size="10" maxLength="10"/>
+			<EditField name="DaysModified" size="10" maxLength="10"/>
+			<ComboField name="LossStatusCategoryID" findMode="text">
+				<UpdateFieldRef name="LossStatusTypeID"/>
+				<SampleItem ID="1" name="Open"/>
+				<SampleItem ID="2" name="Closed"/>
+				<SampleItem ID="3" name="Under Consideration"/>
+				<SampleItem ID="4" name="Denied"/>
+			</ComboField>
+			<ComboField name="LossStatusTypeID" findMode="text" parentField="LossStatusCategoryID">
+				<SampleItem ID="1" name="Open: Active"/>
+				<SampleItem ID="2" name="Open: Inactive"/>
+				<SampleItem ID="3" name="Open: Awaiting Subrogation"/>
+			</ComboField>
+			<CodeComboField name="LegitimacyCategoryID" findMode="text">
+				<UpdateFieldRef name="LossLegitimacyTypeID"/>
+				<SampleItem ID="1" name="Legitimate"/>
+				<SampleItem ID="2" name="Questionable"/>
+				<SampleItem ID="3" name="Abusive"/>
+				<SampleItem ID="4" name="Fraudulent"/>
+			</CodeComboField>
+			<ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+				<SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+				<SampleItem ID="2" name="Clear Liability; Malingering"/>
+			</ComboField>
+			<DateField name="ClaimDate"/>
+			<DateField name="ClosureDate"/>
+			<EditField name="ClaimNumber" size="50" maxLength="50"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an injury and/or illness loss">
+			<ViewField name="LossInjuryID"/>
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="Organization"/>
+			<ViewField name="InjuredPerson"/>
+			<ViewField name="JobTitle"/>
+			<ViewField name="EventDate"/>
+			<ViewField name="TimeDeterminable"/>
+			<ViewField name="IncurredTime"/>
+			<ViewField name="ReportDate"/>
+			<ViewField name="PersonReporting"/>
+			<ViewField name="EntryDate"/>
+			<ViewField name="SubmittedBy"/>
+			<ViewField name="Supervisor"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="OnCoProp"/>
+			<ViewField name="Location"/>
+			<ViewField name="Shift"/>
+			<ViewField name="WorkBegan"/>
+			<ViewField name="CachedTotalCost"/>
+			<ViewScreenSection name="Recordability" phrase="Recordability">
+				<ViewField name="RegulatoryRecordable"/>
+				<ViewField name="PrivacyCase"/>
+				<ViewField name="Rationale"/>
+				<ViewField name="InjuryIllnessCategory"/>
+				<ViewField name="InjuryIllnessType"/>
+				<ViewField name="PrimaryTreatingFacility"/>
+				<ViewField name="TreatingPhysician"/>
+				<ViewField name="EmergencyRoom"/>
+				<ViewField name="Hospitalized"/>
+				<ViewField name="RecordingPerson"/>
+				<ViewField name="DaysAway"/>
+				<ViewField name="DaysModified"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="IncidentDetails" phrase="Incident Details">
+				<ViewField name="Function"/>
+				<ViewField name="TaskCategory"/>
+				<ViewField name="Task"/>
+				<ViewField name="InjuryTaskDesc"/>
+				<ViewField name="InjuryExposure"/>
+				<ViewField name="InjuryExposureDesc"/>
+				<ViewField name="InjurySource1"/>
+				<ViewField name="InjurySource2"/>
+				<ViewField name="InjurySourceDesc"/>
+				<ViewField name="InjuryObject"/>
+				<ViewField name="ObjectDesc"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="InjuryIllness" phrase="Injury and/or Illness Details">
+				<ViewGrid moduleID="lini"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Earnings" phrase="Earnings">
+				<ViewField name="DaysPerWeek"/>
+				<ViewField name="HrsPerDay"/>
+				<ViewField name="EarningsCalculationMethod"/>
+				<ViewField name="EarningsStartDate"/>
+				<ViewField name="EarningsEndDate"/>
+				<ViewField name="AvgDailyEarnings"/>
+				<ViewField name="LocalAvgDailyEarnings"/>
+				<ViewField name="AvgWeeklyEarnings"/>
+				<ViewField name="LocalAvgWeeklyEarnings"/>
+				<ViewField name="AvgMonthlyEarnings"/>
+				<ViewField name="LocalAvgMonthlyEarnings"/>
+				<ViewField name="AvgAnnualEarnings"/>
+				<ViewField name="LocalAvgAnnualEarnings"/>
+				<ViewField name="EarningsAttached"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Claim" phrase="Claim Summary">
+				<ViewField name="Policy"/>
+				<ViewField name="IntegrationKey"/>
+				<ViewField name="ClaimDate"/>
+				<ViewField name="ClaimNumber"/>
+				<ViewField name="LossStatusType"/>
+				<ViewField name="GeneralLossStatusDescription"/>
+				<ViewField name="SpecificLossStatusDescription"/>
+				<ViewField name="LegitimacyCategory"/>
+				<ViewField name="LossLegitimacyType"/>
+				<ViewField name="LegitimacyDesc"/>
+				<ViewField name="ClosureDate"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="RiskMatrix" phrase="Risk Matrix">
+				<ViewField name="CachedTotalCost"/>
+				<ViewField name="Likelihood"/>
+				<ViewField name="LikelihoodStatus"/>
+				<ViewField name="LikelihoodFactors"/>
+				<ViewField name="Severity"/>
+				<ViewField name="CachedSeverityValue"/>
+				<ViewField name="IndexValue"/>
+				<ViewField name="RiskRecommendation"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Modifications" phrase="Work Modifications">
+				<ViewField name="DaysAway"/>
+				<ViewField name="DaysModified"/>
+				<ViewGrid moduleID="linm"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="clm"/>
+				<ViewGrid moduleID="lco"/>
+				<ViewGrid moduleID="evt"/>
+				<ViewGrid moduleID="docs"/>
+				<ViewGrid moduleID="agr"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="pub"/>
+				<ViewGrid moduleID="sup"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="insa"/>
+				<ViewGrid moduleID="rsp"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an injury and/or illness loss">
+			<ViewField name="LossInjuryID"/>
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="EventDate"/>
+			<CheckBoxField name="TimeDeterminable"/>
+			<DateField name="IncurredTime"/>
+			<DateField name="ReportDate"/>
+			<ViewField name="EntryDate"/>
+			<PersonComboField name="InjuredPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="JobTitleID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="3" name="Shipping Clerk"/>
+				<SampleItem ID="5" name="Claims Administrator"/>
+				<SampleItem ID="7" name="Chief Executive Officer"/>
+			</ComboField>
+			<CodeRadioField name="ShiftID" orientation="vertical">
+				<SampleItem ID="1" name="1st - Day"/>
+				<SampleItem ID="3" name="2nd - Night"/>
+				<SampleItem ID="5" name="3rd - Graveyard"/>
+			</CodeRadioField>
+			<DateField name="WorkBegan"/>
+			<PersonComboField name="SubmittedByID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<PersonComboField name="SupervisorID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="IncidentDetails" phrase="Incident|Edit incident details associated with an injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<OrgComboField name="TaskOrganizationID" findMode="text">
+				<UpdateFieldRef name="TaskCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" parentField="TaskOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="TaskID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Processing"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="3" name="Machine Operating"/>
+				<SampleItem ID="3" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskID" findMode="text" parentField="TaskCategoryID">
+				<UpdateFieldRef name="TaskType"/>
+				<UpdateFieldRef name="Function"/>
+				<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+			</ComboField>
+			<ViewField name="TaskType" parentField="TaskID"/>
+			<ViewField name="Function" parentField="TaskID"/>
+			<MemoField name="InjuryTaskDesc" rows="5" cols="75"/>
+			<CodeComboField name="InjuryExposureCategoryID" findMode="text">
+				<UpdateFieldRef name="InjuryExposureTypeID"/>
+				<SampleItem ID="1" name="Contact with Objects and Equipment"/>
+				<SampleItem ID="2" name="Falls"/>
+				<SampleItem ID="3" name="Bodily Reaction and Exertion"/>
+			</CodeComboField>
+			<ComboField name="InjuryExposureTypeID" findMode="text" parentField="InjuryExposureCategoryID">
+				<UpdateFieldRef name="InjuryExposureID"/>
+				<SampleItem ID="1" name="Struck Against Object"/>
+				<SampleItem ID="2" name="Struck By Object"/>
+				<SampleItem ID="3" name="Stuck Object"/>
+			</ComboField>
+			<ComboField name="InjuryExposureID" findMode="text" parentField="InjuryExposureTypeID">
+				<SampleItem ID="1" name="Contact with Objects and Equipment | Struck Against Object | Stepped on object"/>
+				<SampleItem ID="3" name="Contact with Objects and Equipment | Struck Against Object | Struck against stationary object"/>
+				<SampleItem ID="5" name="Contact with Objects and Equipment | Struck Against Object | Struck against a moving object"/>
+			</ComboField>
+			<MemoField name="InjuryExposureDesc" rows="5" cols="75"/>
+			<CodeComboField name="InjurySourceCategory1ID" findMode="text">
+				<UpdateFieldRef name="InjurySourceType1ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</CodeComboField>
+			<ComboField name="InjurySourceType1ID" findMode="text" parentField="InjurySourceCategory1ID">
+				<UpdateFieldRef name="InjurySource1ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</ComboField>
+			<ComboField name="InjurySource1ID" findMode="text" parentField="InjurySourceType1ID">
+				<SampleItem ID="1" name="Machine(s): Drill Press"/>
+				<SampleItem ID="2" name="Machine(s): Grinding Machine"/>
+				<SampleItem ID="3" name="Machine(s): Lathe"/>
+				<SampleItem ID="4" name="Machine(s): Milling Machine"/>
+				<SampleItem ID="5" name="Machine(s): Press"/>
+				<SampleItem ID="6" name="Machine(s): Printing Machine"/>
+				<SampleItem ID="7" name="Machine(s): Drill Press"/>
+			</ComboField>
+			<CodeComboField name="InjurySourceCategory2ID" findMode="text">
+				<UpdateFieldRef name="InjurySourceType2ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</CodeComboField>
+			<ComboField name="InjurySourceType2ID" findMode="text" parentField="InjurySourceCategory2ID">
+				<UpdateFieldRef name="InjurySource2ID"/>
+				<SampleItem ID="1" name="Machinery"/>
+				<SampleItem ID="2" name="Chemicals and Chemical Products"/>
+				<SampleItem ID="3" name="Containers"/>
+				<SampleItem ID="6" name="Furniture and Fixtures"/>
+				<SampleItem ID="4" name="Parts and Materials"/>
+				<SampleItem ID="5" name="Persons, Plants, Animals, and Minerals"/>
+				<SampleItem ID="7" name="Structures and Surfaces"/>
+				<SampleItem ID="8" name="Tools, Instruments, and Equipment"/>
+				<SampleItem ID="9" name="Vehicals"/>
+				<SampleItem ID="10" name="Other Sources"/>
+			</ComboField>
+			<ComboField name="InjurySource2ID" findMode="text" parentField="InjurySourceType2ID">
+				<SampleItem ID="1" name="Machine(s): Drill Press"/>
+				<SampleItem ID="2" name="Machine(s): Grinding Machine"/>
+				<SampleItem ID="3" name="Machine(s): Lathe"/>
+				<SampleItem ID="4" name="Machine(s): Milling Machine"/>
+				<SampleItem ID="5" name="Machine(s): Press"/>
+				<SampleItem ID="6" name="Machine(s): Printing Machine"/>
+				<SampleItem ID="7" name="Machine(s): Drill Press"/>
+			</ComboField>
+			<MemoField name="InjurySourceDesc" rows="5" cols="75"/>
+			<EditField name="InjuryObject" size="75" maxLength="128"/>
+			<MemoField name="ObjectDesc" rows="5" cols="75"/>
+		</EditScreen>
+		<EditScreen name="Injury" phrase="Injuries|Edit injury details associated with an injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="lini"/>
+		</EditScreen>
+		<EditScreen name="Recordability" phrase="Recordability|View or edit recordability details associated with an injury and/or illness loss">
+			<ViewField name="LossInjuryID"/>
+			<ViewField name="IncidentReportID"/>
+			<ViewField name="IncidentReport"/>
+			<ViewField name="EventDate"/>
+			<CheckBoxField name="RegulatoryRecordable"/>
+			<CheckBoxField name="PrivacyCase"/>
+			<MemoField name="Rationale" rows="5" cols="75"/>
+			<ComboField name="InjuryIllnessCategoryID" findMode="text" suppressItemAdd="yes">
+				<UpdateFieldRef name="CategoryDesc"/>
+				<SampleItem ID="1" name="Other Recordable"/>
+				<SampleItem ID="2" name="Job transfer or restriction"/>
+				<SampleItem ID="3" name="Days away from work"/>
+				<SampleItem ID="4" name="Death"/>
+			</ComboField>
+			<ViewField name="CategoryDesc" parentField="InjuryIllnessCategoryID"/>
+			<DateField name="DateofDeath"/>
+			<ComboField name="InjuryIllnessTypeID" findMode="text" suppressItemAdd="yes">
+				<UpdateFieldRef name="InjuryIllnessTypeDesc"/>
+				<SampleItem ID="1" name="Injury"/>
+				<SampleItem ID="2" name="Skin Disorder"/>
+				<SampleItem ID="3" name="Respiratory Condition"/>
+				<SampleItem ID="4" name="Poisoning"/>
+				<SampleItem ID="5" name="All other illnesses"/>
+			</ComboField>
+			<ViewField name="InjuryIllnessTypeDesc" parentField="InjuryIllnessTypeID"/>
+			<OrgComboField name="PrimaryTreatingFacilityID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="TreatingPhysicianID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CheckBoxField name="EmergencyRoom"/>
+			<CheckBoxField name="Hospitalized"/>
+			<PersonComboField name="RecordingPersonID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<ComboField name="RecorderJobTitleID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="3" name="Shipping Clerk"/>
+				<SampleItem ID="5" name="Claims Administrator"/>
+				<SampleItem ID="7" name="Chief Executive Officer"/>
+			</ComboField>
+		</EditScreen>
+		<EditScreen name="Claim" phrase="Claim|Edit summary information about the injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<ViewField name="IncurredTime"/>
+			<DateField name="ClaimDate"/>
+			<DateField name="ReportDate"/>
+			<PersonComboField name="PersonReportingID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<CodeComboField name="InsuranceCategoryID" findMode="text">
+				<UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+				<SampleItem ID="1" name="Subrogation (claim made)"/>
+				<SampleItem ID="2" name="Subrogation (claim received)"/>
+				<SampleItem ID="3" name="Coverage"/>
+				<SampleItem ID="4" name="Denial"/>
+			</CodeComboField>
+			<ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+				<UpdateFieldRef name="PolicyID"/>
+				<SampleItem ID="1" name="General Liability"/>
+				<SampleItem ID="3" name="Auto Liability"/>
+				<SampleItem ID="5" name="Products Liability"/>
+				<SampleItem ID="7" name="Employment Practices Liability"/>
+				<SampleItem ID="9" name="Workers' Compensation'"/>
+				<SampleItem ID="11" name="Pollution Liability"/>
+			</ComboField>
+			<ComboField name="PolicyID" findMode="text" parentField="InsuranceTypeID">
+				<UpdateFieldRef name="IntegrationKey"/>
+				<SampleItem ID="1" name="General Liability; Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"/>
+				<SampleItem ID="2" name="General Liability; Zurich; GL-193-03; Active Agenda, HQ; 03-02-2002, 03-02-2003"/>
+				<SampleItem ID="3" name="General Liability; AIG; GL-39-2003; Active Agenda, HQ; 03-02-2001, 03-02-2002"/>
+				<SampleItem ID="4" name="General Liability; Fireman's Fund; GL-2003-837; Active Agenda, HQ; 03-02-2000, 03-02-2001"/>
+			</ComboField>
+			<ViewField name="IntegrationKey" parentField="PolicyID"/>
+			<EditField name="ClaimNumber" size="50" maxLength="50"/>
+			<PersonComboField name="ClaimsAdjusterID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+		</EditScreen>
+		<EditScreen name="LossLocation" phrase="Location|Edit summary information about the location of the injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<CodeRadioField name="OnCoPropID" orientation="vertical">
+				<SampleItem ID="1" name="Yes"/>
+				<SampleItem ID="2" name="No"/>
+				<SampleItem ID="3" name="On and Off Company Property"/>
+			</CodeRadioField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Document Storage Room"/>
+				<SampleItem ID="3" name="Shipping Office"/>
+				<SampleItem ID="5" name="Administration Break Room"/>
+				<SampleItem ID="7" name="Dry Warehouse"/>
+			</ComboField>
+			<PersonComboField name="LocalClaimManagerID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<MemoField name="IncurredLocationDesc" cols="75" rows="5"/>
+			<EditField name="IncurredAddress1" size="30" maxLength="50"/>
+			<EditField name="IncurredAddress2" size="30" maxLength="50"/>
+			<ComboField name="IncurredCountryID" findMode="text">
+				<UpdateFieldRef name="IncurredStateID"/>
+				<SampleItem ID="1" name="United States of America (USA)"/>
+				<SampleItem ID="2" name="Sweden (SWE)"/>
+				<SampleItem ID="3" name="Latvia (LAT)"/>
+				<SampleItem ID="4" name="Chile (CHI)"/>
+				<SampleItem ID="5" name="Denmark (DEN)"/>
+				<SampleItem ID="6" name="Equador (EQU)"/>
+			</ComboField>
+			<ComboField name="IncurredStateID" findMode="text" parentField="IncurredCountryID">
+				<UpdateFieldRef name="IncurredCountyID"/>
+				<SampleItem ID="1" name="California (CA)"/>
+				<SampleItem ID="2" name="Arizona (AZ)"/>
+				<SampleItem ID="3" name="Oregon (OR)"/>
+				<SampleItem ID="4" name="Nevada (NV)"/>
+				<SampleItem ID="5" name="New Mexico (NM)"/>
+				<SampleItem ID="6" name="Washington (WA)"/>
+			</ComboField>
+			<ComboField name="IncurredCountyID" findMode="text" parentField="IncurredStateID">
+				<SampleItem ID="1" name="Fresno"/>
+				<SampleItem ID="2" name="Bakersfield"/>
+				<SampleItem ID="3" name="Los Angeles"/>
+				<SampleItem ID="4" name="Orange"/>
+				<SampleItem ID="5" name="Riverside"/>
+				<SampleItem ID="6" name="San Diego"/>
+			</ComboField>
+			<EditField name="IncurredCity" size="30" maxLength="50"/>
+			<EditField name="IncurredPostalCode" size="30" maxLength="50"/>
+		</EditScreen>
+		<EditScreen name="LossStatus" phrase="Status|Edit summary information about the status of the injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<ComboField name="LossStatusCategoryID" findMode="text">
+				<UpdateFieldRef name="LossStatusTypeID"/>
+				<SampleItem ID="1" name="Open"/>
+				<SampleItem ID="2" name="Closed"/>
+				<SampleItem ID="3" name="Under Consideration"/>
+				<SampleItem ID="4" name="Denied"/>
+			</ComboField>
+			<ComboField name="LossStatusTypeID" findMode="text" parentField="LossStatusCategoryID">
+				<UpdateFieldRef name="GeneralLossStatusDescription"/>
+				<SampleItem ID="1" name="Open: Active"/>
+				<SampleItem ID="2" name="Open: Inactive"/>
+				<SampleItem ID="3" name="Open: Awaiting Subrogation"/>
+			</ComboField>
+			<ViewField name="GeneralLossStatusDescription" parentField="LossStatusTypeID"/>
+			<MemoField name="SpecificLossStatusDescription" rows="5" cols="75"/>
+			<DateField name="ClosureDate"/>
+		</EditScreen>
+		<EditScreen name="LossLegitimacy" phrase="Legitimacy|Edit summary information about the legitimacy of the injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<CodeComboField name="LegitimacyCategoryID" findMode="text">
+				<UpdateFieldRef name="LossLegitimacyTypeID"/>
+				<SampleItem ID="1" name="Legitimate"/>
+				<SampleItem ID="2" name="Questionable"/>
+				<SampleItem ID="3" name="Abusive"/>
+				<SampleItem ID="4" name="Fraudulent"/>
+			</CodeComboField>
+			<ComboField name="LossLegitimacyTypeID" findMode="text" parentField="LegitimacyCategoryID">
+				<UpdateFieldRef name="LegitimacyDesc"/>
+				<SampleItem ID="1" name="Clear Liability; Active Treatment"/>
+				<SampleItem ID="2" name="Clear Liability; Malingering"/>
+			</ComboField>
+			<ViewField name="LegitimacyDesc" parentField="LossLegitimacyTypeID"/>
+		</EditScreen>
+		<EditScreen name="RiskMatrix" phrase="Risk Matrix|Edit risk matrix values associated with the injury and/or illness loss">
+			<RecordSummaryFieldsRef/>
+			<ComboField name="LikelihoodID" findMode="text">
+				<SampleItem ID="1" name="REMOTE: Extremely unlikely to occur"/>
+				<SampleItem ID="2" name="LOW: Possible but unlikely to occur"/>
+				<SampleItem ID="3" name="MODERATE: Moderate risk of occurrence"/>
+				<SampleItem ID="4" name="HIGH: Likely to occur"/>
+				<SampleItem ID="5" name="PROBABLE: Very likely to occur in immediate future"/>
+			</ComboField>
+			<CodeComboField name="LikelihoodStatusID" findMode="text">
+				<SampleItem ID="1" name="Resolved"/>
+				<SampleItem ID="2" name="Seeking Resolution"/>
+				<SampleItem ID="3" name="Unresolved"/>
+			</CodeComboField>
+			<MemoField name="LikelihoodFactors" cols="75" rows="5"/>
+			<ComboField name="SeverityID" findMode="text">
+				<SampleItem ID="1" name="SLIGHT: Minor First Aid Injury; 900.00 to 9,000.00"/>
+				<SampleItem ID="2" name="APPRECIABLE: Injury involving physician; 9001.00 to 9,000.00"/>
+				<SampleItem ID="3" name="SERIOUS: Serious injury or illness; 9001.00 to 90,000.00"/>
+				<SampleItem ID="4" name="SEVERE: Death or disabling injury; 90,001.00 to 900,000.00"/>
+				<SampleItem ID="5" name="CATASTROPHIC: Deaths and/or disabling injuries; 900,001.00 to 1,000,000.00"/>
+			</ComboField>
+			<ViewField name="CachedSeverityValue"/>
+			<ViewField name="IndexValue"/>
+			<ViewField name="RiskRecommendation"/>
+		</EditScreen>
+		<EditScreen name="Earnings" phrase="Earnings|Associate the average earnings of the person involved with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<CodeComboField name="EarningsCalculationMethodID">
+				<SampleItem ID="1" name="Payroll Report (internal)"/>
+				<SampleItem ID="2" name="Payroll Report (external)"/>
+				<SampleItem ID="3" name="Manual Calculation"/>
+			</CodeComboField>
+			<DateField name="EarningsStartDate"/>
+			<DateField name="EarningsEndDate"/>
+			<MoneyField name="AvgDailyEarnings"/>
+			<MoneyField name="AvgWeeklyEarnings"/>
+			<MoneyField name="AvgMonthlyEarnings"/>
+			<MoneyField name="AvgAnnualEarnings"/>
+			<CheckBoxField name="EarningsAttached"/>
+		</EditScreen>
+		<EditScreen name="WorkModification" phrase="Modifications|Associate work modifications with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="linm"/>
+		</EditScreen>
+		<EditScreen name="EventLog" phrase="Events|Associate ongoing events with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="evt"/>
+		</EditScreen>
+		<EditScreen name="Documentation" phrase="Documentation|Track the status of documentation delivery requirements associated with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="docs"/>
+		</EditScreen>
+		<EditScreen name="Agreements" phrase="Agreements|Associate agreements with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="agrc"/>
+			<EditGrid moduleID="agr"/>
+		</EditScreen>
+		<EditScreen name="Audits" phrase="Audits|Associate audits with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Publicity" phrase="Publicity|Associate publicity with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="pubc"/>
+			<EditGrid moduleID="pub"/>
+		</EditScreen>
+		<EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="supc"/>
+			<EditGrid moduleID="sup"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="insc"/>
+			<EditGrid moduleID="insa"/>
+		</EditScreen>
+		<EditScreen name="Responsibilities" phrase="Responsibilities|Assign organizational level responsibilities to the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="rspc"/>
+			<EditGrid moduleID="rsp"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the injury and/or illness">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the injury and/or illness" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+		<RecordReportScreen name="RecordReports" phrase="Reports|View reports on the current injury/illness"/>
+		<ListReportScreen name="ListReports" phrase="Reports|View reports based on active search criteria"/>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="LossInjuryID"/>
+		<InvisibleField name="InjuryIllnessCategoryID"/>
+		<InvisibleField name="InjuryIllnessTypeID"/>
+		<ViewField name="IncidentReportID"/>
+		<ViewField name="IncidentReport"/>
+		<ViewField name="EventDate"/>
+		<ViewField name="IncurredTime"/>
+		<ViewField name="Organization"/>
+		<ViewField name="Location"/>
+		<ViewField name="InjuredPerson"/>
+		<ViewField name="JobTitle"/>
+		<ViewField name="DaysAway"/>
+		<ViewField name="DaysModified"/>
+		<ViewField name="CachedTotalCost"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="lin" phrase="Injury Losses">
+			<InvisibleField name="LossInjuryID"/>
+			<ViewField name="IncurredTime" sample="10:22 a.m."/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Packaging Area"/>
+			<ViewField name="InjuredPerson" sample="Jane Doe"/>
+		</ViewGrid>
+		<EditGrid moduleID="lin" phrase="Injury Losses">
+			<GridForm>
+				<InvisibleField name="LossInjuryID"/>
+				<DateField name="IncurredTime" sample="10:22 a.m."/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+					<SampleItem ID="3" name="Active Agenda, Latvia"/>
+				</OrgComboField>
+				<ComboField name="LocationID" parentField="OrganizationID" sample="Packaging Area">
+					<SampleItem ID="1" name="Document Storage Room"/>
+					<SampleItem ID="3" name="Shipping Office"/>
+					<SampleItem ID="5" name="Administration Break Room"/>
+					<SampleItem ID="7" name="Dry Warehouse"/>
+				</ComboField>
+				<PersonComboField name="InjuredPersonID" findMode="alpha" sample="Jane Doe">
+					<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+					<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+				</PersonComboField>
+			</GridForm>
+			<ViewField name="IncurredTime" sample="10:22 a.m."/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="Location" sample="Packaging Area"/>
+			<ViewField name="InjuredPerson" sample="Jane Doe"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Injuries Occurring On Company Property">
+			<GroupByField name="OnCoProp"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Injuries Occurring On Company Property">
+			<GroupByField name="OnCoProp"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Injuries By Person Submitting">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Injuries By Person Submitting">
+			<GroupByField name="SubmittedBy"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Injuries By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Injuries By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Injuries By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Injuries By Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Injuries By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Injuries By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Injuries By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Injuries By Person Reporting">
+			<GroupByField name="PersonReporting"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Injuries By Person Injured">
+			<GroupByField name="InjuredPerson"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Injuries By Person Injured">
+			<GroupByField name="InjuredPerson"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Injuries By Job Title">
+			<GroupByField name="JobTitle"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Injuries By Job Title">
+			<GroupByField name="JobTitle"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie09" title="Injuries By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto09" title="Injuries By Supervisor">
+			<GroupByField name="Supervisor"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie10" title="Injuries By Likelihood">
+			<GroupByField name="Likelihood"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto10" title="Injuries By Likelihood">
+			<GroupByField name="Likelihood"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie11" title="Injuries By Severity">
+			<GroupByField name="Severity"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto11" title="Injuries By Severity">
+			<GroupByField name="Severity"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie12" title="Injuries By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto12" title="Injuries By Risk Recommendation">
+			<GroupByField name="RiskRecommendation"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie13" title="Injuries By Shift">
+			<GroupByField name="Shift"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto13" title="Injuries By Shift">
+			<GroupByField name="Shift"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie14" title="Injuries By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto14" title="Injuries By Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie15" title="Injuries By Task Category">
+			<GroupByField name="TaskCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto15" title="Injuries By Task Category">
+			<GroupByField name="TaskCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie16" title="Injuries By Task">
+			<GroupByField name="Task"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto16" title="Injuries By Task">
+			<GroupByField name="Task"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie17" title="Injuries By Exposure Type">
+			<GroupByField name="InjuryExposureType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto17" title="Injuries By Exposure Type">
+			<GroupByField name="InjuryExposureType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie18" title="Injuries By Primary Injury Source">
+			<GroupByField name="InjurySource1"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto18" title="Injuries By Primary Injury Source">
+			<GroupByField name="InjurySource1"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie19" title="Injuries By Injuries By Secondary Injury Source">
+			<GroupByField name="InjurySource2"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto19" title="Injuries By Injuries By Secondary Injury Source">
+			<GroupByField name="InjurySource2"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie20" title="Injuries By Loss Status Category">
+			<GroupByField name="LossStatusCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto20" title="Injuries By Loss Status Category">
+			<GroupByField name="LossStatusCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie21" title="Injuries By Loss Status Type">
+			<GroupByField name="LossStatusType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto21" title="Injuries By Loss Status Type">
+			<GroupByField name="LossStatusType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie22" title="Injuries Resulting In Days Away From Work">
+			<GroupByField name="DaysAway"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto22" title="Injuries Resulting In Days Away From Work">
+			<GroupByField name="DaysAway"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie23" title="Injuries Resulting In Modified Work">
+			<GroupByField name="DaysModified"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto23" title="Injuries Resulting Modified Work">
+			<GroupByField name="DaysModified"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie24" title="Injuries By Injury Category">
+			<GroupByField name="InjIllCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto24" title="Injuries By Injury Category">
+			<GroupByField name="InjIllCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie25" title="Injuries By Injury or Illness Type">
+			<GroupByField name="InjIllType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto25" title="Injuries By Injury or Illness Type">
+			<GroupByField name="InjIllType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie26" title="Injuries By Recordability">
+			<GroupByField name="RegulatoryRecordable"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto26" title="Injuries By Recordability">
+			<GroupByField name="RegulatoryRecordable"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie27" title="Injuries By Recording Person">
+			<GroupByField name="RecordingPerson"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto27" title="Injuries By Recording Person">
+			<GroupByField name="RecordingPerson"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie28" title="Injuries By Primary Source">
+			<GroupByField name="InjurySourceCategory1"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto28" title="Injuries By Primary Source">
+			<GroupByField name="InjurySourceCategory1"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie29" title="Injuries By Secondary Source">
+			<GroupByField name="InjurySourceCategory2"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto29" title="Injuries By Secondary Person">
+			<GroupByField name="InjurySourceCategory2"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<BarChart name="Bar01" title="Injuries by Year">
+			<GroupByField name="IncurredTime" dateInterval="year"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar02" title="Injuries by Quarter">
+			<GroupByField name="IncurredTime" dateInterval="yearquarter"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar03" title="Injuries by Month">
+			<GroupByField name="IncurredTime" dateInterval="yearmonth"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</BarChart>
+		<BarChart name="Bar04" title="Injuries by Week">
+			<GroupByField name="IncurredTime" dateInterval="yearweek"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</BarChart>
+		<PieChart name="Pie30" title="Injuries By Legitimacy Category">
+			<GroupByField name="LegitimacyCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto30" title="Injuries By Legitimacy Category">
+			<GroupByField name="LegitimacyCategory"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie31" title="Injuries By Legitimacy Type">
+			<GroupByField name="LossLegitimacyType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto31" title="Injuries By Legitimacy Type">
+			<GroupByField name="LossLegitimacyType"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie32" title="Injuries By Time Began Work">
+			<GroupByField name="WorkBegan"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto32" title="Injuries By Time Began Work">
+			<GroupByField name="WorkBegan"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie33" title="Injuries By Date of Death">
+			<GroupByField name="DateofDeath"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto33" title="Injuries By Date of Death">
+			<GroupByField name="DateofDeath"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie34" title="Injuries By Treatment Facility">
+			<GroupByField name="PrimaryTreatingFacility"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto34" title="Injuries By Treatment Facility">
+			<GroupByField name="PrimaryTreatingFacility"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie35" title="Injuries By Treating Physician">
+			<GroupByField name="TreatingPhysician"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto35" title="Injuries By Treating Physician">
+			<GroupByField name="TreatingPhysician"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie36" title="Injuries Treated in Emergency Room">
+			<GroupByField name="EmergencyRoom"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto36" title="Injuries Treated in Emergency Room">
+			<GroupByField name="EmergencyRoom"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie37" title="Injuries Involving Hospitalization">
+			<GroupByField name="Hospitalized"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto37" title="Injuries Involving Hospitalization">
+			<GroupByField name="Hospitalized"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie38" title="Injuries By Age">
+			<GroupByField name="Age"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto38" title="Injuries By Age">
+			<GroupByField name="Age"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie39" title="Injuries By Years of Service">
+			<GroupByField name="Service"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto39" title="Injuries By Years of Service">
+			<GroupByField name="Service"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie40" title="Injuries By Gender">
+			<GroupByField name="Gender"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto40" title="Injuries By Gender">
+			<GroupByField name="Gender"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<ParetoChart name="Pareto41" title="Injuries By Privacy Case">
+			<GroupByField name="PrivacyCase"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie41" title="Injuries By Privacy Case">
+			<GroupByField name="PrivacyCase"/>
+			<SummaryField name="LossInjuryID" type="count"/>
+		</PieChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

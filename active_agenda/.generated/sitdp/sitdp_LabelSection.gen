@@ -1,0 +1,66 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    //label section, serialized
+    $fields = unserialize('a:5:{s:18:"DrillParticipantID";O:9:"viewfield":16:{s:4:"name";s:18:"DrillParticipantID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:86:"Participant ID|An automatically assigned number used to associate people with meetings";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"DrillTitle";O:9:"viewfield":16:{s:4:"name";s:10:"DrillTitle";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:65:"Title|A concise title that describes the situation response drill";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"BeginTime";O:9:"viewfield":16:{s:4:"name";s:9:"BeginTime";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:88:"Begin Date|The date and time the situation response drill is scheduled to begin or began";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:6:"center";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"Participant";O:9:"viewfield":16:{s:4:"name";s:11:"Participant";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:51:"Participant|The person attending the training class";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:7:"justify";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:11:"RecordLabel";O:14:"invisiblefield":11:{s:4:"name";s:11:"RecordLabel";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";N;s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";N;s:13:"displayFormat";N;s:9:"isDefault";N;}}');
+    $phrases = unserialize('a:4:{s:18:"DrillParticipantID";s:86:"Participant ID|An automatically assigned number used to associate people with meetings";s:10:"DrillTitle";s:65:"Title|A concise title that describes the situation response drill";s:9:"BeginTime";s:88:"Begin Date|The date and time the situation response drill is scheduled to begin or began";s:11:"Participant";s:51:"Participant|The person attending the training class";}');
+    $singularRecordName = 'Drill Participant';
+    $labelSQL = "SELECT 
+   `sitdp`.DrillParticipantID,
+   `sitd1`.DrillTitle AS DrillTitle,
+   `dat1`.RelatedDate AS BeginTime,
+   NULLIF(CONCAT(IFNULL(`ppl1`.DisplayName,''),' - ',IFNULL(`org3`.ShortName,'')),' - ') AS Participant,
+   NULLIF(CONCAT(IFNULL(NULLIF(CONCAT(IFNULL(`ppl1`.DisplayName,''),' - ',IFNULL(`org3`.ShortName,'')),' - '),''),' | ',IFNULL(`sitd1`.DrillTitle,''),' | ',IFNULL(`dat1`.RelatedDate,'')),' |  | ') AS RecordLabel,
+   `ppl1`.OrganizationID AS OrganizationID
+FROM `sitdp`
+   
+     LEFT OUTER JOIN `sitd` AS sitd1 
+   ON (`sitdp`.SituationDrillID = `sitd1`.SituationDrillID )
+     LEFT OUTER JOIN `inv` AS inv1 
+    ON (`sitdp`.DrillParticipantID = `inv1`.SourceRecordID 
+     AND `inv1`.SourceModuleID = 'sitdp'
+     AND `inv1`._Deleted = 0
+     AND `inv1`.InvolvementDescriptorID = '57')
+     LEFT OUTER JOIN `dat` AS dat1 
+    ON (`sitd1`.SituationDrillID = `dat1`.SourceRecordID 
+     AND `dat1`.SourceModuleID = 'sitd'
+     AND `dat1`._Deleted = 0
+     AND `dat1`.DateDescriptorID = '24')
+     LEFT OUTER JOIN `ppl` AS ppl1 
+   ON (`inv1`.PersonInvolvedID = `ppl1`.PersonID )
+     LEFT OUTER JOIN `org` AS org3 
+   ON (`ppl1`.OrganizationID = `org3`.OrganizationID )
+WHERE
+   sitdp.DrillParticipantID='/**RecordID**/'";
+    $recordLabelField = "RecordLabel";
+?>

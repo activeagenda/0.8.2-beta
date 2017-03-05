@@ -1,0 +1,536 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Managed Changes" moduleID="moc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Managed Change" pluralRecordName="Managed Changes" addNewName="Change" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="ManagedChangeID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|A combined field used to describe this managed change when associating it with other records" sample="1"/>
+        <TableField name="ChangeGuidelineID" type="int" dbFlags="unsigned not null" phrase="Change Guideline|The change guideline used to guide this change" sample="1"/>
+        <ForeignField name="PolicyOrganizationID" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="PolicyOrganizationID" key="ChangeGuidelineID" joinType="left" phrase="Policy Organization|The organization responsible for issuing the change management guideline" sample="1"/>
+        <ForeignField name="PolicyOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PolicyOrganizationID" joinType="left" phrase="Policy Organization|The organization responsible for issuing the change management guideline" sample="Active Agenda, HQ"/>
+        <ForeignField name="PolicyPersonAccountableID" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="PersonAccountableID" key="ChangeGuidelineID" joinType="left" phrase="Policy Person Accountable|The individual assigned primary accountability for providing oversight and support for the change management guideline" sample="1"/>
+        <ForeignField name="PolicyPersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PolicyPersonAccountableID" joinType="left" phrase="Policy Person Accountable|The individual assigned primary accountability for providing oversight and support for the change management guideline" sample="Mattias Thorslund"/>
+        <ForeignField name="ChangeCategoryID" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="ChangeCategoryID" key="ChangeGuidelineID" joinType="left" phrase="Change Category|The category of change requiring management" sample="1"/>
+        <CodeField name="ChangeCategory" key="ChangeCategoryID" phrase="Change Category|The category of change requiring management" sample="New Person" codeTypeID="48"/>
+        <!--no ChangeTitle in mocg?? | MJT
+            <ForeignField name="TypeChangeTitle" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="ChangeTitle" key="ChangeGuidelineID" joinType="left" phrase="Change Guideline Title|A short, descriptive, title for the type of change to be managed" sample="Employee"/>-->
+        <ForeignField name="ChangeGuideline" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="ChangeGuideline" key="ChangeGuidelineID" joinType="left" phrase="Change Guideline|The change guideline used to guide this change" sample="New Person (Employee)"/>
+        <TableField name="ManagedChangeTitle" type="text" validate="notEmpty" phrase="Change Title|A short, descriptive, title for the change to be managed" sample="Employee"/>
+        <ForeignField name="TypeScope" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="Scope" key="ChangeGuidelineID" joinType="left" phrase="Scope Guidance|A detailed description of the scope of the change guideline" sample="Adding new employees shall include a complete review of the job duties and a hazard analysis of the tasks to be performed by the incumbent employee. New employees must also be medically qualified for the work"/>
+        <TableField name="Scope" type="text" validate="noValidation" phrase="Scope|A detailed description of the scope of the change" sample="This change involves the addition of a single employee based on a new job description. The change evaluation will be a thorough and complete."/>
+        <ForeignField name="TypeDegree" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="Degree" key="ChangeGuidelineID" joinType="left" phrase="Degree Guidance|A detailed description of the degree of the change guideline" sample="The addition of new employees requires a thorough review of the employee's background and prior work experience."/>
+        <TableField name="Degree" type="text" validate="noValidation" phrase="Degree|A detailed description of the degree of the change" sample="A thorough review of the employee's background and prior work experience will be performed."/>
+        <ForeignField name="TypeDesignConsiderations" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="DesignConsiderations" key="ChangeGuidelineID" joinType="left" phrase="Design Guidance|A detailed description of the design considerations to be made as a result of the change guideline" sample="New employee assignments should involve a review of work process and task design."/>
+        <TableField name="DesignConsiderations" type="text" validate="noValidation" phrase="Design|A detailed description of the design considerations to be made as a result of the change" sample="A thorough review of the work process and task design will be conducted."/>
+        <ForeignField name="TypeConstructionConsiderations" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="ConstructionConsiderations" key="ChangeGuidelineID" joinType="left" phrase="Construction Guidance|A detailed description of the construction considerations to be made as a result of the change guideline" sample="New employees may require work area modifications to accomodate disabilities. Consideration should be given to any feedback received by the industrial medical provider regarding necessary workplace design accomodations."/>
+        <TableField name="ConstructionConsiderations" type="text" validate="noValidation" phrase="Construction|A detailed description of the construction considerations to be made as a result of the change" sample="A thorough review of the work area will be performed to address any modifications to required to accomodate disabilities identified during the employee's pre-employment physical examination."/>
+        <ForeignField name="TypeOperationalConsiderations" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="OperationalConsiderations" key="ChangeGuidelineID" joinType="left" phrase="Operational Guidance|A detailed description of the operational considerations to be made as a result of the change guideline" sample="Thorough discussions shall be held with all departments affected by the addition of a new empoyee. Every effort should be made to hire employees with prior experience with all required operational equipment."/>
+        <TableField name="OperationalConsiderations" type="text" validate="noValidation" phrase="Operations|A detailed description of the operational considerations to be made as a result of the change" sample="A thorough department consultation will be performed and every efffort will be extended to the most experienced applicant. All department will be required to affirm a candidate before an offer to hire is extended"/>
+        <ForeignField name="TypeMaintenanceConsiderations" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="MaintenanceConsiderations" key="ChangeGuidelineID" joinType="left" phrase="Maintenance Guidance|A detailed description of the maintenance considerations to be made as a result of the change guideline" sample="Consideration shall be given for the requirements to maintain or retain an employee before extending an offer of employment. Employees represent a substantial investment and retention is imperative. Consideration shall be given to the specific requirements to maintain a positive employment relationship and retain an employee on an employee-by-employee basis."/>
+        <TableField name="MaintenanceConsiderations" type="text" validate="noValidation" phrase="Maintenance|A detailed description of the maintenance considerations to be made as a result of the change" sample="A thorough evaluation will be made as to the retain the candidate during the interview process but before extending an offer of employment."/>
+        <ForeignField name="TypeDecommissionConsiderations" foreignTable="mocg" foreignKey="ChangeGuidelineID" foreignField="DecommissionConsiderations" key="ChangeGuidelineID" joinType="left" phrase="Decommission Guidance|A detailed description of the decommissioning considerations to be made as a result of the change guideline" sample="Consideration shall be given to the costs and impact of ending the employment relationship before extending an offer of employment."/>
+        <TableField name="DecommissionConsiderations" type="text" validate="noValidation" phrase="Decommission|A detailed description of the decommissioning considerations to be made as a result of the change" sample="Consideration of the costs associated with ending the employment have been made prior to extending an offer of employment."/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The organization affected by, and responsible for, the managed change" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization affected by, and responsible for, the managed change" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="144" phrase="Person Accountable|The individual assigned primary accountability for providing oversight and support for the managed change" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for providing oversight and support for the managed change" sample="Mattias Thorslund"/>
+        <RemoteField name="BeginDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="28" phrase="Begin Date|The date the managed change began" sample="01/01/2004"/>
+        <RemoteField name="CompletionDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="3" phrase="Completion Date|Date the managed change was completed" sample="01/03/2004"/>
+        <TableField name="ManagedChangeStatusID" type="int" validate="RequireSelection" phrase="Status|The present status of the managed change" sample="1"/>
+        <CodeField name="ManagedChangeStatus" key="ManagedChangeStatusID" phrase="Status|The present status of the managed change" sample="Under Development" codeTypeID="66"/>
+        <SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="ManagedChangeID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'moc'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the managed change" sample="702.00"/>
+        <SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="ManagedChangeID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'moc'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the managed change" sample="702.00"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="New Person (Employee) | Active Agenda, HQ"><CombinedFieldRef name="ChangeGuideline"/>_(<CombinedFieldRef name="ManagedChangeTitle"/>)</CombinedField>
+        <CombinedField name="ManagedChange" phrase="Managed Change|A combined field used to describe the managed change when associating it with other records" sample="New Person (Employee)"><CombinedFieldRef name="ManagedChangeTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="ManagedChangeID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="ManagedChange"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="valc" name="Values Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="vala" name="Values Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="aprd" name="Asset Protection" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="apr" name="Asset Protection" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="cosc" name="Cost Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="cosex" name="Cost Exposures" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="optc" name="Opportunity Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="opt" name="Opportunities" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="hzc" name="Hazard Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="hza" name="Hazard Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="regc" name="Regulatory Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="stdc" name="Standards Considerations" parentKey="ChangeGuidelineID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="mocg"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="oppa" name="Operating Permit Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="orgja" name="Job Title Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="jana" name="Job Analysis Associations" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="ManagedChangeID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="moc"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List management of change">
+            <ListField name="ManagedChangeID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="ManagedChangeTitle" phrase="Title"/>
+            <ListField name="BeginDate" phrase="Begin Date"/>
+            <ListField name="ManagedChangeStatus" phrase="Status"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search management of change">
+            <OrgComboField name="PolicyOrganizationID" findMode="text">
+                <UpdateFieldRef name="ChangeCategoryID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <CodeComboField name="ChangeCategoryID" findMode="text" parentField="PolicyOrganizationID">
+                <UpdateFieldRef name="ChangeGuidelineID" listParentField="ChangeCategoryID"/>
+                <SampleItem ID="1" name="New Person"/>
+                <SampleItem ID="2" name="New Process"/>
+                <SampleItem ID="3" name="New Operation"/>
+                <SampleItem ID="4" name="New Material"/>
+                <SampleItem ID="5" name="Change to Existing Process"/>
+                <SampleItem ID="6" name="Change to Existing Operation"/>
+                <SampleItem ID="7" name="Change to Existing Personnel"/>
+                <SampleItem ID="8" name="Change to Existing Material"/>
+            </CodeComboField>
+            <ComboField name="ChangeGuidelineID" findMode="text" parentField="ChangeCategoryID">
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <!--<EditField name="TypeChangeTitle" size="75" maxLength="128"/>-->
+            <EditField name="ManagedChangeTitle" size="75" maxLength="128"/>
+            <DateField name="BeginDate"/>
+            <DateField name="CompletionDate"/>
+            <CodeComboField name="ManagedChangeStatusID">
+                <SampleItem ID="1" name="Ongoing"/>
+                <SampleItem ID="2" name="Complete"/>
+                <SampleItem ID="3" name="Postponed"/>
+                <SampleItem ID="4" name="Cancelled"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the managed change">
+            <ViewField name="ManagedChangeID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="ChangeCategory"/>
+            <ViewField name="ChangeGuideline"/>
+            <ViewField name="ManagedChangeTitle"/>
+            <ViewField name="Scope"/>
+            <ViewField name="Degree"/>
+            <ViewField name="BeginDate"/>
+            <ViewField name="CompletionDate"/>
+            <ViewField name="ManagedChangeStatus"/>
+            <ViewField name="DesignConsiderations"/>
+            <ViewField name="ConstructionConsiderations"/>
+            <ViewField name="OperationalConsiderations"/>
+            <ViewField name="MaintenanceConsiderations"/>
+            <ViewField name="DecommissionConsiderations"/>
+            <ViewField name="TotalEstOpp"/>
+            <ViewField name="TotalEstExp"/>
+            <ViewField name="ManagedChangeStatus"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="apr"/>
+                <ViewGrid moduleID="vala"/>
+                <ViewGrid moduleID="cosex"/>
+                <ViewGrid moduleID="opt"/>
+                <ViewGrid moduleID="hza"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="bcq"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="oppa"/>
+                <ViewGrid moduleID="orgja"/>
+                <ViewGrid moduleID="jana"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the managed change">
+            <ViewField name="ManagedChangeID"/>
+            <OrgComboField name="PolicyOrganizationID" findMode="text">
+                <UpdateFieldRef name="ChangeCategoryID"/>
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <CodeComboField name="ChangeCategoryID" findMode="text" parentField="PolicyOrganizationID">
+                <UpdateFieldRef name="ChangeGuidelineID" listParentField="ChangeCategoryID"/>
+                <SampleItem ID="1" name="New Person"/>
+                <SampleItem ID="2" name="New Process"/>
+                <SampleItem ID="3" name="New Operation"/>
+                <SampleItem ID="4" name="New Material"/>
+                <SampleItem ID="5" name="Change to Existing Process"/>
+                <SampleItem ID="6" name="Change to Existing Operation"/>
+                <SampleItem ID="7" name="Change to Existing Personnel"/>
+                <SampleItem ID="8" name="Change to Existing Material"/>
+            </CodeComboField>
+            <ComboField name="ChangeGuidelineID" findMode="text" parentField="ChangeCategoryID">
+                <UpdateFieldRef name="TypeScope"/>
+                <UpdateFieldRef name="TypeDegree"/>
+                <UpdateFieldRef name="PolicyPersonAccountable"/>
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <EditField name="ManagedChangeTitle" size="75" maxLength="128"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ViewField name="PolicyPersonAccountable" parentField="ChangeGuidelineID"/>
+            <ViewField name="TypeScope" parentField="ChangeGuidelineID"/>
+            <MemoField name="Scope" rows="5" cols="75"/>
+            <ViewField name="TypeDegree" parentField="ChangeGuidelineID"/>
+            <MemoField name="Degree" rows="5" cols="75"/>
+            <DateField name="BeginDate"/>
+            <DateField name="CompletionDate"/>
+            <CodeComboField name="ManagedChangeStatusID">
+                <SampleItem ID="1" name="Ongoing"/>
+                <SampleItem ID="2" name="Complete"/>
+                <SampleItem ID="3" name="Postponed"/>
+                <SampleItem ID="4" name="Cancelled"/>
+            </CodeComboField>
+        </EditScreen>
+        <EditScreen name="Design" phrase="Design|Edit the design considerations for the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewField name="TypeDesignConsiderations"/>
+            <MemoField name="DesignConsiderations" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Construction" phrase="Construction|Edit the construction considerations for the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewField name="TypeConstructionConsiderations"/>
+            <MemoField name="ConstructionConsiderations" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Operations" phrase="Operations|Edit the operational considerations for the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewField name="TypeOperationalConsiderations"/>
+            <MemoField name="OperationalConsiderations" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Maintenance" phrase="Maintenance|Edit the maintenance considerations for the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewField name="TypeMaintenanceConsiderations"/>
+            <MemoField name="MaintenanceConsiderations" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Decommission" phrase="Decommission|Edit the decommissioning considerations for the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewField name="TypeDecommissionConsiderations"/>
+            <MemoField name="DecommissionConsiderations" rows="10" cols="75"/>
+        </EditScreen>
+        <EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="aprd"/>
+            <EditGrid moduleID="apr"/>
+        </EditScreen>
+        <EditScreen name="Culture" phrase="Culture|Associate values with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="valc"/>
+            <EditGrid moduleID="vala"/>
+        </EditScreen>
+        <EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="cosc"/>
+            <EditGrid moduleID="cosex"/>
+        </EditScreen>
+        <EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="optc"/>
+            <EditGrid moduleID="opt"/>
+        </EditScreen>
+        <EditScreen name="Hazards" phrase="Hazards|Associate hazards with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="hzc"/>
+            <EditGrid moduleID="hza"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="regc"/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="stdc"/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the managed change">
+            <RecordSummaryFieldsRef/>
+            <ViewGrid moduleID="bcqc"/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="Permits" phrase="Permits|Associate operating permits with the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="oppa"/>
+        </EditScreen>
+        <EditScreen name="JobTitles" phrase="Jobs|Associate job titles with the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgja"/>
+        </EditScreen>
+        <EditScreen name="JobAnalyses" phrase="Job Analyses|Associate job analyses with the managed change">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="jana"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the managed change" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="ManagedChangeID"/>
+        <InvisibleField name="ChangeGuidelineID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="ChangeCategory"/>
+        <ViewField name="ChangeGuideline"/>
+        <ViewField name="ManagedChangeTitle"/>
+        <ViewField name="Scope"/>
+        <ViewField name="Degree"/>
+        <ViewField name="BeginDate"/>
+        <ViewField name="CompletionDate"/>
+        <ViewField name="TotalEstOpp"/>
+        <ViewField name="TotalEstExp"/>
+        <ViewField name="ManagedChangeStatus"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Managed Changes By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Managed Changes By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Managed Changes By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Managed Changes By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Managed Changes By Category">
+            <GroupByField name="ChangeCategory"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Managed Changes By Category">
+            <GroupByField name="ChangeCategory"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Managed Changes By Guideline">
+            <GroupByField name="ChangeGuideline"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Managed Changes By Guideline">
+            <GroupByField name="ChangeGuideline"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Managed Changes By Status">
+            <GroupByField name="ManagedChangeStatus"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Managed Changes By Status">
+            <GroupByField name="ManagedChangeStatus"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Managed Changes By Policy Organization">
+            <GroupByField name="PolicyOrganization"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Managed Changes By Policy Organization">
+            <GroupByField name="PolicyOrganization"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Managed Changes By Policy Person Accountable">
+            <GroupByField name="PolicyPersonAccountable"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Managed Changes By Policy Person Accountable">
+            <GroupByField name="PolicyPersonAccountable"/>
+            <SummaryField name="ManagedChangeID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

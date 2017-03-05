@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Department Associations" moduleID="orgda" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Department Association" pluralRecordName="Department Associations" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="DepartmentAssocID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to associate departments with related records" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name of the module which is related to the assigned department" sample="chm"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name of the module which is related to the assigned department" sample="Chemicals"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|Numerical ID to identify the Related Record" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Water; Hydrogen Dioxide; 1336-21-6; Discontinued"/>
+		<TableField name="DepartmentID" type="int" validate="RequireSelection" phrase="Department|A description of the department based on a combination of field values assigned from within the Departments module" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants internalNonParticipants externalNonParticipants" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="OrganizationID" key="DepartmentID" joinType="left" phrase="Organization|The organization to which the department belongs" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Organization" key="OrganizationID" joinType="left" phrase="Organization|The organization to which the department belongs" sample="Active Agenda, HQ"/>
+		<ForeignField name="PersonAccountableID" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="PersonAccountableID" key="DepartmentID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for this department" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for this department" sample="Mattias Thorslund"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|A description of the department based on a combination of field values assigned from within the Departments module" sample="Labor Relations; 26625; Mattias Thorslund"/>
+		<TableField name="ResponsibilityTitle" type="varchar(128)" validate="notEmpty" phrase="Responsibility Title|A short phrase used to identify the department responsibility" sample="Report all claims of discrimination to human resources immediately"/>
+		<TableField name="Responsibilities" type="text" validate="notEmpty" phrase="Responsibility|A brief description of the department's responsibilities associated with the subject matter of the related record" sample="The Labor Relations Department is the local representative of corporate Environmental Affairs. The Labor Relations Department is responsible for maintaining a current MSDS binder and updating the local storage quantities and conditions within Active Agenda."/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions ()Record ID: 3)"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Organization"/>;_<CombinedFieldRef name="ResponsibilityTitle"/>;_<CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/></CombinedField>
+		<CombinedField name="DepartmentAssoc" phrase="Department Association|A combined field used to describe this department association when associating it with other records" sample="Chemicals ID: 12 | Active Agenda, HQ | Labor Relations; 26625; Mattias Thorslund"><CombinedFieldRef name="ResponsibilityTitle"/>;_<CombinedFieldRef name="RelatedModuleRecord"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="DepartmentAssocID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="DepartmentAssoc"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List departments associated with related records">
+			<ListField name="DepartmentAssocID" phrase="Record ID"/>
+			<ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="ResponsibilityTitle" phrase="Responsibility"/>
+			<ListField name="Department" phrase="Department"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search departments associated with related records">
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Chemicals"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="DepartmentID" findMode="text">
+				<SampleItem ID="1" name="Labor Relations; 26625; Mattias Thorslund"/>
+				<SampleItem ID="3" name="Operations, Production; 28827"/>
+				<SampleItem ID="5" name="Operations, Sanitation; 28812"/>
+				<SampleItem ID="7" name="Labor Relations; Human Resources; 22838"/>
+			</ComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Emprise, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Emprise, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Emprise, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Emprise, Latvia"/>
+			</PersonComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a department associated with related records">
+			<ViewField name="DepartmentAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Department"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="ResponsibilityTitle"/>
+			<ViewField name="Responsibilities"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a department associated with a related record">
+			<ViewField name="DepartmentAssocID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="Department"/>
+			<ViewField name="PersonAccountable"/>
+			<EditField name="ResponsibilityTitle" size="75" maxLength="128"/>
+			<MemoField name="Responsibilities" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="orgda" phrase="Departments">
+			<InvisibleField name="DepartmentAssocID"/>
+			<ViewField name="Department" sample="Labor Relations; 26625; Mattias Thorslund"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="ResponsibilityTitle" sample="Report all claims of discrimination to human resources immediately"/>
+			<ViewField name="Responsibilities" sample="The Labor Relations Department is the local representative of corporate Environmental Affairs. The Labor Relations Department is responsible for maintaining a current MSDS binder and updating the local storage quantities and conditions within Active Agenda."/>
+		</ViewGrid>
+		<EditGrid moduleID="orgda" phrase="Departments">
+			<GridForm>
+				<InvisibleField name="DepartmentAssocID"/>
+				<ComboField name="DepartmentID" findMode="text" parentField="OrganizationID">
+					<UpdateFieldRef name="PersonAccountable"/>
+					<SampleItem ID="1" name="Labor Relations; 26625; Mattias Thorslund"/>
+					<SampleItem ID="3" name="Operations; 28827, Larry Hansen"/>
+					<SampleItem ID="5" name="Operations; 28812, Larry Hansen"/>
+					<SampleItem ID="7" name="Labor Relations; 22838, Mattias Thorslund"/>
+				</ComboField>
+				<ViewField name="PersonAccountable" parentField="DepartmentID"/>
+                <EditField name="ResponsibilityTitle" size="75" maxLength="128"/>
+				<MemoField name="Responsibilities" rows="5" cols="75" sample="The Labor Relations Department is the local representative of corporate Environmental Affairs. The Labor Relations Department is responsible for maintaining a current MSDS binder and updating the local storage quantities and conditions within Active Agenda."/>
+			</GridForm>
+			<ViewField name="Department" sample="Labor Relations; 26625; Mattias Thorslund"/>
+			<ViewField name="PersonAccountable" sample="Mattias Thorslund"/>
+			<ViewField name="ResponsibilityTitle" sample="Report all claims of discrimination to human resources immediately"/>
+			<ViewField name="Responsibilities" sample="The Labor Relations Department is the local representative of corporate Environmental Affairs. The Labor Relations Department is responsible for maintaining a current MSDS binder and updating the local storage quantities and conditions within Active Agenda."/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Department Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Department Associations By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Department Associations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Department Associations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Department Associations By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Department Associations By Department">
+			<GroupByField name="Department"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Department Associations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Department Associations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="DepartmentAssocID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

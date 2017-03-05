@@ -1,0 +1,430 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Job Analyses Tasks" parentModule="jan" moduleID="jant" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Task Association" pluralRecordName="Task Associations" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="JobTaskID" type="int" dbFlags="unsigned auto_increment not null" phrase="Job Task ID|An automatically assigned number used to associate job analyses with tasks performed by the organization" sample="1"/>
+		<TableField name="JobAnalysisID" type="int" validate="noValidation" phrase="Analysis ID|A unique number assigned to each job being analyzed for hazards and functional requirements" sample="1"/>
+		<ForeignField name="JAOrganizationID" listType="allParticipants" foreignTable="jan" foreignKey="JobAnalysisID" foreignField="OrganizationID" key="JobAnalysisID" joinType="left" phrase="Job Analysis Organization|The organization authoring and/or utilizing the job analyses" sample="1"/>
+		<ForeignField name="JAOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="JAOrganizationID" joinType="left" phrase="Job Analysis Organization|The organization authoring and/or utilizing the job analyses" sample="Active Agenda, HQ"/>
+		<ForeignField name="JobAnalysisDesc" foreignTable="jan" foreignKey="JobAnalysisID" foreignField="JobAnalysisDesc" key="JobAnalysisID" joinType="left" phrase="Job Analysis Description|A detailed description of the job to be performed. The detailed description will be very important to others interested in assigning this job to different job titles" sample="Line Operations - Sugar Shaker; Active Agenda, HQ"/>
+		<ForeignField name="JobAnalysisStatusID" foreignTable="jan" foreignKey="JobAnalysisID" foreignField="JobAnalysisStatusID" key="JobAnalysisID" joinType="left" phrase="Status|Status of the job review process" sample="Under Review"/>
+		<CodeField name="JobAnalysisStatus" key="JobAnalysisStatusID" phrase="Status|Status of the job review process" sample="Under Review" codeTypeID="175"/>
+		<ForeignField name="JobAnalysis" foreignTable="jan" foreignKey="JobAnalysisID" foreignField="JobAnalysis" key="JobAnalysisID" joinType="left" phrase="Job Analysis|A combined field used to describe this job analysis when associating it with other records" sample="Line Operations - Sugar Shaker; Active Agenda, HQ"/>
+		<TableField name="SortOrder" type="int" phrase="Sort Order|A numerical value used to define the order of the task within the list" sample="100"/>
+		<TableField name="TaskID" type="int" validate="RequireSelection" phrase="Task|A combined field used to describe this task when associating it with other records" sample="1"/>
+		<ForeignField name="TaskOrganizationID" listType="allParticipants" foreignTable="tas" foreignKey="TaskID" foreignField="OrganizationID" key="TaskID" joinType="left" phrase="Task Organization|The organization associated with the task" sample="1"/>
+		<ForeignField name="TaskOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="TaskOrganizationID" joinType="left" phrase="Task Organization|The organization associated with the task" sample="Active Agenda, HQ"/>
+		<RemoteField name="LocationID" validate="RequireSelection" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Location|Specific location within the facility where this task is performed. In the case of a multi-location task, this should be the primary location where the task is performed" sample="1"/>
+		<ForeignField name="Location" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="LocationID" joinType="left" phrase="Location|Specific location within the facility where this task is performed. In the case of a multi-location task, this should be the primary location where the task is performed" sample="Packaging Area"/>
+		<ForeignField name="LocationNumber" foreignTable="orgl" foreignKey="LocationID" foreignField="LocationNumber" key="LocationID" joinType="left" phrase="Location Number|A unique tracking number assigned by the organization to track specific locations. Location numbers are often used by engineering departments to definitively label locations for blueprints, process flow charts and other process information diagrams" sample="1781"/>
+		<ForeignField name="FunctionID" foreignTable="tas" foreignKey="TaskID" foreignField="FunctionID" key="TaskID" joinType="left" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="1"/>
+		<CodeField name="Function" key="FunctionID" phrase="Function|The business purpose of the department responsible for the task to be performed" sample="Operations (Raisin)" codeTypeID="4"/>
+		<ForeignField name="TaskTypeID" listType="allParticipants" foreignTable="tas" foreignKey="TaskID" foreignField="TaskTypeID" key="TaskID" joinType="left" phrase="Task Type|A combined field used to describe this task type when associating it with other records" sample="1"/>
+		<ForeignField name="TaskCategoryID" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskCategoryID" key="TaskTypeID" joinType="left" phrase="Category|A broad categoy used to group tasks of similar types" sample="1"/>
+		<CodeField name="TaskCategory" key="TaskCategoryID" phrase="Category|A broad categoy used to group tasks of similar types" sample="Operating Machinery" codeTypeID="45"/>
+		<ForeignField name="TaskType" foreignTable="tast" foreignKey="TaskTypeID" foreignField="TaskType" key="TaskTypeID" joinType="left" phrase="Task Type|A combined field used to describe this task type when associating it with other records" sample="Operating | Operating Bin Dump"/>
+		<ForeignField name="Task" foreignTable="tas" foreignKey="TaskID" foreignField="Task" key="TaskID" joinType="left" phrase="Task|A combined field used to describe this task when associating it with other records" sample="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area, Under Review"/>
+		<LinkField name="TaskLink" foreignModuleID="tas" recordIDField="TaskID" phrase="Task Link|Link to the task in a new window"/>
+		<LinkField name="JobAnalysisLink" foreignModuleID="jan" recordIDField="JobAnalysisID" phrase="Job Analysis Link|Link to the job analysis in a new window"/>
+		<ForeignField name="TaskDesc" foreignTable="tas" foreignKey="TaskID" foreignField="TaskDesc" key="TaskID" joinType="left" phrase="Task Description|A detailed description of the task to be performed. The detailed description will be very importnat to others interested in assigning this task to different job analyses" sample="Sugar is retrieved from a sugar bag using a red plastic shovel. The sugar is then shake over the Sugar Shaker machine so that the sugar is applied evenly across the surface of the raisins"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="JobAnalysis"/>;_<CombinedFieldRef name="Task"/></CombinedField>
+		<CombinedField name="JobTask" phrase="Job Task|A combined field used to describe this job task when associating it with other records" sample="Line Operations - Sugar Shaker; Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area, Under Review"><CombinedFieldRef name="JobAnalysis"/>;_<CombinedFieldRef name="Task"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="JobTaskID"/>
+		</PrimaryKey>
+		<OwnerField name="JAOrganizationID"/>
+		<RecordDescriptionField name="JobTask"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List task associations with a job analysis">
+			<ListField name="JobTaskID" phrase="Record ID"/>
+			<ListField name="JAOrganization" phrase="Analysis Organization"/>
+			<ListField name="JobAnalysis" phrase="Job Analysis"/>
+			<ListField name="Task" phrase="Task"/>
+			<ListField name="Location" phrase="Location"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search task associations with job analyses">
+			<OrgComboField name="JAOrganizationID" findMode="text">
+				<UpdateFieldRef name="JobAnalysisID"/>
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="JAOrganizationID">
+				<SampleItem ID="1" name="Sugar Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Office"/>
+				<SampleItem ID="4" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="JobAnalysisID" findMode="text" parentField="JAOrganizationID">
+				<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+			</ComboField>
+			<CodeComboField name="JobAnalysisStatusID">
+				<SampleItem ID="1" name="Under Review"/>
+				<SampleItem ID="2" name="Complete"/>
+				<SampleItem ID="3" name="No Review Required"/>
+			</CodeComboField>
+			<OrgComboField name="TaskOrganizationID" findMode="text">
+				<UpdateFieldRef name="TaskCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" parentField="TaskOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="TaskID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Processing"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="3" name="Machine Operating"/>
+				<SampleItem ID="3" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskID" findMode="text" parentField="TaskCategoryID">
+				<SampleItem ID="1" name="Operating Machinery | Operating bin dump"/>
+				<SampleItem ID="2" name="Operating Machinery | Operating incline conveyor"/>
+				<SampleItem ID="3" name="Operating Machinery | Operating sugar shakers"/>
+				<SampleItem ID="4" name="Operating Machinery | Operating mix tanks"/>
+				<SampleItem ID="5" name="Operating Machinery | Operating ammonia compressors"/>
+				<SampleItem ID="6" name="Operating Machinery | Operating pallet jack"/>
+			</ComboField>
+			<ComboField name="TaskTypeID" findMode="text">
+				<SampleItem ID="1" name="Operating Machinery | Operating bin dump"/>
+				<SampleItem ID="2" name="Operating Machinery | Operating incline conveyor"/>
+				<SampleItem ID="3" name="Operating Machinery | Operating sugar shakers"/>
+				<SampleItem ID="4" name="Operating Machinery | Operating mix tanks"/>
+				<SampleItem ID="5" name="Operating Machinery | Operating ammonia compressors"/>
+				<SampleItem ID="6" name="Operating Machinery | Operating pallet jack"/>
+			</ComboField>
+			<ComboField name="LocationID" findMode="text">
+				<SampleItem ID="1" name="Sugar Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Office"/>
+				<SampleItem ID="4" name="Production Line #1"/>
+			</ComboField>
+			<EditField name="LocationNumber" size="25" maxLength="50"/>
+			<CodeComboField name="FunctionID" findMode="text">
+				<SampleItem ID="1" name="Operations (Raisin)"/>
+				<SampleItem ID="2" name="Sales and Marketing"/>
+				<SampleItem ID="3" name="Human Resources"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about the assignment of a task to a job analysis">
+			<ViewField name="JobTaskID"/>
+			<ViewField name="JAOrganization"/>
+			<ViewField name="JobAnalysis"/>
+			<ViewField name="SortOrder"/>
+			<ViewField name="TaskOrganization"/>
+			<ViewField name="Location"/>
+			<ViewField name="LocationNumber"/>
+			<ViewField name="TaskType"/>
+			<ViewField name="TaskDesc"/>
+			<ViewField name="Function"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about the assignment of a task to a job analysis">
+			<ViewField name="JobTaskID"/>
+			<EditField name="SortOrder" size="10" maxLength="10"/>
+			<OrgComboField name="JAOrganizationID" findMode="text">
+				<UpdateFieldRef name="JobAnalysisID"/>
+				<UpdateFieldRef name="LocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<ComboField name="LocationID" findMode="text" parentField="JAOrganizationID">
+				<SampleItem ID="1" name="Sugar Room"/>
+				<SampleItem ID="2" name="Shipping Bay #1"/>
+				<SampleItem ID="3" name="Administrative Office"/>
+				<SampleItem ID="4" name="Production Line #1"/>
+			</ComboField>
+			<ComboField name="JobAnalysisID" findMode="text" parentField="JAOrganizationID">
+				<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+			</ComboField>
+			<ViewField name="JobAnalysisDesc" parentField="JobAnalysisID"/>
+			<ViewField name="JobAnalysisStatus" parentField="JobAnalysisID"/>
+			<OrgComboField name="TaskOrganizationID" findMode="text">
+				<UpdateFieldRef name="TaskCategoryID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Inc."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</OrgComboField>
+			<CodeComboField name="TaskCategoryID" findMode="text" parentField="TaskOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="TaskID" listParentField="TaskCategoryID"/>
+				<SampleItem ID="1" name="Processing"/>
+				<SampleItem ID="2" name="Cleaning"/>
+				<SampleItem ID="3" name="Repairing"/>
+				<SampleItem ID="3" name="Machine Operating"/>
+				<SampleItem ID="3" name="Administering"/>
+			</CodeComboField>
+			<ComboField name="TaskID" findMode="text" parentField="TaskCategoryID">
+				<UpdateFieldRef name="TaskType"/>
+				<UpdateFieldRef name="TaskDesc"/>
+				<UpdateFieldRef name="Function"/>
+				<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+			</ComboField>
+			<ViewField name="TaskType" parentField="TaskID"/>
+			<ViewField name="TaskDesc" parentField="TaskID"/>
+			<ViewField name="Function" parentField="TaskID"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="JobTaskID"/>
+		<ViewField name="JAOrganization"/>
+		<ViewField name="JobAnalysis"/>
+		<ViewField name="TaskOrganization"/>
+		<ViewField name="Location"/>
+		<ViewField name="LocationNumber"/>
+		<ViewField name="Function"/>
+		<ViewField name="TaskType"/>
+		<ViewField name="TaskDesc"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="jant" phrase="Tasks">
+			<InvisibleGridField name="JobTaskID"/>
+			<ViewGridField name="TaskOrganization" phrase="Organization"/>
+			<ViewGridField name="Location" phrase="Location"/>
+			<ViewGridField name="TaskType" phrase="Task Type"/>
+			<ViewGridField name="Task" phrase="Task" link="TaskLink"/>
+			<!--The companion view grid displaying Job Analyses is a custom VG within <jan>
+            <InvisibleGridField name="JobAnalysisAssocID"/>
+            <ViewGridField name="JAOrganization" phrase="Organization"/>
+            <ViewGridField name="JobAnalysis" phrase="Job Analysis"/>
+            <ViewGridField name="JobAnalysisDesc" phrase="Description"/>
+            <ViewGridField name="JobAnalysisStatus" phrase="Status"/>
+            -->
+		</ViewGrid>
+		<EditGrid moduleID="jant" phrase="Tasks">
+			<GridForm>
+				<InvisibleGridField name="JobTaskID"/>
+				<!--<EditField name="SortOrder" size="10" maxLength="10"/>
+					<OrgComboGridField name="TaskOrganizationID" findMode="text">
+                    <UpdateFieldRef name="TaskID"/>
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Inc."/>
+                    <SampleItem ID="3" name="Good Ideas Consulting"/>
+                </OrgComboGridField>
+                <ComboGridField name="TaskID" findMode="text" parentField="TaskOrganizationID">
+                    <UpdateFieldRef name="TaskType"/>
+                    <UpdateFieldRef name="TaskDesc"/>
+                    <UpdateFieldRef name="Location"/>
+                    <UpdateFieldRef name="Function"/>
+                    <SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+                    <SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+                    <SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+                    <SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+                </ComboGridField>
+				<ViewGridField name="TaskType" parentField="TaskID"/>
+				<ViewGridField name="TaskDesc" parentField="TaskID"/>
+				<ViewGridField name="Function" parentField="TaskID"/>-->
+				<OrgComboGridField name="JAOrganizationID" findMode="text">
+					<UpdateFieldRef name="JobAnalysisID"/>
+					<UpdateFieldRef name="LocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Inc."/>
+					<SampleItem ID="3" name="Good Ideas Consulting"/>
+				</OrgComboGridField>
+				<ComboGridField name="LocationID" findMode="text" parentField="JAOrganizationID">
+					<SampleItem ID="1" name="Sugar Room"/>
+					<SampleItem ID="2" name="Shipping Bay #1"/>
+					<SampleItem ID="3" name="Administrative Office"/>
+					<SampleItem ID="4" name="Production Line #1"/>
+				</ComboGridField>
+				<ComboGridField name="JobAnalysisID" findMode="text" parentField="JAOrganizationID">
+					<SampleItem ID="1" name="Sugar coating raisins on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+					<SampleItem ID="2" name="Regulating the vibration on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+					<SampleItem ID="3" name="Closing the lid on the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+					<SampleItem ID="4" name="raking sugar wtihin the sugar shaker, Active Agenda, HQ, Packaging Area"/>
+				</ComboGridField>
+				<ViewGridField name="JobAnalysisDesc" parentField="JobAnalysisID"/>
+				<ViewGridField name="JobAnalysisStatus" parentField="JobAnalysisID"/>
+			</GridForm>
+			<InvisibleGridField name="JobTaskID"/>
+			<ViewGridField name="TaskOrganization" phrase="Organization"/>
+			<ViewGridField name="Location" phrase="Kitchen"/>
+			<ViewGridField name="Task" phrase="Task" link="TaskLink"/>
+			<ViewGridField name="JAOrganization" phrase="Organization"/>
+			<ViewGridField name="JobAnalysis" phrase="Job Analysis" link="JobAnalysisLink"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Job Analyses Tasks by Job Analysis">
+			<GroupByField name="JobAnalysis"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Job Analyses Tasks by Job Analysis">
+			<GroupByField name="JobAnalysis"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Job Analyses Tasks by Job Analysis Organization">
+			<GroupByField name="JAOrganization"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Job Analyses Tasks by Job Analysis Organization">
+			<GroupByField name="JAOrganization"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Job Analyses Tasks by Task Organization">
+			<GroupByField name="TaskOrganization"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Job Analyses Tasks by Task Organization">
+			<GroupByField name="TaskOrganization"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Job Analyses Tasks by Task Type">
+			<GroupByField name="TaskType"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Job Analyses Tasks by Task Type">
+			<GroupByField name="TaskType"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Job Analyses Tasks by Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Job Analyses Tasks by Location">
+			<GroupByField name="Location"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Job Analyses Tasks by Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Job Analyses Tasks by Function">
+			<GroupByField name="Function"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie7" title="Job Analyses Tasks By Location Number">
+			<GroupByField name="LocationNumber"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto7" title="Job Analyses Tasks By Location Number">
+			<GroupByField name="LocationNumber"/>
+			<SummaryField name="JobTaskID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

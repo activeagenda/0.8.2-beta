@@ -1,0 +1,354 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Situations" moduleID="sit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Situation" pluralRecordName="Situations" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="SituationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track situations requiring resources and response" sample="1"/>
+		<TableField name="SituationTypeID" type="int" validate="RequireSelection" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="1"/>
+		<ForeignField name="SituationCategoryID" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationCategoryID" key="SituationTypeID" joinType="left" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="1"/>
+		<CodeField name="SituationCategory" key="SituationCategoryID" phrase="Situation Category|A broadly defined title used to group similar categories of situations" sample="Disease" codeTypeID="26"/>
+		<ForeignField name="SituationType" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationType" key="SituationTypeID" joinType="left" phrase="Situation Type|A combined field used to describe this situation type when associating it with other records" sample="Injury (employee)"/>
+		<ForeignField name="SituationDescription" foreignTable="sitt" foreignKey="SituationTypeID" foreignField="SituationDescription" key="SituationTypeID" joinType="left" phrase="Situation Description|A thorough description of the situation type" sample="Employee injury requiring medical treatment by a licensed medical provider OR an industrial nurse."/>
+		<TableField name="LocalDescription" type="text" validate="notEmpty" phrase="Local Description|An detailed description of the local situation requiring action, communication, or response" sample="Injuries involving medical treatment are those which require the treatment of a trained physician. Injuries resulting in a visit to the industrial medical provider are not included if those injuries can be addressed by a non-physician."/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" phrase="Organization|The name of the organization at risk of encountering the defined situation" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization at risk of encountering the defined situation" sample="Active Agenda, HQ"/>
+		<ForeignField name="OrganizationShortName" foreignTable="org" foreignKey="OrganizationID" foreignField="ShortName" key="OrganizationID" joinType="left" phrase="Organization Short Name|Short name of the organization associated with the individual" sample="AASWE"/>
+		<TableField name="DepartmentID" type="int" validate="noValidation" phrase="Department|The name of the department to be credited with the occurrence of this meeting" sample="1"/>
+		<ForeignField name="Department" foreignTable="orgdp" foreignKey="DepartmentID" foreignField="Department" key="DepartmentID" joinType="left" phrase="Department|The name of the department to be credited with the occurrence of this meeting" sample="Operations"/>
+		<RemoteField name="PersonAccountableID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="80" phrase="Person Accountable|The individual assigned primary accountability for definition interpretations, situational readiness, role assignments, and organizational training" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for definition interpretations, situational readiness, role assignments, and organizational training" sample="Mattias Thorslund"/>
+		<RemoteField name="LastUpdate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="20" phrase="Last Update|The date the situation was last updated" sample="01/01/2004"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'sit'" localKey="SituationID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<CombinedField name="SearchSelect" phrase="Search Select Name|A combination of fields used by the SearchSelectGrid to identify the persons listed" sample="Injury (employee) - AAHQ"><CombinedFieldRef name="SituationType"/>_-_<CombinedFieldRef name="OrganizationShortName"/></CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="SituationCategory"/>:_<CombinedFieldRef name="SituationType"/></CombinedField>
+		<CombinedField name="Situation" phrase="Situation|A combined field used to describe this situation when associating it with other records" sample="Employee injury requiring medical treatment"><CombinedFieldRef name="SituationType"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SituationID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Situation"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="sitc" name="Situation Contacts" parentKey="SituationID" localKey="SituationID"/>
+		<SubModule moduleID="sitrp" name="Situation Roles" parentKey="SituationID" localKey="SituationID"/>
+		<SubModule moduleID="sitd" name="Situation Drills" parentKey="SituationID" localKey="SituationID"/>
+		<SubModule moduleID="gui" name="Guidance Organizations" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="SituationID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="sit"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List situations requiring involvement and/or reporting">
+			<ListField name="SituationID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SituationCategory" phrase="Situation Category"/>
+			<ListField name="SituationType" phrase="Situation Type"/>
+			<ListField name="LastUpdate" phrase="Last Update"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search situations requiring involvement and/or reporting">
+			<ComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</ComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="LastUpdate"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a situation requiring involvement and/or reporting">
+			<ViewField name="SituationID"/>
+			<ViewField name="SituationCategory"/>
+			<ViewField name="SituationType"/>
+			<ViewField name="SituationDescription"/>
+			<ViewField name="LocalDescription"/>
+			<ViewField name="Organization"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="LastUpdate"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="sitc"/>
+				<ViewGrid moduleID="sitrp"/>
+				<ViewGrid moduleID="sitd"/>
+				<ViewGrid moduleID="gui"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a situation requiring involvement and/or reporting">
+			<ViewField name="SituationID"/>
+			<ComboField name="SituationCategoryID" findMode="text">
+				<UpdateFieldRef name="SituationTypeID" listParentField="SituationCategoryID"/>
+				<SampleItem ID="1" name="Injury (employee)"/>
+				<SampleItem ID="2" name="Injury (customer)"/>
+				<SampleItem ID="3" name="Operational (downtime)"/>
+				<SampleItem ID="4" name="Product Recall"/>
+				<SampleItem ID="5" name="Quality Assurance (HACCP Violation)"/>
+				<SampleItem ID="6" name="Information Technology"/>
+			</ComboField>
+			<ComboField name="SituationTypeID" findMode="text" parentField="SituationCategoryID">
+				<UpdateFieldRef name="SituationDescription"/>
+				<SampleItem ID="1" name="First Aid Only Injury"/>
+				<SampleItem ID="2" name="Injury Requiring Minor Medical Treatment"/>
+				<SampleItem ID="3" name="Injury Requiring Major Medical Treatment"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<ViewField name="SituationDescription" parentField="SituationTypeID"/>
+			<MemoField name="LocalDescription" rows="5" cols="75"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+				<SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+			</PersonComboField>
+			<DateField name="LastUpdate"/>
+		</EditScreen>
+		<EditScreen name="Contacts" phrase="Contacts|Associate contacts with a situation requiring involvement and/or reporting">
+			<RecordSummaryFieldsRef/>
+			<InvisibleField name="OrganizationID"/>
+			<InvisibleField name="DepartmentID"/>
+			<SearchSelectGrid moduleID="sitc"/>
+		</EditScreen>
+		<EditScreen name="Criteria" phrase="Criteria|Associate contacts with involvement and/or reporting criteria">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sitc"/>
+		</EditScreen>
+		<EditScreen name="Roles" phrase="Roles|Associate situation response roles with the situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sitrp"/>
+		</EditScreen>
+		<EditScreen name="Roles" phrase="Drills|Associate situation response drills with the situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sitd"/>
+		</EditScreen>
+		<EditScreen name="Guidance" phrase="Guidance|Associate guidance with the situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="gui"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a situation">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with a situation requiring involvement and/or reporting">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a situation requiring involvement and/or reporting" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SituationID"/>
+		<InvisibleField name="SituationTypeID"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SituationCategory"/>
+		<ViewField name="SituationType"/>
+		<ViewField name="SituationDescription"/>
+		<ViewField name="LocalDescription"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="LastUpdate"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Charts>
+		<PieChart name="Pie01" title="Situations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Situations By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SituationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Situations By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="SituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Situations By Category">
+			<GroupByField name="SituationCategory"/>
+			<SummaryField name="SituationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Situations By Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="SituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Situations By Type">
+			<GroupByField name="SituationType"/>
+			<SummaryField name="SituationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Situations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Situations By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="SituationID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Situations By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="SituationID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Situations By Risk Imperatives">
+			<GroupByField name="RiskImperatives"/>
+			<SummaryField name="SituationID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

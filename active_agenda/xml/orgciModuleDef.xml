@@ -1,0 +1,394 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Certificates of Insurance" moduleID="orgci" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Certificate of Insurance" pluralRecordName="Certificates of Insurance" addNewName="Certificate">
+    <ModuleFields>
+        <TableField name="CertificateID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|Automatically assigned number used to track certificates of insurance" sample="1"/>
+        <TableField name="NamedOrgID" type="int" dbFlags="unsigned" phrase="Policy Holder|The organization which is identified on the policy Declarations page as the Named Insured of the insurance policy. The Named Insured is required to provide and maintain currency of the policy and provide updated certificates of insurance to the Additional Insured prior to ANY lapse of policy coverage" sample="1"/>
+        <ForeignField name="NamedOrg" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="NamedOrgID" joinType="left" phrase="Policy Holder|The organization which is identified on the policy Declarations page as the Named Insured of the insurance policy. The Named Insured is required to provide and maintain currency of the policy and provide updated certificates of insurance to the Additional Insured prior to ANY lapse of policy coverage" sample="Active Agenda, HQ"/>
+        <TableField name="CarrierID" type="int" dbFlags="unsigned" phrase="Carrier|Name of the insurance carrier providing the certificate of insurance" sample="1"/>
+        <ForeignField name="Carrier" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="CarrierID" joinType="left" phrase="Carrier|Name of the insurance carrier providing the certificate of insurance" sample="American Insurance Group"/>
+        <TableField name="PolicyTypeID" type="int" dbFlags="unsigned" phrase="Policy Type|The type of insurance coverage provided by the carrier to the contractor and evidenced by the certificate of insurance" sample="1"/>
+        <CodeField name="PolicyType" key="PolicyTypeID" phrase="Policy Type|The type of insurance coverage provided by the carrier to the contractor and evidenced by the certificate of insurance" sample="General Liability" codeTypeID="3"/>
+        <TableField name="CertificateTitle" type="varchar(128)" dbFlags="" validate="notEmpty" phrase="Certificate Title|A descriptive title used to identify the certificate of insurance" sample="AIG; GL-2003-CAGC92882"/>
+        <TableField name="CertificateNo" type="varchar(128)" dbFlags="" phrase="Certificate Number|The number assigned to the certificate of insurance by the insurance carrier or issuing insurance broker" sample="COI4-AIG-GL-2003-CAGC92882"/>
+        <RemoteField name="EffectiveDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="17" phrase="Effective Date|The date the insurance policy referred to in the certificate of insurance went into effect" sample="01/01/2004"/>
+        <RemoteField name="ExpirationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|The date the insurance policy referred to in the certificate of insurance will no longer be in effect" sample="01/01/2004"/>
+        <TableField name="CoverageAmount" type="money" dbFlags="" phrase="Coverage Amount|Amount of insurance coverage provided by the insurance carrier and evidenced by the certificate of insurance and stated in the currency assigned to this installation of the software" sample="1,000,000"/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="11" phrase="Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the 'named' organization" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual with primary responsibility for managing the adequacy and frequency of the certificate of insurance and the risk financing relationship between the insured organization and the 'named' organization" sample="Mattias Thorslund"/>
+        <TableField name="CertificateAttached" type="bool" dbFlags="" phrase="Certificate Attached|Whether the certificate of insurance has been attached to this record" sample="Yes"/>
+        <CalculatedField name="DaysRemaining" type="int" calcFunction="daysremaining_not_negative" params="ExpirationDate" phrase="Days Remaining|The total number of days remaining before the certificate of insurance expires" sample="30"/>
+        <SummaryField name="AdditionalInsureds" summaryFunction="list" summaryField="Organization" summaryKey="CertificateID" summaryModuleID="orgca" localKey="CertificateID" phrase="Additional Insureds|A list of organizations names as additional insureds of the policy on the certificate of insurance" sample="Active Agenda, HA: Active Agenda, Sweden"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Carrier"/>_No:_<CombinedFieldRef name="CertificateNo"/>_expiring:_<CombinedFieldRef name="ExpirationDate"/></CombinedField>
+        <CombinedField name="Certificate" phrase="Certificate|A combined field used to describe this certificate when associating it with other records" sample="Bechtel; Active Agenda, HQ; General Liability; AIG; GL-2003-CAGC92882; American Insurance Group; 09-21-2003"><CombinedFieldRef name="CertificateTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="CertificateID"/>
+        </PrimaryKey>
+        <!--<OwnerField name="NamedOrgID"/>
+         this module needs to be viewable by all organizations-->
+        <RecordDescriptionField name="Certificate"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="orgca" name="Additional Insureds" parentKey="CertificateID" localKey="CertificateID"/>
+        <SubModule moduleID="insa" name="Insurance Policies" parentKey="CertificateID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgci"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="CertificateID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgci"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="CertificateID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgci"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="CertificateID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgci"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="CertificateID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="orgci"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List certificates of insurance">
+            <ListField name="CertificateID" phrase="Record ID"/>
+            <ListField name="PolicyType" phrase="Policy Type"/>
+            <ListField name="NamedOrg" phrase="Policy Holder"/>
+            <ListField name="CertificateTitle" phrase="Certificate Title"/>
+            <ListField name="ExpirationDate" phrase="Expires"/>
+            <ListField name="DaysRemaining" phrase="Days Remaining"/>
+            <ListField name="CertificateAttached" phrase="Attached"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search certificates of insurance">
+            <EditField name="CertificateTitle" size="75" maxLength="128"/>
+            <EditField name="CertificateNo" size="75" maxLength="128"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="NamedOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </ComboField>
+            <CodeComboField name="PolicyTypeID" findMode="text">
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </CodeComboField>
+            <MoneyField name="CoverageAmount"/>
+            <ComboField name="CarrierID" findMode="text">
+                <SampleItem ID="1" name="American Insurance Group"/>
+                <SampleItem ID="2" name="Cigna"/>
+                <SampleItem ID="3" name="CNA"/>
+            </ComboField>
+            <DateField name="EffectiveDate"/>
+            <DateField name="ExpirationDate"/>
+            <CheckBoxField name="CertificateAttached"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about a certificate of insurance">
+            <ViewField name="CertificateID"/>
+            <ViewField name="CertificateTitle"/>
+            <ViewField name="CertificateNo"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="NamedOrg"/>
+            <ViewField name="PolicyType"/>
+            <ViewField name="CoverageAmount"/>
+            <ViewField name="Carrier"/>
+            <ViewField name="EffectiveDate"/>
+            <ViewField name="ExpirationDate"/>
+            <ViewField name="DaysRemaining"/>
+            <ViewField name="CertificateAttached"/>
+            <ViewField name="AdditionalInsureds"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="orgca"/>
+                <ViewGrid moduleID="insa"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about a certificate of insurance">
+            <ViewField name="CertificateID"/>
+            <EditField name="CertificateTitle" size="75" maxLength="128"/>
+            <EditField name="CertificateNo" size="75" maxLength="128"/>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+            </PersonComboField>
+            <ComboField name="NamedOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </ComboField>
+            <CodeComboField name="PolicyTypeID" findMode="text">
+                <SampleItem ID="1" name="General Liability"/>
+                <SampleItem ID="3" name="Auto Liability"/>
+                <SampleItem ID="5" name="Products Liability"/>
+                <SampleItem ID="7" name="Employment Practices Liability"/>
+                <SampleItem ID="9" name="Workers' Compensation'"/>
+                <SampleItem ID="11" name="Pollution Liability"/>
+            </CodeComboField>
+            <MoneyField name="CoverageAmount"/>
+            <ComboField name="CarrierID" findMode="text">
+                <SampleItem ID="1" name="American Insurance Group"/>
+                <SampleItem ID="2" name="Cigna"/>
+                <SampleItem ID="3" name="CNA"/>
+            </ComboField>
+            <DateField name="EffectiveDate"/>
+            <DateField name="ExpirationDate"/>
+            <ViewField name="DaysRemaining"/>
+            <CheckBoxField name="CertificateAttached"/>
+        </EditScreen>
+        <EditScreen name="Insureds" phrase="Insureds|Associate additional insureds with a certificate of insurance">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="orgca"/>
+        </EditScreen>
+        <EditScreen name="Insurance" phrase="Insurance|Associate insurance policies with a certificate of insurance">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="insa"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the certificate of insurance">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the certificate of insurance">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with a certificate of insurance">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with a certificate of insurance" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="CertificateID"/>
+        <ViewField name="CertificateTitle"/>
+        <ViewField name="CertificateNo"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="NamedOrg"/>
+        <ViewField name="PolicyType"/>
+        <ViewField name="CoverageAmount"/>
+        <ViewField name="Carrier"/>
+        <ViewField name="EffectiveDate"/>
+        <ViewField name="ExpirationDate"/>
+        <ViewField name="DaysRemaining"/>
+        <ViewField name="CertificateAttached"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="orgci" phrase="Certificates Issued">
+            <InvisibleField name="CertificateID"/>
+            <ViewField name="NamedOrg" sample="Active Agenda, HQ"/>
+            <ViewField name="PolicyType" sample="General Liability"/>
+            <ViewField name="CertificateNo" sample="COI4-AIG-GL-2003-CAGC92882"/>
+            <ViewField name="ExpirationDate" sample="09-21-2003"/>
+            <ViewField name="DaysRemaining" sample="32"/>
+            <ViewField name="CertificateAttached" sample="Yes"/>
+        </ViewGrid>
+        <EditGrid moduleID="orgci" phrase="Certificates Issued">
+            <GridForm>
+                <InvisibleField name="CertificateID"/>
+                <EditField name="CertificateTitle" size="75" maxLength="128" sample="AIG; GL-2003-CAGC92882"/>
+                <EditField name="CertificateNo" size="75" maxLength="128" sample="COI4-AIG-GL-2003-CAGC92882"/>
+                <ComboField name="NamedOrgID" findMode="text" sample="Active Agenda, HQ">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </ComboField>
+                <CodeComboField name="PolicyTypeID" findMode="text" sample="General Liability">
+                    <SampleItem ID="1" name="General Liability"/>
+                    <SampleItem ID="3" name="Auto Liability"/>
+                    <SampleItem ID="5" name="Products Liability"/>
+                    <SampleItem ID="7" name="Employment Practices Liability"/>
+                    <SampleItem ID="9" name="Workers' Compensation'"/>
+                    <SampleItem ID="11" name="Pollution Liability"/>
+                </CodeComboField>
+                <MoneyField name="CoverageAmount" sample="1,000,000"/>
+                <ComboField name="CarrierID" findMode="text" sample="American Insurance Group">
+                    <SampleItem ID="1" name="American Insurance Group"/>
+                    <SampleItem ID="2" name="Cigna"/>
+                    <SampleItem ID="3" name="CNA"/>
+                </ComboField>
+                <DateField name="EffectiveDate" sample="09-21-2003"/>
+                <DateField name="ExpirationDate" sample="09-21-2003"/>
+                <ViewField name="DaysRemaining" sample="32"/>
+                <CheckBoxField name="CertificateAttached" sample="Yes"/>
+            </GridForm>
+            <ViewField name="NamedOrg" sample="Active Agenda, HQ"/>
+            <ViewField name="PolicyType" sample="General Liability"/>
+            <ViewField name="CertificateNo" sample="COI4-AIG-GL-2003-CAGC92882"/>
+            <ViewField name="ExpirationDate" sample="09-21-2003"/>
+            <ViewField name="DaysRemaining" sample="32"/>
+            <ViewField name="CertificateAttached" sample="Yes"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Certificates of Insurance By Named Organization">
+            <GroupByField name="NamedOrg"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Certificates of Insurance By Named Organization">
+            <GroupByField name="NamedOrg"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Certificates of Insurance By Policy Type">
+            <GroupByField name="PolicyType"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Certificates of Insurance By Policy Type">
+            <GroupByField name="PolicyType"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Certificates of Insurance By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Certificates of Insurance By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Certificates of Insurance By Carrier">
+            <GroupByField name="Carrier"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Certificates of Insurance By Carrier">
+            <GroupByField name="Carrier"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Certificates of Insurance By Certificate Attached">
+            <GroupByField name="CertificateAttached"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Certificates of Insurance By Certificate Attached">
+            <GroupByField name="CertificateAttached"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </ParetoChart>
+        <BarChart name="Bar01" title="Certificates Expiring by Year">
+            <GroupByField name="ExpirationDate" dateInterval="year"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </BarChart>
+        <BarChart name="Bar02" title="Certificates Expiring by Quarter">
+            <GroupByField name="ExpirationDate" dateInterval="yearquarter"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </BarChart>
+        <BarChart name="Bar03" title="Certificates Expiring by Month">
+            <GroupByField name="ExpirationDate" dateInterval="yearmonth"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </BarChart>
+        <BarChart name="Bar04" title="Certificates Expiring by Week">
+            <GroupByField name="ExpirationDate" dateInterval="yearweek"/>
+            <SummaryField name="CertificateID" type="count"/>
+        </BarChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

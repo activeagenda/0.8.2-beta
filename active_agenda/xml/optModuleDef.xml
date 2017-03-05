@@ -1,0 +1,326 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Opportunity Estimates" moduleID="opt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="C:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Opportunity Estimate" pluralRecordName="Opportunity Estimates" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="OpportunityEstimateID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track the association of cost Opportunitys with records throughout the application" sample="1"/>
+        <TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the estimated opportunity" sample="tas"/>
+        <ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the estimated opportunity" sample="Tasks"/>
+        <TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record|The unique ID of the related record within the related module" sample="1"/>
+        <DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record Description|A description of the related record based on a combination of field values assigned from within the related module" sample="Sugar Coating Raisins"/>
+		<TableField name="OwnerOrganizationID" type="int" defaultValue="defaultorgID" listType="allParticipants" validate="RequireSelection" phrase="Organization|The name of the organization presented with the estimated opportunity" sample="1"/>
+        <ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization associated with the estimated opportunity" sample="Active Agenda, Inc."/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="183" phrase="Person Accountable|The individual accountable for managing the estimated opportunity" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual accountable for managing the estimated opportunity" sample="Mattias Thorslund"/>
+        <TableField name="OpportunityEstimateTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A concise title that describes the estimated opportunity" sample="Labor law consulting fees"/>
+        <TableField name="OpportunityEstimateDescription" type="text" validate="notEmpty" phrase="Description|A detailed description of the estimated opportunity" sample="Labor law consultanting fees. This consulting firm was utilized to assist with the agency response."/>
+        <TableField name="Estimate" type="money" validate="Money notEmpty notNegative" phrase="Estimate|The total estimated opportunity" sample="10,000.00"/>
+        <TableField name="FinancialBenefitFrequency" type="float" validate="Number notNegative" phrase="Opportunity Frequency|The recurring frequency of the estimated opportunity" sample="1"/>
+        <TableField name="FinancialBenefitFrequencyUnitID" type="int" validate="noValidation" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="1"/>
+        <ForeignField name="FinancialBenefitFrequencyCategoryID" foreignTable="uts" foreignKey="UnitID" foreignField="UnitCategoryID" key="FinancialBenefitFrequencyUnitID" joinType="left" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="1"/>
+        <CodeField name="FinancialBenefitFrequencyCategory" key="FinancialBenefitFrequencyCategoryID" phrase="Unit Category|A broadly defined title or phrase used to group unit types" sample="Distance" codeTypeID="37"/>
+        <ForeignField name="FinancialBenefitFrequencyUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="FinancialBenefitFrequencyUnitID" joinType="left" phrase="Unit|A combined field used to describe this unit when associating it with other records" sample="Millimeter"/>
+        <CombinedField name="BenefitFrequency" phrase="Benefit Frequency|A combined field used to display the benefit frequency" sample="1 per year"><CombinedFieldRef name="FinancialBenefitFrequency"/>_per_<CombinedFieldRef name="FinancialBenefitFrequencyUnit"/></CombinedField>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+        <CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="People Employees | California Wage and Hours Regulation | California facilities should consider local impact"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="OpportunityEstimateTitle"/>;_<CombinedFieldRef name="Estimate"/>;_<CombinedFieldRef name="BenefitFrequency"/></CombinedField>
+        <CombinedField name="OpportunityEstimate" phrase="Cost Opportunity|A combined field used to describe the estimated opportunity when associating it with other records" sample="Employment | Last Chance Cost | Consider a last chance cost"><CombinedFieldRef name="OpportunityEstimateTitle"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="OpportunityEstimateID"/>
+        </PrimaryKey>
+        <OwnerField name="OwnerOrganizationID"/>
+        <RecordDescriptionField name="OpportunityEstimate"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <Screens>
+        <ListScreen name="List" phrase="List|List opportunity estimates">
+            <ListField name="OpportunityEstimateID" phrase="Record  ID"/>
+            <ListField name="RelatedModule" phrase="Related Module"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+            <ListField name="OpportunityEstimateTitle" phrase="Opportunity"/>
+            <ListField name="Estimate" phrase="Estimate"/>
+            <ListField name="BenefitFrequency" phrase="Benefit Frequency"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search opportunity estimates">
+            <ComboField name="RelatedModuleID" findMode="text">
+                <SampleItem ID="1" name="Tasks"/>
+                <SampleItem ID="2" name="Corrective Actions"/>
+                <SampleItem ID="2" name="Postings"/>
+            </ComboField>
+            <EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+            <OrgComboField name="OwnerOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="OpportunityEstimateTitle" size="75" maxLength="128"/>
+            <MoneyField name="Estimate"/>
+            <EditField name="FinancialBenefitFrequency" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="FinancialBenefitFrequencyCategoryID">
+                    <UpdateFieldRef name="FinancialBenefitFrequencyUnitID"/>
+                    <SampleItem ID="1" name="Time"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="3" name="Distance"/>
+                    <SampleItem ID="4" name="Packaging"/>
+                    <SampleItem ID="5" name="Volume"/>
+                    <SampleItem ID="6" name="Weight"/>
+                </ComboField>
+                <ComboField name="FinancialBenefitFrequencyUnitID" parentField="FinancialBenefitFrequencyCategoryID">
+                    <SampleItem ID="1" name="Second"/>
+                    <SampleItem ID="2" name="Minute"/>
+                    <SampleItem ID="3" name="Hour"/>
+                    <SampleItem ID="4" name="Day"/>
+                </ComboField>
+            </EditField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the opportunity estimate">
+            <ViewField name="OpportunityEstimateID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <ViewField name="OwnerOrganization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="OpportunityEstimateTitle"/>
+            <ViewField name="OpportunityEstimateDescription"/>
+            <ViewField name="Estimate"/>
+            <ViewField name="BenefitFrequency"/>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the opportunity estimate">
+            <ViewField name="OpportunityEstimateID"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+            <ViewField name="RelatedRecordDescription"/>
+            <OrgComboField name="OwnerOrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="OpportunityEstimateTitle" size="75" maxLength="128"/>
+            <MemoField name="OpportunityEstimateDescription" rows="5" cols="75"/>
+            <MoneyField name="Estimate"/>
+            <EditField name="FinancialBenefitFrequency" size="5" maxLength="5">
+                <Self/>
+                <ComboField name="FinancialBenefitFrequencyCategoryID">
+                    <UpdateFieldRef name="FinancialBenefitFrequencyUnitID"/>
+                    <SampleItem ID="1" name="Time"/>
+                    <SampleItem ID="2" name="Area"/>
+                    <SampleItem ID="3" name="Distance"/>
+                    <SampleItem ID="4" name="Packaging"/>
+                    <SampleItem ID="5" name="Volume"/>
+                    <SampleItem ID="6" name="Weight"/>
+                </ComboField>
+                <ComboField name="FinancialBenefitFrequencyUnitID" parentField="FinancialBenefitFrequencyCategoryID">
+                    <SampleItem ID="1" name="Second"/>
+                    <SampleItem ID="2" name="Minute"/>
+                    <SampleItem ID="3" name="Hour"/>
+                    <SampleItem ID="4" name="Day"/>
+                </ComboField>
+            </EditField>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="OpportunityEstimateID"/>
+        <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+        <ViewField name="RelatedRecordDescription"/>
+        <ViewField name="OwnerOrganization"/>
+        <ViewField name="PersonAccountable"/>
+        <ViewField name="OpportunityEstimateTitle"/>
+        <ViewField name="OpportunityEstimateDescription"/>
+        <ViewField name="Estimate"/>
+        <ViewField name="BenefitFrequency"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="opt" phrase="Opportunity Estimates">
+            <InvisibleField name="OpportunityEstimateID"/>
+            <ViewField name="OwnerOrganization"/>
+            <ViewField name="OpportunityEstimateTitle" sample="Facilities must comply with 2110 if they're using widgets"/>
+            <ViewField name="Estimate" sample="USD $25,000.00"/>
+            <ViewField name="BenefitFrequency"/>
+        </ViewGrid>
+        <EditGrid moduleID="opt" phrase="Opportunity Estimates">
+            <GridForm>
+                <InvisibleField name="OpportunityEstimateID"/>
+                <EditField name="OpportunityEstimateTitle" size="75" maxLength="128"/>
+                <MemoField name="OpportunityEstimateDescription" rows="5" cols="75"/>
+                <MoneyField name="Estimate"/>
+                <EditField name="FinancialBenefitFrequency" size="5" maxLength="5">
+                    <Self/>
+                    <ComboField name="FinancialBenefitFrequencyCategoryID">
+                        <UpdateFieldRef name="FinancialBenefitFrequencyUnitID"/>
+                        <SampleItem ID="1" name="Time"/>
+                        <SampleItem ID="2" name="Area"/>
+                        <SampleItem ID="3" name="Distance"/>
+                        <SampleItem ID="4" name="Packaging"/>
+                        <SampleItem ID="5" name="Volume"/>
+                        <SampleItem ID="6" name="Weight"/>
+                    </ComboField>
+                    <ComboField name="FinancialBenefitFrequencyUnitID" parentField="FinancialBenefitFrequencyCategoryID">
+                        <SampleItem ID="1" name="Second"/>
+                        <SampleItem ID="2" name="Minute"/>
+                        <SampleItem ID="3" name="Hour"/>
+                        <SampleItem ID="4" name="Day"/>
+                    </ComboField>
+                </EditField>
+                <OrgComboField name="OwnerOrganizationID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                </OrgComboField>
+                <PersonComboField name="PersonAccountableID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+            </GridForm>
+            <InvisibleField name="OpportunityEstimateID"/>
+            <ViewField name="OwnerOrganization"/>
+            <ViewField name="OpportunityEstimateTitle" sample="Facilities must comply with 2110 if they're using widgets"/>
+            <ViewField name="Estimate" sample="USD $25,000.00"/>
+            <ViewField name="BenefitFrequency" sample="1 per year"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <PieChart name="Pie01" title="Opportunity Estimates By Owner Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Opportunity Estimates By Owner Organization">
+            <GroupByField name="OwnerOrganization"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Opportunity Estimates By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Opportunity Estimates By Related Module">
+            <GroupByField name="RelatedModule"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Opportunity Estimates By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Opportunity Estimates By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Opportunity Estimates By Benefit Frequency">
+            <GroupByField name="BenefitFrequency"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Opportunity Estimates By Benefit Frequency">
+            <GroupByField name="BenefitFrequency"/>
+            <SummaryField name="OpportunityEstimateID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

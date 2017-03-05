@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Business Continuation Guidelines" moduleID="bus" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Continuity Guideline" pluralRecordName="Continuity Guidelines" addNewName="Guideline" allowAddRecord="yes">
+    <ModuleFields>
+        <TableField name="BusinessContinuationID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to assign and track business continuation guidelines" sample="1"/>
+        <TableField name="BusinessProcessTypeID" type="int" validate="RequireSelection" phrase="Process Type|The specific type of business process to be protected against a business interruption" sample="1"/>
+        <CodeField name="BusinessProcessType" key="BusinessProcessTypeID" phrase="Process Type|The specific type of business process to be protected against a business interruption" sample="Production" codeTypeID="283"/>
+        <TableField name="BusinessContinuationTitle" type="varchar(128)" validate="notEmpty" phrase="Title|A brief title used to describe the business continuation guideline" sample="Emergency Cold Storage Support"/>
+        <TableField name="BusinessContinuationNeed" type="text" validate="noValidation" phrase="Needs Assessment|A detailed description of the need for business continuation pre-planning in association with the business process" sample="Failure to secure a cold storage agreement in advance of loosing local storage capabilities could result in the immediate loss of $2.5 MM in inventory."/>
+        <TableField name="OperationalConsiderations" type="text" validate="noValidation" phrase="Operational Considerations|A detailed description of the operational considerations to me made when evaluating business continuation needs associated with the business process" sample="Inventory values should be calculated based on optimal movement of inventory from a downed cold storage to the new location. Consideration should be applied to moving the highest valued inventory first. Costs of shipping and overtime should be factored into the relocation estimate."/>
+        <TableField name="FinancialConsiderations" type="text" validate="noValidation" phrase="Financial Considerations|A detailed description of the financial considerations to me made when evaluating business continuation needs associated with the business process" sample="A total calculation of the value of the inventory to be moved shall be performed prior to securing arrangements with a cold storage facility"/>
+        <TableField name="SignificantImpact" type="money" dbFlags="" phrase="Significant Impact|The financial impact defined as significant. The significant impact value establishes the timeline for action to avoid incurring a financial impact of this magnitude." sample="7,000,000"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Active Agenda, Inc. | Emergency Cold Storage Support | Mattias Thorslund"><CombinedFieldRef name="BusinessProcessType"/>;_<CombinedFieldRef name="BusinessContinuationTitle"/></CombinedField>
+        <CombinedField name="BusinessContinuation" phrase="Business Continuation Issue|A combined field used to describe this business continuation requirement or item when associating it with other records" sample="Emergency Cold Storage Support">
+            <CombinedFieldRef name="BusinessContinuationTitle"/>
+        </CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="BusinessContinuationID"/>
+        </PrimaryKey>
+        <!--<OwnerField name="OrganizationID"/>not required-->
+        <RecordDescriptionField name="BusinessContinuation"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="gui" name="Guidance Organizations" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="BusinessContinuationID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="bus"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List business continuation requirements">
+            <ListField name="BusinessContinuationID" phrase="Record ID"/>
+            <ListField name="BusinessProcessType" phrase="Business Process"/>
+            <ListField name="BusinessContinuationTitle" phrase="Business Continuation Title"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search business continuation requirements">
+            <CodeComboField name="BusinessProcessTypeID" findMode="text">
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+            <EditField name="BusinessContinuationTitle" size="75" maxLength="128"/>
+            <MoneyField name="SignificantImpact"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about business continuation requirements">
+            <ViewField name="BusinessContinuationID"/>
+            <ViewField name="BusinessProcessType"/>
+            <ViewField name="BusinessContinuationTitle"/>
+            <ViewField name="BusinessContinuationNeed"/>
+            <ViewField name="OperationalConsiderations"/>
+            <ViewField name="FinancialConsiderations"/>
+            <ViewField name="SignificantImpact"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="gui"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about business continuation requirements and activities">
+            <ViewField name="BusinessContinuationID"/>
+            <CodeComboField name="BusinessProcessTypeID" findMode="text">
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+            <EditField name="BusinessContinuationTitle" size="75" maxLength="128"/>
+            <MemoField name="BusinessContinuationNeed" rows="10" cols="75"/>
+            <MemoField name="OperationalConsiderations" rows="10" cols="75"/>
+            <MemoField name="FinancialConsiderations" rows="10" cols="75"/>
+            <MoneyField name="SignificantImpact"/>
+        </EditScreen>
+        <EditScreen name="Guidance" phrase="Guidance|Associate guidance organizations with the business continuation guideline">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="gui"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the business continuation guideline">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the business continuation guideline">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate file retention methods with the business continuation guideline">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the business continuation guideline" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="BusinessContinuationID"/>
+        <ViewField name="BusinessProcessType"/>
+        <ViewField name="BusinessContinuationTitle"/>
+        <ViewField name="BusinessContinuationNeed"/>
+        <ViewField name="OperationalConsiderations"/>
+        <ViewField name="FinancialConsiderations"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Business Continuation Needs By Business Process">
+            <GroupByField name="BusinessProcessType"/>
+            <SummaryField name="BusinessContinuationID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Business Continuation Needs By Business Process">
+            <GroupByField name="BusinessProcessType"/>
+            <SummaryField name="BusinessContinuationID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,383 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Equipment" moduleID="eqp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Equipment" pluralRecordName="Equipment" allowAddRecord="yes" dataCollectionForm="yes">
+    <ModuleFields>
+        <TableField name="EquipmentID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track equipment of all types" sample="1"/>
+        <TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalAll" validate="RequireSelection" phrase="Organization|The organization with global responsibility for oversight of this equipment" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization with global responsibility for oversight of this equipment" sample="Active Agenda, HQ"/>
+        <RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="160" phrase="Person Accountable|The individual assigned primary accountability for managing this equipment" sample="1"/>
+        <ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for managing this equipment" sample="Mattias Thorslund"/>
+        <TableField name="EquipmentTypeID" type="int" dbFlags="unsigned not null" phrase="Equipment Type|A combined field used to describe this equipment type when associating it with other records" sample="1"/>
+        <ForeignField name="EquipmentCategoryID" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentCategoryID" key="EquipmentTypeID" joinType="left" phrase="Category|A broad categoy used to group equipments of similar types" sample="1"/>
+        <CodeField name="EquipmentCategory" key="EquipmentCategoryID" phrase="Category|A broad categoy used to group equipments of similar types" sample="Personal Protective Equipment" codeTypeID="284"/>
+        <ForeignField name="EquipmentTitleGuide" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentTypeTitle" key="EquipmentTypeID" joinType="left" phrase="Guidance Type|A title or phrase used to describe a equipment type" sample="Air Purifying Respirator"/>
+        <ForeignField name="EquipmentDescGuide" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentTypeDesc" key="EquipmentTypeID" joinType="left" phrase="Guidance Description|A brief but thorough description of the equipment type" sample="A chemical and particulate cartridge respirator"/>
+        <ForeignField name="EquipmentType" foreignTable="eqpt" foreignKey="EquipmentTypeID" foreignField="EquipmentType" key="EquipmentTypeID" joinType="left" phrase="Equipment Type|A combined field used to describe this equipment type when associating it with other records" sample="Respirator | Air Purifying"/>
+        <TableField name="EquipmentName" type="varchar(128)" validate="notEmpty" phrase="Equipment Name|A distinct name or title used to identify the respective piece of equipment" sample="3M 3710 Dust Mask"/>
+        <TableField name="EquipmentDesc" type="text" dbFlags="" phrase="Equipment Decsription|A detailed description of the equipment" sample="The 3710 is a simple dust mask used for large particulates greater than 10 micons in diameter. This is basically a dust mask."/>
+        <TableField name="ModelNo" type="varchar(50)" validate="noValidation" phrase="Model Number|The model number of the equipment which is usually assigned by the equipment manufacturer" sample="3710"/>
+        <TableField name="BaseUnitID" type="int" validate="RequireSelection" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="1"/>
+        <ForeignField name="BaseUnit" foreignTable="uts" foreignKey="UnitID" foreignField="Unit" key="BaseUnitID" joinType="left" phrase="Base Unit|The unit of measure used to normalize inventory and costs" sample="Each">
+            <ListCondition fieldName="UnitCategoryID" mode="equals">
+                <!-- Packaging -->
+                <StaticValue value="3"/>
+            </ListCondition>
+        </ForeignField>
+        <TableField name="ManufacturerID" type="int" listType="special=2" validate="RequireSelection" phrase="Manufacturer|The name of the organization that manufacturers the equipment" sample="1"/>
+        <ForeignField name="Manufacturer" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ManufacturerID" joinType="left" phrase="Manufacturer|The name of the organization that manufacturers the equipment" sample="Minnesota Mining and Manufacturing (3M)"/>
+        <!--organizations which are identified as manufacturers. 10-19-2003 DFZ-->
+        <TableField name="ManufPartNo" type="varchar(128)" validate="noValidation" phrase="Manufacturer Part Number|The part number assigned by the equipment manufacturer" sample="APR-DM-3710"/>
+        <TableField name="EquipmentURL" type="varchar(128)" validate="noValidation" phrase="Equipment URL|The uniform resource locater for the equipment. This is the manufacturer's Internet address where equipment details can be reviewed" sample="www.mmm.com/3710"/>
+        <TableField name="EmergencyResponse" type="bool" validate="noValidation" dbFlags="default 0" phrase="Emergency Response|Whether the equipment is used by the organization for emergency response purposes.  If the equipment is checked, it will be made available within related modules for purposes of associating emergency response equipment with emergency response procedures" sample="Yes"/>
+        <TableField name="Issued" type="bool" validate="noValidation" dbFlags="" phrase="Issued|Whether the equipment is issued and returned. If the equipment is checked, the equipment will be made available within the equipment checkout module so that equipment distribution and return can be tracked" sample="Yes"/>
+        <TableField name="HazardousEnergy" type="bool" validate="noValidation" dbFlags="default 0" phrase="Hazardous Energy|Whether the equipment possesses hazardous energy. If the equipment is checked, the equipment will be made available within the hazardous energy module so that control procedures can be defined for the equipment" sample="No"/>
+        <TableField name="SystemComponent" type="bool" validate="noValidation" dbFlags="default 0" phrase="System Component|Whether the equipment is a component part of a system or process. If the equipment is checked, the equipment will be made available within the systems module" sample="No"/>
+        <TableField name="CriticalControl" type="bool" validate="noValidation" dbFlags="default 0" phrase="Critical Control|Whether the equipment is considered a critical control over product quality. If the equipment is checked, the equipment will be made available within related modules for purposes of associating critical control equipment with identified hazards" sample="No"/>
+        <TableField name="Training" type="bool" validate="noValidation" dbFlags="default 0" phrase="Training|Whether the equipment is used for training purposes" sample="No"/>
+        <CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="EquipmentName"/>;_<CombinedFieldRef name="Manufacturer"/>;_<CombinedFieldRef name="ModelNo"/></CombinedField>
+        <CombinedField name="Equipment" phrase="Equipment|A combined field used to describe this equipment when associating it with other records" sample="3M 3710 Dust Mask; Respirator; Minnesota Mining and Manufacturing; 3710"><CombinedFieldRef name="EquipmentType"/>;_<CombinedFieldRef name="EquipmentName"/>;_<CombinedFieldRef name="ModelNo"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="EquipmentID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Equipment"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="eqpin" name="Equipment Inventory" parentKey="EquipmentID" localKey="EquipmentID"/>
+        <SubModule moduleID="gui" name="Guidance Organizations" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="EquipmentID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="eqp"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List equipment">
+            <ListField name="EquipmentID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="EquipmentType" phrase="Equipment Type"/>
+            <ListField name="EquipmentName" phrase="Equipment Name"/>
+            <ListField name="ModelNo" phrase="Model Number"/>
+            <ListField name="Manufacturer" phrase="Manufacturer"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search equipment">
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeComboField name="EquipmentCategoryID" findMode="text">
+                <UpdateFieldRef name="EquipmentTypeID" listParentField="EquipmentCategoryID"/>
+                <SampleItem ID="1" name="Personal Protective Equipment"/>
+                <SampleItem ID="2" name="Product Protective Equipment"/>
+                <SampleItem ID="3" name="Maintenance"/>
+                <SampleItem ID="4" name="Production"/>
+            </CodeComboField>
+            <ComboField name="EquipmentTypeID" findMode="text" parentField="EquipmentCategoryID">
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <EditField name="EquipmentName" size="50" maxLength="128"/>
+            <EditField name="ModelNo" size="50" maxLength="50"/>
+            <ComboField name="BaseUnitID" findMode="text">
+                <SampleItem ID="1" name="Each"/>
+                <SampleItem ID="3" name="Pair"/>
+                <SampleItem ID="5" name="Dozen"/>
+                <SampleItem ID="7" name="1000"/>
+            </ComboField>
+            <OrgComboField name="ManufacturerID" findMode="text">
+                <SampleItem ID="1" name="Minnesota Mining and Manufacturing"/>
+                <SampleItem ID="3" name="Draeger"/>
+                <SampleItem ID="5" name="North"/>
+                <SampleItem ID="7" name="Frick"/>
+            </OrgComboField>
+            <EditField name="ManufPartNo" size="50" maxLength="128"/>
+            <EditField name="EquipmentURL" size="50" maxLength="128"/>
+            <CheckBoxField name="EmergencyResponse"/>
+            <CheckBoxField name="Issued"/>
+            <CheckBoxField name="HazardousEnergy"/>
+            <CheckBoxField name="SystemComponent"/>
+            <CheckBoxField name="CriticalControl"/>
+            <CheckBoxField name="Training"/>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about an equipment item">
+            <ViewField name="EquipmentID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="PersonAccountable"/>
+            <ViewField name="EquipmentCategory"/>
+            <ViewField name="EquipmentType"/>
+            <ViewField name="EquipmentName"/>
+            <ViewField name="ModelNo"/>
+            <ViewField name="BaseUnit"/>
+            <ViewField name="Manufacturer"/>
+            <ViewField name="ManufPartNo"/>
+            <ViewField name="EquipmentURL" link="EquipmentURL"/>
+            <ViewScreenSection name="Classifications" phrase="Classifications">
+                <ViewField name="EmergencyResponse"/>
+                <ViewField name="Issued"/>
+                <ViewField name="HazardousEnergy"/>
+                <ViewField name="SystemComponent"/>
+                <ViewField name="CriticalControl"/>
+                <ViewField name="Training"/>
+            </ViewScreenSection>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="gui"/>
+                <ViewGrid moduleID="eqpin"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about an equipment item">
+            <ViewField name="EquipmentID"/>
+            <CodeComboField name="EquipmentCategoryID" findMode="text">
+                <UpdateFieldRef name="EquipmentTypeID" listParentField="EquipmentCategoryID"/>
+                <SampleItem ID="1" name="Personal Protective Equipment"/>
+                <SampleItem ID="2" name="Product Protective Equipment"/>
+                <SampleItem ID="3" name="Maintenance"/>
+                <SampleItem ID="4" name="Production"/>
+            </CodeComboField>
+            <ComboField name="EquipmentTypeID" findMode="text" parentField="EquipmentCategoryID">
+                <UpdateFieldRef name="EquipmentDescGuide"/>
+                <SampleItem ID="1" name="Employee (Leadership)"/>
+                <SampleItem ID="2" name="Employee (Management)"/>
+                <SampleItem ID="3" name="Employee (Staff)"/>
+                <SampleItem ID="4" name="Employee (Line)"/>
+                <SampleItem ID="5" name="Employee (Administration)"/>
+                <SampleItem ID="6" name="Employee (Contractor)"/>
+            </ComboField>
+            <EditField name="EquipmentName" size="50" maxLength="128"/>
+            <ViewField name="EquipmentDescGuide" parentField="EquipmentTypeID"/>
+            <MemoField name="EquipmentDesc" rows="5" cols="75"/>
+            <OrgComboField name="OrganizationID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+            </OrgComboField>
+            <PersonComboField name="PersonAccountableID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <EditField name="ModelNo" size="50" maxLength="50"/>
+            <ComboField name="BaseUnitID" findMode="text">
+                <SampleItem ID="1" name="Each"/>
+                <SampleItem ID="3" name="Pair"/>
+                <SampleItem ID="5" name="Dozen"/>
+                <SampleItem ID="7" name="1000"/>
+            </ComboField>
+            <OrgComboField name="ManufacturerID" findMode="text">
+                <SampleItem ID="1" name="Minnesota Mining and Manufacturing"/>
+                <SampleItem ID="3" name="Draeger"/>
+                <SampleItem ID="5" name="North"/>
+                <SampleItem ID="7" name="Frick"/>
+            </OrgComboField>
+            <EditField name="ManufPartNo" size="50" maxLength="128"/>
+            <EditField name="EquipmentURL" size="50" maxLength="128"/>
+        </EditScreen>
+        <EditScreen name="Classifications" phrase="Classifications|Assign special classifications to an equipment item">
+            <RecordSummaryFieldsRef/>
+            <CheckBoxField name="EmergencyResponse"/>
+            <CheckBoxField name="Issued"/>
+            <CheckBoxField name="HazardousEnergy"/>
+            <CheckBoxField name="SystemComponent"/>
+            <CheckBoxField name="CriticalControl"/>
+            <CheckBoxField name="Training"/>
+        </EditScreen>
+        <EditScreen name="Guidance" phrase="Guidance|Associate guidance organizations with the equipment">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="gui"/>
+        </EditScreen>
+        <EditScreen name="Inventory" phrase="Inventory|Adjust and track an equipment item inventory level">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="eqpin"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the equipment">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the equipment">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="Files|Associate physical files and retention methods with an equipment item">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with an equipment item" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="EquipmentID"/>
+        <ViewField name="EquipmentCategory"/>
+        <ViewField name="EquipmentType"/>
+        <ViewField name="EquipmentName"/>
+        <ViewField name="Manufacturer"/>
+        <ViewField name="ModelNo"/>
+    </RecordSummaryFields>
+    <Charts>
+        <PieChart name="Pie01" title="Equipment By Category">
+            <GroupByField name="EquipmentCategory"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Equipment By Category">
+            <GroupByField name="EquipmentCategory"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Equipment By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Equipment By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Equipment By Type">
+            <GroupByField name="EquipmentType"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Equipment By Type">
+            <GroupByField name="EquipmentType"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie04" title="Equipment By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto04" title="Equipment By Person Accountable">
+            <GroupByField name="PersonAccountable"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Equipment By Manufacturer">
+            <GroupByField name="Manufacturer"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Equipment By Manufacturer">
+            <GroupByField name="Manufacturer"/>
+            <SummaryField name="EquipmentID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,137 @@
+<?php
+/**
+ *  Template file for generated files (alt. a generated file)
+ *
+ *  PHP version 4
+ *
+ *
+ * LICENSE NOTE:
+ *
+ * Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+ *
+ * Unless explicitly acquired and licensed from Licensor under a "commercial license",
+ * the contents of this file are subject to the Reciprocal Public License ("RPL")
+ * Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+ * or use this file in either source code or executable form, except in compliance
+ * with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+ * Active Agenda Inc. at http://www.activeagenda.net/license.
+ *
+ * All software distributed under the Licenses is provided strictly on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+ * INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+ * OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+ * limitations under the Licenses.
+ *
+ *
+ * @author         Mattias Thorslund <mthorslund@activeagenda.net>
+ * @copyright      2003-2007 Active Agenda Inc.
+ * @license        http://www.activeagenda.net/license  RPL 1.4
+ * @version        SVN: $Revision: 499 $
+ * @last-modified  SVN: $Date: 2007-02-16 13:43:40 -0800 (Fri, 16 Feb 2007) $
+ */
+
+    /**CUSTOM_CODE|init**/
+
+    //list of objects containing the field information
+    $fields = unserialize('a:4:{s:15:"QuestionGroupID";O:9:"viewfield":16:{s:4:"name";s:15:"QuestionGroupID";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:97:"Question Group ID|An automatically assigned number used to associate question groups with surveys";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:10:"SurveyName";O:9:"viewfield":16:{s:4:"name";s:10:"SurveyName";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:31:"Survey Name|Title of the survey";s:8:"dataType";N;s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:4:"Name";O:9:"viewfield":16:{s:4:"name";s:4:"Name";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:114:"Question Group|A question group which is used to \'roll-up\' question values and generate results by question groups";s:8:"dataType";s:11:"varchar(50)";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:4:"left";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}s:9:"SortOrder";O:9:"viewfield":16:{s:4:"name";s:9:"SortOrder";s:10:"parentName";N;s:6:"Fields";a:0:{}s:6:"phrase";s:74:"Sort Order|A value used to organize question groups into a preferred order";s:8:"dataType";s:3:"int";s:8:"validate";N;s:7:"invalid";N;s:8:"formName";s:8:"mainForm";s:9:"gridAlign";s:5:"right";s:13:"displayFormat";N;s:9:"isDefault";N;s:9:"linkField";N;s:11:"parentField";N;s:15:"displayDecimals";N;s:14:"roundingMethod";N;s:10:"needsReGet";b:0;}}');
+
+
+    //list of grids
+    /**grids**/
+
+    //phrases for field names, in field order
+    $phrases = array(
+   'QuestionGroupID' => gettext("Question Group ID|An automatically assigned number used to associate question groups with surveys"),
+   'SurveyName' => gettext("Survey Name|Title of the survey"),
+   'Name' => gettext("Question Group|A question group which is used to 'roll-up' question values and generate results by question groups"),
+   'SortOrder' => gettext("Sort Order|A value used to organize question groups into a preferred order")
+   );
+
+
+    $ownerField = '';
+
+    
+    /**disbleGlobalModules**/
+    /**useBestPractices**/
+
+    //retrieve record
+    $data = array();
+    
+    /**SQL|GET_BEGIN**/
+    $SQL = "SELECT 
+   `surqg`.QuestionGroupID,
+   `sur1`.SurveyName AS SurveyName,
+   `surqg`.Name,
+   `surqg`.SortOrder,
+   NULLIF(CONCAT(IFNULL(`sur1`.SurveyName,''),' | Question Group: ',IFNULL(`surqg`.Name,''),' | Sort Order: ',IFNULL(`surqg`.SortOrder,'')),' | Question Group:  | Sort Order: ') AS RecordLabel
+FROM `surqg`
+   
+     LEFT OUTER JOIN `sur` AS sur1 
+   ON (`surqg`.SurveyID = `sur1`.SurveyID )
+WHERE
+   surqg.QuestionGroupID='/**RecordID**/'";
+
+    /**CUSTOM_CODE|before_get**/
+
+    //get data
+    $r = $dbh->getAll(str_replace('/**RecordID**/', $recordID, $SQL), DB_FETCHMODE_ASSOC);
+    dbErrorCheck($r);
+
+    
+    /**SQL|GET_END**/
+    //need to repeat for each getSQL........
+    $data = array_merge($data, $r[0]); //assign first (only) row
+    
+    /**CUSTOM_CODE|get**/
+    
+    //check if user has permission to view or edit record - will redirect if no permission at all
+    $allowEdit = $User->CheckViewScreenPermission();
+    //$allowEdit = true;
+
+    $tabsQSargs = $qsArgs;
+    unset($tabsQSargs['scr']);
+    $tabsQS = MakeQS($tabsQSargs);
+
+    //List tab
+    $tabs['List'] = Array("list.php?$qs", gettext("List|View the list of Survey Question Groups"));
+
+    if ($allowEdit){
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Survey Question Group") );
+$tabs = array_merge($tabs, $tempTabs);
+    } else {
+              $tempTabs['View'] = array( "", gettext("View|View summary information about").' '.gettext("a Survey Question Group") );
+$tabs = array_merge($tabs, $tempTabs);
+    }
+    
+    $recordLabelField = $data['RecordLabel'];
+
+    $content = '';
+    foreach($fields as $key => $field){
+        if (!$field->isSubField()){
+            $content .= $field->render($data, $phrases);
+        }
+    }
+
+    $pageTitle = gettext("Survey Question Group");
+    $screenPhrase = gettext("View|The screen used to view summary information about question groups assigned to surveys");
+
+    $backlink = "list.php?$qs";
+
+    $nextScreen = "";
+    $editlink = "edit.php?$tabsQS&scr=$nextScreen";
+    $content = renderViewTable($content, $allowEdit, $backlink, $editlink);
+
+    //add byline info on record modification info
+    $content .= "<div class=\"recinfo\">{$phrases['_ModDate']} {$data['_ModDate']}";
+    if ($User->IsAdmin) {
+        $content .= '&nbsp; &nbsp; <a href="audit.php?mdl='.$ModuleID.'&rid='.$recordID.'">'.gettext("Audit Trail").'</a> ';
+    }
+    $content .= "</div>";
+
+    //display view grids here
+
+
+//View Screen Sections here
+/**VIEWSCREENSECTIONS**/
+?>

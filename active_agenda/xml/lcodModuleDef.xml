@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Costs" moduleID="lcod" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Loss Cost" pluralRecordName="Loss Cost Details" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="LossCostDetailID" type="int" dbFlags="unsigned auto_increment not null" phrase="Claim Cost Detail ID|Numerical ID assigned by the system to associated claims management costs with claims of loss" sample="1"/>
+		<TableField name="LossCostID" type="int" dbFlags="unsigned not null" phrase="Claim Cost ID|Numerical ID the identifes the related Loss Cost record " sample="1"/>
+		<ForeignField name="CostCategoryID" foreignTable="lcot" foreignKey="LossCostTypeID" foreignField="CostCategoryID" key="LossCostTypeID" joinType="left" phrase="Loss Cost Category|A broadly defined title or phrase used to group similar categories of loss costs" sample="1"/>
+		<CodeField name="CostCategory" key="CostCategoryID" phrase="Loss Cost Category|A broadly defined title or phrase used to group similar categories of loss costs" sample="Medical" codeTypeID="96"/>
+		<TableField name="LossCostTypeID" type="int" validate="RequireSelection" phrase="Loss Cost Type|A combined field used to describe this loss cost type when associating it with other records" sample="1"/>
+		<ForeignField name="LossCostType" foreignTable="lcot" foreignKey="LossCostTypeID" foreignField="LossCostType" key="LossCostTypeID" joinType="left" phrase="Loss Cost Type|A combined field used to describe this loss cost type when associating it with other records" sample="Medical (Forensic)"/>
+		<ForeignField name="ClaimID" foreignTable="lco" foreignKey="LossCostID" foreignField="ClaimID" key="LossCostID" joinType="left" phrase="ClaimID|The record ID of the related record in lco" sample="1"/>
+		<ForeignField name="ClaimNumber" foreignTable="clm" foreignKey="ClaimID" foreignField="ClaimNumber" key="ClaimID" joinType="left" phrase="Claim Number|A unique number assigned by an insurance company or third party administrator responsible for managing the claim" sample="03-001-6717"/>
+		<ForeignField name="RelatedModuleID" foreignTable="lco" foreignKey="LossCostID" foreignField="RelatedModuleID" key="LossCostID" joinType="left" phrase="RelatedModuleID|The Module ID of the related record in lco" sample="len"/>
+		<ForeignField name="RelatedRecordID" foreignTable="lco" foreignKey="LossCostID" foreignField="RelatedRecordID" key="LossCostID" joinType="left" phrase="RelatedRecordID|The Record ID of the related record in lco" sample="1"/>
+		<TableField name="Incurred" type="money" validate="Money notEmpty notNegative" phrase="Incurred|The total estimated amount of the cost to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<TableField name="Payments" type="money" validate="Money notEmpty notNegative" phrase="Paid to Date|The total payments actually made to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<!--outstanding values are automatically calculated based on the following formula: Incurred-Payments to Date=Outstanding-->
+		<CalculatedField name="Outstanding" type="money" calcFunction="subtract" params="Incurred Payments" phrase="Outstanding|The outstanding reserve available to manage and mitigate this claim of loss, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="Incurred"/>;_<CombinedFieldRef name="Payments"/>;_<CombinedFieldRef name="Outstanding"/></CombinedField>
+		<CombinedField name="LossCostDetail" phrase="Loss Cost Detail|A combined field used to describe this loss cost detail record when associating it with other records" sample="Operating Permits | ID: 231 | 702.00"><CombinedFieldRef name="Incurred"/>;_<CombinedFieldRef name="Payments"/>;_<CombinedFieldRef name="Outstanding"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="LossCostDetailID"/>
+		</PrimaryKey>
+		<RecordDescriptionField name="LossCostDetail"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List loss costs and valuation dates">
+			<ListField name="LossCostDetailID" phrase="LossCost Detail ID"/>
+			<ListField name="LossCostID" phrase="LossCost ID"/>
+			<ListField name="LossCostType" phrase="Loss Cost Type"/>
+			<ListField name="Incurred" phrase="Incurred"/>
+			<ListField name="Payments" phrase="Payments"/>
+			<ListField name="Outstanding" phrase="Outstanding"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search loss costs and valuation dates">
+			<CodeComboField name="CostCategoryID" findMode="text">
+				<SampleItem ID="1" name="Medical"/>
+				<SampleItem ID="2" name="Legal"/>
+				<SampleItem ID="3" name="Expense"/>
+				<SampleItem ID="4" name="Indemnity"/>
+				<SampleItem ID="5" name="Settlement"/>
+				<SampleItem ID="6" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="LossCostTypeID" findMode="text">
+				<SampleItem ID="1" name="Medical (forensic)"/>
+				<SampleItem ID="2" name="Investigation (services)"/>
+				<SampleItem ID="3" name="Investigation (sub rosa)"/>
+				<SampleItem ID="4" name="Legal (defense)"/>
+				<SampleItem ID="5" name="Legal (plaintiff)"/>
+				<SampleItem ID="6" name="Medical (treatment)"/>
+				<SampleItem ID="7" name="Reimbursement (expense)"/>
+				<SampleItem ID="8" name="Reimbursement (lost wages)"/>
+				<SampleItem ID="9" name="Settlement"/>
+			</ComboField>
+			<MoneyField name="Incurred"/>
+			<MoneyField name="Payments"/>
+			<MoneyField name="Outstanding"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a loss cost and valuation date">
+			<ViewField name="LossCostDetailID"/>
+			<ViewField name="LossCostID"/>
+			<ViewField name="LossCostType"/>
+			<ViewField name="Incurred"/>
+			<ViewField name="Payments"/>
+			<ViewField name="Outstanding"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a loss cost and valuation date">
+			<ViewField name="LossCostDetailID"/>
+			<ViewField name="LossCostID"/>
+			<CodeComboField name="CostCategoryID" findMode="text">
+				<UpdateFieldRef name="LossCostTypeID"/>
+				<SampleItem ID="1" name="Medical"/>
+				<SampleItem ID="2" name="Legal"/>
+				<SampleItem ID="3" name="Expense"/>
+				<SampleItem ID="4" name="Indemnity"/>
+				<SampleItem ID="5" name="Settlement"/>
+				<SampleItem ID="6" name="Investigation"/>
+			</CodeComboField>
+			<ComboField name="LossCostTypeID" findMode="text" parentField="CostCategoryID">
+				<SampleItem ID="1" name="Medical (forensic)"/>
+				<SampleItem ID="2" name="Medical (treatment)"/>
+				<SampleItem ID="3" name="Medical (consultation)"/>
+			</ComboField>
+			<MoneyField name="Incurred"/>
+			<MoneyField name="Payments"/>
+			<ViewField name="Outstanding"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="lcod" phrase="Loss Cost Details">
+			<InvisibleField name="LossCostDetailID"/>
+			<ViewField name="LossCostType" sample="Medical (Forensic)"/>
+			<ViewField name="Incurred" sample="1,000,000.00"/>
+			<ViewField name="Payments" sample="250,000.00"/>
+			<ViewField name="Outstanding" sample="750,000.00"/>
+		</ViewGrid>
+		<EditGrid moduleID="lcod" phrase="Loss Cost Details">
+			<GridForm>
+				<InvisibleField name="LossCostDetailID"/>
+				<CodeComboField name="CostCategoryID" findMode="text" sample="Medical">
+					<UpdateFieldRef name="LossCostTypeID"/>
+					<SampleItem ID="1" name="Medical"/>
+					<SampleItem ID="2" name="Legal"/>
+					<SampleItem ID="3" name="Expense"/>
+					<SampleItem ID="4" name="Indemnity"/>
+					<SampleItem ID="5" name="Settlement"/>
+					<SampleItem ID="6" name="Investigation"/>
+				</CodeComboField>
+				<CodeComboField name="LossCostTypeID" findMode="text" parentField="CostCategoryID" sample="Medical (Forensic)">
+					<SampleItem ID="1" name="Medical (forensic)"/>
+					<SampleItem ID="2" name="Medical (treatment)"/>
+					<SampleItem ID="3" name="Medical (consultation)"/>
+				</CodeComboField>
+				<MoneyField name="Incurred"/>
+				<MoneyField name="Payments"/>
+				<ViewField name="Outstanding"/>
+			</GridForm>
+			<ViewField name="LossCostType" sample="Medical (Forensic)"/>
+			<ViewField name="Incurred" sample="1,000,000.00"/>
+			<ViewField name="Payments" sample="250,000.00"/>
+			<ViewField name="Outstanding" sample="750,000.00"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

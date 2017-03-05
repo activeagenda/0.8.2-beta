@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Loss Characteristics" moduleID="lch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\ActiveAgenda\ModuleDef.xsd" singularRecordName="Loss Characteristic" pluralRecordName="Loss Characteristics" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="CharacteristicID" type="int" dbFlags="unsigned auto_increment not null" phrase="Characteristic ID|An automatically assigned number used to associate claim or file characteristics with a loss" sample="1"/>
+		<TableField name="RelatedModuleID" type="varchar(5)" validate="noValidation" phrase="Related Module|The name or title of the module which is associated with the record" sample="ire"/>
+		<ForeignField name="RelatedModule" foreignTable="mod" foreignKey="ModuleID" foreignField="Name" key="RelatedModuleID" joinType="left" phrase="Related Module|The name or title of the module which is associated with the record" sample="Incident Reporting"/>
+		<TableField name="RelatedRecordID" type="int" validate="noValidation" phrase="Related Record ID|The unique ID of the related record within the related module" sample="1"/>
+		<DynamicForeignField name="RelatedRecordDescription" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="RecordDescription" joinType="left" phrase="Related Record|A description of the related record based on a combination of field values assigned from within the related module" sample="Thorslund Discrimination Complaint; Active Agenda, HQ; 04-29-2004; ID23"/>
+		<DynamicForeignField name="OwnerOrganizationID" key="RelatedRecordID" moduleIDField="RelatedModuleID" foreignField="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization experiencing the loss characteristic" sample="1"/>
+		<ForeignField name="OwnerOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OwnerOrganizationID" joinType="left" phrase="Organization|The name of the organization experiencing the loss characteristic" sample="Active Agenda, Inc."/>
+		<TableField name="LossCharID" type="int" validate="RequireSelection" phrase="Characteristics|The specific characteristic of a claim or loss" sample="1"/>
+		<CodeField name="LossChar" key="LossCharID" phrase="Characteristics|The specific characteristic of a claim or loss" sample="Litigation" codeTypeID="186"/>
+		<TableField name="LossCharDesc" type="text" validate="notEmpty" phrase="Description|A detailed description of the characteristic associated with the claim or loss" sample="Mr. Thorslund hired an attorney after talking with a co-worker. The co-worker told him his benefit would increase by three times if he were represented. The co-worker told Thorslund he had filed ten claims and used the same attorney for all ten. The co-worker cannot be reached because he has moved to the Soth of France"/>
+        <LinkField name="RelatedRecordLink" moduleIDField="RelatedModuleID" recordIDField="RelatedRecordID" phrase="Related Record Link|An internal link to the related record."/>
+		<CombinedField name="RelatedModuleRecord" phrase="Related Record|A combined field used to display the related module name and record ID" sample="Corrective Actions | Record ID: 3"><CombinedFieldRef name="RelatedModule"/>_Module_(Record_ID:_<CombinedFieldRef name="RelatedRecordID"/>)</CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="RelatedModule"/>;_<CombinedFieldRef name="RelatedRecordDescription"/>;_<CombinedFieldRef name="LossChar"/></CombinedField>
+		<CombinedField name="Characteristic" phrase="Characteristic|A combined field used to describe this characteristic when associating it with other records" sample="Operating Permits | ID: 231 | Litigation"><CombinedFieldRef name="RelatedModule"/>_ID:_<CombinedFieldRef name="RelatedRecordID"/>;_<CombinedFieldRef name="LossChar"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="CharacteristicID"/>
+		</PrimaryKey>
+		<OwnerField name="OwnerOrganizationID"/>
+		<RecordDescriptionField name="Characteristic"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List loss or claim characteristics">
+			<ListField name="CharacteristicID" phrase="Characteristic ID"/>
+			<ListField name="RelatedModule" phrase="Module Name"/>
+            <ListField name="RelatedRecordDescription" link="RelatedRecordLink" phrase="Related Record Description"/>
+            <InvisibleField name="RelatedRecordLink"/>
+			<ListField name="LossChar" phrase="Characteristic"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search loss or claim characteristics">
+			<OrgComboField name="OwnerOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="RelatedModuleID" findMode="text">
+				<SampleItem ID="1" name="Employment Practice Loss"/>
+				<SampleItem ID="2" name="Corrective Actions"/>
+				<SampleItem ID="2" name="Postings"/>
+			</ComboField>
+			<EditField name="RelatedRecordDescription" size="75" maxLength="128"/>
+			<CodeComboField name="LossCharID" findMode="text">
+				<SampleItem ID="1" name="Litigated (plaintiff)"/>
+				<SampleItem ID="2" name="Litigated (defense)"/>
+				<SampleItem ID="3" name="Vocational Rehabilitation"/>
+				<SampleItem ID="4" name="Subrogation"/>
+				<SampleItem ID="5" name="Applicant Attorney Dismissal"/>
+			</CodeComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a loss or claim characteristic">
+			<ViewField name="CharacteristicID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<ViewField name="LossChar"/>
+			<ViewField name="LossCharDesc"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a loss or claim characteristic">
+			<ViewField name="CharacteristicID"/>
+			<ViewField name="OwnerOrganization"/>
+            <ViewField name="RelatedModuleRecord" link="RelatedRecordLink"/>
+			<ViewField name="RelatedRecordDescription"/>
+			<CodeComboField name="LossCharID" findMode="text">
+				<SampleItem ID="1" name="Litigated (plaintiff)"/>
+				<SampleItem ID="2" name="Litigated (defense)"/>
+				<SampleItem ID="3" name="Vocational Rehabilitation"/>
+				<SampleItem ID="4" name="Subrogation"/>
+				<SampleItem ID="5" name="Applicant Attorney Dismissal"/>
+			</CodeComboField>
+			<MemoField name="LossCharDesc" rows="10" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="lch" phrase="Loss Characteristics">
+			<InvisibleField name="CharacteristicID"/>
+			<ViewField name="LossChar" sample="Litigation"/>
+			<ViewField name="LossCharDesc" sample="Mr. Thorslund hired an attorney after talking with a co-worker. The co-worker told him his benefit would increase by three times if he were represented. The co-worker told Thorslund he had filed ten claims and used the same attorney for all ten. The co-worker cannot be reached because he has moved to the Soth of France"/>
+		</ViewGrid>
+		<EditGrid moduleID="lch" phrase="Loss Characteristics">
+			<GridForm>
+				<CodeComboField name="LossCharID" findMode="text" sample="Litigation">
+					<SampleItem ID="1" name="Litigated (plaintiff)"/>
+					<SampleItem ID="2" name="Litigated (defense)"/>
+					<SampleItem ID="3" name="Vocational Rehabilitation"/>
+					<SampleItem ID="4" name="Subrogation"/>
+					<SampleItem ID="5" name="Applicant Attorney Dismissal"/>
+				</CodeComboField>
+				<MemoField name="LossCharDesc" rows="10" cols="75" sample="Mr. Thorslund hired an attorney after talking with a co-worker. The co-worker told him his benefit would increase by three times if he were represented. The co-worker told Thorslund he had filed ten claims and used the same attorney for all ten. The co-worker cannot be reached because he has moved to the Soth of France"/>
+			</GridForm>
+			<ViewField name="LossChar" sample="Litigation"/>
+			<ViewField name="LossCharDesc" sample="Mr. Thorslund hired an attorney after talking with a co-worker. The co-worker told him his benefit would increase by three times if he were represented. The co-worker told Thorslund he had filed ten claims and used the same attorney for all ten. The co-worker cannot be reached because he has moved to the Soth of France"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Loss Characteristics By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Loss Characteristics By Module">
+			<GroupByField name="RelatedModule"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Loss Characteristics By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Loss Characteristics By Organization">
+			<GroupByField name="OwnerOrganization"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Total Loss Characteristics">
+			<GroupByField name="LossChar"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Total Loss Characteristics">
+			<GroupByField name="LossChar"/>
+			<SummaryField name="CharacteristicID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 532 $" date="$Date: 2007-02-24 15:15:59 -0800 (Sat, 24 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,280 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Operating Permits - Waste Affected" moduleID="oppwa" parentModule="opp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Waste Stream Affected By Permit" pluralRecordName="Waste Streams Affected By Permits" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PermitWasteID" type="int" dbFlags="unsigned auto_increment not null" phrase="Permit Waste ID|A unique number assigned to waste streams so that multiple waste streams can be associated with a single operating permit" sample="1"/>
+		<TableField name="OppPermitID" type="int" validate="noValidation" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="11"/>
+		<ForeignField name="OppPermit" foreignTable="opp" foreignKey="OppPermitID" foreignField="OppPermit" key="OppPermitID" joinType="left" phrase="Operating Permit|A combined field used to describe this operating permit when associating it with other records" sample="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+		<TableField name="WasteID" type="int" validate="RequireSelection" phrase="Waste|A combined field used to describe this waste when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" listType="allParticipants" foreignTable="was" foreignKey="WasteID" foreignField="OrganizationID" key="WasteID" joinType="left" phrase="Organization|The name of the organization where the waste stream is generated" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the waste stream is generated" sample="Active Agenda, HQ"/>
+		<ForeignField name="WasteTypeID" foreignTable="was" foreignKey="WasteID" foreignField="WasteTypeID" key="OrganizationID" joinType="left" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="1"/>
+		<CodeField name="WasteType" key="WasteTypeID" phrase="Waste Type|A method of classifying and tracking wastes of different types" sample="Cardboard" codeTypeID="11"/>
+		<ForeignField name="Waste" foreignTable="was" foreignKey="WasteID" foreignField="Waste" key="OrganizationID" joinType="left" phrase="Waste|A combined field used to describe this waste when associating it with other records" sample="Cardboard, Cardboard boxes from Receiving"/>
+		<TableField name="PermitWasteAffect" type="varchar(255)" validate="notEmpty" phrase="Affect of Permit|A detailed description of how the operating permit affects the waste stream" sample="The stormwater discharge permit prohibits the storing of cardboard in the production area. The storage of cardboard in the production area will result in immediate revocation of the operating permit."/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="WasteType"/>;_<CombinedFieldRef name="Waste"/>;_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="PermitWaste" phrase="Permit Waste|A combined field used to describe this permitted waste stream when associating it with other records" sample="Discharge, Storm Water Discharge - 002 | U.S. Environmental Protection Agency | Active Agenda, HQ | Cardboard | Cardboard, Cardboard boxes from Receiving"><CombinedFieldRef name="OppPermit"/>;_<CombinedFieldRef name="WasteType"/>;_<CombinedFieldRef name="Waste"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PermitWasteID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="PermitWaste"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List waste streams affected by operating permits">
+			<ListField name="PermitWasteID" phrase="Waste ID"/>
+			<ListField name="OppPermit" phrase="Permit"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="WasteType" phrase="Waste Type"/>
+			<ListField name="Waste" phrase="Waste"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search waste streams affected by operating permits">
+			<ComboField name="OppPermitID" findMode="text">
+				<SampleItem ID="1" name="Discharge, Storm Water Discharge - 002; U.S. Environmental Protection Agency; Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Discharge, Storm Water Discharge - 003; U.S. Environmental Protection Agency; Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Discharge, Storm Water Discharge - 004; U.S. Environmental Protection Agency; Active Agenda, Latvia"/>
+				<SampleItem ID="4" name="Discharge, Storm Water Discharge - 005; U.S. Environmental Protection Agency; Active Agenda, Norway"/>
+			</ComboField>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="WasteTypeID" findMode="text">
+				<SampleItem ID="1" name="Paper and Cardboard"/>
+				<SampleItem ID="2" name="Process Water"/>
+				<SampleItem ID="3" name="Air Emmissions"/>
+				<SampleItem ID="4" name="Sludge"/>
+				<SampleItem ID="5" name="Raw Ingredient"/>
+				<SampleItem ID="6" name="Product"/>
+			</CodeComboField>
+			<ComboField name="WasteID" findMode="text">
+				<SampleItem ID="1" name="Cardboard, Cardboard boxes from Receiving"/>
+				<SampleItem ID="2" name="Cardboard, Cardboard boxes from Shipping"/>
+				<SampleItem ID="3" name="Cardboard, Cardboard boxes from Production"/>
+				<SampleItem ID="4" name="Cardboard, Cardboard boxes from Packaging"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a waste stream affected by an operating permit">
+			<ViewField name="PermitWasteID"/>
+			<ViewField name="OppPermit"/>
+			<ViewField name="Organization"/>
+			<ViewField name="WasteType"/>
+			<ViewField name="Waste"/>
+			<ViewField name="PermitWasteAffect"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a waste stream affected by an operating permit">
+			<ViewField name="PermitWasteID"/>
+			<ViewField name="OppPermit"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+				<SampleItem ID="3" name="Active Agenda, New York"/>
+				<SampleItem ID="4" name="Active Agenda, Munich"/>
+			</OrgComboField>
+			<CodeComboField name="WasteTypeID" findMode="text">
+				<UpdateFieldRef name="WasteID"/>
+				<SampleItem ID="1" name="Paper and Cardboard"/>
+				<SampleItem ID="2" name="Process Water"/>
+				<SampleItem ID="3" name="Air Emmissions"/>
+				<SampleItem ID="4" name="Sludge"/>
+				<SampleItem ID="5" name="Raw Ingredient"/>
+				<SampleItem ID="6" name="Product"/>
+			</CodeComboField>
+			<ComboField name="WasteID" findMode="text" parentField="WasteTypeID">
+				<SampleItem ID="1" name="Cardboard, Cardboard boxes from Receiving"/>
+				<SampleItem ID="2" name="Cardboard, Cardboard boxes from Shipping"/>
+				<SampleItem ID="3" name="Cardboard, Cardboard boxes from Production"/>
+				<SampleItem ID="4" name="Cardboard, Cardboard boxes from Packaging"/>
+			</ComboField>
+			<MemoField name="PermitWasteAffect" rows="5" cols="75"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="oppwa" phrase="Waste Affected">
+			<InvisibleField name="PermitWasteID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="WasteType" sample="Cardboard"/>
+			<ViewField name="Waste" sample="Cardboard, Cardboard boxes from Receiving"/>
+		</ViewGrid>
+		<EditGrid moduleID="oppwa" phrase="Waste Affected">
+			<GridForm>
+				<InvisibleField name="PermitWasteID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sacramento"/>
+					<SampleItem ID="3" name="Active Agenda, New York"/>
+					<SampleItem ID="4" name="Active Agenda, Munich"/>
+				</OrgComboField>
+				<CodeComboField name="WasteTypeID" findMode="text" sample="Cardboard">
+					<UpdateFieldRef name="WasteID"/>
+					<SampleItem ID="1" name="Paper and Cardboard"/>
+					<SampleItem ID="2" name="Process Water"/>
+					<SampleItem ID="3" name="Air Emmissions"/>
+					<SampleItem ID="4" name="Sludge"/>
+					<SampleItem ID="5" name="Raw Ingredient"/>
+					<SampleItem ID="6" name="Product"/>
+				</CodeComboField>
+				<ComboField name="WasteID" findMode="text" parentField="WasteTypeID" sample="Cardboard, Cardboard boxes from Receiving">
+					<SampleItem ID="1" name="Cardboard, Cardboard boxes from Receiving"/>
+					<SampleItem ID="2" name="Cardboard, Cardboard boxes from Shipping"/>
+					<SampleItem ID="3" name="Cardboard, Cardboard boxes from Production"/>
+					<SampleItem ID="4" name="Cardboard, Cardboard boxes from Packaging"/>
+				</ComboField>
+				<MemoField name="PermitWasteAffect" rows="5" cols="75" sample="The stormwater discharge permit prohibits the storing of cardboard in the production area. The storage of cardboard in the production area will result in immediate revocation of the operating permit."/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="WasteType" sample="Cardboard"/>
+			<ViewField name="Waste" sample="Cardboard, Cardboard boxes from Receiving"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Permitted Waste Streams By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Permitted Waste Streams By Operating Permit">
+			<GroupByField name="OppPermit"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Permitted Waste Streams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Permitted Waste Streams By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Permitted Waste Streams By Waste Type">
+			<GroupByField name="WasteType"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Permitted Waste Streams By Waste Type">
+			<GroupByField name="WasteType"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Permitted Waste Streams By Waste">
+			<GroupByField name="Waste"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Permitted Waste Streams By Waste">
+			<GroupByField name="Waste"/>
+			<SummaryField name="PermitWasteID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

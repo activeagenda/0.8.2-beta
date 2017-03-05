@@ -1,0 +1,608 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Insurance Policies" moduleID="ins" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Insurance Policy" pluralRecordName="Insurance Policies" addNewName="Policy" allowAddRecord="yes" dataCollectionForm="yes">
+	<ModuleFields>
+		<TableField name="PolicyID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track insurance policies" sample="1"/>
+		<TableField name="PolicyNumber" type="varchar(128)" validate="noValidation" phrase="Policy Number|The policy number assigned by the insurance carrier" sample="Zurich; GL-19928-2003"/>
+		<TableField name="IntegrationKey" type="varchar(128)" validate="noValidation" phrase="Integration Key|An alpha or alpha numeric value assigned by the claims administration company to enable to downloading of data directly from the claims administrator" sample="DFC2004DFN001"/>
+		<TableField name="OrganizationID" type="int" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants" validate="RequireSelection" phrase="Organization|The primary organization covered by this insurance policy" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The primary organization covered by this insurance policy" sample="Active Agenda, HQ"/>
+		<TableField name="RetentionAcct" type="bool" validate="noValidation" dbFlags="default 0" phrase="Retention Account|Whether this policy is an internal retention or accruel account established to pay claims from internal funds" sample="Yes"/>
+		<RemoteField name="PersonAccountableID" defaultValue="defaultorgID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="RequireSelection" remoteModuleID="acc" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonAccountableID" remoteDescriptorField="AccountabilityDescriptorID" remoteDescriptor="46" phrase="Person Accountable|The individual assigned primary accountability for policy oversight relative to this specific policy" sample="1"/>
+		<ForeignField name="PersonAccountable" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PersonAccountableID" joinType="left" phrase="Person Accountable|The individual assigned primary accountability for policy oversight relative to this specific policy" sample="Mattias Thorslund"/>
+		<RemoteField name="EffectiveDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="17" phrase="Effective Date|The date the insurance policy first becomes effective" sample="01/01/2004"/>
+		<RemoteField name="ExpirationDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="10" phrase="Expiration Date|The date the is no longer in force and coverage no longer exists" sample="01/01/2004"/>
+		<CalculatedField name="DaysRemaining" type="int" calcFunction="daysremaining_not_negative" params="ExpirationDate" phrase="Days Remaining|The total number of days remaining before the insurance policy expires" sample="30"/>
+		<TableField name="InsuranceTypeID" type="int" dbFlags="unsigned not null" phrase="Insurance Type|A combined field used to describe this insurance type when associating it with other records" sample="1"/>
+		<ForeignField name="InsuranceCategoryID" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceCategoryID" key="InsuranceTypeID" joinType="left" phrase="Category|A broad categoy used to group equipments of similar types" sample="1"/>
+		<CodeField name="InsuranceCategory" key="InsuranceCategoryID" phrase="Category|A broad categoy used to group equipments of similar types" sample="Property" codeTypeID="3"/>
+		<ForeignField name="InsuranceTitleGuide" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceTypeTitle" key="InsuranceTypeID" joinType="left" phrase="Insurance Type|A title or phrase used to describe a equipment type" sample="Boiler and Machinery"/>
+		<ForeignField name="InsuranceDescGuide" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceTypeDesc" key="InsuranceTypeID" joinType="left" phrase="Description|A brief but thorough description of the equipment type" sample="Boiler and machinery insurance, sometimes referred to as 'equipment breakdown' or 'mechanical breakdown coverage,' provides coverage for the accidental breakdown of boilers, machinery, and equipment. This type of coverage usually will reimburse you for property damage and business interruption losses. For example, this coverage would cover fire damage to computers."/>
+		<ForeignField name="InsuranceType" foreignTable="inst" foreignKey="InsuranceTypeID" foreignField="InsuranceType" key="InsuranceTypeID" joinType="left" phrase="Insurance Type|A combined field used to describe this insurance type when associating it with other records" sample="Property | Boiler and Machinery"/>
+		<TableField name="PolicyName" type="varchar(128)" validate="notEmpty" phrase="Policy Name|A short name or phrase used to identify the insurancepolicy" sample="BM 2006 - All sites except Arizona"/>
+		<TableField name="PolicyDesc" type="text" validate="noValidation" phrase="Policy Description|A detailed description of the insrance policy in effect and any special endorsements or exclusions associated with the policy" sample="This is the general liability policy for the packing operation. All physical locations are included in this coverage."/>
+		<TableField name="PolicyStatusID" type="int" validate="RequireSelection" phrase="Policy Status|The status of this insurance policy" sample="2"/>
+		<CodeField name="PolicyStatus" key="PolicyStatusID" phrase="Policy Status|The status of this insurance policy" sample="Expired" codeTypeID="209"/>
+		<TableField name="CarrierNameID" type="int" listType="special=4" validate="RequireSelection" phrase="Carrier Name|The name of insurance carrier providing the policy and related coverages" sample="1"/>
+		<ForeignField name="CarrierName" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="CarrierNameID" joinType="left" phrase="Carrier Name|The name of insurance carrier providing the policy and related coverages" sample="Chubb"/>
+		<!--this cb should be populated based on organizations identified as Carriers using the bool field within <org>. DFZ 5-12-2004-->
+		<RemoteField name="CarrierContactID" listType="special=4" validate="RequireSelection" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="64" phrase="Primary Contact Person|The person acting as the primary contact between the carrier and the primary organization of the policy holder" sample="1"/>
+		<ForeignField name="CarrierContact" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="CarrierContactID" joinType="left" phrase="Primary Contact Person|The person acting as the primary contact between the carrier and the primary organization of the policy holder" sample="Larry Hansen"/>
+		<TableField name="EstimatedPremium" type="money" validate="Money notNegative" phrase="Estimated Premium|The total estimated cost of this insurance premium, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<TableField name="PremiumPaid" type="money" validate="Money notNegative" phrase="Paid Premium|The amount actually paid to satisfy the estimated premium, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<CalculatedField name="OutstandingPremium" type="money" calcFunction="subtract" params="EstimatedPremium PremiumPaid" validate="" phrase="Outstanding Premium|The amount left to be paid to satisfy the estimated premium, stated in the currency assigned to this installation of the software. The outstanding reserve is the difference between Total Incurred and the Paid to Date amounts" sample="702.00"/>
+		<TableField name="PremiumValuationDate" type="date" validate="noValidation" phrase="Premium Valuation Date|The specific date the premium payment evaluation occurred" sample="01/01/2004"/>
+		<TableField name="BrokerNameID" type="int" listType="special=5" validate="noValidation" phrase="Broker Name|The name of the insurance brokerage firm responsible for selling and supporting the insurance policy" sample="1"/>
+		<ForeignField name="BrokerName" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="BrokerNameID" joinType="left" phrase="Broker Name|The name of the insurance brokerage firm responsible for selling and supporting the insurance policy" sample="AON"/>
+		<!--this cb should be populated based on organizations identified as Brokers using the bool field within <org>. DFZ 5-12-2004-->
+		<RemoteField name="BrokerContactID" listType="special=5" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="64" phrase="Broker Contact|The name of the individual working for the insurance broker that has been assigned responsibility for organization's insurance program" sample="1"/>
+		<ForeignField name="BrokerContact" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="BrokerContactID" joinType="left" phrase="Broker Contact|The name of the individual working for the insurance broker that has been assigned responsibility for organization's insurance program" sample="Larry Hansen"/>
+		<TableField name="BrokerageFee" type="money" validate="Money notNegative" phrase="Brokerage Fee|The total fee paid to the insurance broker to secure this policy and service this account, stated in the currency assigned to this installation of the software" sample="702.00"/>
+		<TableField name="PercentofPremium" type="float" validate="noValidation" phrase="Brokerage Percentage|An automatic calculation of the fee paid to the insurance broker as a percentage of premium" sample="15%"/>
+		<!--divide the BrokerageFee by the EstimatedPremium and display the results as a percentage value. DFZ 5-12-2004-->
+		<TableField name="ExcessCarrierID" type="int" listType="special=6" validate="noValidation" phrase="Excess Carrier|The name of the reinsurance company or excess carrier that begins participating in coverage when a threshold amount has been exceeded" sample="1"/>
+		<ForeignField name="ExcessCarrier" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="ExcessCarrierID" joinType="left" phrase="Excess Carrier|The name of the reinsurance company or excess carrier that begins participating in coverage when a threshold amount has been exceeded" sample="Munich Reinsurance Company"/>
+		<SummaryField name="RiskImperatives" summaryFunction="list" summaryField="RiskImperative" summaryKey="RelatedRecordID" summaryModuleID="rsk" summaryCondition="RelatedModuleID = 'ins'" localKey="PolicyID" phrase="Risk Imperatives|A list of associated Risk Imperatives" sample="36"/>
+		<SummaryField name="TotalEstExp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="PolicyID" summaryKey="RelatedRecordID" summaryModuleID="cosex" summaryCondition="RelatedModuleID = 'ins'" isGlobal="no" phrase="Estimated Exposure|The total estimated cost exposure associated with the insurance policy" sample="702.00"/>
+		<SummaryField name="TotalEstOpp" type="money" validate="noValidation" summaryFunction="sum" summaryField="Estimate" localKey="PolicyID" summaryKey="RelatedRecordID" summaryModuleID="opt" summaryCondition="RelatedModuleID = 'ins'" isGlobal="no" phrase="Estimated Opportunity|The total estimated financial opportunity associated with the insurance policy" sample="702.00"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="General Libility Number: CNA-2714-2006 issued by CNA Insurance Company, expiring on 01-01-2006"><CombinedFieldRef name="InsuranceType"/>_Number:_<CombinedFieldRef name="PolicyNumber"/>_issued_by_<CombinedFieldRef name="CarrierName"/>,_expiring_on_<CombinedFieldRef name="ExpirationDate"/></CombinedField>
+		<CombinedField name="Policy" phrase="Policy|A combined field used to describe this policy when associating it with other records" sample="Chubb; GL-19928-2003; Active Agenda, HQ; 03-02-2003, 03-02-2004"><CombinedFieldRef name="CarrierName"/>;_<CombinedFieldRef name="PolicyNumber"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PolicyID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="Policy"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="inso" name="Insurance Policy Assignments" parentKey="PolicyID" localKey="PolicyID"/>
+		<SubModule moduleID="inscl" name="Coverage Limits" parentKey="PolicyID" localKey="PolicyID"/>
+		<SubModule moduleID="valc" name="Values Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="vala" name="Values Associations" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="aprd" name="Asset Protection" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="apr" name="Asset Protection" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="cosc" name="Cost Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="cosex" name="Cost Exposures" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="optc" name="Opportunity Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="opt" name="Opportunities" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="hzc" name="Hazard Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="hza" name="Hazard Associations" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="bcqc" name="Business Conseuqnece Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="bcq" name="Business Consequences" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="regc" name="Regulatory Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="rega" name="Regulation Associations" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="stdc" name="Standards Considerations" parentKey="InsuranceTypeID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="inst"/>
+		</SubModule>
+		<SubModule moduleID="stda" name="Standard Associations" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="filr" name="File Retention Methods" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="prta" name="Participant Accountabilities" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="prti" name="Participant Involvement" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="rsk" name="Risk Imperatives" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+		<SubModule moduleID="bpc" name="Best Practices" parentKey="PolicyID" localKey="RelatedRecordID">
+			<SubModuleCondition field="RelatedModuleID" value="ins"/>
+		</SubModule>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List insurance policies">
+			<ListField name="PolicyID" phrase="Record ID"/>
+			<ListField name="PolicyNumber" phrase="Policy Number"/>
+			<ListField name="CarrierName" phrase="Carrier Name"/>
+			<ListField name="InsuranceType" phrase="Policy Type"/>
+			<ListField name="ExpirationDate" phrase="Expiration Date"/>
+			<ListField name="DaysRemaining" phrase="Days Remaining"/>
+			<ListField name="RetentionAcct" phrase="Retention Account"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search insurance policies">
+			<EditField name="PolicyNumber" size="75" maxLength="128"/>
+			<EditField name="IntegrationKey" size="75" maxLength="128"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CheckBoxField name="RetentionAcct"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="EffectiveDate"/>
+			<DateField name="ExpirationDate"/>
+			<EditField name="DaysRemaining" size="5" maxLength="5"/>
+			<ComboField name="InsuranceCategoryID" findMode="text">
+				<UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+				<SampleItem ID="1" name="Property"/>
+				<SampleItem ID="2" name="Liability"/>
+				<SampleItem ID="3" name="Workers Compensation"/>
+				<SampleItem ID="4" name="Suerty"/>
+			</ComboField>
+			<ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+				<SampleItem ID="1" name="Boiler and Machinery"/>
+				<SampleItem ID="2" name="Debris Remova"/>
+				<SampleItem ID="3" name="Builder's Risk"/>
+				<SampleItem ID="4" name="Glass"/>
+				<SampleItem ID="5" name="Inland Marine"/>
+				<SampleItem ID="6" name="Business Interruption"/>
+			</ComboField>
+			<CodeComboField name="PolicyStatusID">
+				<SampleItem ID="1" name="In Effect"/>
+				<SampleItem ID="2" name="Expired"/>
+			</CodeComboField>
+			<OrgComboField name="CarrierNameID" findMode="text">
+				<SampleItem ID="1" name="Chubb"/>
+				<SampleItem ID="2" name="Fireman's Fund"/>
+				<SampleItem ID="3" name="AIG"/>
+				<SampleItem ID="4" name="CIGNA"/>
+			</OrgComboField>
+			<PersonComboField name="CarrierContactID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<OrgComboField name="ExcessCarrierID" findMode="text">
+				<SampleItem ID="1" name="Munich Reinsurance Company"/>
+				<SampleItem ID="2" name="Swiss Reinsurance Company"/>
+				<SampleItem ID="3" name="Zurich Reinsurance"/>
+				<SampleItem ID="4" name="American Reinsurance Company"/>
+			</OrgComboField>
+			<MoneyField name="EstimatedPremium"/>
+			<MoneyField name="PremiumPaid"/>
+			<MoneyField name="OutstandingPremium"/>
+			<DateField name="PremiumValuationDate"/>
+			<OrgComboField name="BrokerNameID" findMode="text">
+				<SampleItem ID="1" name="AON"/>
+				<SampleItem ID="2" name="Marsh"/>
+				<SampleItem ID="3" name="Willis"/>
+				<SampleItem ID="4" name="A.J. Gallagher"/>
+			</OrgComboField>
+			<PersonComboField name="BrokerContactID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<MoneyField name="BrokerageFee"/>
+			<EditField name="PercentofPremium"/>
+			<CodeCheckSearchField name="RiskImperativeID" subModuleID="rsk" subModuleModuleIDField="RelatedModuleID" subModuleRecordIDField="RelatedRecordID" codeIDField="RiskImperativeID" codeTypeID="234" phrase="Risk Imperatives|Filter search results by one or more related risk imperatives"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an insurance policy">
+			<ViewField name="PolicyID"/>
+			<ViewField name="InsuranceCategory"/>
+			<ViewField name="InsuranceType"/>
+			<ViewField name="PolicyName"/>
+			<ViewField name="PolicyNumber"/>
+			<ViewField name="IntegrationKey"/>
+			<ViewField name="PolicyDesc"/>
+			<ViewField name="Organization"/>
+			<ViewField name="RetentionAcct"/>
+			<ViewField name="PersonAccountable"/>
+			<ViewField name="EffectiveDate"/>
+			<ViewField name="ExpirationDate"/>
+			<ViewField name="DaysRemaining"/>
+			<ViewField name="TotalEstOpp"/>
+			<ViewField name="TotalEstExp"/>
+			<ViewField name="PolicyStatus"/>
+			<ViewField name="RiskImperatives"/>
+			<ViewScreenSection name="Carrier" phrase="Carrier">
+				<ViewField name="CarrierName"/>
+				<ViewField name="CarrierContact"/>
+				<ViewField name="ExcessCarrier"/>
+				<ViewField name="EstimatedPremium"/>
+				<ViewField name="PremiumPaid"/>
+				<ViewField name="OutstandingPremium"/>
+				<ViewField name="PremiumValuationDate"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Broker" phrase="Broker">
+				<ViewField name="BrokerName"/>
+				<ViewField name="BrokerContact"/>
+				<ViewField name="BrokerageFee"/>
+				<ViewField name="PercentofPremium"/>
+			</ViewScreenSection>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="inso"/>
+				<ViewGrid moduleID="inscl"/>
+				<ViewGrid moduleID="apr"/>
+				<ViewGrid moduleID="vala"/>
+				<ViewGrid moduleID="cosex"/>
+				<ViewGrid moduleID="opt"/>
+				<ViewGrid moduleID="hza"/>
+				<ViewGrid moduleID="rega"/>
+				<ViewGrid moduleID="stda"/>
+				<ViewGrid moduleID="bcq"/>
+				<ViewGrid moduleID="prta"/>
+				<ViewGrid moduleID="prti"/>
+				<ViewGrid moduleID="filr"/>
+				<ViewGrid moduleID="bpc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an insurance policy">
+			<ViewField name="PolicyID"/>
+			<ComboField name="InsuranceCategoryID" findMode="text">
+				<UpdateFieldRef name="InsuranceTypeID" listParentField="InsuranceCategoryID"/>
+				<SampleItem ID="1" name="Property"/>
+				<SampleItem ID="2" name="Liability"/>
+				<SampleItem ID="3" name="Workers Compensation"/>
+				<SampleItem ID="4" name="Suerty"/>
+			</ComboField>
+			<ComboField name="InsuranceTypeID" findMode="text" parentField="InsuranceCategoryID">
+				<UpdateFieldRef name="InsuranceDescGuide"/>
+				<SampleItem ID="1" name="Boiler and Machinery"/>
+				<SampleItem ID="2" name="Debris Remova"/>
+				<SampleItem ID="3" name="Builder's Risk"/>
+				<SampleItem ID="4" name="Glass"/>
+				<SampleItem ID="5" name="Inland Marine"/>
+				<SampleItem ID="6" name="Business Interruption"/>
+			</ComboField>
+			<EditField name="PolicyName" size="50" maxLength="128"/>
+			<EditField name="PolicyNumber" size="75" maxLength="128"/>
+			<EditField name="IntegrationKey" size="75" maxLength="128"/>
+			<ViewField name="InsuranceDescGuide" parentField="InsuranceTypeID"/>
+			<MemoField name="PolicyDesc" rows="4" cols="50"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				<SampleItem ID="3" name="Active Agenda, Latvia"/>
+			</OrgComboField>
+			<CheckBoxField name="RetentionAcct"/>
+			<PersonComboField name="PersonAccountableID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<DateField name="EffectiveDate"/>
+			<DateField name="ExpirationDate"/>
+			<ViewField name="DaysRemaining"/>
+			<MemoField name="PolicyDesc" rows="4" cols="50"/>
+			<CodeComboField name="PolicyStatusID">
+				<SampleItem ID="1" name="In Effect"/>
+				<SampleItem ID="2" name="Expired"/>
+			</CodeComboField>
+		</EditScreen>
+		<EditScreen name="Carrier" phrase="Carrier|Associate an insurance carrier with an insurance policy">
+			<RecordSummaryFieldsRef/>
+			<OrgComboField name="CarrierNameID" findMode="text">
+				<SampleItem ID="1" name="Chubb"/>
+				<SampleItem ID="2" name="Fireman's Fund"/>
+				<SampleItem ID="3" name="AIG"/>
+				<SampleItem ID="4" name="CIGNA"/>
+			</OrgComboField>
+			<PersonComboField name="CarrierContactID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<OrgComboField name="ExcessCarrierID" findMode="text">
+				<SampleItem ID="1" name="Munich Reinsurance Company"/>
+				<SampleItem ID="2" name="Swiss Reinsurance Company"/>
+				<SampleItem ID="3" name="Zurich Reinsurance"/>
+				<SampleItem ID="4" name="American Reinsurance Company"/>
+			</OrgComboField>
+			<MoneyField name="EstimatedPremium"/>
+			<MoneyField name="PremiumPaid"/>
+			<ViewField name="OutstandingPremium"/>
+			<DateField name="PremiumValuationDate"/>
+		</EditScreen>
+		<EditScreen name="Broker" phrase="Broker|Associate an insurance broker with an insurance policy">
+			<RecordSummaryFieldsRef/>
+			<OrgComboField name="BrokerNameID" findMode="text">
+				<SampleItem ID="1" name="AON"/>
+				<SampleItem ID="2" name="Marsh"/>
+				<SampleItem ID="3" name="Willis"/>
+				<SampleItem ID="4" name="A.J. Gallagher"/>
+			</OrgComboField>
+			<PersonComboField name="BrokerContactID" findMode="alpha">
+				<SampleItem ID="1" name="Jane Doe" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="3" name="Dan Zahlis" orgName="Active Agenda, HQ"/>
+				<SampleItem ID="4" name="Mattias Thorlsund" orgName="Active Agenda, HQ"/>
+			</PersonComboField>
+			<MoneyField name="BrokerageFee"/>
+			<ViewField name="PercentofPremium"/>
+		</EditScreen>
+		<EditScreen name="Insureds" phrase="Insureds|Associate covered organizations with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="inso"/>
+		</EditScreen>
+		<EditScreen name="Limits" phrase="Limits|Associate coverage and threshold limits with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="inscl"/>
+		</EditScreen>
+		<EditScreen name="Coordinators" phrase="Coordinators|Associate local policy coordinators with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="inso"/>
+		</EditScreen>
+		<EditScreen name="AssetProtection" phrase="Audits|Associate audit items with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="aprd"/>
+			<EditGrid moduleID="apr"/>
+		</EditScreen>
+		<EditScreen name="Culture" phrase="Culture|Associate values with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="valc"/>
+			<EditGrid moduleID="vala"/>
+		</EditScreen>
+		<EditScreen name="CostExposures" phrase="Exposures|Associate cost exposures with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="cosc"/>
+			<EditGrid moduleID="cosex"/>
+		</EditScreen>
+		<EditScreen name="Opportunities" phrase="Opportunities|Associate financial opportunities with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="optc"/>
+			<EditGrid moduleID="opt"/>
+		</EditScreen>
+		<EditScreen name="Hazards" phrase="Hazards|Associate hazards with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="hzc"/>
+			<EditGrid moduleID="hza"/>
+		</EditScreen>
+		<EditScreen name="Regulations" phrase="Regulations|Associate regulations with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="regc"/>
+			<EditGrid moduleID="rega"/>
+		</EditScreen>
+		<EditScreen name="Standards" phrase="Standards|Associate standards with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="stdc"/>
+			<EditGrid moduleID="stda"/>
+		</EditScreen>
+		<EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<ViewGrid moduleID="bcqc"/>
+			<EditGrid moduleID="bcq"/>
+		</EditScreen>
+		<EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prta"/>
+		</EditScreen>
+		<EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="prti"/>
+		</EditScreen>
+		<EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="filr"/>
+		</EditScreen>
+		<EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the insurance policy">
+			<RecordSummaryFieldsRef/>
+			<SelectGrid moduleID="rsk"/>
+		</EditScreen>
+		<EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the insurance policy" tabConditionModuleID="bpc">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="bpc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="PolicyID"/>
+		<InvisibleField name="InsuranceTypeID"/>
+		<ViewField name="InsuranceType"/>
+		<ViewField name="PolicyName"/>
+		<ViewField name="PolicyNumber"/>
+		<ViewField name="IntegrationKey"/>
+		<ViewField name="PolicyDesc"/>
+		<ViewField name="Organization"/>
+		<ViewField name="RetentionAcct"/>
+		<ViewField name="PersonAccountable"/>
+		<ViewField name="EffectiveDate"/>
+		<ViewField name="ExpirationDate"/>
+		<ViewField name="DaysRemaining"/>
+		<ViewField name="TotalEstOpp"/>
+		<ViewField name="TotalEstExp"/>
+		<ViewField name="PolicyStatus"/>
+		<ViewField name="RiskImperatives"/>
+	</RecordSummaryFields>
+	<Charts>
+		<RadarChart name="Radar01" title="Insurance Policies By Risk Imperative" subModuleID="rsk" mode="categorize">
+			<GroupByField name="RiskImperative"/>
+			<SummaryField name="ImperativeID" type="count"/>
+		</RadarChart>
+		<PieChart name="Pie01" title="Insurance Policies By Policy Type">
+			<GroupByField name="InsuranceType"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Insurance Policies By Policy Type">
+			<GroupByField name="InsuranceType"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Insurance Policies By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Insurance Policies By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Insurance Policies By Policy Status">
+			<GroupByField name="PolicyStatus"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Insurance Policies By Policy Status">
+			<GroupByField name="PolicyStatus"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie04" title="Insurance Policies By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto04" title="Insurance Policies By Person Accountable">
+			<GroupByField name="PersonAccountable"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie05" title="Insurance Policies By Carrier">
+			<GroupByField name="CarrierName"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto05" title="Insurance Policies By Carrier">
+			<GroupByField name="CarrierName"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie06" title="Insurance Policies By Broker">
+			<GroupByField name="BrokerName"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto06" title="Insurance Policies By Broker">
+			<GroupByField name="BrokerName"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie07" title="Insurance Policies By Excess Carrier">
+			<GroupByField name="ExcessCarrier"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto07" title="Insurance Policies By Excess Carrier">
+			<GroupByField name="ExcessCarrier"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie08" title="Insurance Policies By Category">
+			<GroupByField name="InsuranceCategory"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto08" title="Insurance Policies By Category">
+			<GroupByField name="InsuranceCategory"/>
+			<SummaryField name="PolicyID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

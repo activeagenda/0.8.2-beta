@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Sub Systems" moduleID="syss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Sub-System" pluralRecordName="Sub-Systems" allowAddRecord="yes">
+	<ModuleFields>
+		<TableField name="SubSystemID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track sub-systems and sub-processes of the parent system or process" sample="1"/>
+		<TableField name="SystemID" type="int" validate="RequireSelection" phrase="System|A combined field used to describe this system when associating it with other records" sample="1"/>
+		<ForeignField name="OrganizationID" foreignTable="sys" foreignKey="SystemID" foreignField="OrganizationID" key="SystemID" joinType="left" phrase="Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The name of the organization where the system or process exists" sample="Active Agenda, HQ"/>
+		<ForeignField name="System" foreignTable="sys" foreignKey="SystemID" foreignField="System" key="SystemID" joinType="left" phrase="System|A combined field used to describe this system when associating it with other records" sample="Ammonia Refrigeration System; Active Agenda, HQ; 10-28-2003; 1"/>
+		<ForeignField name="SystemDesc" foreignTable="sys" foreignKey="SystemID" foreignField="SystemDesc" key="SystemID" joinType="left" phrase="System Decsription|A detailed description of the system or process" sample="The ammonia refrigeration spans throughout the entire physical building and is utilized to cool the cold storage building and raw ingredient warehouse. The ammonia refrigeration system contains 100,000 pounds of anhydrous ammonia."/>
+		<TableField name="SubSystemName" type="varchar(128)" validate="notEmpty" phrase="Sub System Name|Name used to identify the sub-system or sub-process of the parent system or process" sample="Ammonia Storage"/>
+		<TableField name="SubSystemDesc" type="text" validate="noValidation" phrase="Sub System Description|A detailed description of the sub-system or sub-process of the parent system or process" sample="The ammonia receiver contains all ammonia not flowing throughout the refrigeration system. All anhydrous ammonia received into and stored within the ammonia receiver"/>
+		<RemoteField name="SubSystemLocationID" validate="noValidation" remoteModuleID="orgla" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="LocationID" phrase="Sub System Location|Specific location within the facility where the sub-system is located" sample="1"/>
+		<ForeignField name="SubSystemLocation" foreignTable="orgl" foreignKey="LocationID" foreignField="Location" key="SubSystemLocationID" joinType="left" phrase="Sub System Location|Specific location within the facility where the sub-system is located" sample="Engine Room"/>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing">Sub_System:_<CombinedFieldRef name="SubSystemName"/>_of_system:_<CombinedFieldRef name="System"/>_of:_<CombinedFieldRef name="Organization"/></CombinedField>
+		<CombinedField name="SubSystem" phrase="Sub System|A combined field used to describe this sub system when associating it with other records" sample="Ammonia Storage | Active Agenda, HQ | Receiver">
+			<CombinedFieldRef name="SubSystemName"/>
+		</CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="SubSystemID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="SubSystem"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<SubModules>
+		<SubModule moduleID="sysc" name="System Components" parentKey="SubSystemID" localKey="SubSystemID"/>
+	</SubModules>
+	<Screens>
+		<ListScreen name="List" phrase="List|List sub systems">
+			<ListField name="SubSystemID" phrase="Record ID"/>
+			<ListField name="System" phrase="System"/>
+			<ListField name="SubSystemName" phrase="Sub System Name"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="SubSystemLocation" phrase="Location"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search sub systems">
+			<OrgComboField name="OrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemID" findMode="text">
+				<SampleItem ID="1" name="Ammonia Refrigeration"/>
+				<SampleItem ID="2" name="Stabilization Unit Exhaust"/>
+			</ComboField>
+			<ComboField name="SubSystemLocationID" findMode="text">
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about a sub system">
+			<ViewField name="SubSystemID"/>
+			<ViewField name="System"/>
+			<ViewField name="SystemDesc"/>
+			<ViewField name="SubSystemName"/>
+			<ViewField name="SubSystemDesc"/>
+			<ViewField name="Organization"/>
+			<ViewField name="SubSystemLocation"/>
+			<ViewScreenSection name="Associations" phrase="Associations">
+				<ViewGrid moduleID="sysc"/>
+			</ViewScreenSection>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about a sub system">
+			<ViewField name="SubSystemID"/>
+			<OrgComboField name="OrganizationID" findMode="text">
+				<UpdateFieldRef name="SystemID"/>
+				<UpdateFieldRef name="SubSystemLocationID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden"/>
+			</OrgComboField>
+			<ComboField name="SystemID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Ammonia Refrigeration"/>
+				<SampleItem ID="2" name="Stabilization Unit Exhaust"/>
+			</ComboField>
+			<EditField name="SubSystemName" size="75" maxLength="128"/>
+			<MemoField name="SubSystemDesc" rows="5" cols="75"/>
+			<ComboField name="SubSystemLocationID" findMode="text" parentField="OrganizationID">
+				<SampleItem ID="1" name="Engine Room"/>
+				<SampleItem ID="3" name="Shipping Bay #1"/>
+				<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+				<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+			</ComboField>
+		</EditScreen>
+		<EditScreen name="Components" phrase="Components|Associate component parts with a sub system">
+			<RecordSummaryFieldsRef/>
+			<EditGrid moduleID="sysc"/>
+		</EditScreen>
+	</Screens>
+	<RecordSummaryFields>
+		<ViewField name="SubSystemID"/>
+		<ViewField name="System"/>
+		<ViewField name="SystemDesc"/>
+		<ViewField name="SubSystemName"/>
+		<ViewField name="SubSystemDesc"/>
+		<ViewField name="Organization"/>
+		<ViewField name="SubSystemLocation"/>
+	</RecordSummaryFields>
+	<Exports>
+		<ViewGrid moduleID="syss" phrase="Sub Systems">
+			<InvisibleField name="SubSystemID"/>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="SubSystemLocation" sample="Engine Room"/>
+			<ViewField name="SubSystemName" sample="Ammonia Storage"/>
+		</ViewGrid>
+		<EditGrid moduleID="syss" phrase="Sub Systems">
+			<GridForm>
+				<InvisibleField name="SubSystemID"/>
+				<OrgComboField name="OrganizationID" findMode="text" sample="Active Agenda, HQ">
+					<UpdateFieldRef name="SystemID"/>
+					<UpdateFieldRef name="SubSystemLocationID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden"/>
+				</OrgComboField>
+				<ComboField name="SubSystemLocationID" findMode="text" parentField="OrganizationID" sample="Engine Room">
+					<SampleItem ID="1" name="Engine Room"/>
+					<SampleItem ID="3" name="Shipping Bay #1"/>
+					<SampleItem ID="5" name="Administrative Building, CEO Office, 112"/>
+					<SampleItem ID="7" name="Manufacturing Line 1, Production Building, Processing Room"/>
+				</ComboField>
+				<EditField name="SubSystemName" size="75" maxLength="128" sample="Ammonia Storage"/>
+				<MemoField name="SubSystemDesc" rows="5" cols="75" sample="The ammonia receiver contains all ammonia not flowing throughout the refrigeration system. All anhydrous ammonia received into and stored within the ammonia receiver"/>
+			</GridForm>
+			<ViewField name="Organization" sample="Active Agenda, HQ"/>
+			<ViewField name="SubSystemLocation" sample="Engine Room"/>
+			<ViewField name="SubSystemName" sample="Ammonia Storage"/>
+		</EditGrid>
+	</Exports>
+	<Charts>
+		<PieChart name="Pie01" title="Sub Systems By System">
+			<GroupByField name="System"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto01" title="Sub Systems By System">
+			<GroupByField name="System"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie02" title="Sub Systems By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto02" title="Sub Systems By Organization">
+			<GroupByField name="Organization"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</ParetoChart>
+		<PieChart name="Pie03" title="Sub Systems By Location">
+			<GroupByField name="SubSystemLocation"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</PieChart>
+		<ParetoChart name="Pareto03" title="Sub Systems By Location">
+			<GroupByField name="SubSystemLocation"/>
+			<SummaryField name="SubSystemID" type="count"/>
+		</ParetoChart>
+	</Charts>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

@@ -1,0 +1,539 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Trust Account Expenditures" moduleID="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Expenditure" pluralRecordName="Expenditures" addNewName="Expense" allowAddRecord="no">
+    <ModuleFields>
+        <TableField name="ExpenditureID" type="int" dbFlags="unsigned auto_increment not null" phrase="Record ID|An automatically assigned number used to track expenditures made from trust accounts" sample="1"/>
+        <TableField name="TrustDistributionID" type="int" dbFlags="unsigned not null" validate="RequireSelection" phrase="From Account|The trust distribution account to be debited" sample="1"/>
+        <ForeignField name="TrustAccountID" foreignTable="trud" foreignKey="TrustDistributionID" foreignField="TrustAccountID" key="TrustDistributionID" joinType="left" phrase="Trust Account ID|A unique number used to identify the trust account" sample="1"/>
+        <ForeignField name="OrganizationID" defaultValue="defaultorgID" foreignTable="tru" foreignKey="TrustAccountID" foreignField="OrganizationID" key="TrustAccountID" joinType="left" phrase="From Organization|The organization responsible for funding and managing the trust distribution account" sample="1"/>
+        <ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization responsible for funding and managing the trust distribution account" sample="Active Agenda, Sweden"/>
+        <ForeignField name="AccountName" foreignTable="tru" foreignKey="TrustAccountID" foreignField="AccountName" key="TrustAccountID" joinType="left" phrase="Account|A unique name or title used to identify the trust distribution account" sample="2006 Quality Trust Account"/>
+        <ForeignField name="AccountNumber" foreignTable="tru" foreignKey="TrustAccountID" foreignField="TrustAccountNumber" key="TrustAccountID" joinType="left" phrase="Account|A unique number used to identify the trust distribution account" sample="MTT-2004-01"/>
+        <ForeignField name="AccountDesc" foreignTable="tru" foreignKey="TrustAccountID" foreignField="AccountDesc" key="TrustAccountID" joinType="left" phrase="Account Description|A detailed description of the trust distribution account" sample="This account is utilized by employees as a discretionary fund to improve business methods, processes or conditions"/>
+        <ForeignField name="TrustedPersonID" defaultValue="defaultorgID" foreignTable="trud" foreignKey="TrustDistributionID" foreignField="TrustedPersonID" key="TrustDistributionID" joinType="left" phrase="From Person|The name of the individual transferring the amount to a different trust distribution account" sample="This account is utilized by employees as a discretionary fund to improve business methods, processes or conditions"/>
+        <ForeignField name="TrustedPerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="TrustedPersonID" joinType="left" phrase="Person|The name of the individual transferring the amount to a different trust distribution account" sample="Jane Doe"/>
+        <ForeignField name="DistAcctNumber" foreignTable="trud" foreignKey="TrustDistributionID" foreignField="DistAcctNumber" key="TrustDistributionID" joinType="left" phrase="Account Number|A combined field used to generate a unique distribution account number" sample="9918817 - 5 - 423 - 232"/>
+        <ForeignField name="TrustDistribution" foreignTable="trud" foreignKey="TrustDistributionID" foreignField="TrustDistribution" key="TrustDistributionID" joinType="left" phrase="Account|The trust distribution account" sample="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+        <TableField name="ProcessObstacleTypeID" type="int" validate="noValidation" phrase="Obstacle Type|The specific type of business process that has become an obstacle to process improvement" sample="1"/>
+        <CodeField name="ProcessObstacleType" key="ProcessObstacleTypeID" phrase="Obstacle Type|The specific type of business process that has become an obstacle to process improvement" sample="Maintenance and Engineering" codeTypeID="283"/>
+        <TableField name="ObstacleDesc" type="text" validate="noValidation" phrase="Obstacle Description|A detailed description of the process obstacle being overcome by the use of this trust account" sample="The Maintenance Department has placed a low priority on repairing floor. Work order number 253 was issued six months ago the we have incurred two injuries since that time due to the condition of the floor"/>
+        <TableField name="ExpenseDate" type="date" validate="notEmpty" phrase="Expense Date|The specific date the expense occurred" sample="01/01/2004"/>
+        <TableField name="ExpenseAmount" type="money" validate="Money notEmpty notNegative" phrase="Amount|The amount of the expense, stated in the currency assigned to this installation of the software" sample="1,000.00"/>
+        <TableField name="PayeeOrgID" type="int" listType="internalAll externalAll" validate="noValidation" phrase="Payee Organization|The organization receiving payment" sample="1"/>
+        <ForeignField name="PayeeOrg" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="PayeeOrgID" joinType="left" phrase="Payee Organization|The organization receiving payment" sample="Calaveras Floor Coating Service"/>
+        <RemoteField name="PayeePersonID" listType="internalParticipants internalNonParticipants externalParticipants externalNonParticipants" validate="noValidation" remoteModuleID="inv" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="PersonInvolvedID" remoteDescriptorField="InvolvementDescriptorID" remoteDescriptor="1" phrase="Payee Person|The name of the individual receiving payment" sample="1"/>
+        <ForeignField name="PayeePerson" foreignTable="ppl" foreignKey="PersonID" foreignField="DisplayName" key="PayeePersonID" joinType="left" phrase="Payee Person|The name of the individual receiving payment" sample="Jane Doe"/>
+        <TableField name="ExpenseTitle" type="varchar(128)" validate="notEmpty" phrase="Expense Title|A brief title used to describe the expense paid from the trust distribution account" sample="Replacement of 40 degree room floor"/>
+        <TableField name="ExpenseDesc" type="text" validate="notEmpty" phrase="Expense Description|A detailed description of the expense paid from the trust distribution account" sample="The vendor replaced the floor coating within the 40 Degree Room to prevent slips and falls."/>
+        <TableField name="ExpensePaymentApproachID" type="int" validate="RequireSelection" phrase="Payment Approach|Whether the payment approach was from an individual trust account or a team account" sample="1"/>
+        <CodeField name="ExpensePaymentApproach" key="ExpensePaymentApproachID" phrase="Payment Approach|Whether the payment approach was from an individual trust account or a team account" sample="Team" codeTypeID="182"/>
+        <TableField name="ExpensePaymentMethodID" type="int" validate="RequireSelection" phrase="Payment Method|The method used to pay the expense" sample="1"/>
+        <CodeField name="ExpensePaymentMethod" key="ExpensePaymentMethodID" phrase="Payment Method|The method used to pay the expense" sample="USD" codeTypeID="227"/>
+        <TableField name="TransactionDocNumber" type="varchar(128)" validate="noValidation" phrase="Payment Document Number|The type and number associated with the payment document (e.g. Personal Check (562)" sample="Personal Check (1247)"/>
+        <CombinedField name="RecordLabel" phrase="Record Description|A combined field used to describe the payment when associating it with other records" sample="Active Agenda, Sweden | Mattias Thorslund Risk Control Account | 01-02-2004 | 1,000.00"><CombinedFieldRef name="TrustedPerson"/>;_<CombinedFieldRef name="ExpenseDate"/>;_<CombinedFieldRef name="ExpenseAmount"/></CombinedField>
+        <CombinedField name="Expenditure" phrase="Expenditure|A combined field used to describe the payment when associating it with other records" sample="Active Agenda, Sweden | Mattias Thorslund Risk Control Account | 01-02-2004 | 1,000.00"><CombinedFieldRef name="TrustedPerson"/>;_<CombinedFieldRef name="ExpenseDate"/>;_<CombinedFieldRef name="ExpenseAmount"/></CombinedField>
+    </ModuleFields>
+    <ModuleInfo>
+        <PrimaryKey>
+            <FieldRef name="ExpenditureID"/>
+        </PrimaryKey>
+        <OwnerField name="OrganizationID"/>
+        <RecordDescriptionField name="Expenditure"/>
+        <RecordLabelField name="RecordLabel"/>
+    </ModuleInfo>
+    <SubModules>
+        <SubModule moduleID="agr" name="Agreements" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="bcq" name="Business Consequences" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="hza" name="Hazard Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="oppa" name="Permit Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="pub" name="Publicity Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="rega" name="Regulation Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="rsk" name="Risk Imperatives" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="stda" name="Standard Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="sup" name="Supplier Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="traca" name="Training Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="vala" name="Values Associations" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="filr" name="File Retention Methods" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="prta" name="Participant Accountabilities" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="prti" name="Participant Involvement" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+        <SubModule moduleID="bpc" name="Best Practices" parentKey="ExpenditureID" localKey="RelatedRecordID">
+            <SubModuleCondition field="RelatedModuleID" value="true"/>
+        </SubModule>
+    </SubModules>
+    <Screens>
+        <ListScreen name="List" phrase="List|List trust account expenditures">
+            <ListField name="ExpenditureID" phrase="Record ID"/>
+            <ListField name="Organization" phrase="Organization"/>
+            <ListField name="ExpenseDate" phrase="Date"/>
+            <ListField name="ExpenseTitle" phrase="Expense Title"/>
+            <ListField name="ExpensePaymentApproach" phrase="Approach"/>
+            <ListField name="ExpensePaymentMethod" phrase="Method"/>
+            <ListField name="ExpenseAmount" phrase="Amount"/>
+        </ListScreen>
+        <SearchScreen name="Search" phrase="Search|Search trust account expenditures">
+            <PersonComboField name="TrustedPersonID" findMode="alpha">
+                <UpdateFieldRef name="TrustDistributionID"/>
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <ComboField name="TrustDistributionID" findMode="text" parentField="TrustedPersonID">
+                <SampleItem ID="1" name="Mattias Thorslund Risk Control Account; MTT-2004-01; Active"/>
+                <SampleItem ID="2" name="Daniel Zahlis Risk Control Account; DFZ-2004-01; Active"/>
+                <SampleItem ID="3" name="Jane Doe Risk Control Account; JAD-2004-01; Active"/>
+                <SampleItem ID="4" name="Larry Hansen Risk Control Account; LLH-2004-01; Active"/>
+            </ComboField>
+            <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+            <DateField name="ExpenseDate"/>
+            <MoneyField name="ExpenseAmount"/>
+            <OrgComboField name="PayeeOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="PayeePersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeRadioField name="ExpensePaymentApproachID">
+                <SampleItem ID="1" name="Individual"/>
+                <SampleItem ID="2" name="Team"/>
+            </CodeRadioField>
+            <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                <SampleItem ID="1" name="Personal Check"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="Company Check"/>
+                <SampleItem ID="4" name="Purchase Order"/>
+            </CodeComboField>
+            <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+            <CodeComboField name="ProcessObstacleTypeID" findMode="text">
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+        </SearchScreen>
+        <ViewScreen name="View" phrase="View|View summary information about the trust account expenditure">
+            <ViewField name="ExpenditureID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="TrustDistribution"/>
+            <ViewField name="ExpenseDate"/>
+            <ViewField name="ExpenseTitle"/>
+            <ViewField name="ExpenseDesc"/>
+            <ViewField name="ExpenseAmount"/>
+            <ViewField name="PayeeOrg"/>
+            <ViewField name="PayeePerson"/>
+            <ViewField name="ExpensePaymentApproach"/>
+            <ViewField name="ExpensePaymentMethod"/>
+            <ViewField name="TransactionDocNumber"/>
+            <ViewField name="ProcessObstacleType"/>
+            <ViewField name="ObstacleDesc"/>
+            <ViewScreenSection name="Associations" phrase="Associations">
+                <ViewGrid moduleID="bcq"/>
+                <ViewGrid moduleID="hza"/>
+                <ViewGrid moduleID="oppa"/>
+                <ViewGrid moduleID="pub"/>
+                <ViewGrid moduleID="rega"/>
+                <ViewGrid moduleID="rsk"/>
+                <ViewGrid moduleID="stda"/>
+                <ViewGrid moduleID="sup"/>
+                <ViewGrid moduleID="traca"/>
+                <ViewGrid moduleID="vala"/>
+                <ViewGrid moduleID="prta"/>
+                <ViewGrid moduleID="prti"/>
+                <ViewGrid moduleID="filr"/>
+                <ViewGrid moduleID="bpc"/>
+            </ViewScreenSection>
+        </ViewScreen>
+        <EditScreen name="Form" phrase="Form|Edit summary information about the trust account expenditure">
+            <ViewField name="ExpenditureID"/>
+            <ViewField name="Organization"/>
+            <ViewField name="TrustDistribution"/>
+            <DateField name="ExpenseDate"/>
+            <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+            <MemoField name="ExpenseDesc" rows="5" cols="75"/>
+            <MoneyField name="ExpenseAmount"/>
+            <OrgComboField name="PayeeOrgID" findMode="text">
+                <SampleItem ID="1" name="Active Agenda, HQ"/>
+                <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                <SampleItem ID="3" name="Active Agenda, Latvia"/>
+            </OrgComboField>
+            <PersonComboField name="PayeePersonID" findMode="alpha">
+                <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+            </PersonComboField>
+            <CodeRadioField name="ExpensePaymentApproachID">
+                <SampleItem ID="1" name="Individual"/>
+                <SampleItem ID="2" name="Team"/>
+            </CodeRadioField>
+            <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                <SampleItem ID="1" name="Personal Check"/>
+                <SampleItem ID="2" name="Cash"/>
+                <SampleItem ID="3" name="Company Check"/>
+                <SampleItem ID="4" name="Purchase Order"/>
+            </CodeComboField>
+            <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+            <CodeComboField name="ProcessObstacleTypeID" findMode="text">
+                <SampleItem ID="1" name="Production"/>
+                <SampleItem ID="2" name="Quality Assurance or Control"/>
+                <SampleItem ID="3" name="Customer Service"/>
+                <SampleItem ID="4" name="Maintenance and Engineering"/>
+                <SampleItem ID="5" name="Sales or Sales Administration"/>
+                <SampleItem ID="6" name="Finance and Treasury"/>
+                <SampleItem ID="7" name="Research and Development"/>
+                <SampleItem ID="8" name="Human Resources Management"/>
+                <SampleItem ID="9" name="Information Technology"/>
+                <SampleItem ID="10" name="Premises Administration"/>
+                <SampleItem ID="11" name="Marketing or Public Relations"/>
+                <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                <SampleItem ID="13" name="Strategic Planning"/>
+                <SampleItem ID="14" name="Distribution or Logistics"/>
+            </CodeComboField>
+            <MemoField name="ObstacleDesc" rows="5" cols="75"/>
+        </EditScreen>
+        <EditScreen name="Culture" phrase="Culture|Associate values with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="vala"/>
+        </EditScreen>
+        <EditScreen name="Hazards" phrase="Hazards|Associate hazards with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="hza"/>
+        </EditScreen>
+        <EditScreen name="BusinessConsequences" phrase="Consequences|Associate business consequences with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bcq"/>
+        </EditScreen>
+        <EditScreen name="Imperatives" phrase="Imperatives|Associate risk imperatives with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="rsk"/>
+        </EditScreen>
+        <EditScreen name="Permits" phrase="Permits|Associate operating permits with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="oppa"/>
+        </EditScreen>
+        <EditScreen name="Publicity" phrase="Publicity|Associate publicity with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="pub"/>
+        </EditScreen>
+        <EditScreen name="Regulations" phrase="Regulations|Associate regulations with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="rega"/>
+        </EditScreen>
+        <EditScreen name="Standards" phrase="Standards|Associate standards with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="stda"/>
+        </EditScreen>
+        <EditScreen name="Suppliers" phrase="Suppliers|Associate suppliers with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="sup"/>
+        </EditScreen>
+        <EditScreen name="Training" phrase="Training|Associate training with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="traca"/>
+        </EditScreen>
+        <EditScreen name="Accountability" phrase="Accountability|Associate participants with ongoing accountabilities for the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prta"/>
+        </EditScreen>
+        <EditScreen name="Involvement" phrase="Involvement|Associate participants involved with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="prti"/>
+        </EditScreen>
+        <EditScreen name="FileRetention" phrase="File Retention|Associate file retention methods with the trust account expenditure">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="filr"/>
+        </EditScreen>
+        <EditScreen name="BestPractices" phrase="Best Practices|Associate best practices with the trust account expenditure" tabConditionModuleID="bpc">
+            <RecordSummaryFieldsRef/>
+            <EditGrid moduleID="bpc" phrase="Best Practices|Associate best practices with the trust account expenditure"/>
+        </EditScreen>
+    </Screens>
+    <RecordSummaryFields>
+        <ViewField name="ExpenditureID"/>
+        <ViewField name="Organization"/>
+        <ViewField name="TrustDistribution"/>
+        <ViewField name="ExpenseDate"/>
+        <ViewField name="ExpenseTitle"/>
+        <ViewField name="ExpenseDesc"/>
+        <ViewField name="ExpenseAmount"/>
+        <ViewField name="PayeeOrg"/>
+        <ViewField name="PayeePerson"/>
+        <ViewField name="ExpensePaymentApproach"/>
+        <ViewField name="ExpensePaymentMethod"/>
+        <ViewField name="TransactionDocNumber"/>
+        <ViewField name="ProcessObstacleType"/>
+        <ViewField name="ObstacleDesc"/>
+    </RecordSummaryFields>
+    <Exports>
+        <ViewGrid moduleID="true" phrase="Expenditures">
+            <InvisibleField name="ExpenditureID"/>
+            <ViewField name="ExpenseDate" sample="07-04-2006"/>
+            <ViewField name="ExpenseTitle" sample="Replace floor mat in the forty degree room"/>
+            <ViewField name="ExpenseAmount" sample="USD $50.00"/>
+            <ViewField name="ExpensePaymentApproach" sample="Team"/>
+            <ViewField name="ExpensePaymentMethod" sample="Personal Check - 8837"/>
+        </ViewGrid>
+        <EditGrid moduleID="true" phrase="Expenditures">
+            <GridForm>
+                <InvisibleField name="ExpenditureID"/>
+                <DateField name="ExpenseDate"/>
+                <EditField name="ExpenseTitle" size="75" maxLength="128"/>
+                <MemoField name="ExpenseDesc" rows="5" cols="75"/>
+                <MoneyField name="ExpenseAmount"/>
+                <OrgComboField name="PayeeOrgID" findMode="text">
+                    <SampleItem ID="1" name="Active Agenda, HQ"/>
+                    <SampleItem ID="2" name="Active Agenda, Sweden"/>
+                    <SampleItem ID="3" name="Active Agenda, Latvia"/>
+                </OrgComboField>
+                <PersonComboField name="PayeePersonID" findMode="alpha">
+                    <SampleItem ID="1" name="Mattias Thorslund" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="2" name="Larry Hansen" orgName="Active Agenda, Norway"/>
+                    <SampleItem ID="3" name="Dan Zahlis'" orgName="Active Agenda, Sweden"/>
+                    <SampleItem ID="4" name="Jane Doe" orgName="Active Agenda, Latvia"/>
+                </PersonComboField>
+                <CodeRadioField name="ExpensePaymentApproachID">
+                    <SampleItem ID="1" name="Individual"/>
+                    <SampleItem ID="2" name="Team"/>
+                </CodeRadioField>
+                <CodeComboField name="ExpensePaymentMethodID" findMode="text">
+                    <SampleItem ID="1" name="Personal Check"/>
+                    <SampleItem ID="2" name="Cash"/>
+                    <SampleItem ID="3" name="Company Check"/>
+                    <SampleItem ID="4" name="Purchase Order"/>
+                </CodeComboField>
+                <EditField name="TransactionDocNumber" size="75" maxLength="128"/>
+                <CodeComboField name="ProcessObstacleTypeID" findMode="text">
+                    <SampleItem ID="1" name="Production"/>
+                    <SampleItem ID="2" name="Quality Assurance or Control"/>
+                    <SampleItem ID="3" name="Customer Service"/>
+                    <SampleItem ID="4" name="Maintenance and Engineering"/>
+                    <SampleItem ID="5" name="Sales or Sales Administration"/>
+                    <SampleItem ID="6" name="Finance and Treasury"/>
+                    <SampleItem ID="7" name="Research and Development"/>
+                    <SampleItem ID="8" name="Human Resources Management"/>
+                    <SampleItem ID="9" name="Information Technology"/>
+                    <SampleItem ID="10" name="Premises Administration"/>
+                    <SampleItem ID="11" name="Marketing or Public Relations"/>
+                    <SampleItem ID="12" name="Accounting, Reporting, or Auditing"/>
+                    <SampleItem ID="13" name="Strategic Planning"/>
+                    <SampleItem ID="14" name="Distribution or Logistics"/>
+                </CodeComboField>
+                <MemoField name="ObstacleDesc" rows="5" cols="75"/>
+            </GridForm>
+            <InvisibleField name="ExpenditureID"/>
+            <ViewField name="ExpenseDate" sample="07-04-2006"/>
+            <ViewField name="ExpenseTitle" sample="Replace floor mat in the forty degree room"/>
+            <ViewField name="ExpenseAmount" sample="USD $50.00"/>
+            <ViewField name="ExpensePaymentApproach" sample="Team"/>
+            <ViewField name="ExpensePaymentMethod" sample="Personal Check - 8837"/>
+        </EditGrid>
+    </Exports>
+    <Charts>
+        <RadarChart name="Radar01" title="Expenditures By Risk Imperative" subModuleID="rsk" mode="categorize">
+            <GroupByField name="RiskImperative"/>
+            <SummaryField name="ImperativeID" type="count"/>
+        </RadarChart>
+        <RadarChart name="Radar02" title="Expenditures By Risk Classification" subModuleID="rskcl" mode="categorize">
+            <GroupByField name="RiskClassification"/>
+            <SummaryField name="RiskClassID" type="count"/>
+        </RadarChart>
+        <PieChart name="Pie01" title="Expenditures By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto01" title="Expenditures By Organization">
+            <GroupByField name="Organization"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie02" title="Expenditures By Payment Approach">
+            <GroupByField name="ExpensePaymentApproach"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto02" title="Expenditures By Payment Approach">
+            <GroupByField name="ExpensePaymentApproach"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie03" title="Expenditures By Payment Method">
+            <GroupByField name="ExpensePaymentMethod"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto03" title="Expenditures By Payment Method">
+            <GroupByField name="ExpensePaymentMethod"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie05" title="Expenditures By Person">
+            <GroupByField name="TrustedPerson"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto05" title="Expenditures By Person">
+            <GroupByField name="TrustedPerson"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie06" title="Expenditures By Account">
+            <GroupByField name="AccountName"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto06" title="Expenditures By Account">
+            <GroupByField name="AccountName"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie07" title="Expenditures By Account Number">
+            <GroupByField name="AccountNumber"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto07" title="Expenditures By Account Number">
+            <GroupByField name="AccountNumber"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+        <PieChart name="Pie08" title="Expenditures By Process Obstacle Type">
+            <GroupByField name="ProcessObstacleType"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </PieChart>
+        <ParetoChart name="Pareto08" title="Expenditures By Process Obstacle Type">
+            <GroupByField name="ProcessObstacleType"/>
+            <SummaryField name="ExpenditureID" type="count"/>
+        </ParetoChart>
+    </Charts>
+    <Documentation>
+        <DocumentationSection sectionID="Introduction" title="Introduction">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Implementation" title="Implementation">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="PeopleElements" title="People Elements">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataCollection" title="Data Collection">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="DataInput" title="Data Input">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="Training" title="Training">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+        <DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+            <p>
+                <b>"Your Text Here"</b>
+            </p>
+            <p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+        </DocumentationSection>
+    </Documentation>
+    <Revision author="$Author: dan $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>

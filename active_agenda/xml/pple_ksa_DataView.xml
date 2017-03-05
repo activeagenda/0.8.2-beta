@@ -1,0 +1,61 @@
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<!-- A DataView is a custom summarization of the data from several modules, providing views of the data that cannot be accomplished in a single module. -->
+
+<DataView ID="pple_ksa" name="People KSA Qualifications">
+    <Union>
+        <Statement>
+            <Field moduleAlias="traas" name="PersonID" field="AttendeeID"/>
+            <Field moduleAlias="trak" name="KSAID" field="KSAID"/>
+            <Field moduleAlias="trak" name="KSA" field="KSA"/>
+            <Field moduleAlias="trak" name="LevelID" field="LevelID"/>
+            <Field moduleAlias="trak" name="Level" field="Level"/>
+            <Field moduleAlias="traas" name="DaysRemaining" field="DaysRemaining"/>
+            <Value name="Type" value="Training"/>
+            <ModuleRef alias="trak" moduleID="trak" name="Training KSAs"/>
+            <ModuleRef alias="tracl" moduleID="tracl" name="Training Classes">
+                <Join type="inner" joinToAlias="trak">
+                    <JoinCondition joinToKey="CourseID" localKey="CourseID"/>
+                </Join>
+            </ModuleRef>
+            <ModuleRef alias="traas" moduleID="traas" name="Training Class Attendance">
+                <Join type="inner" joinToAlias="tracl">
+                    <JoinCondition joinToKey="TrainingClassID" localKey="TrainingClassID"/>
+                </Join>
+            </ModuleRef>
+            <FilterCondition filterField="DaysRemaining" operator="greater" value="0"/>
+        </Statement>
+        <Statement>
+            <Field moduleAlias="pplek" name="PersonID" field="PersonID"/>
+            <Field moduleAlias="pplek" name="KSAID" field="KSAID"/>
+            <Field moduleAlias="pplek" name="KSA" field="KSA"/>
+            <Field moduleAlias="pplek" name="LevelID" field="LevelID"/>
+            <Field moduleAlias="pplek" name="Level" field="Level"/>
+            <Value name="DaysRemaining" value="n/a"/>
+            <Value name="Type" value="Experience"/>
+            <ModuleRef alias="pplek" moduleID="pplek" name="Employee Experience KSAs"/>
+        </Statement>
+    </Union>
+</DataView>

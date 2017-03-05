@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ScreenViewer.xsl"?>
+<!-- 
+LICENSE NOTE:
+
+Copyright  2003-2007 Active Agenda Inc., All Rights Reserved.
+
+Unless explicitly acquired and licensed from Licensor under a "commercial license",
+the contents of this file are subject to the Reciprocal Public License ("RPL")
+Version 1.4, or subsequent versions as allowed by the RPL,and You may not copy
+or use this file in either source code or executable form, except in compliance
+with the terms and conditions of the RPL. You may obtain a copy of the RPL from
+Active Agenda Inc. at http://www.activeagenda.net/license.
+
+All software distributed under the Licenses is provided strictly on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND ACTIVE AGENDA
+INC. HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT,
+OR NON-INFRINGEMENT. See the Licenses for specific language governing rights and
+limitations under the Licenses.
+
+author         Dan Zahlis <dzahlis@activeagenda.net>
+author         Mattias Thorslund <mthorslund@activeagenda.net>
+copyright      2003-2007 Active Agenda Inc.
+license        http://www.activeagenda.net/license
+-->
+<Module name="Job Title Assignments" moduleID="ppljt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ModuleDef.xsd" singularRecordName="Job Title Assignment" pluralRecordName="Job Title Assignments" allowAddRecord="no">
+	<ModuleFields>
+		<TableField name="PeopleJobTitleID" type="int" dbFlags="unsigned auto_increment not null" phrase="Job Title ID|A unique number assigned to each job title occupied by each employee for a stated period of time" sample="1"/>
+		<TableField name="PersonID" type="int" dbFlags="unsigned" phrase="Person ID|A unique number assigned to each employee" sample="3"/>
+		<ForeignField name="OrganizationID" foreignTable="ppl" foreignTableAlias="ppl_a" foreignKey="PersonID" foreignField="OrganizationID" key="PersonID" joinType="left" phrase="Organization|The organization the employee reports to" sample="1"/>
+		<ForeignField name="Organization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="OrganizationID" joinType="left" phrase="Organization|The organization the employee reports to" sample="Active Agenda, HQ"/>
+		<ForeignField name="LastName" foreignTable="ppl" foreignTableAlias="ppl_a" foreignKey="PersonID" foreignField="LastName" key="PersonID" joinType="left" phrase="Last Name|Family Name of an individual" sample="Zahlis"/>
+		<ForeignField name="FirstName" foreignTable="ppl" foreignTableAlias="ppl_a" foreignKey="PersonID" foreignField="FirstName" key="PersonID" joinType="left" phrase="First Name|Given Name of an individual" sample="Daniel"/>
+		<ForeignField name="EmployeeNo" foreignTable="pple" foreignKey="PersonID" foreignField="EmployeeNo" key="PersonID" joinType="left" phrase="Employee Number|A uniques number assigned by the organization to each employee for tracking purposes" sample="2710"/>
+		<TableField name="OrgJobTitleID" type="int" dbFlags="unsigned" phrase="Job Title|A combined field used to describe this job title when associating it with other records" sample="1"/>
+		<ForeignField name="JobTitleOrganizationID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrganizationID" key="OrgJobTitleID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="1"/>
+		<ForeignField name="JobTitleOrganization" foreignTable="org" foreignKey="OrganizationID" foreignField="Name" key="JobTitleOrganizationID" joinType="left" phrase="Organization|The organization utilizing this job title" sample="Active Agenda, HQ"/>
+		<ForeignField name="FunctionID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="FunctionID" key="OrgJobTitleID" joinType="left" phrase="Function|The business purpose of the job title" sample="1"/>
+		<CodeField name="Function" key="FunctionID" phrase="Function|The business purpose of the job title" sample="Human Resources" codeTypeID="4"/>
+		<ForeignField name="LocalLevelID" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="LocalLevelID" key="OrgJobTitleID" joinType="left" phrase="Organization Level|A hierarchical level of an organization to which individuals of an organization are assigned" sample="1"/>
+		<CodeField name="LocalLevel" key="LocalLevelID" phrase="Organization Level|A hierarchical level of an organization to which individuals of an organization are assigned" sample="Plant Management" codeTypeID="22"/>
+		<ForeignField name="JobTitleTypeID" foreignTable="orgtt" foreignKey="JobTitleTypeID" foreignField="JobTitleTypeID" key="OrgJobTitleID" joinType="left" phrase="Job Title Type|A phrase used to describe the type of job title utilized by the organization" sample="1"/>
+		<ForeignField name="JobTitleCategoryID" foreignTable="orgtt" foreignKey="JobTitleTypeID" foreignField="JobTitleCategoryID" key="JobTitleTypeID" joinType="left" phrase="Job Title Category|A broad categoy used to group job titles of similar types" sample="1"/>
+		<CodeField name="JobTitleCategory" key="JobTitleCategoryID" phrase="Job Title Category|A broad categoy used to group job titles of similar types" sample="Operations" codeTypeID="20"/>
+		<ForeignField name="JobTitleTypeDesc" foreignTable="orgtt" foreignKey="JobTitleTypeID" foreignField="JobTitleTypeDesc" key="JobTitleTypeID" joinType="left" phrase="Type Description|A brief but thorough description of the specific type of job title" sample="A supervios responsible for leading a group of employees at th eplant line level."/>
+		<ForeignField name="JobTitleType" foreignTable="orgtt" foreignKey="JobTitleTypeID" foreignField="JobTitleType" key="JobTitleTypeID" joinType="left" phrase="Job Title Type|A combined field used to describe this job title type when associating it with other records" sample="Line Supervisor"/>
+		<ForeignField name="OrgJobTitle" foreignTable="orgjt" foreignKey="OrgJobTitleID" foreignField="OrgJobTitle" key="OrgJobTitleID" joinType="left" phrase="Job Title|A combined field used to describe this job title when associating it with other records" sample="Risk Manager, Active Agenda HQ, Under Consideration"/>
+		<RemoteField name="BeginDate" type="date" validate="RequireSelection" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="28" phrase="Begin Date|The date the employee began working with this job title" sample="01/01/2004"/>
+		<RemoteField name="EndDate" type="date" validate="noValidation" remoteModuleID="dat" remoteModuleIDField="SourceModuleID" remoteRecordIDField="SourceRecordID" remoteField="RelatedDate" remoteDescriptorField="DateDescriptorID" remoteDescriptor="36" phrase="End Date|The date the employee began stopped working with this job title" sample="01/01/2004"/>
+		<CalculatedField name="ServiceEndDate" calcFunction="ifnull" params="EndDate #now()" validate="" phrase="Service End Date|The present date if the end date is empty" sample="02/02/2002"/>
+		<CalculatedField name="Service" calcFunction="datediff_year_month" params="ServiceEndDate BeginDate" validate="" phrase="Service|The automatically calculated amount of time the employee has worked for the company" sample="21"/>
+		<CombinedField name="JobTitleHistoryCB" phrase="Job Title Jistory|A combined field used to list a job title history when associating a job title using a combo box" sample="Risk Manager: Began (01-01-2005) Ended (01-01-2007)"><CombinedFieldRef name="OrgJobTitle"/>:_Began_(
+            <CombinedFieldRef name="BeginDate"/>)_Ended_(
+            <CombinedFieldRef name="EndDate"/>)
+        </CombinedField>
+		<CombinedField name="RecordLabel" phrase="Record Label|The short, concise, label of the record for display purposes" sample="Mattias Thorslund | 01-01-2006 | Ongoing"><CombinedFieldRef name="OrgJobTitle"/>;_
+            <CombinedFieldRef name="FirstName"/>_
+            <CombinedFieldRef name="LastName"/>;_
+            <CombinedFieldRef name="Service"/></CombinedField>
+		<CombinedField name="PeopleJobTitle" phrase="Emergency Contact|A combined field used to describe this job title assignment when associating him or her with other records" sample="Risk Manager: Began (01-01-2005) Ended (01-01-2007)"><CombinedFieldRef name="OrgJobTitle"/></CombinedField>
+	</ModuleFields>
+	<ModuleInfo>
+		<PrimaryKey>
+			<FieldRef name="PeopleJobTitleID"/>
+		</PrimaryKey>
+		<OwnerField name="OrganizationID"/>
+		<RecordDescriptionField name="PeopleJobTitle"/>
+		<RecordLabelField name="RecordLabel"/>
+	</ModuleInfo>
+	<Screens>
+		<ListScreen name="List" phrase="List|List employee job title histories">
+			<ListField name="PeopleJobTitleID" phrase="Record ID"/>
+			<ListField name="Organization" phrase="Organization"/>
+			<ListField name="LastName" phrase="Last"/>
+			<ListField name="FirstName" phrase="First"/>
+			<ListField name="EmployeeNo" phrase="Number"/>
+			<ListField name="OrgJobTitle" phrase="Job Title"/>
+			<ListField name="Service" phrase="Service"/>
+		</ListScreen>
+		<SearchScreen name="Search" phrase="Search|Search employee job title histories">
+			<EditField name="LastName" size="50" maxLength="50"/>
+			<EditField name="FirstName" size="50" maxLength="50"/>
+			<EditField name="EmployeeNo" size="50" maxLength="50"/>
+			<ComboField name="JobTitleOrganizationID" findMode="text">
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<CodeComboField name="FunctionID" findMode="text">
+				<SampleItem ID="1" name="Human Resources"/>
+				<SampleItem ID="2" name="Operations (Raisin)"/>
+				<SampleItem ID="3" name="Sales and Marketing"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<CodeComboField name="LocalLevelID" findMode="text">
+				<SampleItem ID="1" name="Plant Management"/>
+				<SampleItem ID="2" name="Plant Leadership"/>
+				<SampleItem ID="3" name="Plant Supervision"/>
+				<SampleItem ID="4" name="Plant Team Leadership"/>
+				<SampleItem ID="5" name="Plant Line"/>
+				<SampleItem ID="6" name="Plant Staff"/>
+			</CodeComboField>
+			<CodeComboField name="JobTitleCategoryID" findMode="text">
+				<SampleItem ID="1" name="Operations"/>
+				<SampleItem ID="2" name="Staff"/>
+				<SampleItem ID="3" name="Sales"/>
+				<SampleItem ID="4" name="Marketing"/>
+				<SampleItem ID="5" name="Legal"/>
+			</CodeComboField>
+			<ComboField name="JobTitleTypeID" findMode="text">
+				<SampleItem ID="1" name="Risk Manager"/>
+				<SampleItem ID="2" name="Operator"/>
+				<SampleItem ID="3" name="Customer Service Representative"/>
+				<SampleItem ID="4" name="Sales Person"/>
+				<SampleItem ID="6" name="Executive Leadership"/>
+				<SampleItem ID="7" name="General Administration"/>
+				<SampleItem ID="8" name="Financial Control"/>
+			</ComboField>
+			<ComboField name="OrgJobTitleID" findMode="text" parentField="JobTitleTypeID">
+				<SampleItem ID="1" name="Corporate Risk Manager"/>
+				<SampleItem ID="2" name="Corporate Risk Administrator"/>
+				<SampleItem ID="3" name="Corporate Risk Finance Specialist"/>
+			</ComboField>
+			<DateField name="BeginDate"/>
+			<DateField name="EndDate"/>
+			<EditField name="Service" size="5" maxLength="5"/>
+		</SearchScreen>
+		<ViewScreen name="View" phrase="View|View summary information about an employee job title during a stated period">
+			<ViewField name="PeopleJobTitleID"/>
+			<ViewField name="LastName">
+				<ViewField name="FirstName"/>
+			</ViewField>
+			<ViewField name="EmployeeNo"/>
+			<ViewField name="Organization"/>
+			<ViewField name="OrgJobTitle"/>
+			<ViewField name="Function"/>
+			<ViewField name="LocalLevel"/>
+			<ViewField name="JobTitleCategory"/>
+			<ViewField name="JobTitleType"/>
+			<ViewField name="JobTitleTypeDesc"/>
+			<DateField name="BeginDate"/>
+			<DateField name="EndDate"/>
+			<ViewField name="Service"/>
+		</ViewScreen>
+		<EditScreen name="Form" phrase="Form|Edit summary information about an employee job title during a stated period">
+			<ViewField name="PeopleJobTitleID"/>
+			<ViewField name="Organization"/>
+			<ViewField name="LastName">
+				<ViewField name="FirstName"/>
+			</ViewField>
+			<ViewField name="EmployeeNo"/>
+			<ComboField name="JobTitleOrganizationID" findMode="text">
+				<UpdateFieldRef name="FunctionID"/>
+				<SampleItem ID="1" name="Active Agenda, HQ"/>
+				<SampleItem ID="2" name="Active Agenda, Sweden."/>
+				<SampleItem ID="3" name="Good Ideas Consulting"/>
+			</ComboField>
+			<CodeComboField name="FunctionID" findMode="text" parentField="JobTitleOrganizationID" parentListModuleField="OrganizationID">
+				<UpdateFieldRef name="OrgJobTitleID" listParentField="FunctionID"/>
+				<SampleItem ID="1" name="Human Resources"/>
+				<SampleItem ID="2" name="Operations (Raisin)"/>
+				<SampleItem ID="3" name="Sales and Marketing"/>
+				<SampleItem ID="4" name="Accounting"/>
+			</CodeComboField>
+			<ComboField name="OrgJobTitleID" findMode="text" parentField="FunctionID">
+				<UpdateFieldRef name="JobTitleCategory"/>
+				<UpdateFieldRef name="JobTitleType"/>
+				<UpdateFieldRef name="JobTitleTypeDesc"/>
+				<SampleItem ID="1" name="Corporate Risk Manager"/>
+				<SampleItem ID="2" name="Corporate Risk Administrator"/>
+				<SampleItem ID="3" name="Corporate Risk Finance Specialist"/>
+			</ComboField>
+			<ViewField name="JobTitleCategory" parentField="OrgJobTitleID"/>
+			<ViewField name="JobTitleType" parentField="OrgJobTitleID"/>
+			<ViewField name="JobTitleTypeDesc" parentField="OrgJobTitleID"/>
+			<DateField name="BeginDate"/>
+			<DateField name="EndDate"/>
+			<ViewField name="Service"/>
+		</EditScreen>
+	</Screens>
+	<Exports>
+		<ViewGrid moduleID="ppljt" phrase="Job Title History">
+			<InvisibleField name="PeopleJobTitleID"/>
+			<ViewField name="LocalLevel" sample="Plant Management"/>
+			<ViewField name="JobTitleType" sample="Risk Management"/>
+			<ViewField name="OrgJobTitle" sample="Risk Manager, Active Agenda HQ, Under Consideration"/>
+			<ViewField name="Service" sample="1 year 2 months"/>
+		</ViewGrid>
+		<EditGrid moduleID="ppljt" phrase="Job Title History">
+			<GridForm>
+				<InvisibleField name="PeopleJobTitleID"/>
+				<ComboField name="JobTitleOrganizationID" findMode="text">
+					<UpdateFieldRef name="FunctionID"/>
+					<SampleItem ID="1" name="Active Agenda, HQ"/>
+					<SampleItem ID="2" name="Active Agenda, Sweden."/>
+					<SampleItem ID="3" name="Good Ideas Consulting"/>
+				</ComboField>
+				<CodeComboField name="FunctionID" findMode="text" parentField="JobTitleOrganizationID" parentListModuleField="OrganizationID">
+					<UpdateFieldRef name="OrgJobTitleID" listParentField="FunctionID"/>
+					<SampleItem ID="1" name="Human Resources"/>
+					<SampleItem ID="2" name="Operations (Raisin)"/>
+					<SampleItem ID="3" name="Sales and Marketing"/>
+					<SampleItem ID="4" name="Accounting"/>
+				</CodeComboField>
+				<ComboField name="OrgJobTitleID" findMode="text" parentField="FunctionID">
+					<UpdateFieldRef name="JobTitleCategory"/>
+					<UpdateFieldRef name="JobTitleType"/>
+					<UpdateFieldRef name="JobTitleTypeDesc"/>
+					<SampleItem ID="1" name="Corporate Risk Manager"/>
+					<SampleItem ID="2" name="Corporate Risk Administrator"/>
+					<SampleItem ID="3" name="Corporate Risk Finance Specialist"/>
+				</ComboField>
+				<ViewField name="JobTitleCategory" parentField="OrgJobTitleID"/>
+				<ViewField name="JobTitleType" parentField="OrgJobTitleID"/>
+				<ViewField name="JobTitleTypeDesc" parentField="OrgJobTitleID"/>
+				<DateField name="BeginDate" sample="01/01/2004"/>
+				<DateField name="EndDate" sample="01/01/2008"/>
+				<ViewField name="Service" sample="1 year 2 months"/>
+			</GridForm>
+            <InvisibleField name="PeopleJobTitleID"/>
+			<ViewField name="LocalLevel" sample="Plant Management"/>
+			<ViewField name="JobTitleType" sample="Risk Management"/>
+			<ViewField name="OrgJobTitle" sample="Risk Manager, Active Agenda HQ, Under Consideration"/>
+			<ViewField name="Service" sample="1 year 2 months"/>
+		</EditGrid>
+	</Exports>
+	<Documentation>
+		<DocumentationSection sectionID="Introduction" title="Introduction">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>The installation-specific introduction to the scope and purpose of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said to introduce this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Implementation" title="Implementation">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific implementation rules, policies, practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about implementating this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="PeopleElements" title="People Elements">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific information regarding the way this module impacts people should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about how this module impacts, or is impacted by, people in general. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="BarrierstoSuccess" title="Barriers to success">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific barriers to success in implemeting this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about barriers to success associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataCollection" title="Data Collection">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data collection methods, locations, and resources should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about collecting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="DataInput" title="Data Input">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific data input methods, permissions, and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about inputting the types of data associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalInfo" title="Organizational Information">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge and information that impacts the subject matter of this module should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational considerations associated with the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="CommonPractices" title="Common Practices and Alternatives">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge of common or past practices should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about common practices associated with the subject matter of this module and opportunities for change enabled by the Active Agenda project. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="OrganizationalLearning" title="Organizational Learning">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific learning goals, purposes, and opportunities should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about organizational learning associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="Training" title="Training">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific training considerations and requirements should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about training associated with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="ApplyKnowledge" title="Applying Knowledge">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific knowledge application methods should be entered here. You can click the online documentation link beneath the table of contents to see what the active agenda community has said about applying the knowledge collected in association with the subject matter of this module.  You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+		<DocumentationSection sectionID="FAQ" title="Frequently Asked Questions">
+			
+			<p>
+				<b>"Your Text Here"</b>
+			</p>
+			<p>Installation-specific questions that are frequently asked of administrators or implementers should be entered here. You can click the online documentation link beneath the table of contents to see the types of questions collected, and answers provided, by the Active Agenda community relating to the subject matter of this module. You are welcome to collect the thoughts of the community, copy them into your local documentation, and extend them to satisfy your local needs.</p>
+		</DocumentationSection>
+	</Documentation>
+	<Revision author="$Author: mattias $" id="$Revision: 498 $" date="$Date: 2007-02-16 13:29:54 -0800 (Fri, 16 Feb 2007) $"/>
+</Module>
